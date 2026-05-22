@@ -1,9 +1,11 @@
 /* Fashion Freelancing — public site shared scripts */
 
 (function () {
-  // Resolve link paths so they work under both file:// (direct open) and / (server).
-  // If we're in /pages/foo.html → root prefix is "../". Otherwise it's "./".
-  const inPagesDir = /\/pages\/[^/]+\.html?$/i.test(location.pathname);
+  // Resolve link paths so they work under file:// (direct open), a local
+  // server, AND Cloudflare Pages — which serves /pages/signup.html at the
+  // CLEAN URL /pages/signup (no .html). So detect the /pages/ segment by
+  // path, not by file extension.
+  const inPagesDir = /\/pages\//i.test(location.pathname);
   const ROOT = inPagesDir ? '../' : './';
   const r = (p) => ROOT + p.replace(/^\/+/, '');
 
@@ -12,12 +14,22 @@
   window.FF_R = r;
 
   // -- Auto-load shared modules in order: store → api → ui --
+  // Each script is appended only after the previous one's `load` event,
+  // so execution order is guaranteed regardless of the `async` attribute.
   function loadScript(src) {
     return new Promise((resolve, reject) => {
-      if (document.querySelector(`script[src$="${src.split('/').pop()}"]`)) return resolve();
+      // already on the page? (matched by exact filename, anchored)
+      const file = src.split('/').pop();
+      const existing = [...document.scripts].some(s => {
+        const sf = (s.src || '').split('/').pop().split('?')[0];
+        return sf === file;
+      });
+      if (existing) return resolve();
       const s = document.createElement('script');
-      s.src = src; s.async = false;
-      s.onload = resolve; s.onerror = reject;
+      s.src = src;
+      s.async = false;
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error('Could not load ' + src));
       document.head.appendChild(s);
     });
   }
@@ -25,15 +37,17 @@
   window.FF_READY = window.FF_READY || false;
 
   if (!window.api) {
-    Promise.resolve()
-      .then(() => loadScript(r('assets/store.js')))
+    loadScript(r('assets/store.js'))
       .then(() => loadScript(r('assets/api.js')))
       .then(() => loadScript(r('assets/ui.js')))
       .then(() => {
+        if (!window.api) throw new Error('api.js loaded but window.api is undefined');
         window.FF_READY = true;
         window.dispatchEvent(new CustomEvent('ff:ready', { detail: { api: window.api, ui: window.UI } }));
       })
-      .catch(e => console.error('Shared modules failed to load', e));
+      .catch(e => {
+        console.error('Shared modules failed to load:', e && e.message ? e.message : e);
+      });
   } else {
     window.FF_READY = true;
   }
