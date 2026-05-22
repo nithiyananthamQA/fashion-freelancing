@@ -1,0 +1,199 @@
+---
+import Dashboard from '@/layouts/Dashboard.astro';
+import { services } from '@/data/mock';
+// Group services for the <optgroup> so the long list stays scannable
+const grouped = services.reduce<Record<string, typeof services>>((acc, s) => {
+  (acc[s.group] ||= [] as any).push(s); return acc;
+}, {});
+---
+<Dashboard title="Post a job" pageTitle="Post a job" current="post" role="brand">
+
+  <div class="grid grid-cols-12 gap-6">
+
+    <!-- Form -->
+    <div class="col-span-12 lg:col-span-8">
+      <div class="card p-6 lg:p-8 space-y-6">
+
+        <div>
+          <label class="label">Project title</label>
+          <input class="input" id="ff-title" placeholder="e.g. Senior womenswear designer for SS27 capsule"/>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="label">What kind of freelancer do you need?</label>
+            <select class="input" id="ff-service-select">
+              {Object.entries(grouped).map(([group, list]) => (
+                <optgroup label={group}>
+                  {list.map((s) => <option value={s.slug}>{s.name}</option>)}
+                </optgroup>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label class="label">Experience level</label>
+            <select class="input"><option>Senior</option><option>Mid</option><option>Junior</option><option>Top 1%</option></select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <div>
+            <label class="label">Budget range</label>
+            <input class="input" id="ff-budget" placeholder="$8k–$14k"/>
+          </div>
+          <div>
+            <label class="label">Pay type</label>
+            <select class="input" id="ff-paytype"><option>Fixed</option><option>Day rate</option><option>Hourly</option></select>
+          </div>
+          <div>
+            <label class="label">Timeline</label>
+            <input class="input" id="ff-timeline" placeholder="8 weeks"/>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="label">Location</label>
+            <input class="input" id="ff-location" placeholder="Remote · Paris · Hybrid…"/>
+          </div>
+          <div>
+            <label class="label">Country preference</label>
+            <input class="input" id="ff-country" placeholder="Any · EU · APAC"/>
+          </div>
+        </div>
+
+        <div>
+          <label class="label">Description</label>
+          <textarea class="input" id="ff-desc" rows="6" placeholder="Describe the project, the brand, what you're looking for and what success looks like…"></textarea>
+        </div>
+
+        <div>
+          <label class="label">Required skills</label>
+          <div class="flex flex-wrap gap-2">
+            <span class="chip chip-gold">Womenswear ✕</span>
+            <span class="chip chip-gold">Linen ✕</span>
+            <span class="chip chip-gold">Capsule ✕</span>
+            <span class="chip chip-gold">Sustainable ✕</span>
+            <span class="chip">+ Add skill</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="label">Attachments</label>
+          <label class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-line rounded-xl hover:border-gold hover:bg-gold-50/50 transition cursor-pointer">
+            <span class="w-10 h-10 rounded-full bg-gold-50 text-gold-deep flex items-center justify-center mb-2">↑</span>
+            <span class="font-medium text-sm">Drag &amp; drop moodboards, references or files</span>
+            <span class="text-xs text-ink-500 mt-1">PDF, JPG, PNG, Figma · up to 50MB</span>
+            <input type="file" class="hidden" multiple/>
+          </label>
+        </div>
+
+        <div class="flex items-center gap-2 p-4 rounded-xl border border-gold-100 bg-gold-50">
+          <input type="checkbox" id="ff-urgent" class="accent-gold" checked/>
+          <span class="text-sm">Mark as <strong>urgent</strong> (boosts visibility, charges $20)</span>
+        </div>
+
+        <div class="flex justify-between gap-3 pt-4 border-t border-line">
+          <button type="button" class="btn btn-ghost" id="ff-save-draft">Save draft</button>
+          <div class="flex gap-2">
+            <button type="button" class="btn btn-ghost" id="ff-preview">Preview</button>
+            <button type="button" class="btn-gold" id="ff-post-job">Post job</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI hints -->
+    <aside class="col-span-12 lg:col-span-4 space-y-4">
+      <div class="card p-6 bg-gradient-to-br from-gold-50 to-white border-gold-100">
+        <div class="mono text-[11px] uppercase tracking-[0.18em] text-gold-deep">AI assist</div>
+        <h3 class="editorial text-xl mt-1">Reach 3.4× more creators</h3>
+        <ul class="mt-4 space-y-3 text-sm text-ink-700">
+          <li class="flex gap-2"><span class="text-gold">●</span><span>Add 2 reference images — jobs with visuals get 3× more applicants.</span></li>
+          <li class="flex gap-2"><span class="text-gold">●</span><span>Specify a budget range (not "TBD") — it doubles application rate.</span></li>
+          <li class="flex gap-2"><span class="text-gold">●</span><span>Tag <strong>Lisbon</strong> if you'd hire there — 142 matching creators.</span></li>
+        </ul>
+      </div>
+
+      <div class="card p-6">
+        <h3 class="editorial text-lg">Suggested rate</h3>
+        <p class="text-sm text-ink-500 mt-1">For senior womenswear · 8-week capsule</p>
+        <div class="editorial gold-text text-3xl mt-3">$8,000<span class="text-ink-400 text-sm"> – $14,000</span></div>
+        <div class="text-xs text-ink-500 mt-2">Based on 142 similar jobs in 2026.</div>
+      </div>
+
+      <div class="card p-6">
+        <h3 class="editorial text-lg">Predicted applicants</h3>
+        <div class="editorial text-3xl mt-3">~24</div>
+        <div class="text-xs text-ink-500 mt-1">High-quality applicants in 48h.</div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Post a job → creates a real brief via the API -->
+  <script is:inline>
+    (function () {
+      function init() {
+        const api = window.api, UI = window.UI;
+        if (!api) return;
+        const $ = (id) => document.getElementById(id);
+        const postBtn = $('ff-post-job');
+        if (!postBtn) return;
+
+        // parse "$8k–$14k" / "8000-14000" → { min, max } in whole dollars
+        function parseBudget(str) {
+          const nums = (str || '').toLowerCase().match(/(\d[\d.,]*)\s*k?/g) || [];
+          const vals = nums.map(n => {
+            const k = n.includes('k');
+            const v = parseFloat(n.replace(/[k,]/g, '')) || 0;
+            return k ? v * 1000 : v;
+          }).filter(Boolean);
+          if (!vals.length) return { min: 0, max: 0 };
+          return { min: vals[0], max: vals[vals.length - 1] };
+        }
+
+        postBtn.addEventListener('click', async () => {
+          if (UI && UI.requireAuth && !UI.requireAuth('to post a job')) return;
+          const title = ($('ff-title').value || '').trim();
+          if (!title) { UI && UI.toast('Add a project title first.', { kind: 'warn' }); return; }
+
+          const b = parseBudget($('ff-budget').value);
+          const wk = parseInt(($('ff-timeline').value || '').match(/\d+/)?.[0] || '4', 10);
+          const skills = [...document.querySelectorAll('.chip-gold')]
+            .map(c => c.textContent.replace('✕', '').trim()).filter(Boolean);
+
+          postBtn.disabled = true; postBtn.textContent = 'Posting…';
+          try {
+            await api.briefs.create({
+              title,
+              description: ($('ff-desc').value || '').trim() || title,
+              serviceSlug: $('ff-service-select').value,
+              budgetMin: b.min, budgetMax: b.max, currency: 'USD',
+              pricingType: ($('ff-paytype').value || 'fixed').toLowerCase().replace(' ', '-'),
+              durationWeeks: wk,
+              location: ($('ff-location').value || 'remote').trim(),
+              skillsRequired: skills,
+              isUrgent: $('ff-urgent').checked,
+            });
+            UI && UI.toast('Job posted! Freelancers can now apply.', { kind: 'success' });
+            setTimeout(() => { location.href = '/brand/applicants'; }, 800);
+          } catch (err) {
+            postBtn.disabled = false; postBtn.textContent = 'Post job';
+            UI && UI.toast(err.message || 'Could not post the job', { kind: 'error' });
+          }
+        });
+
+        // Save draft / Preview — lightweight acknowledgements (mock)
+        $('ff-save-draft') && $('ff-save-draft').addEventListener('click', () => {
+          UI && UI.toast('Draft saved.', { kind: 'success' });
+        });
+        $('ff-preview') && $('ff-preview').addEventListener('click', () => {
+          UI && UI.toast('Preview is coming soon — for now, post when ready.', { kind: 'info' });
+        });
+      }
+      if (window.api) init();
+      else window.addEventListener('ff:ready', init, { once: true });
+    })();
+  </script>
+
+</Dashboard>

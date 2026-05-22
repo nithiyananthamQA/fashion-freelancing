@@ -1,0 +1,49 @@
+---
+import Admin from '@/layouts/Admin.astro';
+const reports = [
+  { id:'rep-001', target:'@scammer_x', reporter:'@buyer_19', reason:'Off-platform payment request', age:'12m', status:'open' },
+  { id:'rep-002', target:'Tech pack template - knockoff', reporter:'@designer_482', reason:'IP infringement', age:'1h', status:'investigating' },
+  { id:'rep-003', target:'@spam_buyer', reporter:'@stylist_a', reason:'Harassment in messages', age:'5h', status:'open' },
+  { id:'rep-004', target:'5★ review burst', reporter:'system', reason:'Suspicious review pattern', age:'1d', status:'resolved' },
+];
+---
+<Admin title="Reports" pageTitle="User reports" current="reports">
+
+  <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div class="flex gap-2">
+      <button class="chip chip-active">Open · 6</button>
+      <button class="chip">Investigating · 3</button>
+      <button class="chip">Resolved · 142</button>
+    </div>
+  </div>
+
+  <div class="card overflow-hidden">
+    <div class="overflow-x-auto -mx-px"><table class="w-full">
+      <thead>
+        <tr class="bg-paper text-[11px] mono uppercase tracking-wider text-ink-5">
+          <th class="text-left px-6 py-3 font-medium">ID</th>
+          <th class="text-left px-6 py-3 font-medium">Target</th>
+          <th class="text-left px-6 py-3 font-medium">Reporter</th>
+          <th class="text-left px-6 py-3 font-medium">Reason</th>
+          <th class="text-left px-6 py-3 font-medium">Age</th>
+          <th class="text-left px-6 py-3 font-medium">Status</th>
+          <th class="px-6 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {reports.map(r => (
+          <tr class="border-t border-line hover:bg-paper-2/50 transition">
+            <td class="px-6 py-4 mono text-xs text-ink-5">{r.id}</td>
+            <td class="px-6 py-4 text-sm font-medium">{r.target}</td>
+            <td class="px-6 py-4 text-sm text-ink-3 mono">{r.reporter}</td>
+            <td class="px-6 py-4 text-sm">{r.reason}</td>
+            <td class="px-6 py-4 text-xs text-ink-5">{r.age} ago</td>
+            <td class="px-6 py-4"><span class={r.status === 'resolved' ? 'pill-green' : r.status === 'investigating' ? 'pill-champagne' : 'pill-rose'}>{r.status}</span></td>
+            <td class="px-6 py-4 text-right"><button class="btn btn-ghost btn-sm">Open</button></td>
+          </tr>
+        ))}
+      </tbody>
+    </table></div>
+  </div>
+
+</Admin>

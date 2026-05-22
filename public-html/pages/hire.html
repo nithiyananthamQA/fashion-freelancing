@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Hire Amara · Fashion Freelancing</title>
+<meta name="description" content="Hire Amara safely. Pay through us, money is held until you approve the work." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/styles.css" />
+<style>
+  .hire-grid { display:grid; grid-template-columns: 1fr 360px; gap: 36px; align-items: flex-start; }
+  @media (max-width: 1024px) { .hire-grid { grid-template-columns: 1fr; } }
+  .hire-side { position: sticky; top: 88px; }
+  .choice {
+    border: 2px solid var(--line);
+    border-radius: 16px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all .15s;
+    display: block;
+  }
+  .choice:hover { border-color: var(--ink); }
+  .choice.selected { border-color: var(--ink); background: var(--paper-2); }
+  .choice input { display: none; }
+  .choice-row { display: flex; align-items: start; gap: 16px; }
+  .choice-icon { width: 44px; height: 44px; border-radius: 10px; background: var(--paper-2); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .choice.selected .choice-icon { background: var(--ink); color: var(--paper); }
+  .package {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all .15s;
+    display: block;
+  }
+  .package:hover { border-color: var(--ink); }
+  .package.selected { border-color: var(--ink); background: var(--paper-2); }
+  .package input { display: none; }
+</style>
+</head>
+<body>
+
+<div id="site-nav"></div>
+
+<section style="padding: 32px 0 96px;">
+  <div class="container">
+
+    <!-- Breadcrumb -->
+    <nav class="text-xs muted mb-6" style="display:flex;gap:6px;align-items:center;">
+      <a href="../index.html">Home</a><span>›</span>
+      <a href="./marketplace.html">Find a freelancer</a><span>›</span>
+      <a href="./profile.html">Amara Okafor</a><span>›</span>
+      <span>Hire</span>
+    </nav>
+
+    <h1 class="h-1">You're hiring <span class="display-italic" style="color:var(--ink-3);">Amara</span>.</h1>
+    <p class="lead mt-3">Pick what you need. We'll keep your payment safe until the work is done.</p>
+
+    <div class="hire-grid mt-8">
+
+      <!-- LEFT — the choice form -->
+      <div>
+        <h2 class="h-3 mb-4">Step 1 · What do you want?</h2>
+
+        <!-- Two choices -->
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <label class="choice selected" id="choice-package">
+            <input type="radio" name="hire-type" value="package" checked/>
+            <div class="choice-row">
+              <span class="choice-icon">📦</span>
+              <div>
+                <div style="font-weight: 600;">Pick a ready-made package</div>
+                <div class="lead text-sm mt-1" style="margin: 4px 0 0;">Amara has 3 packages with set prices. Fastest way to start. Pick one, pay, she begins.</div>
+                <div class="text-xs muted mt-3">From $120 · 24-hour delivery available</div>
+              </div>
+            </div>
+          </label>
+
+          <label class="choice" id="choice-custom">
+            <input type="radio" name="hire-type" value="custom"/>
+            <div class="choice-row">
+              <span class="choice-icon">✍️</span>
+              <div>
+                <div style="font-weight: 600;">Send a custom job</div>
+                <div class="lead text-sm mt-1" style="margin: 4px 0 0;">Got a bigger project? Describe what you need. Amara replies with a price and timeline. You agree, then we lock in the payment.</div>
+                <div class="text-xs muted mt-3">Reply usually within 1 hour</div>
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Step 2: Package picker (visible by default) -->
+        <div id="step-package" style="margin-top: 32px;">
+          <h2 class="h-3 mb-4">Step 2 · Pick a package</h2>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <label class="package">
+              <input type="radio" name="package" value="basic" checked/>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <div>
+                  <div style="font-weight: 600;">Tech pack for one piece</div>
+                  <div class="lead text-sm mt-1">Front, back &amp; side sketch · materials list · single size · 2 free changes</div>
+                  <div class="text-xs muted mt-2">Ready in 24 hours</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-family: var(--font-display); font-size: 28px; font-weight: 480;">$120</div>
+                </div>
+              </div>
+            </label>
+
+            <label class="package">
+              <input type="radio" name="package" value="standard"/>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <div>
+                  <div style="font-weight: 600;">Capsule pack <span class="pill pill-champagne" style="margin-left: 6px;">Most popular</span></div>
+                  <div class="lead text-sm mt-1">3 garments · all sizes graded · construction details · 4 free changes</div>
+                  <div class="text-xs muted mt-2">Ready in 3 days</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-family: var(--font-display); font-size: 28px; font-weight: 480;">$320</div>
+                </div>
+              </div>
+            </label>
+
+            <label class="package">
+              <input type="radio" name="package" value="premium"/>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px;">
+                <div>
+                  <div style="font-weight: 600;">Full collection pack</div>
+                  <div class="lead text-sm mt-1">8+ garments · CLO3D virtual fitting · factory contacts · unlimited changes</div>
+                  <div class="text-xs muted mt-2">Ready in 7 days</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-family: var(--font-display); font-size: 28px; font-weight: 480;">$840</div>
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <h2 class="h-3 mt-8 mb-4">Step 3 · Tell Amara what you need</h2>
+          <textarea class="input" rows="5" placeholder="A few sentences about your garment or collection. Sketches? Reference photos? Materials? The more detail, the better."></textarea>
+
+          <h2 class="h-3 mt-8 mb-4">Step 4 · Your details</h2>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div><label class="label">Your name</label><input class="input" placeholder="Sara Lindqvist"/></div>
+            <div><label class="label">Your email</label><input class="input" type="email" placeholder="you@brand.com"/></div>
+          </div>
+          <p class="muted text-xs mt-2">No account needed yet — we'll create one for you when you confirm.</p>
+
+          <div class="mt-8 flex gap-3 flex-wrap">
+            <button id="ff-hire-package-submit" class="btn btn-primary btn-lg" type="button">Pay $120 &amp; start →</button>
+            <a href="./profile.html" class="btn btn-ghost btn-lg">← Back to Amara</a>
+          </div>
+        </div>
+
+        <!-- Step 2: Custom job form (hidden by default) -->
+        <div id="step-custom" style="display: none; margin-top: 32px;">
+          <h2 class="h-3 mb-4">Step 2 · Describe your job</h2>
+
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div>
+              <label class="label">What do you need?</label>
+              <input class="input" placeholder="E.g. Tech packs for a 12-piece denim collection"/>
+            </div>
+            <div>
+              <label class="label">Tell Amara more</label>
+              <textarea class="input" rows="6" placeholder="Materials, sizes, deadline, references — everything that helps her give you a good price."></textarea>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label class="label">Your budget (rough estimate)</label>
+                <input class="input" placeholder="$500–$2,000"/>
+              </div>
+              <div>
+                <label class="label">When do you need it by?</label>
+                <input class="input" placeholder="In 4 weeks"/>
+              </div>
+            </div>
+            <div>
+              <label class="label">Attach files (optional)</label>
+              <label style="display: flex; align-items: center; gap: 12px; padding: 18px; border: 2px dashed var(--line); border-radius: 10px; cursor: pointer;">
+                <span style="width: 36px; height: 36px; border-radius: 8px; background: var(--paper-2); display: inline-flex; align-items: center; justify-content: center;">📎</span>
+                <span class="text-sm">Sketches, photos, references — drag &amp; drop or click</span>
+                <input type="file" multiple style="display: none;"/>
+              </label>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div><label class="label">Your name</label><input class="input" placeholder="Sara Lindqvist"/></div>
+              <div><label class="label">Your email</label><input class="input" type="email" placeholder="you@brand.com"/></div>
+            </div>
+          </div>
+
+          <p class="muted text-xs mt-3">Amara will reply within 1 hour with a price and timeline. You only pay if you agree.</p>
+
+          <div class="mt-8 flex gap-3 flex-wrap">
+            <button id="ff-hire-custom-submit" class="btn btn-primary btn-lg" type="button">Send to Amara →</button>
+            <a href="./profile.html" class="btn btn-ghost btn-lg">← Back to Amara</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT — order summary + safety -->
+      <aside class="hire-side">
+        <div class="card card-pad">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=160" class="avatar" style="width:48px;height:48px;"/>
+            <div>
+              <div style="font-weight: 600;">Amara Okafor</div>
+              <div class="muted text-xs">Tech pack designer · Lagos</div>
+              <div class="champagne text-xs mt-1">★ 5.00 (67 happy customers)</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line);">
+            <div class="text-xs muted" style="text-transform: uppercase; letter-spacing: 0.1em;">Your order so far</div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px;">
+              <span class="text-sm" id="summary-title">Tech pack for one piece</span>
+              <span style="font-family: var(--font-display); font-size: 22px; font-weight: 480;" id="summary-price">$120</span>
+            </div>
+            <div class="text-xs muted mt-1" id="summary-time">Ready in 24 hours</div>
+          </div>
+        </div>
+
+        <!-- Safety -->
+        <div class="card card-pad mt-4" style="background: var(--paper-2);">
+          <div style="display: flex; align-items: start; gap: 12px;">
+            <span style="width: 36px; height: 36px; border-radius: 8px; background: white; border: 1px solid var(--line); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">🛡️</span>
+            <div>
+              <div style="font-weight: 600; font-size: 14px;">Your money is safe</div>
+              <p class="text-sm muted mt-2" style="line-height: 1.5;">We hold your payment until you approve the work. If you're not happy, our team helps sort it out — usually within 48 hours.</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+<script src="../assets/site.js"></script>
+<script>
+  // Toggle between package and custom flow
+  const choices = document.querySelectorAll('.choice');
+  const stepPackage = document.getElementById('step-package');
+  const stepCustom = document.getElementById('step-custom');
+
+  choices.forEach(c => c.addEventListener('click', () => {
+    choices.forEach(x => x.classList.remove('selected'));
+    c.classList.add('selected');
+    const isCustom = c.id === 'choice-custom';
+    stepPackage.style.display = isCustom ? 'none' : '';
+    stepCustom.style.display = isCustom ? '' : 'none';
+  }));
+
+  // Package picker → update summary
+  const packages = document.querySelectorAll('.package');
+  const PRICES = {
+    basic:    { title: 'Tech pack for one piece', price: '$120', time: 'Ready in 24 hours', startBtn: 'Pay $120 &amp; start →' },
+    standard: { title: 'Capsule pack',             price: '$320', time: 'Ready in 3 days',    startBtn: 'Pay $320 &amp; start →' },
+    premium:  { title: 'Full collection pack',     price: '$840', time: 'Ready in 7 days',    startBtn: 'Pay $840 &amp; start →' },
+  };
+
+  packages.forEach(p => p.addEventListener('click', () => {
+    packages.forEach(x => x.classList.remove('selected'));
+    p.classList.add('selected');
+    const v = p.querySelector('input').value;
+    const d = PRICES[v];
+    document.getElementById('summary-title').textContent = d.title;
+    document.getElementById('summary-price').textContent = d.price;
+    document.getElementById('summary-time').textContent = d.time;
+    const btn = stepPackage.querySelector('.btn-primary');
+    if (btn) btn.innerHTML = d.startBtn;
+  }));
+
+  // Mark first package as selected by default
+  packages[0]?.classList.add('selected');
+
+  // ========================================================
+  // Real hire flow — creates an order via api
+  // ========================================================
+  let freelancerId = new URL(location.href).searchParams.get('freelancerId') || 'u_amara';
+  let freelancer = null;
+  let selectedPackageId = 'pkg_amara_basic';
+
+  const PKG_TO_ID = {
+    basic:    'pkg_amara_basic',
+    standard: 'pkg_amara_standard',
+    premium:  'pkg_amara_premium',
+  };
+
+  window.onFFReady(async () => {
+    freelancer = await api.freelancers.get(freelancerId);
+    if (!freelancer) freelancer = await api.freelancers.get('u_amara');
+
+    // Update side-card seller info
+    const sellerImg = document.querySelector('.hire-side .card.card-pad img');
+    if (sellerImg && freelancer) sellerImg.src = freelancer.avatar;
+    const sellerName = document.querySelector('.hire-side .card.card-pad div[style*="font-weight: 600"]');
+    if (sellerName && freelancer) sellerName.textContent = freelancer.name;
+    // Update headline ("You're hiring …")
+    const h1 = document.querySelector('h1.h-1');
+    if (h1 && freelancer) h1.innerHTML = `You're hiring <span class="display-italic" style="color:var(--ink-3);">${freelancer.name.split(' ')[0]}</span>.`;
+    // Update breadcrumb
+    document.querySelectorAll('nav a[href="./profile.html"]').forEach(a => a.textContent = freelancer.name);
+    document.querySelectorAll('a[href="./profile.html"]').forEach(a => a.href = `./profile.html?id=${freelancer.id}`);
+
+    // Update back-button label
+    document.querySelectorAll('.btn-ghost.btn-lg').forEach(b => {
+      if (b.textContent.includes('Back')) b.innerHTML = `← Back to ${freelancer.name.split(' ')[0]}`;
+    });
+
+    // Track selected package
+    packages.forEach(p => p.addEventListener('click', () => {
+      const v = p.querySelector('input').value;
+      selectedPackageId = PKG_TO_ID[v] || 'pkg_amara_basic';
+    }));
+
+    // Wire submit (package flow)
+    document.getElementById('ff-hire-package-submit').addEventListener('click', async () => {
+      if (!api.users.sessionSync()) {
+        UI.toast('Please sign in to hire.', { kind: 'warn', action: { label: 'Sign in', onClick: () => location.href = './login.html' } });
+        return;
+      }
+      const tier = document.querySelector('.package.selected input')?.value || 'basic';
+      const briefText = document.querySelector('#step-package textarea')?.value || '';
+      const pkg = await api.packages.get(PKG_TO_ID[tier]);
+      const btn = document.getElementById('ff-hire-package-submit');
+      btn.disabled = true; btn.textContent = 'Placing order…';
+      try {
+        const order = await api.orders.create({
+          sellerId: freelancer.id,
+          packageId: pkg.id,
+          title: pkg.title,
+          description: briefText || `${pkg.title} — ordered via marketplace`,
+          amount: pkg.priceAmount,
+          currency: pkg.currency,
+          dueInDays: pkg.deliveryDays,
+        });
+        UI.toast(`Order placed! ${freelancer.name.split(' ')[0]} will reply within ${freelancer.responseTimeMinutes < 60 ? freelancer.responseTimeMinutes + ' min' : '~1 hour'}.`, { kind: 'success', duration: 5000 });
+        setTimeout(() => { window.location = `/dashboard/orders/view?id=${order.id}`; }, 800);
+      } catch (err) {
+        btn.disabled = false; btn.textContent = `Pay & start →`;
+        UI.toast(err.message || 'Could not place order', { kind: 'error' });
+      }
+    });
+
+    // Wire submit (custom job flow)
+    document.getElementById('ff-hire-custom-submit').addEventListener('click', async () => {
+      if (!api.users.sessionSync()) {
+        UI.toast('Please sign in to hire.', { kind: 'warn', action: { label: 'Sign in', onClick: () => location.href = './login.html' } });
+        return;
+      }
+      const inputs = document.querySelectorAll('#step-custom .input');
+      const title = inputs[0]?.value.trim() || `Custom job for ${freelancer.name}`;
+      const desc  = inputs[1]?.value.trim() || '';
+      const budget= inputs[2]?.value.trim() || '';
+      const when  = inputs[3]?.value.trim() || '';
+      // Best-guess amount (last number in budget string × 100). Fallback: $1000.
+      const m = budget.match(/(\d[\d,]*)/g);
+      const amount = m ? parseInt(m[m.length - 1].replace(/,/g, ''), 10) : 1000;
+
+      const btn = document.getElementById('ff-hire-custom-submit');
+      btn.disabled = true; btn.textContent = 'Sending…';
+      try {
+        const order = await api.orders.create({
+          sellerId: freelancer.id,
+          packageId: null, briefId: null,
+          title, description: `${desc}\n\nBudget: ${budget || '$' + amount}\nNeeded by: ${when || 'Flexible'}`,
+          amount, currency: 'USD', dueInDays: 14,
+        });
+        UI.toast(`Sent to ${freelancer.name.split(' ')[0]}.`, { kind: 'success', duration: 5000 });
+        setTimeout(() => { window.location = `/dashboard/orders/view?id=${order.id}`; }, 800);
+      } catch (err) {
+        btn.disabled = false; btn.textContent = `Send to ${freelancer.name.split(' ')[0]} →`;
+        UI.toast(err.message || 'Could not send', { kind: 'error' });
+      }
+    });
+  });
+</script>
+</body>
+</html>

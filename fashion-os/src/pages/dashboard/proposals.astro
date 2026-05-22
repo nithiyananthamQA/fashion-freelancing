@@ -1,0 +1,48 @@
+---
+import Dashboard from '@/layouts/Dashboard.astro';
+import { proposals } from '@/data/mock';
+
+const pillFor = (s: string) =>
+  s === 'won' ? 'pill-green' : s === 'shortlisted' ? 'pill-gold' : s === 'declined' ? 'pill-rose' : 'pill-gray';
+---
+<Dashboard title="Proposals" pageTitle="Proposals" current="proposals" role="creator">
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-500">Sent</div><div class="editorial text-3xl mt-1">12</div></div>
+    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-500">Shortlisted</div><div class="editorial text-3xl mt-1 gold-text">4</div></div>
+    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-500">Won</div><div class="editorial text-3xl mt-1">7</div></div>
+    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-500">Win rate</div><div class="editorial text-3xl mt-1">38%</div></div>
+  </div>
+
+  <div class="card overflow-hidden">
+    <div class="px-6 py-4 border-b border-line flex items-center justify-between flex-wrap gap-3">
+      <div class="flex gap-2 flex-wrap">
+        <button class="chip chip-active">All · 12</button>
+        <button class="chip">Sent · 5</button>
+        <button class="chip">Shortlisted · 4</button>
+        <button class="chip">Won · 2</button>
+        <button class="chip">Declined · 1</button>
+      </div>
+      <a href="/dashboard/ai" class="btn-gold">+ New proposal · AI</a>
+    </div>
+
+    <div class="divide-y divide-line">
+      {proposals.map((p) => (
+        <div class="grid grid-cols-12 gap-4 items-center px-6 py-4 hover:bg-ink-50/50 transition">
+          <div class="col-span-12 md:col-span-5">
+            <div class="font-medium">{p.project}</div>
+            <div class="text-xs text-ink-500 mt-0.5">{p.brand} · {p.milestones} milestones · Sent {p.sentAt}</div>
+          </div>
+          <div class="col-span-6 md:col-span-2 text-sm font-medium">{p.amount}</div>
+          <div class="col-span-6 md:col-span-2"><span class={`pill ${pillFor(p.status)}`}>{p.status}</span></div>
+          <div class="col-span-12 md:col-span-3 flex justify-end gap-2">
+            <button class="chip">View</button>
+            {p.status === 'sent' && <button class="chip">Withdraw</button>}
+            {p.status === 'shortlisted' && <button class="btn-gold !py-1.5 !px-3 text-xs">Open chat</button>}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+</Dashboard>

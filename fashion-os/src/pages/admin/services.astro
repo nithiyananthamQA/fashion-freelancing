@@ -1,0 +1,45 @@
+---
+import Admin from '@/layouts/Admin.astro';
+import { services } from '@/data/mock';
+
+const groupCount = services.reduce<Record<string, number>>((acc, s) => { acc[s.group] = (acc[s.group] ?? 0) + 1; return acc; }, {});
+---
+<Admin title="Services catalog" pageTitle="Services catalog" current="svc">
+
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+    {Object.entries(groupCount).map(([g, n]) => (
+      <div class="card p-4"><div class="text-[11px] mono uppercase text-ink-5">{g}</div><div class="display text-2xl mt-1">{n}</div></div>
+    ))}
+  </div>
+
+  <div class="flex items-center justify-between mb-6">
+    <p class="text-sm text-ink-5">{services.length} services live across {Object.keys(groupCount).length} groups</p>
+    <button class="btn btn-primary btn-sm">+ Add service category</button>
+  </div>
+
+  <div class="card overflow-hidden">
+    <div class="overflow-x-auto -mx-px"><table class="w-full">
+      <thead>
+        <tr class="bg-paper text-[11px] mono uppercase tracking-wider text-ink-5">
+          <th class="text-left px-6 py-3 font-medium">Service</th>
+          <th class="text-left px-6 py-3 font-medium">Slug</th>
+          <th class="text-left px-6 py-3 font-medium">Group</th>
+          <th class="text-left px-6 py-3 font-medium">Status</th>
+          <th class="px-6 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {services.map(s => (
+          <tr class="border-t border-line hover:bg-paper-2/50 transition">
+            <td class="px-6 py-4 text-sm font-medium">{s.name}</td>
+            <td class="px-6 py-4 text-xs mono text-ink-5">{s.slug}</td>
+            <td class="px-6 py-4 text-sm">{s.group}</td>
+            <td class="px-6 py-4"><span class="pill-green">live</span></td>
+            <td class="px-6 py-4 text-right"><button class="btn btn-ghost btn-sm">Edit</button></td>
+          </tr>
+        ))}
+      </tbody>
+    </table></div>
+  </div>
+
+</Admin>

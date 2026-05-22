@@ -1,0 +1,70 @@
+---
+import Admin from '@/layouts/Admin.astro';
+import { creators } from '@/data/mock';
+---
+<Admin title="Users" pageTitle="Users · 12,438" current="users">
+
+  <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div class="flex gap-2 flex-wrap">
+      <button class="chip chip-active">All</button>
+      <button class="chip">Creators · 8,210</button>
+      <button class="chip">Brands · 4,212</button>
+      <button class="chip">Admins · 16</button>
+      <button class="chip">Suspended · 47</button>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="relative">
+        <input class="input !py-1.5 text-sm" placeholder="Search by name, email, handle…" style="padding-left: 32px; width: 280px;"/>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="text-ink-5 absolute left-3 top-1/2 -translate-y-1/2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+      </div>
+      <button class="btn btn-ghost btn-sm">Export</button>
+    </div>
+  </div>
+
+  <div class="card overflow-hidden">
+    <div class="overflow-x-auto -mx-px"><table class="w-full">
+      <thead>
+        <tr class="bg-paper text-[11px] mono uppercase tracking-wider text-ink-5">
+          <th class="text-left px-6 py-3 font-medium">User</th>
+          <th class="text-left px-6 py-3 font-medium">Role</th>
+          <th class="text-left px-6 py-3 font-medium">Plan</th>
+          <th class="text-left px-6 py-3 font-medium">Joined</th>
+          <th class="text-left px-6 py-3 font-medium">GMV</th>
+          <th class="text-left px-6 py-3 font-medium">Status</th>
+          <th class="px-6 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {creators.slice(0, 8).map((c, i) => (
+          <tr class="border-t border-line hover:bg-paper-2/50 transition">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <img src={c.avatar} class="w-9 h-9 rounded-full object-cover" alt=""/>
+                <div><div class="font-medium text-sm">{c.name}</div><div class="text-xs text-ink-5 mono">{c.handle}</div></div>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm capitalize">creator</td>
+            <td class="px-6 py-4 text-sm">{i % 3 === 0 ? 'Pro' : 'Free'}</td>
+            <td class="px-6 py-4 text-sm text-ink-5">{['Apr 2024','Jan 2025','Mar 2024','Feb 2025','Dec 2023','Sep 2024','May 2024','Aug 2024'][i]}</td>
+            <td class="px-6 py-4 text-sm tabular-nums">${(c.from * 24).toLocaleString()}</td>
+            <td class="px-6 py-4"><span class={i === 6 ? 'pill-rose' : 'pill-green'}>{i === 6 ? 'suspended' : 'active'}</span></td>
+            <td class="px-6 py-4 text-right"><button class="btn btn-ghost btn-sm">View</button></td>
+          </tr>
+        ))}
+      </tbody>
+    </table></div>
+    <div class="px-6 py-4 border-t border-line flex items-center justify-between text-sm">
+      <div class="text-ink-5">Showing 1–8 of 12,438</div>
+      <div class="flex gap-1">
+        <button class="chip">←</button>
+        <button class="chip chip-active">1</button>
+        <button class="chip">2</button>
+        <button class="chip">3</button>
+        <button class="chip">…</button>
+        <button class="chip">1,555</button>
+        <button class="chip">→</button>
+      </div>
+    </div>
+  </div>
+
+</Admin>

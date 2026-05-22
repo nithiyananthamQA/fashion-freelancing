@@ -1,0 +1,108 @@
+---
+import Dashboard from '@/layouts/Dashboard.astro';
+const invoices = [
+  { id:'inv-2026-04', date:'May 01', desc:'Enterprise · 8 seats · May 2026', amount:'$1,920', status:'paid' },
+  { id:'inv-2026-03', date:'Apr 01', desc:'Enterprise · 8 seats · Apr 2026', amount:'$1,920', status:'paid' },
+  { id:'inv-2026-02', date:'Mar 01', desc:'Enterprise · 6 seats · Mar 2026', amount:'$1,440', status:'paid' },
+  { id:'inv-2026-01', date:'Feb 01', desc:'Enterprise · 6 seats · Feb 2026', amount:'$1,440', status:'paid' },
+];
+const escrow = [
+  { project:'SS27 Linen Capsule · Yuna Aoki', held:'$3,200', ms:'Milestone 2 of 3' },
+  { project:'Pre-Fall 26 · Marco Reyes', held:'$1,800', ms:'Milestone 1 of 3' },
+];
+---
+<Dashboard title="Billing" pageTitle="Billing" current="billing" role="brand">
+
+  <div class="grid grid-cols-12 gap-6">
+
+    <div class="col-span-12 lg:col-span-8 space-y-6">
+
+      <!-- Plan -->
+      <div class="card p-6 flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <div class="mono text-[11px] uppercase tracking-[0.18em] text-ink-500">Current plan</div>
+          <h2 class="editorial gold-text text-3xl mt-1">Enterprise</h2>
+          <div class="text-sm text-ink-500 mt-1">8 seats · €240 / seat / mo · annual contract</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="btn btn-ghost">Manage seats</button>
+          <button class="btn-gold">Upgrade contract</button>
+        </div>
+      </div>
+
+      <!-- Escrow -->
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="editorial text-xl">Escrow · funds held for active projects</h3>
+          <span class="text-sm text-ink-500">Total <strong>$5,000</strong></span>
+        </div>
+        <div class="space-y-3">
+          {escrow.map((e) => (
+            <div class="card p-4 flex items-center gap-4">
+              <span class="w-10 h-10 rounded-lg bg-gold-50 text-gold-deep flex items-center justify-center mono text-xs">$</span>
+              <div class="flex-1">
+                <div class="font-medium text-sm">{e.project}</div>
+                <div class="text-xs text-ink-500">{e.ms}</div>
+              </div>
+              <div class="text-right">
+                <div class="font-medium">{e.held}</div>
+                <div class="text-xs text-ink-500">in escrow</div>
+              </div>
+              <button class="btn-gold !py-1.5 !px-3 text-xs">Release</button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Invoices -->
+      <div class="card overflow-hidden">
+        <div class="px-6 py-4 border-b border-line flex items-center justify-between">
+          <h3 class="editorial text-xl">Invoices</h3>
+          <button class="chip">Export all</button>
+        </div>
+        <div class="divide-y divide-line">
+          {invoices.map((inv) => (
+            <div class="px-6 py-4 grid grid-cols-12 gap-4 items-center hover:bg-ink-50/50 transition">
+              <div class="col-span-2 text-xs mono text-ink-500">{inv.date}</div>
+              <div class="col-span-6"><div class="text-sm font-medium">{inv.desc}</div><div class="text-xs text-ink-500 mono">{inv.id}</div></div>
+              <div class="col-span-2 font-medium text-sm">{inv.amount}</div>
+              <div class="col-span-2 text-right flex items-center gap-2 justify-end"><span class="pill pill-green">{inv.status}</span><a href="#" class="text-xs text-gold ulink">PDF</a></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <aside class="col-span-12 lg:col-span-4 space-y-6">
+      <div class="card p-6">
+        <h3 class="editorial text-lg">Payment method</h3>
+        <div class="mt-4 p-4 border border-line rounded-xl flex items-center gap-3">
+          <span class="w-10 h-10 rounded-lg bg-ink-900 text-white flex items-center justify-center mono text-[10px] font-bold">VISA</span>
+          <div class="flex-1">
+            <div class="text-sm font-medium">Visa ending in •• 4242</div>
+            <div class="text-xs text-ink-500">Expires 09/27</div>
+          </div>
+          <button class="chip">Edit</button>
+        </div>
+        <button class="btn btn-ghost w-full mt-3">+ Add method</button>
+      </div>
+
+      <div class="card p-6">
+        <h3 class="editorial text-lg">Billing address</h3>
+        <div class="text-sm mt-3 leading-relaxed text-ink-700">
+          Auriga AB<br/>
+          Storgatan 24, 4th floor<br/>
+          111 23 Stockholm, Sweden
+        </div>
+        <button class="btn btn-ghost w-full mt-4">Update</button>
+      </div>
+
+      <div class="card p-6">
+        <h3 class="editorial text-lg">Need help?</h3>
+        <p class="text-sm text-ink-500 mt-2">Your dedicated success manager is <strong class="text-ink-900">Marc Olivier</strong>.</p>
+        <button class="btn-gold w-full mt-4">Book a call</button>
+      </div>
+    </aside>
+  </div>
+
+</Dashboard>

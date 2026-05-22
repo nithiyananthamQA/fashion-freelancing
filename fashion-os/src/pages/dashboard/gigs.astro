@@ -1,0 +1,68 @@
+---
+import Dashboard from '@/layouts/Dashboard.astro';
+import { myGigs } from '@/data/mock';
+---
+<Dashboard title="My services" pageTitle="My services" current="gigs" role="creator">
+
+  <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div>
+      <div class="text-sm text-ink-5">2 active · 1 paused · 1 in review</div>
+    </div>
+    <a href="/dashboard/gigs/new" class="btn btn-champagne">+ Add a service</a>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    {myGigs.map((g) => (
+      <div class="card overflow-hidden">
+        <div class="aspect-[4/3] bg-paper-2 relative">
+          <img src={g.img} alt="" class="w-full h-full object-cover"/>
+          <span class="pill pill-green absolute top-3 left-3">Active</span>
+        </div>
+        <div class="p-5">
+          <div class="text-sm font-medium leading-snug">{g.title}</div>
+          <div class="text-xs text-ink-5 mt-1">{g.service}</div>
+          <div class="mt-4 grid grid-cols-3 gap-2 text-xs">
+            <div class="bg-paper p-2 rounded-lg text-center">
+              <div class="text-ink-5">Views</div>
+              <div class="font-semibold text-ink mt-0.5">1,284</div>
+            </div>
+            <div class="bg-paper p-2 rounded-lg text-center">
+              <div class="text-ink-5">Orders</div>
+              <div class="font-semibold text-ink mt-0.5">{g.reviews}</div>
+            </div>
+            <div class="bg-paper p-2 rounded-lg text-center">
+              <div class="text-ink-5">Rating</div>
+              <div class="font-semibold text-champagne-3 mt-0.5">★ {g.rating}</div>
+            </div>
+          </div>
+          <div class="mt-4 flex gap-2">
+            <a href={`/dashboard/gigs/${g.slug}`} class="btn btn-ghost flex-1 text-xs">Edit</a>
+            <a href="/gig" class="btn btn-ghost flex-1 text-xs">Preview</a>
+            <button class="btn btn-ghost text-xs px-3" aria-label="More">⋯</button>
+          </div>
+        </div>
+      </div>
+    ))}
+
+    <a href="/dashboard/gigs/new" class="border-2 border-dashed border-line rounded-2xl p-12 flex flex-col items-center justify-center gap-3 text-ink-5 hover:border-ink hover:text-ink transition min-h-[400px]">
+      <span class="w-14 h-14 rounded-full bg-paper-2 flex items-center justify-center text-2xl">+</span>
+      <span class="text-base font-medium">Add a service</span>
+      <span class="text-xs">Add a new service to your profile</span>
+    </a>
+  </div>
+
+  <!-- Performance summary -->
+  <div class="card p-6 mt-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="display text-xl">This month</h2>
+      <a href="/dashboard/earnings" class="text-sm text-champagne-2 underline-offset-2 hover:underline">Detailed analytics →</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div><div class="text-xs text-ink-5 uppercase tracking-wider">Profile views</div><div class="display text-2xl mt-1">2,140</div><div class="text-xs text-emerald-700 mt-1">↗ +18%</div></div>
+      <div><div class="text-xs text-ink-5 uppercase tracking-wider">Orders</div><div class="display text-2xl mt-1">12</div><div class="text-xs text-emerald-700 mt-1">↗ +24%</div></div>
+      <div><div class="text-xs text-ink-5 uppercase tracking-wider">Conversion</div><div class="display text-2xl mt-1">5.6%</div><div class="text-xs text-ink-5 mt-1">vs 4.2% peer avg</div></div>
+      <div><div class="text-xs text-ink-5 uppercase tracking-wider">Earnings</div><div class="display text-2xl mt-1 gold-text">$8,420</div><div class="text-xs text-emerald-700 mt-1">↗ +24%</div></div>
+    </div>
+  </div>
+
+</Dashboard>

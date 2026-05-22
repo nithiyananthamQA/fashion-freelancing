@@ -1,0 +1,157 @@
+---
+import Dashboard from '@/layouts/Dashboard.astro';
+const tabs = [
+  { k: 'account',       label: 'Account' },
+  { k: 'notifications', label: 'Notifications' },
+  { k: 'security',      label: 'Security &amp; 2FA' },
+  { k: 'billing',       label: 'Billing &amp; payouts' },
+  { k: 'integrations',  label: 'Integrations' },
+  { k: 'privacy',       label: 'Privacy &amp; data' },
+];
+---
+<Dashboard title="Settings" pageTitle="Settings" current="settings" role="creator">
+
+  <div class="grid grid-cols-12 gap-8">
+    <!-- Side nav -->
+    <aside class="col-span-12 lg:col-span-3">
+      <div class="card p-2 sticky top-24">
+        {tabs.map((t, i) => (
+          <a href={`#${t.k}`} class={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm ${i === 0 ? 'bg-ink text-paper' : 'text-ink-3 hover:bg-paper-2'}`} set:html={t.label}></a>
+        ))}
+      </div>
+    </aside>
+
+    <!-- Content -->
+    <div class="col-span-12 lg:col-span-9 space-y-6">
+
+      <!-- Account -->
+      <section id="account" class="card p-6">
+        <h2 class="display text-xl">Account</h2>
+        <p class="text-sm text-ink-5 mt-1">Identity and contact info.</p>
+
+        <div class="grid grid-cols-2 gap-4 mt-6">
+          <div><label class="label">Display name</label><input class="input" value="Yuna Aoki"/></div>
+          <div><label class="label">Handle</label><input class="input" value="@yunaaoki"/></div>
+          <div><label class="label">Email</label><input class="input" type="email" value="yuna@example.com"/></div>
+          <div><label class="label">Time zone</label>
+            <select class="input"><option>Asia/Tokyo (JST)</option><option>Europe/Paris</option><option>America/New_York</option></select>
+          </div>
+        </div>
+        <button class="btn btn-primary mt-6">Save changes</button>
+      </section>
+
+      <!-- Notifications -->
+      <section id="notifications" class="card p-6">
+        <h2 class="display text-xl">Notifications</h2>
+        <p class="text-sm text-ink-5 mt-1">Choose how we contact you.</p>
+
+        <div class="mt-6 divide-y divide-line">
+          {[
+            ['New order received', 'Email + push', true],
+            ['New message', 'Push only', true],
+            ['Order delivered / approved', 'Email + push', true],
+            ['Weekly earnings digest', 'Email', true],
+            ['Marketing &amp; product updates', 'Email', false],
+          ].map(([label, channel, on]) => (
+            <div class="py-3 flex items-center justify-between">
+              <div><div class="font-medium text-sm" set:html={label}></div><div class="text-xs text-ink-5">{channel}</div></div>
+              <button class={`w-11 h-6 rounded-full relative transition ${on ? 'bg-ink' : 'bg-paper-3'}`}>
+                <span class={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition ${on ? 'left-5' : 'left-0.5'}`}></span>
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Security -->
+      <section id="security" class="card p-6">
+        <h2 class="display text-xl">Security &amp; 2FA</h2>
+        <p class="text-sm text-ink-5 mt-1">Keep your account safe.</p>
+
+        <div class="mt-6 space-y-4">
+          <div class="flex items-center justify-between p-4 border border-line rounded-xl">
+            <div><div class="font-medium text-sm">Password</div><div class="text-xs text-ink-5">Last changed 3 months ago</div></div>
+            <button class="btn btn-ghost">Change</button>
+          </div>
+          <div class="flex items-center justify-between p-4 border border-line rounded-xl">
+            <div><div class="font-medium text-sm">Two-factor authentication</div><div class="text-xs text-ink-5">Authenticator app</div></div>
+            <span class="pill-green">Enabled</span>
+          </div>
+          <div class="flex items-center justify-between p-4 border border-line rounded-xl">
+            <div><div class="font-medium text-sm">Active sessions</div><div class="text-xs text-ink-5">3 devices · last active 2 minutes ago</div></div>
+            <button class="btn btn-ghost">Manage</button>
+          </div>
+          <div class="flex items-center justify-between p-4 border border-rose-200 bg-rose-50 rounded-xl">
+            <div><div class="font-medium text-sm text-rose-700">Delete account</div><div class="text-xs text-rose-700/80">Permanently remove your data</div></div>
+            <button class="btn border-rose-300 text-rose-700 bg-white hover:bg-rose-100">Delete</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Billing -->
+      <section id="billing" class="card p-6">
+        <h2 class="display text-xl">Billing &amp; payouts</h2>
+        <p class="text-sm text-ink-5 mt-1">Subscription, invoices and payout method.</p>
+
+        <div class="mt-6 grid grid-cols-2 gap-4">
+          <div class="p-4 border border-champagne-100 bg-champagne-50/50 rounded-xl">
+            <div class="text-xs text-champagne-3 uppercase tracking-wider">Plan</div>
+            <div class="display gold-text text-2xl mt-1">Pro Creator</div>
+            <div class="text-xs text-ink-5 mt-1">$24/mo · renews May 28</div>
+            <button class="btn btn-ghost mt-4">Manage plan</button>
+          </div>
+          <div class="p-4 border border-line rounded-xl">
+            <div class="text-xs text-ink-5 uppercase tracking-wider">Payout method</div>
+            <div class="display text-2xl mt-1">Stripe</div>
+            <div class="text-xs text-ink-5 mt-1">USD · ending in •• 4729</div>
+            <button class="btn btn-ghost mt-4">Update</button>
+          </div>
+        </div>
+
+        <a href="/dashboard/earnings" class="btn btn-link mt-6 inline-flex">View invoices &amp; transactions →</a>
+      </section>
+
+      <!-- Integrations -->
+      <section id="integrations" class="card p-6">
+        <h2 class="display text-xl">Integrations</h2>
+        <p class="text-sm text-ink-5 mt-1">Connect your other tools.</p>
+
+        <div class="mt-6 space-y-2">
+          {[
+            ['Instagram', 'Verified · @yunaaoki', true],
+            ['Behance', 'Not connected', false],
+            ['Pinterest', 'Not connected', false],
+            ['Figma', 'Connected', true],
+            ['CLO3D', 'Connected', true],
+          ].map(([n, st, on]) => (
+            <div class="flex items-center justify-between p-3 border border-line rounded-xl">
+              <div class="flex items-center gap-3">
+                <span class="w-9 h-9 rounded-lg bg-paper-2 flex items-center justify-center font-semibold text-xs">{n.slice(0,2).toUpperCase()}</span>
+                <div><div class="text-sm">{n}</div><div class="text-xs text-ink-5">{st}</div></div>
+              </div>
+              <button class="btn btn-ghost btn-sm">{on ? 'Disconnect' : 'Connect'}</button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Privacy -->
+      <section id="privacy" class="card p-6">
+        <h2 class="display text-xl">Privacy &amp; data</h2>
+        <p class="text-sm text-ink-5 mt-1">Export, manage or delete your data.</p>
+
+        <div class="mt-6 space-y-3">
+          <div class="flex items-center justify-between p-4 border border-line rounded-xl">
+            <div><div class="font-medium text-sm">Download your data</div><div class="text-xs text-ink-5">JSON archive of all your account data</div></div>
+            <button class="btn btn-ghost">Request export</button>
+          </div>
+          <div class="flex items-center justify-between p-4 border border-line rounded-xl">
+            <div><div class="font-medium text-sm">Cookie preferences</div><div class="text-xs text-ink-5">Manage non-essential cookies</div></div>
+            <button class="btn btn-ghost">Manage</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+</Dashboard>

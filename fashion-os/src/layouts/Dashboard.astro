@@ -1,0 +1,91 @@
+---
+import '@/styles/globals.css';
+import DashboardSidebar from '@/components/DashboardSidebar.astro';
+import DashboardTopbar from '@/components/DashboardTopbar.astro';
+const { title = 'Dashboard', current = '', role = 'creator', pageTitle = 'Overview' } = Astro.props;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{title} · Fashion Freelancing</title>
+  <meta name="theme-color" content="#FFFFFF" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-surface">
+  <div class="flex min-h-screen">
+    <DashboardSidebar current={current} role={role} />
+    <div class="flex-1 min-w-0">
+      <DashboardTopbar title={pageTitle} role={role} />
+      <main class="px-6 lg:px-8 py-8">
+        <slot />
+      </main>
+    </div>
+  </div>
+
+  <!-- Shared store/api/ui — same as public-html, served from /public/ -->
+  <script src="/store.js" is:inline></script>
+  <script src="/api.js" is:inline></script>
+  <script src="/ui.js" is:inline></script>
+  <script is:inline>
+    // Mark shared modules ready for any page hydration scripts
+    window.dispatchEvent(new CustomEvent('ff:ready', { detail: { api: window.api, ui: window.UI } }));
+    // If no session, redirect to public sign-in. (For demo: bypass.)
+    if (!window.api.users.sessionSync()) {
+      // Auto-sign-in as demo Yuna for the creator dashboard
+      const isBrand = location.pathname.startsWith('/brand');
+      const isAdmin = location.pathname.startsWith('/admin');
+      const email = isBrand ? 'sara@auriga.world' : isAdmin ? 'admin@fashionfreelancing.app' : 'yuna@example.com';
+      window.api.users.signIn({ email }).then(() => location.reload());
+    }
+  </script>
+
+  <!-- Dashboard motion: cinematic scroll-reveal + card cursor-spotlight -->
+  <script is:inline>
+    (function () {
+      var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function wire() {
+        if (reduce) return;
+        // opt every content card into scroll-reveal, gently staggered per row
+        var cards = document.querySelectorAll('main .card');
+        cards.forEach(function (el, i) {
+          el.classList.add('reveal');
+          el.style.transitionDelay = ((i % 4) * 0.07) + 's';
+        });
+        var io = new IntersectionObserver(function (ents) {
+          ents.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+          });
+        }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+        document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+
+        // cursor spotlight glow on cards
+        document.addEventListener('pointermove', function (e) {
+          var c = e.target.closest && e.target.closest('main .card');
+          if (!c) return;
+          var r = c.getBoundingClientRect();
+          c.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+          c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        });
+
+        // topbar condenses once scrolled
+        var bar = document.querySelector('.db-topbar');
+        if (bar) {
+          var t = false;
+          var sync = function () { bar.classList.toggle('is-scrolled', window.scrollY > 12); t = false; };
+          window.addEventListener('scroll', function () {
+            if (!t) { requestAnimationFrame(sync); t = true; }
+          }, { passive: true });
+          sync();
+        }
+      }
+      if (document.readyState !== 'loading') wire();
+      else document.addEventListener('DOMContentLoaded', wire);
+    })();
+  </script>
+</body>
+</html>

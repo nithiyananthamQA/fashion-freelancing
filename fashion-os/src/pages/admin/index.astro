@@ -1,0 +1,124 @@
+---
+import Admin from '@/layouts/Admin.astro';
+---
+<Admin title="Dashboard" pageTitle="Admin · Overview" current="dash">
+
+  <!-- Top KPIs -->
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+    <div class="card p-5">
+      <div class="text-[11px] mono uppercase tracking-[0.16em] text-ink-5">Active users</div>
+      <div class="display text-3xl mt-1 tabular-nums">12,438</div>
+      <div class="text-xs text-emerald-700 mt-1">↗ +312 this week</div>
+    </div>
+    <div class="card p-5">
+      <div class="text-[11px] mono uppercase tracking-[0.16em] text-ink-5">GMV · MTD</div>
+      <div class="display text-3xl mt-1 gold-text tabular-nums">$3.8M</div>
+      <div class="text-xs text-emerald-700 mt-1">↗ +24%</div>
+    </div>
+    <div class="card p-5">
+      <div class="text-[11px] mono uppercase tracking-[0.16em] text-ink-5">Active orders</div>
+      <div class="display text-3xl mt-1 tabular-nums">1,284</div>
+      <div class="text-xs text-ink-5 mt-1">86% on-time</div>
+    </div>
+    <div class="card p-5">
+      <div class="text-[11px] mono uppercase tracking-[0.16em] text-ink-5">Pending review</div>
+      <div class="display text-3xl mt-1 tabular-nums text-rose-700">79</div>
+      <div class="text-xs text-rose-700 mt-1">24 mod · 47 verify · 8 disp</div>
+    </div>
+    <div class="card p-5">
+      <div class="text-[11px] mono uppercase tracking-[0.16em] text-ink-5">Trust &amp; safety score</div>
+      <div class="display text-3xl mt-1 tabular-nums">98.4</div>
+      <div class="text-xs text-emerald-700 mt-1">healthy</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-12 gap-6">
+
+    <!-- Queues -->
+    <div class="col-span-12 lg:col-span-8 space-y-6">
+      <div class="card p-6">
+        <h2 class="display text-xl mb-4">Action queues</h2>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <a href="/admin/moderation" class="p-4 border border-line rounded-xl hover:border-ink-7 transition">
+            <div class="text-xs text-ink-5 uppercase tracking-wider">Moderation</div>
+            <div class="display text-2xl mt-1 text-rose-700">24</div>
+            <div class="text-xs text-ink-5 mt-1">flagged content</div>
+          </a>
+          <a href="/admin/verification" class="p-4 border border-line rounded-xl hover:border-ink-7 transition">
+            <div class="text-xs text-ink-5 uppercase tracking-wider">Verifications</div>
+            <div class="display text-2xl mt-1 text-rose-700">47</div>
+            <div class="text-xs text-ink-5 mt-1">pending review</div>
+          </a>
+          <a href="/admin/disputes" class="p-4 border border-line rounded-xl hover:border-ink-7 transition">
+            <div class="text-xs text-ink-5 uppercase tracking-wider">Disputes</div>
+            <div class="display text-2xl mt-1 text-rose-700">8</div>
+            <div class="text-xs text-ink-5 mt-1">open · &lt;48h SLA</div>
+          </a>
+          <a href="/admin/fraud" class="p-4 border border-line rounded-xl hover:border-ink-7 transition">
+            <div class="text-xs text-ink-5 uppercase tracking-wider">Fraud signals</div>
+            <div class="display text-2xl mt-1 text-rose-700">3</div>
+            <div class="text-xs text-ink-5 mt-1">high-risk accounts</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- GMV chart -->
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="display text-xl">GMV · last 12 months</h2>
+          <select class="input !py-1.5 !text-xs !w-auto"><option>All time</option></select>
+        </div>
+        <div class="flex items-end gap-2 h-48">
+          {[42, 48, 52, 58, 64, 68, 72, 78, 86, 91, 102, 124].map((h, i) => (
+            <div class="flex-1 flex flex-col items-center gap-2">
+              <div class="w-full rounded-t-md transition-all" style={`height: ${h}%; background: linear-gradient(180deg, #6E56F0, #5468F5);`}></div>
+              <div class="text-[10px] mono text-ink-5 uppercase">{['Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May'][i]}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Recent activity -->
+      <div class="card p-6">
+        <h2 class="display text-xl mb-4">Recent activity</h2>
+        <div class="space-y-3 text-sm">
+          <div class="flex gap-3"><span class="w-2 h-2 rounded-full bg-rose-500 mt-2 flex-shrink-0"></span><div><strong>Dispute opened</strong> · order #o4 (Vestra) · escalated to senior agent<div class="text-xs text-ink-5">2 min ago</div></div></div>
+          <div class="flex gap-3"><span class="w-2 h-2 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></span><div><strong>47 portfolios verified</strong> · weekly batch processed<div class="text-xs text-ink-5">1 hour ago</div></div></div>
+          <div class="flex gap-3"><span class="w-2 h-2 rounded-full bg-champagne mt-2 flex-shrink-0"></span><div><strong>Account suspended</strong> · @fakeuser_191 · fraud · auto-flagged<div class="text-xs text-ink-5">3 hours ago</div></div></div>
+          <div class="flex gap-3"><span class="w-2 h-2 rounded-full bg-sky-500 mt-2 flex-shrink-0"></span><div><strong>New service category</strong> · "AI fashion prompting" · 184 creators in 48h<div class="text-xs text-ink-5">Yesterday</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="col-span-12 lg:col-span-4 space-y-6">
+      <div class="card p-6 bg-rose-50 border-rose-100">
+        <div class="text-rose-700 text-xs uppercase tracking-wider font-medium">High priority</div>
+        <div class="display text-lg mt-2 text-rose-900">3 fraud signals need review</div>
+        <p class="text-sm text-rose-700/80 mt-1">Auto-flagged accounts with payment-velocity anomalies.</p>
+        <a href="/admin/fraud" class="btn btn-primary w-full mt-4">Review now</a>
+      </div>
+
+      <div class="card p-6">
+        <h3 class="display text-lg">Top services this week</h3>
+        <ul class="mt-4 space-y-3 text-sm">
+          <li class="flex justify-between"><span>Tech pack designer</span><strong class="tabular-nums">312</strong></li>
+          <li class="flex justify-between"><span>Fashion photography</span><strong class="tabular-nums">248</strong></li>
+          <li class="flex justify-between"><span>Pattern maker</span><strong class="tabular-nums">196</strong></li>
+          <li class="flex justify-between"><span>AI fashion prompting</span><strong class="tabular-nums text-emerald-700">184 ↗</strong></li>
+          <li class="flex justify-between"><span>UI/UX (Figma)</span><strong class="tabular-nums">142</strong></li>
+        </ul>
+      </div>
+
+      <div class="card p-6">
+        <h3 class="display text-lg">System health</h3>
+        <ul class="mt-4 space-y-3 text-sm">
+          <li class="flex justify-between"><span class="text-ink-5">API uptime · 30d</span><span class="text-emerald-700">99.99%</span></li>
+          <li class="flex justify-between"><span class="text-ink-5">P95 latency</span><span class="tabular-nums">142ms</span></li>
+          <li class="flex justify-between"><span class="text-ink-5">Error rate</span><span class="tabular-nums">0.04%</span></li>
+          <li class="flex justify-between"><span class="text-ink-5">Stripe webhooks</span><span class="text-emerald-700">healthy</span></li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+</Admin>

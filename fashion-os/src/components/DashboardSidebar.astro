@@ -1,0 +1,133 @@
+---
+import Logo from './Logo.astro';
+const { role = 'creator', current = '' } = Astro.props;
+
+const creatorNav = [
+  { section: 'My work', items: [
+    { href: '/dashboard',           label: 'Home',          k: 'overview',  icon: 'home' },
+    { href: '/dashboard/orders',    label: 'My jobs',       k: 'orders',    icon: 'doc', badge: '3' },
+    { href: '/dashboard/messages',  label: 'Messages',      k: 'messages',  icon: 'msg', badge: '3' },
+  ]},
+  { section: 'My business', items: [
+    { href: '/dashboard/gigs',      label: 'My services',   k: 'gigs',      icon: 'grid' },
+    { href: '/dashboard/proposals', label: 'Pitches I sent', k: 'proposals', icon: 'spark' },
+    { href: '/dashboard/earnings',  label: 'My earnings',   k: 'earnings',  icon: 'wallet' },
+  ]},
+  { section: 'My account', items: [
+    { href: '/dashboard/profile',   label: 'My page',       k: 'profile',   icon: 'user' },
+    { href: '/dashboard/ai',        label: 'AI helper',     k: 'ai',        icon: 'spark' },
+    { href: '/dashboard/settings',  label: 'Settings',      k: 'settings',  icon: 'gear' },
+  ]},
+];
+
+const brandNav = [
+  { section: 'Hire someone', items: [
+    { href: '/brand',              label: 'Home',           k: 'overview',   icon: 'home' },
+    { href: '/brand/talent',       label: 'Find a freelancer', k: 'talent',  icon: 'search' },
+    { href: '/brand/post',         label: 'Post a job',     k: 'post',       icon: 'plus' },
+    { href: '/brand/applicants',   label: 'People who applied', k: 'applicants', icon: 'users', badge: '12' },
+  ]},
+  { section: 'My work', items: [
+    { href: '/brand/orders',       label: 'My orders',      k: 'orders',     icon: 'doc', badge: '5' },
+    { href: '/brand/messages',     label: 'Messages',       k: 'messages',   icon: 'msg', badge: '5' },
+    { href: '/brand/saved',        label: 'Saved freelancers', k: 'saved',   icon: 'heart' },
+  ]},
+  { section: 'My account', items: [
+    { href: '/brand/billing',      label: 'Billing',        k: 'billing',    icon: 'wallet' },
+    { href: '/brand/team',         label: 'My team',        k: 'team',       icon: 'users' },
+    { href: '/brand/settings',     label: 'Settings',       k: 'settings',   icon: 'gear' },
+  ]},
+];
+
+const nav = role === 'brand' ? brandNav : creatorNav;
+const user = role === 'brand'
+  ? { name: 'Auriga', email: 'sara@auriga.world', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop', plan: 'Enterprise' }
+  : { name: 'Yuna Aoki', email: 'yuna@example.com', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop', plan: 'Pro Creator' };
+
+const icons = {
+  home:'M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V11z',
+  msg:'M21 12a8 8 0 1 1-3-6.2L21 4l-1 4.2A8 8 0 0 1 21 12z',
+  kanban:'M4 4h6v16H4zM14 4h6v10h-6z',
+  doc:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z',
+  wallet:'M3 7h18v4h-2a2 2 0 0 0 0 4h2v4H3z',
+  user:'M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4 0-8 2-8 6v2h16v-2c0-4-4-6-8-6z',
+  grid:'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
+  spark:'M12 3v6M12 15v6M3 12h6M15 12h6M5.6 5.6l4.2 4.2M14.2 14.2l4.2 4.2M18.4 5.6l-4.2 4.2M9.8 14.2l-4.2 4.2',
+  plus:'M12 5v14M5 12h14',
+  search:'M11 4a7 7 0 1 1 0 14 7 7 0 0 1 0-14zM21 21l-4.3-4.3',
+  users:'M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4zM8 13a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm0 2c-3 0-6 1.5-6 4v1h8v-1c0-1 .4-2 1-2.7-.9-.2-1.9-.3-3-.3zm8 0c-3 0-6 1.5-6 4v1h12v-1c0-2.5-3-4-6-4z',
+  gear:'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9 4a8.96 8.96 0 0 0-.21-1.94l2.07-1.62-2-3.46-2.43.99a9.16 9.16 0 0 0-3.36-1.94L14.7 1.5h-4l-.37 2.55a9.16 9.16 0 0 0-3.36 1.94l-2.43-.99-2 3.46 2.07 1.62A8.97 8.97 0 0 0 4.4 12c0 .66.07 1.31.21 1.94L2.54 15.56l2 3.46 2.43-.99c.97.81 2.1 1.47 3.36 1.94l.37 2.55h4l.37-2.55c1.26-.47 2.39-1.13 3.36-1.94l2.43.99 2-3.46-2.07-1.62c.14-.63.21-1.28.21-1.94z',
+  heart:'M12 21l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.18L12 21z',
+};
+---
+<!-- backdrop (mobile only, shown when the drawer is open) -->
+<div id="db-nav-backdrop" class="fixed inset-0 bg-ink-900/40 backdrop-blur-sm z-40 opacity-0 invisible transition-all duration-300 lg:hidden"></div>
+
+<aside id="db-sidebar"
+  class="db-sidebar fixed lg:sticky top-0 left-0 z-50 lg:z-auto flex flex-col w-64 shrink-0 border-r border-line bg-white h-screen
+         -translate-x-full lg:translate-x-0 transition-transform duration-300">
+  <div class="px-5 h-16 flex items-center justify-between border-b border-line">
+    <Logo />
+    <button id="db-nav-close" aria-label="Close menu" class="lg:hidden w-9 h-9 rounded-lg flex items-center justify-center hover:bg-ink-50 text-ink-500">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div class="px-3 py-4 flex-1 overflow-y-auto">
+    {nav.map((group) => (
+      <div class="mb-4">
+        <div class="px-3 mb-1.5 text-[10px] uppercase tracking-[0.22em] text-ink-400 mono">{group.section}</div>
+        <ul class="space-y-0.5">
+          {group.items.map((it) => (
+            <li>
+              <a href={it.href} class={`nav-item ${current === it.k ? 'active' : ''}`}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="opacity-80"><path d={icons[it.icon as keyof typeof icons]}/></svg>
+                <span class="flex-1">{it.label}</span>
+                {it.badge && <span class={`text-[10px] mono px-1.5 py-0.5 rounded-full ${current === it.k ? 'bg-white/15 text-white' : 'bg-gold-50 text-gold-deep'}`}>{it.badge}</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+
+  <div class="border-t border-line p-3">
+    <a href={role === 'brand' ? '/brand/billing' : '/dashboard/profile'} class="flex items-center gap-3 p-2 rounded-lg hover:bg-ink-50">
+      <img src={user.avatar} alt={user.name} class="w-9 h-9 rounded-full object-cover"/>
+      <div class="min-w-0 flex-1">
+        <div class="text-sm font-medium truncate text-ink-900">{user.name}</div>
+        <div class="text-[11px] text-ink-500 mono truncate">{user.plan}</div>
+      </div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-ink-400"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+  </div>
+</aside>
+
+<script is:inline>
+  // Mobile drawer: #db-nav-toggle (in the topbar) opens, backdrop / close / link-tap closes.
+  (function () {
+    const sidebar  = document.getElementById('db-sidebar');
+    const backdrop = document.getElementById('db-nav-backdrop');
+    if (!sidebar || !backdrop) return;
+    function open() {
+      sidebar.classList.remove('-translate-x-full');
+      backdrop.classList.remove('opacity-0', 'invisible');
+      document.body.style.overflow = 'hidden';
+    }
+    function close() {
+      sidebar.classList.add('-translate-x-full');
+      backdrop.classList.add('opacity-0', 'invisible');
+      document.body.style.overflow = '';
+    }
+    backdrop.addEventListener('click', close);
+    document.getElementById('db-nav-close')?.addEventListener('click', close);
+    // the toggle button lives in the topbar — bind by id, may mount before/after
+    document.addEventListener('click', (e) => {
+      if (e.target.closest && e.target.closest('#db-nav-toggle')) open();
+    });
+    // tapping any nav link closes the drawer
+    sidebar.querySelectorAll('a[href]').forEach(a => a.addEventListener('click', close));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  })();
+</script>

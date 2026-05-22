@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Find a fashion freelancer · Fashion Freelancing</title>
+<meta name="description" content="Browse 12,400 fashion freelancers. Designers, pattern makers, photographers, and more. Pick someone, agree a price, hire safely." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/styles.css" />
+<style>
+  .mp-grid { display:grid; grid-template-columns: 240px 1fr; gap:32px; align-items:flex-start; }
+  @media (max-width: 1024px) { .mp-grid { grid-template-columns: 1fr; } }
+  .filters { position: sticky; top: 88px; }
+  .filter-block { padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .filter-block:first-child { padding-top: 0; }
+  .filter-block h4 { font-size:13px; font-weight:600; margin-bottom: 10px; }
+  .filter-block label { display:flex; align-items:center; gap:8px; padding:5px 0; font-size:13px; cursor:pointer; color:var(--ink-3); }
+  .filter-block label:hover { color: var(--ink); }
+  .gig-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+  .mode-tabs { display: inline-flex; background: var(--paper-2); border-radius: 99px; padding: 4px; gap: 2px; border: 1px solid var(--line); }
+  .mode-tabs button { padding: 9px 18px; font-size: 14px; color: var(--ink-3); background: transparent; border: 0; border-radius: 99px; cursor: pointer; transition: all .15s; font-weight: 500; }
+  .mode-tabs button.active { background: var(--ink); color: var(--paper); }
+</style>
+</head>
+<body>
+
+<div id="site-nav" data-current="talent"></div>
+
+<!-- Header -->
+<section class="fx-stage" style="padding: 52px 0 16px;">
+  <span class="fx-orb v md" style="top:-200px;left:-160px;"></span>
+  <span class="fx-orb c sm" style="top:-130px;right:-110px;animation-delay:-8s;"></span>
+  <div class="container">
+    <h1 class="h-1">Find a <span class="display-italic">fashion freelancer</span>.</h1>
+    <p class="lead mt-3" style="max-width: 600px;">12,400 verified freelancers. Pick someone, agree a price, hire safely. No agencies, no middlemen.</p>
+
+    <!-- Mode tabs: People vs Jobs -->
+    <div class="mode-tabs mt-6" id="mode-tabs">
+      <button class="active" data-mode="people">Browse people <span class="muted text-xs" style="margin-left:6px;">12,400</span></button>
+      <button data-mode="jobs">See open jobs <span class="muted text-xs" style="margin-left:6px;">312</span></button>
+    </div>
+
+    <!-- Search bar -->
+    <div style="margin-top: 18px; display: flex; gap: 8px; align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 99px; padding: 6px 6px 6px 18px; max-width: 720px; box-shadow: 0 1px 0 rgba(0,0,0,.02);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="color:var(--ink-5);"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <input id="search" style="border:none;background:transparent;padding:10px 4px;flex:1;outline:none;font-size:14px;" placeholder="Search 'tech pack designer', 'pattern maker', 'photographer in Paris'…"/>
+      <button class="btn btn-primary btn-sm">Search</button>
+    </div>
+  </div>
+</section>
+
+<!-- Group chips -->
+<div class="container">
+  <div style="display: flex; gap: 8px; overflow-x: auto; padding: 12px 0; border-bottom: 1px solid var(--line);" id="group-nav">
+    <button class="chip chip-active" data-group="all">All freelancers</button>
+    <button class="chip" data-group="Design">Designers</button>
+    <button class="chip" data-group="Technical">Tech &amp; production</button>
+    <button class="chip" data-group="Visual">Photo &amp; video</button>
+    <button class="chip" data-group="Web &amp; UX">Web &amp; design</button>
+    <button class="chip" data-group="Business">Marketing &amp; retail</button>
+    <button class="chip" data-group="Niche">Other specialties</button>
+  </div>
+</div>
+
+<!-- People view -->
+<section id="view-people" style="padding: 24px 0 96px;">
+  <div class="container">
+    <div class="mp-grid">
+
+      <aside class="filters">
+        <div class="filter-block">
+          <h4>Price range</h4>
+          <input type="range" min="0" max="5000" value="2500" style="width:100%;accent-color:var(--ink);"/>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-5);margin-top:6px;"><span>$0</span><span>$5,000+</span></div>
+        </div>
+        <div class="filter-block">
+          <h4>How fast can they deliver?</h4>
+          <label><input type="checkbox"/> 24 hours</label>
+          <label><input type="checkbox" checked/> Up to 3 days</label>
+          <label><input type="checkbox"/> Up to 1 week</label>
+          <label><input type="checkbox"/> Up to 1 month</label>
+        </div>
+        <div class="filter-block">
+          <h4>Where are they?</h4>
+          <label><input type="checkbox"/> Anywhere (remote)</label>
+          <label><input type="checkbox"/> Europe</label>
+          <label><input type="checkbox"/> Asia</label>
+          <label><input type="checkbox"/> Americas</label>
+          <label><input type="checkbox"/> Africa</label>
+        </div>
+        <div class="filter-block">
+          <h4>Experience level</h4>
+          <label><input type="checkbox"/> Newer</label>
+          <label><input type="checkbox" checked/> Verified</label>
+          <label><input type="checkbox"/> Top-rated</label>
+        </div>
+        <div class="filter-block" style="border-bottom:0;">
+          <h4>Available now</h4>
+          <label><input type="checkbox" checked/> Yes, taking new work</label>
+        </div>
+        <button class="btn btn-ghost w-full" style="margin-top:14px;">Reset all</button>
+      </aside>
+
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:8px;">
+          <p style="font-size:14px;color:var(--ink-5);"><strong id="result-count" style="color:var(--ink);">1,284</strong> freelancers ready to work</p>
+          <select class="input" style="width:auto;padding:7px 12px;font-size:13px;">
+            <option>Best match</option><option>Top-rated first</option><option>Cheapest first</option><option>Fastest first</option>
+          </select>
+        </div>
+
+        <div class="gig-grid" id="gig-grid"><!-- populated --></div>
+
+        <div style="margin-top:40px;display:flex;justify-content:center;gap:6px;">
+          <button class="chip">←</button>
+          <button class="chip chip-active">1</button>
+          <button class="chip">2</button>
+          <button class="chip">3</button>
+          <button class="chip">…</button>
+          <button class="chip">96</button>
+          <button class="chip">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Jobs view -->
+<section id="view-jobs" style="padding: 24px 0 96px; display: none;">
+  <div class="container">
+
+    <div class="card card-pad mb-6" style="background: var(--paper-2); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: space-between;">
+      <div>
+        <strong>312 open jobs</strong> from <strong>248 fashion brands</strong>. <span class="muted">Apply with one click.</span>
+      </div>
+      <a href="./signup.html?role=creator" class="btn btn-primary btn-sm">Create my page first →</a>
+    </div>
+
+    <div class="brief-card">
+      <div class="brief-head"><span>Job</span><span>What for</span><span>How much</span><span>How long</span><span></span></div>
+      <a class="brief-row" href="./brief.html"><div style="display:flex;align-items:center;gap:12px;"><span class="brandmark">M·K</span><div><div style="font-weight:500;">Womenswear designer for spring collection</div><div class="text-xs muted">Maison Kirei · Paris · Remote · 2h ago</div></div></div><div class="text-sm">Designer</div><div><strong>$8,000–14,000</strong></div><div class="text-sm">8 weeks</div><div style="text-align:right;"><span class="btn btn-primary btn-sm">Apply</span></div></a>
+      <a class="brief-row" href="./brief.html"><div style="display:flex;align-items:center;gap:12px;"><span class="brandmark">VS</span><div><div style="font-weight:500;">Tech packs for new denim line — 12 styles <span class="pill pill-rose" style="margin-left:6px;">Urgent</span></div><div class="text-xs muted">Vestra · LA · 2 days/week in office · today</div></div></div><div class="text-sm">Tech pack</div><div><strong>$3,200</strong></div><div class="text-sm">3 weeks</div><div style="text-align:right;"><span class="btn btn-primary btn-sm">Apply</span></div></a>
+      <a class="brief-row" href="./brief.html"><div style="display:flex;align-items:center;gap:12px;"><span class="brandmark">L&amp;C</span><div><div style="font-weight:500;">Stylist for Vogue Italia February cover</div><div class="text-xs muted">Léon &amp; Co. · Milan · In person · yesterday</div></div></div><div class="text-sm">Stylist</div><div><strong>$12,000</strong></div><div class="text-sm">5 days</div><div style="text-align:right;"><span class="btn btn-primary btn-sm">Apply</span></div></a>
+      <a class="brief-row" href="./brief.html"><div style="display:flex;align-items:center;gap:12px;"><span class="brandmark">OB</span><div><div style="font-weight:500;">Pattern maker for sustainable knitwear capsule</div><div class="text-xs muted">Obscura · Berlin · Remote · 3d ago</div></div></div><div class="text-sm">Pattern maker</div><div><strong>$1,800–3,000</strong></div><div class="text-sm">4 weeks</div><div style="text-align:right;"><span class="btn btn-primary btn-sm">Apply</span></div></a>
+      <a class="brief-row" href="./brief.html"><div style="display:flex;align-items:center;gap:12px;"><span class="brandmark">HK</span><div><div style="font-weight:500;">Director for our 90-second launch video</div><div class="text-xs muted">Hanako Studio · Tokyo · Remote · 5h ago</div></div></div><div class="text-sm">Director</div><div><strong>€22,000</strong></div><div class="text-sm">6 weeks</div><div style="text-align:right;"><span class="btn btn-primary btn-sm">Apply</span></div></a>
+    </div>
+
+    <div style="text-align: center; margin-top: 32px;">
+      <button class="btn btn-ghost">Show more jobs →</button>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+<script src="../assets/services.js"></script>
+<script src="../assets/site.js"></script>
+<script>
+  // Real marketplace — reads from store via api, supports URL ?q= and ?cat=
+  window.onFFReady(async () => {
+    const grid = document.getElementById('gig-grid');
+    const countEl = document.getElementById('result-count');
+    const searchInput = document.getElementById('search');
+    const url = new URL(location.href);
+    const initialQ = url.searchParams.get('q') || '';
+    const initialCat = url.searchParams.get('cat') || '';
+    if (initialQ && searchInput) searchInput.value = initialQ;
+
+    let filters = { q: initialQ, category: initialCat || undefined, group: undefined, sort: 'best_match' };
+
+    function showLoading() {
+      grid.innerHTML = Array(8).fill(0).map(() => `
+        <div class="gig" style="opacity:.5;">
+          <div class="img" style="background:var(--paper-2);animation:pulse 1.4s ease-in-out infinite;"></div>
+          <div class="body">
+            <div style="height:14px;background:var(--paper-2);border-radius:4px;margin:6px 0;"></div>
+            <div style="height:12px;background:var(--paper-2);border-radius:4px;width:60%;"></div>
+          </div>
+        </div>`).join('');
+    }
+
+    async function refresh() {
+      showLoading();
+      const result = await api.freelancers.list(filters);
+      countEl.textContent = result.total.toLocaleString();
+      if (!result.items.length) {
+        grid.innerHTML = `
+          <div style="grid-column:1/-1;text-align:center;padding:64px 24px;background:var(--paper-2);border-radius:14px;">
+            <div style="font-size:42px;margin-bottom:12px;">🔍</div>
+            <h3 class="h-3">No freelancers match.</h3>
+            <p class="lead text-sm mt-2">Try a different search or clear your filters.</p>
+            <button class="btn btn-ghost mt-6" onclick="window.location.search='';">Clear filters</button>
+          </div>`;
+        return;
+      }
+      grid.innerHTML = result.items.map(f => {
+        const c = f.currency === 'EUR' ? '€' : f.currency === 'GBP' ? '£' : '$';
+        return `
+        <a class="gig reveal" href="./profile.html?id=${f.id}">
+          <div class="img"><img src="${f.cover}" alt="" loading="lazy"/></div>
+          <div class="body">
+            <div class="by">
+              <img src="${f.avatar}" alt=""/>
+              <span style="font-weight:500;">${f.name.split(' ').slice(0,2).join(' ')}</span>
+              <span class="muted">·</span>
+              <span class="muted">${f.city}</span>
+            </div>
+            <div class="ttl">${f.headline}</div>
+            <div class="row">
+              <span><span class="star">★</span> ${f.rating} <span class="muted">(${f.reviewCount})</span></span>
+              <span class="from">From <b>${c}${f.fromPrice}</b></span>
+            </div>
+          </div>
+        </a>`;
+      }).join('');
+      // Re-init scroll reveal for new cards
+      UI.initScrollReveal();
+    }
+
+    // Header + page search submission updates URL & filter
+    const form = searchInput?.closest('div')?.parentElement; // not exactly form here
+    if (searchInput) {
+      const submit = () => {
+        filters.q = searchInput.value.trim();
+        const u = new URL(location.href);
+        if (filters.q) u.searchParams.set('q', filters.q);
+        else u.searchParams.delete('q');
+        history.replaceState({}, '', u);
+        refresh();
+      };
+      searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+      // Search button next to input
+      const searchBtn = searchInput.parentElement?.querySelector('button');
+      if (searchBtn) searchBtn.addEventListener('click', submit);
+    }
+
+    // Mode tabs (people vs jobs)
+    const mt = document.getElementById('mode-tabs');
+    mt.addEventListener('click', e => {
+      const b = e.target.closest('button[data-mode]'); if (!b) return;
+      mt.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      document.getElementById('view-people').style.display = b.dataset.mode === 'people' ? '' : 'none';
+      document.getElementById('view-jobs').style.display = b.dataset.mode === 'jobs' ? '' : 'none';
+    });
+    if (location.hash === '#jobs') mt.querySelector('[data-mode="jobs"]').click();
+
+    // Group filter chips
+    const gn = document.getElementById('group-nav');
+    if (initialCat) {
+      // We had a category in URL — group nav to "all" but pre-filter
+      filters.category = initialCat;
+    }
+    gn.addEventListener('click', e => {
+      const b = e.target.closest('.chip[data-group]'); if (!b) return;
+      gn.querySelectorAll('.chip').forEach(x => x.classList.remove('chip-active'));
+      b.classList.add('chip-active');
+      const g = b.dataset.group;
+      filters.group = g === 'all' ? undefined : g;
+      filters.category = undefined; // clearing
+      const u = new URL(location.href);
+      u.searchParams.delete('cat');
+      history.replaceState({}, '', u);
+      refresh();
+    });
+
+    // Sort select
+    const sortSelect = document.querySelector('select.input');
+    if (sortSelect) {
+      const sortMap = { 'Best match':'best_match', 'Top-rated first':'top_rated', 'Cheapest first':'lowest_price', 'Fastest first':'fastest', 'Top rated':'top_rated', 'Newest':'newest', 'Lowest price':'lowest_price' };
+      sortSelect.addEventListener('change', () => {
+        filters.sort = sortMap[sortSelect.value] || 'best_match';
+        refresh();
+      });
+    }
+
+    // First render
+    refresh();
+  });
+</script>
+</body>
+</html>

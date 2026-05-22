@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>How it works · Fashion Freelancing</title>
+<meta name="description" content="Three simple steps. Whether you're hiring or getting hired, here's how it works." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/styles.css" />
+<style>
+  .who-tabs { display: inline-flex; background: var(--paper-2); border-radius: 99px; padding: 4px; gap: 2px; border: 1px solid var(--line); }
+  .who-tabs button { padding: 10px 20px; font-size: 14px; color: var(--ink-3); background: transparent; border: 0; border-radius: 99px; cursor: pointer; transition: all .15s; font-weight: 500; }
+  .who-tabs button.active { background: var(--ink); color: var(--paper); }
+  .step-big {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 24px;
+    padding: 48px 0;
+    border-top: 1px solid var(--line);
+    align-items: start;
+  }
+  .step-big:first-of-type { border-top: 0; }
+  .step-big .num {
+    font-family: var(--font-display);
+    font-size: 64px;
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--ink-7);
+  }
+  .step-big.cur .num { color: var(--ink); }
+  @media (max-width: 700px) {
+    .step-big { grid-template-columns: 1fr; gap: 12px; }
+    .step-big .num { font-size: 48px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="site-nav" data-current="how"></div>
+
+<!-- Hero -->
+<section style="padding: 64px 0 24px;">
+  <div class="container text-center" style="max-width: 720px;">
+    <h1 class="h-display">How it <span class="display-italic" style="color: var(--ink-3);">works</span>.</h1>
+    <p class="lead mt-4" style="font-size: 18px;">Three simple steps. The same idea, whether you want to hire someone or get hired.</p>
+
+    <div class="who-tabs mt-8" id="who-tabs">
+      <button class="active" data-who="hire">I want to hire</button>
+      <button data-who="work">I want to get hired</button>
+    </div>
+  </div>
+</section>
+
+<!-- HIRING flow -->
+<section id="flow-hire" class="section" style="padding-top: 32px;">
+  <div class="container" style="max-width: 880px;">
+
+    <article class="step-big">
+      <div class="num">1</div>
+      <div>
+        <h2 class="h-2">Find someone good.</h2>
+        <p class="lead mt-3">Search for what you need — for example: <em>"tech pack designer"</em> or <em>"fashion photographer in Milan"</em>. Or browse our list of freelancers by category.</p>
+        <p class="lead mt-3">Every freelancer is checked by a real fashion person before they're allowed on the site. So you don't waste time on people who don't know what a tech pack is.</p>
+        <div class="mt-6"><a href="./marketplace.html" class="btn btn-primary">Find a freelancer →</a></div>
+      </div>
+    </article>
+
+    <article class="step-big">
+      <div class="num">2</div>
+      <div>
+        <h2 class="h-2">Agree on a price.</h2>
+        <p class="lead mt-3">Two ways to do this:</p>
+        <ul style="list-style: none; padding: 0; margin: 16px 0; display: grid; gap: 12px;">
+          <li class="card card-pad" style="padding: 18px;">
+            <strong>Pick a price they've already set.</strong>
+            <div class="lead text-sm mt-1" style="margin: 4px 0 0;">Most freelancers list a few packages — like "Tech pack for one piece, $120" or "Photography day, $1,200". Click, agree, done.</div>
+          </li>
+          <li class="card card-pad" style="padding: 18px;">
+            <strong>Send a custom job.</strong>
+            <div class="lead text-sm mt-1" style="margin: 4px 0 0;">Got a bigger project? Describe what you need. They'll reply with a price and a timeline. You agree, they start.</div>
+          </li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="step-big">
+      <div class="num">3</div>
+      <div>
+        <h2 class="h-2">Pay only when you're happy.</h2>
+        <p class="lead mt-3">Your payment goes to <strong>us first</strong>, not the freelancer. We hold it safely.</p>
+        <p class="lead mt-3">When the freelancer delivers the work, you check it. If you're happy, you click <strong>"I'm happy with this"</strong> and we send the money to them. If not, you ask for changes (or get a refund — our team helps).</p>
+        <p class="lead mt-3"><strong>That's it.</strong> No invoices, no chasing payments, no surprises.</p>
+      </div>
+    </article>
+
+    <!-- Final action -->
+    <div class="card card-pad-lg mt-12" style="background: var(--paper-2); text-align: center;">
+      <h3 class="h-2">Ready to hire someone?</h3>
+      <p class="lead mt-3" style="max-width: 480px; margin: 12px auto 0;">12,400 fashion freelancers are waiting. Find one and send your job in 5 minutes.</p>
+      <div class="mt-6"><a href="./marketplace.html" class="btn btn-primary btn-lg">Find a freelancer →</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- WORK flow (hidden by default) -->
+<section id="flow-work" class="section" style="padding-top: 32px; display: none;">
+  <div class="container" style="max-width: 880px;">
+
+    <article class="step-big">
+      <div class="num">1</div>
+      <div>
+        <h2 class="h-2">Set up your page.</h2>
+        <p class="lead mt-3">Tell us what you do — fashion designer, pattern maker, photographer, anything. Add some of your work. Set your prices.</p>
+        <p class="lead mt-3">We'll review your page (it takes about 2 days). Once you're approved, brands can find you.</p>
+        <div class="mt-6"><a href="./signup.html?role=creator" class="btn btn-primary">Create your page →</a></div>
+      </div>
+    </article>
+
+    <article class="step-big">
+      <div class="num">2</div>
+      <div>
+        <h2 class="h-2">Get hired in two ways.</h2>
+        <ul style="list-style: none; padding: 0; margin: 16px 0; display: grid; gap: 12px;">
+          <li class="card card-pad" style="padding: 18px;">
+            <strong>Brands find you.</strong>
+            <div class="lead text-sm mt-1" style="margin: 4px 0 0;">If your page is good, brands search for what you do and click "Hire". You get a notification.</div>
+          </li>
+          <li class="card card-pad" style="padding: 18px;">
+            <strong>You apply for jobs.</strong>
+            <div class="lead text-sm mt-1" style="margin: 4px 0 0;">We have <strong>312 open jobs</strong> right now from real brands. Browse the list, click "Apply" on the ones you like, send a short pitch.</div>
+          </li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="step-big">
+      <div class="num">3</div>
+      <div>
+        <h2 class="h-2">Do the work and get paid.</h2>
+        <p class="lead mt-3">Before you start, the buyer's payment is already locked in our system. You know the money is there.</p>
+        <p class="lead mt-3">Deliver the work. The buyer reviews it. When they click <strong>"I'm happy"</strong>, we send the money to your bank or PayPal — usually within 1 working day.</p>
+        <p class="lead mt-3"><strong>No commission.</strong> We don't take a cut from your earnings — we just charge an optional Pro membership ($24/month) for extra features.</p>
+      </div>
+    </article>
+
+    <!-- Final -->
+    <div class="card card-pad-lg mt-12" style="background: var(--champagne-50); border-color: var(--champagne-100); text-align: center;">
+      <h3 class="h-2">Ready to start earning?</h3>
+      <p class="lead mt-3" style="max-width: 480px; margin: 12px auto 0;">Sign up free. Browse 312 open fashion jobs, or set up your page so brands find you.</p>
+      <div class="mt-6 flex justify-center gap-2 flex-wrap">
+        <a href="./signup.html?role=creator" class="btn btn-primary btn-lg">Create my page →</a>
+        <a href="./marketplace.html#jobs" class="btn btn-ghost btn-lg">See open jobs →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMON: safety -->
+<section class="section" style="background: var(--paper-2); border-top: 1px solid var(--line);">
+  <div class="container" style="max-width: 720px; text-align: center;">
+    <h2 class="h-1">Safe for <span class="display-italic" style="color: var(--ink-3);">everyone</span>.</h2>
+    <p class="lead mt-4">Whether you're hiring or getting hired, our payment system protects you. Money is held by us until everyone agrees the work is done. If there's a problem, our team sorts it out within 48 hours.</p>
+    <a href="./help.html" class="btn btn-ghost mt-6">Read more in our Help center →</a>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+<script src="../assets/site.js"></script>
+<script>
+  // Tab switcher between hire / work
+  const tabs = document.getElementById('who-tabs');
+  tabs.addEventListener('click', e => {
+    const b = e.target.closest('button[data-who]'); if (!b) return;
+    tabs.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    const who = b.dataset.who;
+    document.getElementById('flow-hire').style.display = who === 'hire' ? '' : 'none';
+    document.getElementById('flow-work').style.display = who === 'work' ? '' : 'none';
+  });
+</script>
+</body>
+</html>

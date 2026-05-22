@@ -1,0 +1,8 @@
+---
+const { eyebrow, title, lead, align = 'left' } = Astro.props;
+---
+<div class={`mb-12 ${align === 'center' ? 'text-center mx-auto max-w-3xl' : ''}`}>
+  {eyebrow && <div class="text-[11px] uppercase tracking-[0.25em] text-gold mb-3 mono">{eyebrow}</div>}
+  <h2 class="editorial text-4xl lg:text-6xl leading-[1.05]" set:html={title}></h2>
+  {lead && <p class={`text-ink-600 mt-4 ${align === 'center' ? 'mx-auto' : ''} max-w-xl`}>{lead}</p>}
+</div>

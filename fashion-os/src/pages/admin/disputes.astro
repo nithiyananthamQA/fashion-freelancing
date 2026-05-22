@@ -1,0 +1,68 @@
+---
+import Admin from '@/layouts/Admin.astro';
+const disputes = [
+  { id:'dsp-001', order:'#o4', amount:'$120', buyer:'Vestra', seller:'Yuna Aoki', reason:'Quality below tier', opened:'2h ago', sla:'46h left', status:'investigating' },
+  { id:'dsp-002', order:'#o19', amount:'€3,800', buyer:'Hanako Studio', seller:'Elena Marchetti', reason:'Late delivery', opened:'5h ago', sla:'43h left', status:'awaiting_buyer' },
+  { id:'dsp-003', order:'#o23', amount:'$240', buyer:'Auriga', seller:'Sofia Rosso', reason:'Scope creep', opened:'1d ago', sla:'24h left', status:'awaiting_seller' },
+  { id:'dsp-004', order:'#o42', amount:'$1,200', buyer:'Léon & Co.', seller:'Marco Reyes', reason:'Files corrupted', opened:'1d ago', sla:'24h left', status:'investigating' },
+  { id:'dsp-005', order:'#o88', amount:'£480', buyer:'Obscura', seller:'Kai Nakamura', reason:'Buyer non-responsive', opened:'2d ago', sla:'overdue', status:'escalated' },
+];
+const slaColor = (s: string) => s === 'overdue' ? 'text-rose-700' : 'text-ink-3';
+const statusPill = (s: string) => ({
+  investigating: 'pill-champagne',
+  awaiting_buyer: 'pill-blue',
+  awaiting_seller: 'pill-blue',
+  escalated: 'pill-rose',
+  resolved: 'pill-green',
+}[s] ?? 'pill-gray');
+---
+<Admin title="Disputes" pageTitle="Disputes · 8 open" current="dis">
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+    <div class="card p-4 text-center"><div class="text-[11px] mono uppercase text-ink-5">Open</div><div class="display text-2xl mt-1">8</div></div>
+    <div class="card p-4 text-center"><div class="text-[11px] mono uppercase text-ink-5">Resolved · 30d</div><div class="display text-2xl mt-1 text-emerald-700">142</div></div>
+    <div class="card p-4 text-center"><div class="text-[11px] mono uppercase text-ink-5">Avg resolution</div><div class="display text-2xl mt-1">26h</div></div>
+    <div class="card p-4 text-center"><div class="text-[11px] mono uppercase text-ink-5">SLA met</div><div class="display text-2xl mt-1 text-emerald-700">96.2%</div></div>
+  </div>
+
+  <div class="card overflow-hidden">
+    <div class="px-6 py-4 border-b border-line flex items-center gap-2 flex-wrap">
+      <button class="chip chip-active">All open</button>
+      <button class="chip">Investigating</button>
+      <button class="chip">Awaiting buyer</button>
+      <button class="chip">Awaiting seller</button>
+      <button class="chip">Escalated</button>
+    </div>
+    <div class="overflow-x-auto -mx-px"><table class="w-full">
+      <thead>
+        <tr class="bg-paper text-[11px] mono uppercase tracking-wider text-ink-5">
+          <th class="text-left px-6 py-3 font-medium">ID</th>
+          <th class="text-left px-6 py-3 font-medium">Order</th>
+          <th class="text-left px-6 py-3 font-medium">Amount</th>
+          <th class="text-left px-6 py-3 font-medium">Buyer</th>
+          <th class="text-left px-6 py-3 font-medium">Seller</th>
+          <th class="text-left px-6 py-3 font-medium">Reason</th>
+          <th class="text-left px-6 py-3 font-medium">SLA</th>
+          <th class="text-left px-6 py-3 font-medium">Status</th>
+          <th class="px-6 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {disputes.map(d => (
+          <tr class="border-t border-line hover:bg-paper-2/50 transition">
+            <td class="px-6 py-4 mono text-xs text-ink-5">{d.id}</td>
+            <td class="px-6 py-4 text-sm">{d.order}</td>
+            <td class="px-6 py-4 text-sm font-medium">{d.amount}</td>
+            <td class="px-6 py-4 text-sm">{d.buyer}</td>
+            <td class="px-6 py-4 text-sm">{d.seller}</td>
+            <td class="px-6 py-4 text-sm text-ink-3">{d.reason}</td>
+            <td class={`px-6 py-4 text-xs ${slaColor(d.sla)}`}>{d.sla}</td>
+            <td class="px-6 py-4"><span class={statusPill(d.status)}>{d.status.replace('_',' ')}</span></td>
+            <td class="px-6 py-4 text-right"><button class="btn btn-ghost btn-sm">Open case</button></td>
+          </tr>
+        ))}
+      </tbody>
+    </table></div>
+  </div>
+
+</Admin>

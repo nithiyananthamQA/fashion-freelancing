@@ -1,0 +1,14 @@
+# Cloudflare Pages — redirects
+# https://developers.cloudflare.com/pages/configuration/redirects/
+# Astro routes (/dashboard, /brand, /admin, /dashboard/orders/view …) and the
+# copied static pages (/pages/*.html, /index.html) are served as built files.
+# These rules only add a few clean-URL conveniences.
+
+# Clean URLs for the most common public pages
+/login        /pages/login.html        301
+/signup       /pages/signup.html       301
+/marketplace  /pages/marketplace.html  301
+/pricing      /pages/pricing.html      301
+/how-it-works /pages/how-it-works.html 301
+/about        /pages/about.html        301
+/help         /pages/help.html         301

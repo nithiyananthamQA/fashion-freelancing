@@ -1,0 +1,111 @@
+---
+import Dashboard from '@/layouts/Dashboard.astro';
+import { brandOrders, creators } from '@/data/mock';
+
+const statusPill = (s: string) => ({
+  ordered: 'pill-blue', in_progress: 'pill-champagne', delivered: 'pill-green', reviewed: 'pill-gray', cancelled: 'pill-rose',
+}[s] ?? 'pill-gray');
+---
+<Dashboard title="Brand · Overview" pageTitle="Welcome, Auriga" current="overview" role="brand">
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-5">Active orders</div><div class="display text-3xl mt-1">2</div><div class="text-xs text-ink-5 mt-2">5 total this month</div></div>
+    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-5">Spent · this month</div><div class="display text-3xl mt-1 gold-text">€11,800</div><div class="text-xs text-ink-5 mt-2">€42k YTD</div></div>
+    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-5">Open briefs</div><div class="display text-3xl mt-1">3</div><div class="text-xs text-ink-5 mt-2">12 applicants</div></div>
+    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-5">Avg time saved</div><div class="display text-3xl mt-1">−72%</div><div class="text-xs text-ink-5 mt-2">vs agency baseline</div></div>
+  </div>
+
+  <div class="grid grid-cols-12 gap-6">
+    <div class="col-span-12 lg:col-span-8 space-y-6">
+
+      <!-- Active orders -->
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="display text-xl">Active orders</h2>
+          <a href="/brand/orders" class="text-sm text-champagne-2 underline-offset-2 hover:underline">All orders →</a>
+        </div>
+        <div class="space-y-3">
+          {brandOrders.filter(o => o.status === 'in_progress' || o.status === 'ordered' || o.status === 'delivered').map((o) => (
+            <a href={`/dashboard/orders/${o.id}`} class="flex items-center gap-4 p-3 rounded-xl border border-line hover:border-ink-7 transition">
+              <img src={o.sellerAvatar} class="w-10 h-10 rounded-full object-cover" alt=""/>
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-sm truncate">{o.gigTitle}</div>
+                <div class="text-xs text-ink-5">{o.seller} · {o.tier} · {o.amount} · due {o.due}</div>
+              </div>
+              <span class={statusPill(o.status)}>{o.status.replace('_',' ')}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <!-- Top applicants -->
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="display text-xl">Top applicants this week</h2>
+          <a href="/brand/applicants" class="text-sm text-champagne-2 underline-offset-2 hover:underline">All applicants →</a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {creators.slice(0, 4).map((c) => (
+            <a href="#" class="card p-4 flex items-center gap-3 hover:border-ink-7 transition">
+              <img src={c.avatar} class="w-12 h-12 rounded-full object-cover" alt=""/>
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-sm truncate">{c.name}</div>
+                <div class="text-xs text-ink-5 truncate">{c.specialty} · {c.location.split(',')[0]}</div>
+                <div class="text-[11px] text-ink-5 mt-1">★ {c.rating} · From ${c.from}</div>
+              </div>
+              <span class="pill pill-champagne">{Math.round(80 + c.rating * 3)}%</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <!-- Activity feed -->
+      <div class="card p-6">
+        <h2 class="display text-xl mb-4">Activity</h2>
+        <div class="space-y-3">
+          <div class="flex gap-3 text-sm"><span class="w-2 h-2 rounded-full bg-champagne mt-2 flex-shrink-0"></span><div><span class="font-medium">Yuna Aoki</span> delivered <span class="font-medium">Tech pack · linen trouser</span><div class="text-xs text-ink-5 mt-0.5">2 min ago</div></div></div>
+          <div class="flex gap-3 text-sm"><span class="w-2 h-2 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></span><div><span class="font-medium">€3,800</span> released to Elena Marchetti<div class="text-xs text-ink-5 mt-0.5">1 hour ago</div></div></div>
+          <div class="flex gap-3 text-sm"><span class="w-2 h-2 rounded-full bg-sky-500 mt-2 flex-shrink-0"></span><div>3 new applicants on <span class="font-medium">Knitwear pattern job</span><div class="text-xs text-ink-5 mt-0.5">3 hours ago</div></div></div>
+          <div class="flex gap-3 text-sm"><span class="w-2 h-2 rounded-full bg-ink-7 mt-2 flex-shrink-0"></span><div>Sofia left a 5★ review on <span class="font-medium">AI lookbook concept</span><div class="text-xs text-ink-5 mt-0.5">Yesterday</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-span-12 lg:col-span-4 space-y-6">
+
+      <div class="card p-6 bg-gradient-to-br from-champagne-50 to-white border-champagne-100">
+        <h3 class="display text-lg">Get started</h3>
+        <p class="text-sm text-ink-4 mt-1">Pick a freelancer's package, or post your own job and let people apply.</p>
+        <a href="/brand/talent" class="btn btn-primary w-full mt-4">Find a freelancer →</a>
+        <a href="/brand/post" class="btn btn-ghost w-full mt-2">Post a job</a>
+      </div>
+
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="display text-lg">Open briefs</h3>
+          <a href="/brand/post" class="text-sm text-champagne-2 hover:underline">+ New</a>
+        </div>
+        <div class="divide-y divide-line">
+          <div class="py-3"><div class="text-sm font-medium">Senior womenswear designer · SS27</div><div class="text-xs text-ink-5 mt-0.5">8 applicants · 2d ago</div></div>
+          <div class="py-3"><div class="text-sm font-medium">Tech pack engineer · denim</div><div class="text-xs text-ink-5 mt-0.5">3 applicants · today</div></div>
+          <div class="py-3"><div class="text-sm font-medium">Pattern maker · knitwear</div><div class="text-xs text-ink-5 mt-0.5">1 applicant · 3d ago</div></div>
+        </div>
+      </div>
+
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="display text-lg">Saved talent</h3>
+          <a href="/brand/saved" class="text-sm text-champagne-2 hover:underline">All →</a>
+        </div>
+        <div class="flex -space-x-2">
+          {creators.slice(0, 5).map((c) => (
+            <img src={c.avatar} class="w-9 h-9 rounded-full ring-2 ring-white object-cover" alt=""/>
+          ))}
+          <span class="w-9 h-9 rounded-full ring-2 ring-white bg-paper-2 flex items-center justify-center text-xs font-semibold">+12</span>
+        </div>
+        <div class="text-xs text-ink-5 mt-3">17 creators in your private pool</div>
+      </div>
+    </div>
+  </div>
+
+</Dashboard>

@@ -1,0 +1,64 @@
+---
+import Admin from '@/layouts/Admin.astro';
+const signals = [
+  { id:'frd-001', user:'@rapid_buyer_91', risk:92, signal:'Velocity · 14 orders in 1h, 0 deliveries marked', loc:'IP: VPN exit · Latvia', age:'8m', action:'auto-paused' },
+  { id:'frd-002', user:'@new_seller_x', risk:78, signal:'Portfolio match · stolen images detected (TinEye)', loc:'IP: clean · Vietnam', age:'2h', action:'review' },
+  { id:'frd-003', user:'@buyer_pe', risk:71, signal:'Stripe chargeback rate 8% (last 30d)', loc:'Multiple cards', age:'1d', action:'review' },
+];
+---
+<Admin title="Fraud monitoring" pageTitle="Fraud monitoring" current="fraud">
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+    <div class="card p-4"><div class="text-[11px] mono uppercase text-ink-5">High risk</div><div class="display text-2xl mt-1 text-rose-700">3</div></div>
+    <div class="card p-4"><div class="text-[11px] mono uppercase text-ink-5">Auto-paused · 24h</div><div class="display text-2xl mt-1">12</div></div>
+    <div class="card p-4"><div class="text-[11px] mono uppercase text-ink-5">Chargeback rate</div><div class="display text-2xl mt-1">0.21%</div></div>
+    <div class="card p-4"><div class="text-[11px] mono uppercase text-ink-5">False positive · 30d</div><div class="display text-2xl mt-1">2.4%</div></div>
+  </div>
+
+  <div class="card p-6 mb-6 bg-rose-50 border-rose-100">
+    <div class="text-rose-700 font-semibold">3 high-risk signals require attention</div>
+    <p class="text-sm text-rose-700/80 mt-1">Auto-flagged accounts. Review payment activity, IP, portfolio integrity before un-pausing.</p>
+  </div>
+
+  <div class="card overflow-hidden">
+    <div class="overflow-x-auto -mx-px"><table class="w-full">
+      <thead>
+        <tr class="bg-paper text-[11px] mono uppercase tracking-wider text-ink-5">
+          <th class="text-left px-6 py-3 font-medium">ID</th>
+          <th class="text-left px-6 py-3 font-medium">User</th>
+          <th class="text-left px-6 py-3 font-medium">Risk</th>
+          <th class="text-left px-6 py-3 font-medium">Signal</th>
+          <th class="text-left px-6 py-3 font-medium">Source</th>
+          <th class="text-left px-6 py-3 font-medium">Action</th>
+          <th class="px-6 py-3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {signals.map(s => (
+          <tr class="border-t border-line hover:bg-paper-2/50 transition">
+            <td class="px-6 py-4 mono text-xs text-ink-5">{s.id}</td>
+            <td class="px-6 py-4 mono text-sm">{s.user}</td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-2">
+                <span class={`tabular-nums font-semibold ${s.risk >= 80 ? 'text-rose-700' : 'text-champagne-3'}`}>{s.risk}</span>
+                <div class="w-16 h-1.5 bg-paper-2 rounded-full overflow-hidden">
+                  <div class={`h-full ${s.risk >= 80 ? 'bg-rose-500' : 'bg-champagne'}`} style={`width: ${s.risk}%`}></div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm">{s.signal}</td>
+            <td class="px-6 py-4 text-xs text-ink-5 mono">{s.loc}</td>
+            <td class="px-6 py-4"><span class={s.action === 'auto-paused' ? 'pill-rose' : 'pill-champagne'}>{s.action}</span></td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex gap-1.5 justify-end">
+                <button class="btn btn-ghost btn-sm">Investigate</button>
+                <button class="btn btn-ghost btn-sm border-rose-200 text-rose-700">Suspend</button>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table></div>
+  </div>
+
+</Admin>

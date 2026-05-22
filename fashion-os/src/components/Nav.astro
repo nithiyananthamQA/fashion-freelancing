@@ -1,0 +1,26 @@
+---
+import Logo from './Logo.astro';
+const { current = '' } = Astro.props;
+const links = [
+  { href: '/talent',     label: 'Find Talent',  k: 'talent' },
+  { href: '/marketplace', label: 'Find Work',    k: 'work' },
+  { href: '/workflow',   label: 'Workflow',     k: 'workflow' },
+  { href: '/ai-studio',  label: 'AI Studio',    k: 'ai' },
+  { href: '/community',  label: 'Community',    k: 'community' },
+  { href: '/pricing',    label: 'Pricing',      k: 'pricing' },
+];
+---
+<div class="border-b border-line bg-white/80 backdrop-blur-xl sticky top-0 z-50">
+  <header class="container-x h-16 flex items-center justify-between">
+    <Logo />
+    <nav class="hidden lg:flex items-center gap-9 text-sm">
+      {links.map((l) => (
+        <a href={l.href} class={`ulink ${current === l.k ? 'text-ink-900 font-medium' : 'text-ink-600 hover:text-ink-900'}`}>{l.label}</a>
+      ))}
+    </nav>
+    <div class="flex items-center gap-3">
+      <a href="/login" class="hidden sm:inline text-sm text-ink-700 hover:text-ink-900">Sign in</a>
+      <a href="/signup" class="btn-gold text-sm rounded-full">Get started</a>
+    </div>
+  </header>
+</div>

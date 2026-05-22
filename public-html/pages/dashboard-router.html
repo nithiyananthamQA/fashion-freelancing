@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Choose your workspace · Fashion Freelancing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../assets/styles.css" />
+<style>
+  body { background: var(--paper); display:flex; align-items:center; justify-content:center; min-height:100vh; }
+  .pick-card { display: block; background:#fff; border:1px solid var(--line); border-radius: 16px; padding: 28px; transition: all .2s; cursor: pointer; }
+  .pick-card:hover { border-color: var(--ink); box-shadow: var(--shadow-2); transform: translateY(-2px); }
+</style>
+</head>
+<body>
+
+<div style="width:100%;max-width:760px;padding:32px;">
+  <div style="text-align:center;margin-bottom:32px;">
+    <a href="../index.html" class="logo" style="display:inline-flex;"><span class="logo-mark">F</span><span class="logo-text">Fashion<span>Freelancing</span></span></a>
+    <h1 class="h-1 mt-6">Pick what you want to do.</h1>
+    <p class="lead text-sm mt-3">This is a demo — pick a view.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr;gap:14px;">
+    <a class="pick-card" href="/dashboard">
+      <div style="display:flex;align-items:flex-start;gap:18px;">
+        <span style="width:48px;height:48px;border-radius:12px;background:var(--paper-2);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--line);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg>
+        </span>
+        <div style="flex:1;">
+          <h2 class="h-3">My freelancer workspace</h2>
+          <p class="lead text-sm mt-2">My jobs, messages, money, my page, and the AI tools to help me work faster.</p>
+        </div>
+        <span style="color:var(--ink-5);align-self:center;">→</span>
+      </div>
+    </a>
+
+    <a class="pick-card" href="/brand">
+      <div style="display:flex;align-items:flex-start;gap:18px;">
+        <span style="width:48px;height:48px;border-radius:12px;background:var(--ink);color:var(--paper);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 21h18M5 21V7l7-4 7 4v14"/></svg>
+        </span>
+        <div style="flex:1;">
+          <h2 class="h-3">My brand workspace</h2>
+          <p class="lead text-sm mt-2">Find freelancers, post jobs, manage orders, message my team.</p>
+        </div>
+        <span style="color:var(--ink-5);align-self:center;">→</span>
+      </div>
+    </a>
+
+    <a class="pick-card" href="/admin" style="background: var(--paper-2);">
+      <div style="display:flex;align-items:flex-start;gap:18px;">
+        <span style="width:48px;height:48px;border-radius:12px;background:var(--paper);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--line);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 3l8 4v5c0 5-3.5 9-8 10-4.5-1-8-5-8-10V7z"/></svg>
+        </span>
+        <div style="flex:1;">
+          <h2 class="h-3">Admin (internal)</h2>
+          <p class="lead text-sm mt-2">For our team — moderation, fraud, disputes, verifications.</p>
+        </div>
+        <span style="color:var(--ink-5);align-self:center;">→</span>
+      </div>
+    </a>
+  </div>
+
+  <p class="text-sm muted text-center mt-8">
+    Run with <code style="background:var(--paper-2);padding:2px 8px;border-radius:6px;font-family:ui-monospace,monospace;">cd fashion-os &amp;&amp; pnpm dev</code> to see the live workspace.
+  </p>
+</div>
+
+<script src="../assets/site.js"></script>
+<script>
+  // Wire the picker — sign in as the demo user for the chosen workspace
+  window.onFFReady(() => {
+    const cards = document.querySelectorAll('.pick-card');
+    cards.forEach(card => {
+      card.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const href = card.getAttribute('href');
+        const isCreator = href === '/dashboard';
+        const isBrand = href === '/brand';
+        const isAdmin = href === '/admin';
+        const email = isCreator ? 'yuna@example.com'
+                    : isBrand ? 'sara@auriga.world'
+                    : isAdmin ? 'admin@fashionfreelancing.app'
+                    : null;
+        if (email) {
+          try {
+            const session = await api.users.signIn({ email });
+            UI.toast(`Signed in as ${session.name}`, { kind: 'success' });
+            setTimeout(() => { window.location = href; }, 600);
+          } catch (err) {
+            UI.toast('Demo sign-in failed', { kind: 'error' });
+            console.error(err);
+          }
+        } else {
+          window.location = href;
+        }
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+---
+import Dashboard from '@/layouts/Dashboard.astro';
+import { messages } from '@/data/mock';
+const active = messages[0];
+---
+<Dashboard title="Messages" pageTitle="Messages" current="messages" role="brand">
+
+  <div class="card overflow-hidden h-[calc(100vh-180px)] flex">
+    <aside class="w-80 border-r border-line flex flex-col">
+      <div class="p-4 border-b border-line"><input class="input !py-2 text-sm" placeholder="Search creators…"/></div>
+      <div class="flex-1 overflow-y-auto">
+        {messages.map((m, i) => (
+          <a href="#" class={`flex items-center gap-3 p-4 border-b border-line/70 hover:bg-ink-50 transition ${i === 0 ? 'bg-ink-50/60' : ''}`}>
+            <img src={m.avatar} class="w-11 h-11 rounded-full object-cover flex-shrink-0" alt=""/>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-baseline justify-between"><div class="text-sm font-medium truncate">{m.from}</div><div class="text-[10px] mono text-ink-400 ml-2">{m.time}</div></div>
+              <div class="text-xs text-ink-500 truncate">{m.preview}</div>
+            </div>
+            {m.unread && <span class="w-2 h-2 rounded-full bg-gold flex-shrink-0"></span>}
+          </a>
+        ))}
+      </div>
+    </aside>
+
+    <section class="flex-1 flex flex-col">
+      <header class="px-6 py-4 border-b border-line flex items-center gap-3">
+        <img src={active.avatar} class="w-10 h-10 rounded-full object-cover" alt=""/>
+        <div class="flex-1"><div class="font-medium">{active.from}</div><div class="text-xs text-ink-500">SS27 silk capsule · contract value $11,400</div></div>
+        <button class="chip">Project files</button>
+        <button class="chip">⋯</button>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-6 space-y-4 bg-surface">
+        <div class="flex justify-end max-w-[70%] ml-auto">
+          <div>
+            <div class="bg-ink-900 text-white !rounded-2xl !rounded-tr-sm p-3 px-4 text-sm">Sara — sending v3 sketches with the wider shoulder. LMK what you think before I push to tech pack.</div>
+            <div class="text-[10px] mono text-ink-400 mt-1 mr-3 text-right">10:48</div>
+          </div>
+        </div>
+        <div class="flex gap-3 max-w-[70%]">
+          <img src={active.avatar} class="w-8 h-8 rounded-full object-cover flex-shrink-0" alt=""/>
+          <div>
+            <div class="card !rounded-2xl !rounded-tl-sm p-3 px-4 text-sm">Loving the v3. Tiny note: the slit on look 4 — a touch shorter? Otherwise green-light to tech pack.</div>
+            <div class="text-[10px] mono text-ink-400 mt-1 ml-3">2 min</div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="border-t border-line p-4">
+        <div class="card !rounded-2xl p-3 flex items-end gap-2">
+          <textarea class="flex-1 bg-transparent border-0 resize-none focus:outline-none text-sm placeholder:text-ink-400 max-h-32 py-1" placeholder="Type a message…" rows="1"></textarea>
+          <button class="btn-gold">Send</button>
+        </div>
+      </footer>
+    </section>
+  </div>
+
+</Dashboard>
