@@ -152,6 +152,17 @@
         UI.toast("You're signed in as a brand — only freelancers can apply to jobs.", { kind: 'warn' });
         return;
       }
+
+      // Gate: only APPROVED freelancers can apply
+      const me = api._store.getState().freelancers.find(f => f.id === session.userId);
+      if (me && me.approvalStatus && me.approvalStatus !== 'approved') {
+        const msg = me.approvalStatus === 'pending'
+          ? "Your page is still under review — you'll be able to apply once it's approved."
+          : "Your page wasn't approved. Update it from your dashboard before applying.";
+        UI.toast(msg, { kind: 'warn', duration: 4500 });
+        return;
+      }
+
       applyBtn.style.pointerEvents = 'none';
       applyBtn.textContent = 'Sending your application…';
       try {

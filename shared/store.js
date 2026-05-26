@@ -90,8 +90,10 @@
       svc('retail-management',    'Retail management',         'Business',   96,   480, 'photo-1441984904996-e0b6ba687e04'),
       svc('sustainability',       'Sustainability consulting', 'Business',   142,  380, 'photo-1542838132-92c53300491e'),
       svc('fashion-copywriting',  'Fashion copywriting',       'Business',   184,  90,  'photo-1486312338219-ce68d2c6f44d'),
-      svc('costume-design',       'Costume design (Film/TV)',  'Niche',      78,   800, 'photo-1559827260-dc66d52bef19'),
+      svc('costume-design',       'Costume designer',          'Niche',      78,   800, 'photo-1559827260-dc66d52bef19'),
       svc('creative-director',    'Creative director',         'Niche',      188,  1500,'photo-1490481651871-ab68de25d43d'),
+      svc('fashion-model',        'Fashion model',             'Niche',      214,  250, 'photo-1581338834647-b0fb40704e21'),
+      svc('makeup-artist',        'Makeup artist',             'Niche',      168,  180, 'photo-1487412947147-5cebf100ffc2'),
     ];
 
     // Packages
@@ -204,6 +206,12 @@
       onTimePercent: o.onTime, completionPercent: o.completion, responseTimeMinutes: o.response,
       isAvailable: true,
       verificationLevel: o.badges.includes('top_1') ? 'top_1' : o.badges.includes('top_rated') ? 'top_rated' : 'verified',
+      // approval gate — demo freelancers ship pre-approved; new sign-ups
+      // start as 'pending' and require admin approval to be listed.
+      approvalStatus: o.approvalStatus || 'approved',
+      approvalReason: null,
+      approvedAt: now(),
+      portfolio: o.portfolio || [],
       badges: o.badges,
       portfolioImageIds: [], packageIds: [],
       experience: [], socialLinks: [],

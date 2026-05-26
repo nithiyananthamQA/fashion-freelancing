@@ -149,7 +149,18 @@
           </div>
           <p class="muted text-xs mt-2">No account needed yet — we'll create one for you when you confirm.</p>
 
-          <div class="mt-8 flex gap-3 flex-wrap">
+          <!-- Fee breakdown — fills from api.fees.breakdown(price) -->
+          <div id="ff-fee-breakdown" class="card card-pad mt-8" style="background:var(--paper-2);">
+            <div class="text-xs muted" style="text-transform:uppercase;letter-spacing:0.12em;">What you pay</div>
+            <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;font-size:14px;">
+              <div style="display:flex;justify-content:space-between;"><span>Package price</span><span id="fb-listed">—</span></div>
+              <div style="display:flex;justify-content:space-between;color:var(--ink-4);"><span>Service fee (10%)</span><span id="fb-buyerFee">—</span></div>
+              <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--line);font-weight:600;"><span>Total you pay today</span><span id="fb-total">—</span></div>
+            </div>
+            <div class="muted text-xs mt-3">Held safely by us. Released to the freelancer only when you approve their work.</div>
+          </div>
+
+          <div class="mt-6 flex gap-3 flex-wrap">
             <button id="ff-hire-package-submit" class="btn btn-primary btn-lg" type="button">Pay $120 &amp; start →</button>
             <a href="./profile.html" class="btn btn-ghost btn-lg">← Back to Amara</a>
           </div>
@@ -258,10 +269,24 @@
   // Package picker → update summary
   const packages = document.querySelectorAll('.package');
   const PRICES = {
-    basic:    { title: 'Tech pack for one piece', price: '$120', time: 'Ready in 24 hours', startBtn: 'Pay $120 &amp; start →' },
-    standard: { title: 'Capsule pack',             price: '$320', time: 'Ready in 3 days',    startBtn: 'Pay $320 &amp; start →' },
-    premium:  { title: 'Full collection pack',     price: '$840', time: 'Ready in 7 days',    startBtn: 'Pay $840 &amp; start →' },
+    basic:    { title: 'Tech pack for one piece', priceAmount: 120, time: 'Ready in 24 hours' },
+    standard: { title: 'Capsule pack',             priceAmount: 320, time: 'Ready in 3 days' },
+    premium:  { title: 'Full collection pack',     priceAmount: 840, time: 'Ready in 7 days' },
   };
+
+  // Fee breakdown — uses api.fees.breakdown if available, else falls back to 10%
+  function fmt$(n) { return '$' + Math.round(n).toLocaleString(); }
+  function paintBreakdown(priceAmount) {
+    const b = (window.api && api.fees && api.fees.breakdown)
+      ? api.fees.breakdown(priceAmount)
+      : { listed: priceAmount, buyerFee: priceAmount * 0.10, buyerPays: priceAmount * 1.10 };
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('fb-listed',   fmt$(b.listed));
+    set('fb-buyerFee', fmt$(b.buyerFee));
+    set('fb-total',    fmt$(b.buyerPays));
+    const btn = stepPackage.querySelector('.btn-primary');
+    if (btn) btn.innerHTML = `Pay ${fmt$(b.buyerPays)} &amp; start →`;
+  }
 
   packages.forEach(p => p.addEventListener('click', () => {
     packages.forEach(x => x.classList.remove('selected'));
@@ -269,14 +294,14 @@
     const v = p.querySelector('input').value;
     const d = PRICES[v];
     document.getElementById('summary-title').textContent = d.title;
-    document.getElementById('summary-price').textContent = d.price;
+    document.getElementById('summary-price').textContent = fmt$(d.priceAmount);
     document.getElementById('summary-time').textContent = d.time;
-    const btn = stepPackage.querySelector('.btn-primary');
-    if (btn) btn.innerHTML = d.startBtn;
+    paintBreakdown(d.priceAmount);
   }));
 
-  // Mark first package as selected by default
+  // Mark first package as selected by default and paint the breakdown
   packages[0]?.classList.add('selected');
+  paintBreakdown(PRICES.basic.priceAmount);
 
   // ========================================================
   // Real hire flow — creates an order via api

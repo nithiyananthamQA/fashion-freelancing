@@ -87,6 +87,10 @@
  * @property {number}    responseTimeMinutes
  * @property {boolean}   isAvailable          taking new work?
  * @property {VerificationLevel} verificationLevel
+ * @property {ApprovalStatus} approvalStatus    admin gate — 'pending' until approved
+ * @property {?string}   approvalReason         if rejected, why
+ * @property {?string}   approvedAt             ISO date of approval
+ * @property {PortfolioWork[]} portfolio        portfolio items the freelancer uploaded at signup
  * @property {Badge[]}   badges
  * @property {string[]}  portfolioImageIds    references to PortfolioItem
  * @property {string[]}  packageIds           references to Package
@@ -100,7 +104,18 @@
 
 /** @typedef {'USD' | 'EUR' | 'GBP' | 'JPY' | 'INR' | 'AUD' | 'CAD'} Currency */
 /** @typedef {'unverified' | 'pending' | 'verified' | 'top_rated' | 'top_1'} VerificationLevel */
+/** @typedef {'pending' | 'approved' | 'rejected'} ApprovalStatus */
 /** @typedef {'featured' | 'rising' | 'pro' | 'top_1' | 'verified' | 'top_rated' | 'sustainable' | 'vogue_alum'} Badge */
+
+/**
+ * A single portfolio entry uploaded by a freelancer during signup.
+ * @typedef {Object} PortfolioWork
+ * @property {string} id
+ * @property {string} title
+ * @property {string} imageUrl
+ * @property {string} [description]
+ * @property {string} createdAt
+ */
 
 /**
  * @typedef {Object} PortfolioItem

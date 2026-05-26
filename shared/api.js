@@ -176,6 +176,14 @@
       await lag();
       let items = clone(Store.getState().freelancers);
 
+      // ---- Approval gate (default: public — only show approved) ----
+      // Callers that need the full list (admin queue) pass approvalStatus.
+      if (filters.approvalStatus) {
+        items = items.filter(f => f.approvalStatus === filters.approvalStatus);
+      } else if (!filters.includeUnapproved) {
+        items = items.filter(f => (f.approvalStatus || 'approved') === 'approved');
+      }
+
       if (filters.q) {
         const q = filters.q;
         items = items.filter(f =>
@@ -221,6 +229,72 @@
       await lag();
       const h = handle.startsWith('@') ? handle : '@' + handle;
       return clone(Store.getState().freelancers.find(f => f.handle === h));
+    },
+
+    /**
+     * Approve a pending freelancer (admin only).
+     */
+    async approve(freelancerId) {
+      await lag();
+      Store.setState(s => {
+        s.freelancers = s.freelancers.map(f => f.id === freelancerId
+          ? { ...f, approvalStatus: 'approved', approvedAt: now(), approvalReason: null, updatedAt: now() }
+          : f);
+        return s;
+      });
+      return findById(Store.getState().freelancers, freelancerId);
+    },
+
+    /**
+     * Reject a pending freelancer (admin only). `reason` is shown to them.
+     */
+    async reject(freelancerId, reason) {
+      await lag();
+      Store.setState(s => {
+        s.freelancers = s.freelancers.map(f => f.id === freelancerId
+          ? { ...f, approvalStatus: 'rejected', approvalReason: reason || 'Profile did not meet our quality bar.', updatedAt: now() }
+          : f);
+        return s;
+      });
+      return findById(Store.getState().freelancers, freelancerId);
+    },
+
+    /**
+     * Create a freelancer profile in 'pending' state — called from the
+     * onboarding flow after a worker uploads their portfolio.
+     */
+    async createPending(user, profile) {
+      await lag();
+      if (!user || !user.id) throw new Error('Missing user.');
+      const id = user.id;
+      const f = {
+        id, userId: id,
+        name: user.name, handle: user.handle, avatar: user.avatar,
+        cover: profile.cover || `https://images.unsplash.com/photo-1488161628813-04466f872be2?w=1400&auto=format&fit=crop`,
+        headline: profile.headline || '',
+        bio: profile.bio || '',
+        serviceSlug: profile.serviceSlug,
+        serviceSlugs: profile.serviceSlugs || (profile.serviceSlug ? [profile.serviceSlug] : []),
+        skills: profile.skills || [],
+        tools: profile.tools || [], languages: profile.languages || ['en'],
+        city: profile.city || '', country: profile.country || '', countryCode: profile.countryCode || '',
+        currency: profile.currency || 'USD', fromPrice: profile.fromPrice || 0,
+        rating: 0, reviewCount: 0, completedOrders: 0,
+        onTimePercent: 100, completionPercent: 100, responseTimeMinutes: 240,
+        isAvailable: true,
+        verificationLevel: 'pending',
+        approvalStatus: 'pending', approvalReason: null, approvedAt: null,
+        portfolio: profile.portfolio || [],
+        badges: [], portfolioImageIds: [], packageIds: [],
+        experience: [], socialLinks: [], profileViews30d: 0, followerCount: 0,
+        createdAt: now(), updatedAt: now(),
+      };
+      Store.setState(s => {
+        // remove any prior entry for the same id, then add fresh
+        s.freelancers = s.freelancers.filter(x => x.id !== id).concat(f);
+        return s;
+      });
+      return f;
     },
 
     async getPackages(freelancerId) {
@@ -638,10 +712,41 @@
     },
   };
 
+  // ============================================================
+  //  Commission / platform fees
+  //  Both sides contribute: a buyer fee on top of the listed price,
+  //  and a freelancer commission off their payout. Single source of
+  //  truth — change these two numbers and the whole site updates.
+  // ============================================================
+  const fees = {
+    buyerFeePct: 0.10,        // 10% added on top of listed price
+    freelancerFeePct: 0.10,   // 10% taken from the freelancer's payout
+
+    /**
+     * Compute the full fee breakdown for a listed price.
+     * @param {number} listed  — price in whole units (USD/EUR…), e.g. 120.
+     * @returns {{listed:number, buyerFee:number, buyerPays:number,
+     *           freelancerFee:number, freelancerEarns:number,
+     *           platformTakes:number}}
+     */
+    breakdown(listed) {
+      const buyerFee = +(listed * fees.buyerFeePct).toFixed(2);
+      const freelancerFee = +(listed * fees.freelancerFeePct).toFixed(2);
+      return {
+        listed: +listed.toFixed(2),
+        buyerFee,
+        buyerPays: +(listed + buyerFee).toFixed(2),
+        freelancerFee,
+        freelancerEarns: +(listed - freelancerFee).toFixed(2),
+        platformTakes: +(buyerFee + freelancerFee).toFixed(2),
+      };
+    },
+  };
+
   return {
     users, freelancers, services, packages, orders, briefs, applications,
     messages, notifications, reviews, search, stats,
-    fmt,
+    fmt, fees,
     // Direct store access for advanced use
     _store: Store,
   };

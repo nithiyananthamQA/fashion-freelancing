@@ -38,8 +38,10 @@ window.FOS_SERVICES = [
   { slug: 'fashion-copywriting',  name: 'Fashion copywriting',       group: 'Business',   count: 184,  from: 90,  img: 'photo-1486312338219-ce68d2c6f44d' },
 
   // Group: Niche
-  { slug: 'costume-design',       name: 'Costume design (Film/TV)',  group: 'Niche',      count: 78,   from: 800, img: 'photo-1559827260-dc66d52bef19' },
+  { slug: 'costume-design',       name: 'Costume designer',          group: 'Niche',      count: 78,   from: 800, img: 'photo-1559827260-dc66d52bef19' },
   { slug: 'creative-director',    name: 'Creative director',         group: 'Niche',      count: 188,  from: 1500,img: 'photo-1490481651871-ab68de25d43d' },
+  { slug: 'fashion-model',        name: 'Fashion model',             group: 'Niche',      count: 214,  from: 250, img: 'photo-1581338834647-b0fb40704e21' },
+  { slug: 'makeup-artist',        name: 'Makeup artist',             group: 'Niche',      count: 168,  from: 180, img: 'photo-1487412947147-5cebf100ffc2' },
 ];
 
 window.FOS_GROUPS = {

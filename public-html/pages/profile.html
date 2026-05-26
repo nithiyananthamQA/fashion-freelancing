@@ -342,10 +342,31 @@
     // Is the signed-in user looking at their OWN profile?
     const session = api.users.sessionSync();
     const isOwnProfile = session && session.userId === f.id;
+    const status = f.approvalStatus || 'approved';
+    const isPending = status !== 'approved' && !isOwnProfile;
 
     const hireLinks = document.querySelectorAll('a[href="./hire.html"], a[href$="hire.html"]');
     const msgBtns = [...document.querySelectorAll('a[href="#"]')]
       .filter(b => (b.textContent || '').toLowerCase().includes('message'));
+
+    // ---- Profile not approved yet (and you're not the owner) ----
+    // Don't let strangers reach pending/rejected pages.
+    if (isPending) {
+      // Visually flag the page and disable contact actions
+      const main = document.querySelector('main') || document.body;
+      // Inline a small notice at the very top
+      const notice = document.createElement('div');
+      notice.className = 'card card-pad';
+      notice.style.cssText = 'margin:20px auto;max-width:760px;background:var(--paper-2);text-align:center;';
+      notice.innerHTML = '<div class="h-3">This page isn\'t live yet</div>' +
+        '<p class="lead text-sm mt-2">' + firstName + '\'s profile is being reviewed by our editors. ' +
+        'It will be available once approved.</p>' +
+        '<a href="./marketplace.html" class="btn btn-primary mt-4">Browse approved freelancers →</a>';
+      main.prepend(notice);
+      hireLinks.forEach(a => { a.style.display = 'none'; });
+      msgBtns.forEach(b => { b.outerHTML = ''; });
+      return;
+    }
 
     // ---- Own profile: you can't hire or message yourself ----
     if (isOwnProfile) {

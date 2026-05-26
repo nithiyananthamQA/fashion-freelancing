@@ -22,6 +22,9 @@ const { title = 'Dashboard', current = '', role = 'creator', pageTitle = 'Overvi
     <div class="flex-1 min-w-0">
       <DashboardTopbar title={pageTitle} role={role} />
       <main class="px-6 lg:px-8 py-8">
+        {/* Approval banner — shown by JS only when the signed-in creator's
+            freelancer profile is in 'pending' or 'rejected' state. */}
+        <div id="ff-approval-banner" class="hidden mb-6"></div>
         <slot />
       </main>
     </div>
@@ -42,6 +45,46 @@ const { title = 'Dashboard', current = '', role = 'creator', pageTitle = 'Overvi
       const email = isBrand ? 'sara@auriga.world' : isAdmin ? 'admin@fashionfreelancing.app' : 'yuna@example.com';
       window.api.users.signIn({ email }).then(() => location.reload());
     }
+  </script>
+
+  <!-- Approval banner — shown when the signed-in creator is pending/rejected -->
+  <script is:inline>
+    (function () {
+      function paintBanner() {
+        var api = window.api, banner = document.getElementById('ff-approval-banner');
+        if (!api || !banner) return;
+        var session = api.users.sessionSync();
+        if (!session || session.role !== 'creator') return;
+        var f = api._store.getState().freelancers.find(function (x) { return x.id === session.userId; });
+        if (!f) return; // no freelancer profile yet — first-time pre-onboarding
+        var status = f.approvalStatus || 'approved';
+        if (status === 'approved') return;
+        banner.classList.remove('hidden');
+        if (status === 'pending') {
+          banner.innerHTML = '' +
+            '<div class="card p-5 flex items-start gap-4" style="background:linear-gradient(135deg,rgba(110,86,240,.08),rgba(43,168,232,.06));border-color:rgba(110,86,240,.3);">' +
+            '<div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-white" style="background:linear-gradient(135deg,#6E56F0,#2BA8E8);">⏳</div>' +
+            '<div class="flex-1 min-w-0">' +
+              '<div class="font-semibold text-ink-900">Your page is under review.</div>' +
+              '<div class="text-sm text-ink-500 mt-1">Our editors are checking your portfolio. We\'ll email you when it\'s approved — usually within 48 hours. Until then, you can browse but can\'t apply to jobs or be hired yet.</div>' +
+            '</div>' +
+            '<a href="/dashboard/profile" class="btn btn-ghost text-sm hidden md:inline-flex">Edit my page</a>' +
+            '</div>';
+        } else if (status === 'rejected') {
+          banner.innerHTML = '' +
+            '<div class="card p-5 flex items-start gap-4" style="background:#FCEAEF;border-color:#F2C7D1;">' +
+            '<div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-rose-700 bg-white">!</div>' +
+            '<div class="flex-1 min-w-0">' +
+              '<div class="font-semibold text-rose-700">Your page wasn\'t approved.</div>' +
+              '<div class="text-sm text-rose-700/80 mt-1">' + (f.approvalReason || 'Profile did not meet our quality bar.') + ' Update your portfolio and we\'ll review again.</div>' +
+            '</div>' +
+            '<a href="/dashboard/profile" class="btn btn-ghost text-sm hidden md:inline-flex">Edit my page</a>' +
+            '</div>';
+        }
+      }
+      if (window.api) paintBanner();
+      else window.addEventListener('ff:ready', paintBanner, { once: true });
+    })();
   </script>
 
   <!-- Dashboard motion: cinematic scroll-reveal + card cursor-spotlight -->
