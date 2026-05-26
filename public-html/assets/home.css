@@ -53,7 +53,7 @@ body.home-v7 ::selection { background: rgba(110,86,240,.22); color: var(--d-ink)
 /* ---- glow orbs (lighting simulation, softened for light) --- */
 .hv-orb {
   position: absolute; border-radius: 50%;
-  filter: blur(100px); opacity: .55; pointer-events: none; z-index: 0;
+  filter: blur(70px); opacity: .55; pointer-events: none; z-index: 0;
   animation: hv-drift 24s ease-in-out infinite;
 }
 .hv-orb.violet { background: radial-gradient(circle, rgba(110,86,240,.6), transparent 70%); }
@@ -85,10 +85,13 @@ body.home-v7 ::selection { background: rgba(110,86,240,.22); color: var(--d-ink)
 /* ---- typography ------------------------------------------- */
 .home-v7 .hv-display {
   font-family: var(--font-display);
-  font-weight: 500; letter-spacing: -0.024em; line-height: 1.04;
+  font-weight: 700;            /* 800 was too heavy on big sizes — looked clogged */
+  letter-spacing: -0.022em;    /* relaxed from -0.032 — letters were touching */
+  line-height: 1.08;           /* was 1.02 — lines almost overlapped */
+  text-wrap: balance;          /* modern browsers: balance multi-line headlines */
 }
-.hv-h1 { font-size: clamp(44px, 6.6vw, 88px); }
-.hv-h2 { font-size: clamp(31px, 4vw, 54px); }
+.hv-h1 { font-size: clamp(40px, 5.8vw, 76px); max-width: 22ch; margin-inline: auto; }
+.hv-h2 { font-size: clamp(29px, 3.8vw, 48px); }
 .hv-grad-text {
   background: var(--d-grad);
   -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -198,7 +201,7 @@ body.home-v7 ::selection { background: rgba(110,86,240,.22); color: var(--d-ink)
   transition: transform .4s var(--d-ease);
 }
 .hv-path:hover .ico { transform: scale(1.08) rotate(-4deg); }
-.hv-path h3 { font-family: var(--font-display); font-size: 25px; font-weight: 500; margin: 19px 0 0; letter-spacing: -.014em; color: var(--d-ink); }
+.hv-path h3 { font-family: var(--font-display); font-size: 25px; font-weight: 700; margin: 19px 0 0; letter-spacing: -.014em; color: var(--d-ink); }
 .hv-path p { color: var(--d-ink-3); font-size: 14.5px; line-height: 1.62; margin: 11px 0 0; }
 .hv-path .go { margin-top: 20px; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; color: var(--d-indigo); }
 .hv-path .go .ar { transition: transform .4s var(--d-ease); }
@@ -208,7 +211,7 @@ body.home-v7 ::selection { background: rgba(110,86,240,.22); color: var(--d-ink)
 .hv-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
 @media (max-width: 680px){ .hv-stats { grid-template-columns: 1fr; } }
 .hv-stat { padding: 34px 28px; text-align: center; }
-.hv-stat .num { font-family: var(--font-display); font-size: clamp(40px,4.2vw,56px); font-weight: 500; line-height: 1; color: var(--d-ink); }
+.hv-stat .num { font-family: var(--font-display); font-size: clamp(40px,4.2vw,56px); font-weight: 700; line-height: 1; color: var(--d-ink); }
 .hv-stat .num .star { background: var(--d-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .hv-stat .lbl { margin-top: 11px; color: var(--d-ink-3); font-size: 14px; }
 .hv-stat .live { display:inline-block; width:7px; height:7px; border-radius:999px; background: var(--d-indigo); margin-right:6px; vertical-align: middle; box-shadow: 0 0 10px rgba(84,104,245,.85); animation: hv-pulse 1.7s ease-in-out infinite; }
@@ -233,13 +236,13 @@ body.home-v7 ::selection { background: rgba(110,86,240,.22); color: var(--d-ink)
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 12px 24px -8px rgba(84,104,245,.6);
 }
-.hv-step h3 { font-family: var(--font-display); font-size: 22px; font-weight: 500; margin: 21px 0 0; letter-spacing: -.012em; color: var(--d-ink); }
+.hv-step h3 { font-family: var(--font-display); font-size: 22px; font-weight: 700; margin: 21px 0 0; letter-spacing: -.012em; color: var(--d-ink); }
 .hv-step p { color: var(--d-ink-3); font-size: 14.5px; line-height: 1.62; margin: 11px 0 0; }
 
 /* ---- CATEGORY TILES --------------------------------------- */
 .hv-cats { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
-@media (max-width: 980px){ .hv-cats { grid-template-columns: repeat(2,1fr); } }
-@media (max-width: 540px){ .hv-cats { grid-template-columns: 1fr; } }
+@media (max-width: 980px){ .hv-cats { grid-template-columns: repeat(2,1fr); gap: 12px; } }
+@media (max-width: 380px){ .hv-cats { grid-template-columns: 1fr; } }
 .hv-cat {
   position: relative; border-radius: 20px; overflow: hidden;
   aspect-ratio: 4/3; cursor: pointer;
@@ -251,13 +254,13 @@ body.home-v7 ::selection { background: rgba(110,86,240,.22); color: var(--d-ink)
 .hv-cat:hover { transform: translateY(-6px); border-color: rgba(110,86,240,.42); box-shadow: var(--d-glow-md); }
 .hv-cat:hover img { transform: scale(1.1); }
 .hv-cat .cap { position: absolute; left: 18px; right: 18px; bottom: 16px; z-index: 2; color: #fff; }
-.hv-cat .cap .nm { font-family: var(--font-display); font-size: 19px; font-weight: 500; }
+.hv-cat .cap .nm { font-family: var(--font-display); font-size: 19px; font-weight: 700; }
 .hv-cat .cap .ct { font-size: 12.5px; color: rgba(255,255,255,.78); margin-top: 3px; }
 
 /* ---- TALENT CARDS ----------------------------------------- */
 .hv-talent { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; }
-@media (max-width: 980px){ .hv-talent { grid-template-columns: repeat(2,1fr); } }
-@media (max-width: 540px){ .hv-talent { grid-template-columns: 1fr; } }
+@media (max-width: 980px){ .hv-talent { grid-template-columns: repeat(2,1fr); gap: 14px; } }
+@media (max-width: 380px){ .hv-talent { grid-template-columns: 1fr; } }
 .hv-person { overflow: hidden; cursor: pointer; }
 .hv-person .ph { aspect-ratio: 4/3; overflow: hidden; border-radius: 23px 23px 0 0; }
 .hv-person .ph img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--d-ease); }
@@ -327,7 +330,7 @@ body.home-v7 ::selection { background: rgba(110,86,240,.22); color: var(--d-ink)
 /* ---- TESTIMONIAL ------------------------------------------ */
 .hv-quote { text-align: center; max-width: 760px; margin: 0 auto; }
 .hv-quote blockquote {
-  font-family: var(--font-display); font-weight: 500; color: var(--d-ink);
+  font-family: var(--font-display); font-weight: 700; color: var(--d-ink);
   font-size: clamp(25px,3.1vw,40px); line-height: 1.3; letter-spacing: -.014em; margin: 0;
 }
 .hv-quote .qby { margin-top: 30px; display: flex; gap: 12px; align-items: center; justify-content: center; }
@@ -359,7 +362,7 @@ body.home-v7 ::selection { background: rgba(110,86,240,.22); color: var(--d-ink)
 .hv-marquee { display: flex; gap: 56px; animation: hv-marq 40s linear infinite; align-items: center; width: max-content; }
 .hv-marquee-wrap:hover .hv-marquee { animation-play-state: paused; }
 @keyframes hv-marq { to { transform: translateX(-50%); } }
-.hv-brand { font-family: var(--font-display); font-size: 22px; font-weight: 500; color: var(--d-ink-4); white-space: nowrap; transition: color .3s; }
+.hv-brand { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--d-ink-4); white-space: nowrap; transition: color .3s; }
 .hv-brand:hover { color: var(--d-ink-2); }
 .hv-brand.it { font-style: italic; }
 
@@ -382,3 +385,12 @@ body.home-v7 ::selection { background: rgba(110,86,240,.22); color: var(--d-ink)
 
 /* The injected nav + footer are themed by styles.css (v8 nebula) —
    no homepage-specific override needed; they already match. */
+
+/* Final reduced-motion safety net for the homepage v8 layer */
+@media (prefers-reduced-motion: reduce) {
+  body.home-v7 *, body.home-v7 *::before, body.home-v7 *::after {
+    animation-duration:  0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

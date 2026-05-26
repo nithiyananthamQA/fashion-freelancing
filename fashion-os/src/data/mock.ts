@@ -257,31 +257,45 @@ export type Order = {
   tier: string; amount: string; orderedAt: string; due: string;
 };
 
+// Grouped by PRODUCTION STAGE (matches shared/store.js + services.js).
 export const services = [
-  { slug: 'fashion-designer',     name: 'Fashion designer',          group: 'Design' },
-  { slug: 'graphic-designer',     name: 'Graphic designer',          group: 'Design' },
-  { slug: 'fashion-illustrator',  name: 'Fashion illustrator',       group: 'Design' },
-  { slug: 'textile-designer',     name: 'Textile designer',          group: 'Design' },
-  { slug: 'ai-fashion-prompting', name: 'AI fashion / prompting',    group: 'Design' },
+  // Concept
+  { slug: 'fashion-forecaster',   name: 'Trend forecaster',          group: 'Concept' },
+  { slug: 'creative-director',    name: 'Creative director',         group: 'Concept' },
+  { slug: 'fashion-illustrator',  name: 'Fashion illustrator',       group: 'Concept' },
+  { slug: 'ai-fashion-prompting', name: 'AI fashion / prompting',    group: 'Concept' },
+  { slug: 'textile-designer',     name: 'Textile designer',          group: 'Concept' },
+  { slug: 'fashion-designer',     name: 'Fashion designer',          group: 'Concept' },
+  // Technical
   { slug: 'tech-pack-designer',   name: 'Tech pack designer',        group: 'Technical' },
   { slug: 'pattern-maker',        name: 'Pattern maker',             group: 'Technical' },
   { slug: 'cad-cam-specialist',   name: 'CAD / CAM specialist',      group: 'Technical' },
-  { slug: 'jacquard-dobby',       name: 'Jacquard / Dobby designer', group: 'Technical' },
-  { slug: '3d-fitting-clo3d',     name: '3D fitting (CLO3D)',        group: 'Technical' },
   { slug: 'technical-designer',   name: 'Technical designer',        group: 'Technical' },
-  { slug: 'quality-technician',   name: 'Quality technician',        group: 'Technical' },
+  { slug: 'jacquard-dobby',       name: 'Jacquard / Dobby designer', group: 'Technical' },
+  { slug: 'graphic-designer',     name: 'Graphic designer',          group: 'Technical' },
+  // 3D & Sampling
+  { slug: 'digital-fashion-3d',   name: 'Digital fashion (3D)',      group: '3D & Sampling' },
+  { slug: '3d-fitting-clo3d',     name: '3D fitting (CLO3D)',        group: '3D & Sampling' },
+  // Production
+  { slug: 'quality-technician',   name: 'Quality technician / QA',   group: 'Production' },
+  { slug: 'testing-lab',          name: 'Testing & lab',             group: 'Production' },
+  { slug: 'merchandiser',         name: 'Merchandiser / sourcing',   group: 'Production' },
+  { slug: 'sustainability',       name: 'Sustainability consulting', group: 'Production' },
+  { slug: 'retail-management',    name: 'Retail management',         group: 'Production' },
+  // Visual
   { slug: 'fashion-photography',  name: 'Fashion photography',       group: 'Visual' },
   { slug: 'fashion-videography',  name: 'Fashion videography',       group: 'Visual' },
   { slug: 'ad-film-commercials',  name: 'Ad film & commercials',     group: 'Visual' },
   { slug: 'visual-merchandising', name: 'Visual merchandising',      group: 'Visual' },
-  { slug: 'fashion-website',      name: 'Fashion website',           group: 'Web & UX' },
-  { slug: 'uiux-figma-fashion',   name: 'UI/UX (Figma)',             group: 'Web & UX' },
-  { slug: 'fashion-coding',       name: 'Fashion coding · Shopify',  group: 'Web & UX' },
-  { slug: 'fashion-forecaster',   name: 'Fashion forecaster',        group: 'Business' },
-  { slug: 'merchandiser',         name: 'Merchandiser / sourcing',   group: 'Business' },
-  { slug: 'fashion-marketing',    name: 'Fashion marketing',         group: 'Business' },
-  { slug: 'retail-management',    name: 'Retail management',         group: 'Business' },
-  { slug: 'sustainability',       name: 'Sustainability consulting', group: 'Business' },
+  { slug: 'fashion-model',        name: 'Fashion model',             group: 'Visual' },
+  { slug: 'makeup-artist',        name: 'Makeup artist',             group: 'Visual' },
+  { slug: 'costume-design',       name: 'Costume designer',          group: 'Visual' },
+  // Web & Marketing
+  { slug: 'fashion-website',      name: 'Website developer',              group: 'Web & Marketing' },
+  { slug: 'uiux-figma-fashion',   name: 'UI/UX designer',                 group: 'Web & Marketing' },
+  { slug: 'fashion-coding',       name: 'Shopify / e-commerce developer', group: 'Web & Marketing' },
+  { slug: 'fashion-marketing',    name: 'Fashion digital marketing',      group: 'Web & Marketing' },
+  { slug: 'fashion-copywriting',  name: 'Fashion copywriting',            group: 'Web & Marketing' },
 ];
 
 export const myGigs: Gig[] = [

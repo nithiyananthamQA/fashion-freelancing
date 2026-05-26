@@ -108,13 +108,23 @@
 /** @typedef {'featured' | 'rising' | 'pro' | 'top_1' | 'verified' | 'top_rated' | 'sustainable' | 'vogue_alum'} Badge */
 
 /**
- * A single portfolio entry uploaded by a freelancer during signup.
+ * A single portfolio "project" — can be one image or a process flow
+ * (e.g. Sketch → Tech pack → Final garment). When `stages` is present
+ * with >1 entries, the profile renders the project as a 3-stage strip
+ * which shows brands that the freelancer's work is manufacturable.
+ *
  * @typedef {Object} PortfolioWork
  * @property {string} id
  * @property {string} title
- * @property {string} imageUrl
+ * @property {string} imageUrl          legacy / cover image (= first stage)
+ * @property {PortfolioStage[]} [stages]  optional process flow
  * @property {string} [description]
  * @property {string} createdAt
+ *
+ * @typedef {Object} PortfolioStage
+ * @property {'sketch'|'tech-pack'|'sample'|'final'|'other'} kind
+ * @property {string} label     human label e.g. "Initial sketch"
+ * @property {string} imageUrl
  */
 
 /**

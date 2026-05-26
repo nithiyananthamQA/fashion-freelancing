@@ -63,37 +63,46 @@
 
     // Service categories
     const services = [
-      svc('fashion-designer',     'Fashion designer',          'Design',     2480, 320, 'photo-1539109136881-3be0616acf4b'),
-      svc('graphic-designer',     'Graphic designer',          'Design',     1820, 80,  'photo-1542744095-fcf48d80b0fd'),
-      svc('fashion-illustrator',  'Fashion illustrator',       'Design',     612,  120, 'photo-1503602642458-232111445657'),
-      svc('textile-designer',     'Textile designer',          'Design',     624,  180, 'photo-1459411552884-841db9b3cc2a'),
-      svc('ai-fashion-prompting', 'AI fashion / prompting',    'Design',     412,  60,  'photo-1620063633168-8b1bea99bafd'),
-      svc('digital-fashion-3d',   'Digital fashion (3D)',      'Design',     184,  240, 'photo-1513104890138-7c749659a591'),
+      // Group by PRODUCTION STAGE — the brand picks based on where they are
+      // in the process. (Old groups: Design / Technical / Visual / Web & UX /
+      // Business / Niche → new: Concept / Technical / 3D & Sampling /
+      // Production / Visual / Web & Marketing.)
+      svc('fashion-forecaster',   'Trend forecaster',          'Concept',    132,  600, 'photo-1539109136881-3be0616acf4b'),
+      svc('creative-director',    'Creative director',         'Concept',    188,  1500,'photo-1490481651871-ab68de25d43d'),
+      svc('fashion-illustrator',  'Fashion illustrator',       'Concept',    612,  120, 'photo-1503602642458-232111445657'),
+      svc('ai-fashion-prompting', 'AI fashion / prompting',    'Concept',    412,  60,  'photo-1620063633168-8b1bea99bafd'),
+      svc('textile-designer',     'Textile designer',          'Concept',    624,  180, 'photo-1459411552884-841db9b3cc2a'),
+      svc('fashion-designer',     'Fashion designer',          'Concept',    2480, 320, 'photo-1539109136881-3be0616acf4b'),
+
       svc('tech-pack-designer',   'Tech pack designer',        'Technical',  980,  120, 'photo-1558769132-cb1aea458c5e'),
       svc('pattern-maker',        'Pattern maker',             'Technical',  1302, 180, 'photo-1556905055-8f358a7a47b2'),
       svc('cad-cam-specialist',   'CAD / CAM specialist',      'Technical',  412,  200, 'photo-1555421689-491a97ff2040'),
-      svc('jacquard-dobby',       'Jacquard / Dobby designer', 'Technical',  188,  280, 'photo-1493106641515-6b5631de4bb9'),
-      svc('3d-fitting-clo3d',     '3D fitting (CLO3D)',        'Technical',  264,  220, 'photo-1521336575822-6da63fb45455'),
       svc('technical-designer',   'Technical designer',        'Technical',  540,  240, 'photo-1558769132-cb1aea458c5e'),
-      svc('quality-technician',   'Quality technician / QA',   'Technical',  286,  160, 'photo-1567789884554-0b844b597180'),
-      svc('testing-lab',          'Testing & lab',             'Technical',  102,  200, 'photo-1581094288338-2314dddb7ece'),
+      svc('jacquard-dobby',       'Jacquard / Dobby designer', 'Technical',  188,  280, 'photo-1493106641515-6b5631de4bb9'),
+      svc('graphic-designer',     'Graphic designer',          'Technical',  1820, 80,  'photo-1542744095-fcf48d80b0fd'),
+
+      svc('digital-fashion-3d',   'Digital fashion (3D)',      '3D & Sampling', 184, 240, 'photo-1513104890138-7c749659a591'),
+      svc('3d-fitting-clo3d',     '3D fitting (CLO3D)',        '3D & Sampling', 264, 220, 'photo-1521336575822-6da63fb45455'),
+
+      svc('quality-technician',   'Quality technician / QA',   'Production', 286,  160, 'photo-1567789884554-0b844b597180'),
+      svc('testing-lab',          'Testing & lab',             'Production', 102,  200, 'photo-1581094288338-2314dddb7ece'),
+      svc('merchandiser',         'Merchandiser / sourcing',   'Production', 412,  320, 'photo-1542060748-10c28b62716f'),
+      svc('sustainability',       'Sustainability consulting', 'Production', 142,  380, 'photo-1542838132-92c53300491e'),
+      svc('retail-management',    'Retail management',         'Production', 96,   480, 'photo-1441984904996-e0b6ba687e04'),
+
       svc('fashion-photography',  'Fashion photography',       'Visual',     1766, 350, 'photo-1483985988355-763728e1935b'),
       svc('fashion-videography',  'Fashion videography',       'Visual',     824,  480, 'photo-1492691527719-9d1e07e534b4'),
       svc('ad-film-commercials',  'Ad film & commercials',     'Visual',     312,  1200,'photo-1505739998589-00fc191ce01d'),
       svc('visual-merchandising', 'Visual merchandising',      'Visual',     246,  280, 'photo-1519415943484-9fa1873496d4'),
-      svc('fashion-website',      'Website developer',           'Web & UX',   384,  480, 'photo-1523289333742-be1143f6b766'),
-      svc('uiux-figma-fashion',   'UI/UX designer', 'Web & UX',   246,  300, 'photo-1561070791-2526d30994b8'),
-      svc('fashion-coding',       'Shopify & e-commerce developer',  'Web & UX',   168,  380, 'photo-1551288049-bebda4e38f71'),
-      svc('fashion-forecaster',   'Fashion forecaster',        'Business',   132,  600, 'photo-1539109136881-3be0616acf4b'),
-      svc('merchandiser',         'Merchandiser / sourcing',   'Business',   412,  320, 'photo-1542060748-10c28b62716f'),
-      svc('fashion-marketing',    'Fashion digital marketing', 'Business',   588,  240, 'photo-1554774853-aae0a22c8aa4'),
-      svc('retail-management',    'Retail management',         'Business',   96,   480, 'photo-1441984904996-e0b6ba687e04'),
-      svc('sustainability',       'Sustainability consulting', 'Business',   142,  380, 'photo-1542838132-92c53300491e'),
-      svc('fashion-copywriting',  'Fashion copywriting',       'Business',   184,  90,  'photo-1486312338219-ce68d2c6f44d'),
-      svc('costume-design',       'Costume designer',          'Niche',      78,   800, 'photo-1559827260-dc66d52bef19'),
-      svc('creative-director',    'Creative director',         'Niche',      188,  1500,'photo-1490481651871-ab68de25d43d'),
-      svc('fashion-model',        'Fashion model',             'Niche',      214,  250, 'photo-1581338834647-b0fb40704e21'),
-      svc('makeup-artist',        'Makeup artist',             'Niche',      168,  180, 'photo-1487412947147-5cebf100ffc2'),
+      svc('fashion-model',        'Fashion model',             'Visual',     214,  250, 'photo-1581338834647-b0fb40704e21'),
+      svc('makeup-artist',        'Makeup artist',             'Visual',     168,  180, 'photo-1487412947147-5cebf100ffc2'),
+      svc('costume-design',       'Costume designer',          'Visual',     78,   800, 'photo-1559827260-dc66d52bef19'),
+
+      svc('fashion-website',      'Website developer',         'Web & Marketing', 384, 480, 'photo-1523289333742-be1143f6b766'),
+      svc('uiux-figma-fashion',   'UI/UX designer',            'Web & Marketing', 246, 300, 'photo-1561070791-2526d30994b8'),
+      svc('fashion-coding',       'Shopify / e-commerce developer', 'Web & Marketing', 168, 380, 'photo-1551288049-bebda4e38f71'),
+      svc('fashion-marketing',    'Fashion digital marketing', 'Web & Marketing', 588, 240, 'photo-1554774853-aae0a22c8aa4'),
+      svc('fashion-copywriting',  'Fashion copywriting',       'Web & Marketing', 184, 90,  'photo-1486312338219-ce68d2c6f44d'),
     ];
 
     // Packages

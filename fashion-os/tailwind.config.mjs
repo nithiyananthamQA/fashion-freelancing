@@ -57,9 +57,9 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui'],
-        // "serif"/"display" now point to Fraunces (editorial serif)
-        serif: ['Fraunces', 'Georgia', 'serif'],
-        display: ['Fraunces', 'Georgia', 'serif'],
+        // "serif"/"display" now point to Plus Jakarta Sans (bold modern geometric)
+        serif: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui'],
+        display: ['Plus Jakarta Sans', 'ui-sans-serif', 'system-ui'],
         mono: ['"JetBrains Mono"', 'ui-monospace'],
       },
       letterSpacing: { tightish: '-0.012em', editorial: '-0.018em' },

@@ -277,16 +277,64 @@
       syncHeader(); // set correct state on load (e.g. when restored mid-page)
     }
 
+    // ---- PERF: lazy-load images that aren't above the fold ----
+    // Skips the first 3 images on the page (likely the hero/cover/avatar)
+    // and any image inside .topnav. Adds decoding="async" everywhere so the
+    // main thread isn't blocked decoding portfolio photos during scroll.
+    (function () {
+      const imgs = document.querySelectorAll('img:not([loading])');
+      imgs.forEach((img, i) => {
+        if (img.closest('.topnav')) return;
+        if (!img.hasAttribute('decoding')) img.decoding = 'async';
+        if (i < 3) {
+          // above-the-fold: load eagerly, but ask for high priority
+          img.setAttribute('fetchpriority', 'high');
+        } else {
+          img.loading = 'lazy';
+        }
+      });
+    })();
+
+    // ---- PERF: pause heavy CSS animations when off-screen ----
+    // Orbs (filter: blur) and marquees keep the GPU awake even when nobody's
+    // looking. We toggle `.paused-fx` on the closest "stage" parent the moment
+    // it scrolls out of view; CSS does the rest (animation-play-state: paused).
+    if ('IntersectionObserver' in window) {
+      const stages = new Set();
+      document.querySelectorAll('.fx-orb, .hv-orb, .hv-marquee, .marquee, .ticker-track, [data-fx-loop]').forEach(el => {
+        const stage = el.closest('.fx-stage, .hv-hero, .hv-cta, .hv-marquee-wrap, section, header, body') || el.parentElement;
+        if (stage) stages.add(stage);
+      });
+      if (stages.size) {
+        const fxObs = new IntersectionObserver((entries) => {
+          entries.forEach(e => e.target.classList.toggle('paused-fx', !e.isIntersecting));
+        }, { rootMargin: '120px' }); // start a bit before, end a bit after — no flicker at edges
+        stages.forEach(s => fxObs.observe(s));
+      }
+    }
+
     // ---- Auto-wire the v8 motion system site-wide ----
     // Pages don't all hand-tag .reveal/.spotlight, so opt every content
     // .card and major section into scroll-reveal + cursor glow for free.
+    // Cards that share a parent get a soft per-row stagger so they reveal
+    // in sequence rather than all at once.
     const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!reduceMotion) {
+      const cardsByParent = new Map();
       document.querySelectorAll('.card').forEach(el => {
-        if (!el.closest('.topnav, .footer')) {
-          el.classList.add('reveal');
-          if (!el.classList.contains('spotlight')) el.classList.add('spotlight');
-        }
+        if (el.closest('.topnav, .footer')) return;
+        el.classList.add('reveal');
+        if (!el.classList.contains('spotlight')) el.classList.add('spotlight');
+        const parent = el.parentElement;
+        if (!parent) return;
+        if (!cardsByParent.has(parent)) cardsByParent.set(parent, []);
+        cardsByParent.get(parent).push(el);
+      });
+      cardsByParent.forEach(siblings => {
+        siblings.forEach((el, i) => {
+          // Cap delay at 4 to keep things snappy; rest fire together.
+          el.style.transitionDelay = (Math.min(i, 4) * 0.08) + 's';
+        });
       });
       // section-level headers / blocks fade up too
       document.querySelectorAll('.section > .container > *, main > section').forEach(el => {

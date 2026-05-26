@@ -12,10 +12,10 @@
 }
 
 @layer components {
-  .display { font-family: 'Fraunces', Georgia, serif; letter-spacing: -0.014em; font-weight: 500; font-optical-sizing: auto; }
-  .display-italic { font-style: italic; color: #5468F5; font-family: 'Fraunces', Georgia, serif; }
-  /* editorial — serif display used across dashboard headings */
-  .editorial { font-family: 'Fraunces', Georgia, serif; letter-spacing: -0.012em; font-weight: 500; font-optical-sizing: auto; }
+  .display { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.024em; font-weight: 700; }
+  .display-italic { font-style: normal; background: linear-gradient(118deg,#6E56F0,#5468F5,#2BA8E8); -webkit-background-clip: text; background-clip: text; color: transparent; font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; font-weight: 700; }
+  /* editorial — sans display used across dashboard headings */
+  .editorial { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.018em; font-weight: 700; }
   .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
 
   .container-x { @apply max-w-[1400px] mx-auto px-6 lg:px-8; }
