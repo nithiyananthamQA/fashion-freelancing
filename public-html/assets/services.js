@@ -25,10 +25,16 @@ window.FOS_SERVICES = [
 
   // ---------- Production (QC, sourcing, sustainability, retail) ----------
   { slug: 'quality-technician',   name: 'Quality technician / QA',   group: 'Production', count: 286, from: 160, img: 'photo-1567789884554-0b844b597180' },
+  { slug: 'third-party-inspection', name: 'Third-party inspection',  group: 'Production', count: 142, from: 220, img: 'photo-1581094288338-2314dddb7ece' },
+  { slug: 'social-compliance',    name: 'Social compliance audit',   group: 'Production', count: 48,  from: 500, img: 'photo-1581094288338-2314dddb7ece' },
   { slug: 'testing-lab',          name: 'Testing & lab',             group: 'Production', count: 102, from: 200, img: 'photo-1581094288338-2314dddb7ece' },
   { slug: 'merchandiser',         name: 'Merchandiser / sourcing',   group: 'Production', count: 412, from: 320, img: 'photo-1542060748-10c28b62716f' },
+  { slug: 'logistics-freight',    name: 'Logistics & freight',       group: 'Production', count: 76,  from: 240, img: 'photo-1494412519320-aa613dfb7738' },
   { slug: 'sustainability',       name: 'Sustainability consulting', group: 'Production', count: 142, from: 380, img: 'photo-1542838132-92c53300491e' },
   { slug: 'retail-management',    name: 'Retail management',         group: 'Production', count: 96,  from: 480, img: 'photo-1441984904996-e0b6ba687e04' },
+
+  // ---------- Industrial / Mill (factory-specific traditional textile) ----------
+  { slug: 'screen-color-separation', name: 'Screen color separation', group: 'Technical', count: 64,  from: 180, img: 'photo-1493106641515-6b5631de4bb9' },
 
   // ---------- Visual (photo, video, model, makeup, set) ----------
   { slug: 'fashion-photography',  name: 'Fashion photography',       group: 'Visual',    count: 1766, from: 350, img: 'photo-1483985988355-763728e1935b' },
@@ -39,7 +45,10 @@ window.FOS_SERVICES = [
   { slug: 'makeup-artist',        name: 'Makeup artist',             group: 'Visual',    count: 168,  from: 180, img: 'photo-1487412947147-5cebf100ffc2' },
   { slug: 'costume-design',       name: 'Costume designer',          group: 'Visual',    count: 78,   from: 800, img: 'photo-1559827260-dc66d52bef19' },
 
-  // ---------- Web & Marketing (site, store, growth) ----------
+  // ---------- Web & Marketing (site, store, growth, marketplace sync) ----------
+  { slug: 'marketplace-integration', name: 'Marketplace integration (Amazon / Myntra / Flipkart)', group: 'Web & Marketing', count: 142, from: 800, img: 'photo-1556742502-ec7c0e9f34b1' },
+  { slug: 'ai-catalog-tagging',   name: 'AI catalog tagging',             group: 'Web & Marketing', count: 64,  from: 400, img: 'photo-1620063633168-8b1bea99bafd' },
+  { slug: 'ai-trend-forecast',    name: 'AI trend forecasting',           group: 'Web & Marketing', count: 88,  from: 600, img: 'photo-1620063633168-8b1bea99bafd' },
   { slug: 'fashion-website',      name: 'Website developer',              group: 'Web & Marketing', count: 384, from: 480, img: 'photo-1523289333742-be1143f6b766' },
   { slug: 'uiux-figma-fashion',   name: 'UI/UX designer',                 group: 'Web & Marketing', count: 246, from: 300, img: 'photo-1561070791-2526d30994b8' },
   { slug: 'fashion-coding',       name: 'Shopify / e-commerce developer', group: 'Web & Marketing', count: 168, from: 380, img: 'photo-1551288049-bebda4e38f71' },

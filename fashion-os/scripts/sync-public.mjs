@@ -38,9 +38,10 @@ if (existsSync(join(publicHtml, 'index.html'))) {
   cpSync(join(publicHtml, 'index.html'), join(dest, 'index.html'));
 }
 
-// 2. pages + assets
+// 2. pages + assets + shared (chat widget renderer + css live in public-html/shared)
 copyDir(join(publicHtml, 'pages'), join(dest, 'pages'));
 copyDir(join(publicHtml, 'assets'), join(dest, 'assets'));
+copyDir(join(publicHtml, 'shared'), join(dest, 'shared'));
 
 // 2b. top-level 404 so Cloudflare Pages serves it for unknown routes.
 // The source 404 lives in /pages/ and uses ../ relative paths — rewrite

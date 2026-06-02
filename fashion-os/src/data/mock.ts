@@ -278,10 +278,14 @@ export const services = [
   { slug: '3d-fitting-clo3d',     name: '3D fitting (CLO3D)',        group: '3D & Sampling' },
   // Production
   { slug: 'quality-technician',   name: 'Quality technician / QA',   group: 'Production' },
+  { slug: 'third-party-inspection',name: 'Third-party inspection',   group: 'Production' },
+  { slug: 'social-compliance',    name: 'Social compliance audit',   group: 'Production' },
   { slug: 'testing-lab',          name: 'Testing & lab',             group: 'Production' },
   { slug: 'merchandiser',         name: 'Merchandiser / sourcing',   group: 'Production' },
+  { slug: 'logistics-freight',    name: 'Logistics & freight',       group: 'Production' },
   { slug: 'sustainability',       name: 'Sustainability consulting', group: 'Production' },
   { slug: 'retail-management',    name: 'Retail management',         group: 'Production' },
+  { slug: 'screen-color-separation', name: 'Screen color separation', group: 'Technical' },
   // Visual
   { slug: 'fashion-photography',  name: 'Fashion photography',       group: 'Visual' },
   { slug: 'fashion-videography',  name: 'Fashion videography',       group: 'Visual' },
@@ -291,6 +295,9 @@ export const services = [
   { slug: 'makeup-artist',        name: 'Makeup artist',             group: 'Visual' },
   { slug: 'costume-design',       name: 'Costume designer',          group: 'Visual' },
   // Web & Marketing
+  { slug: 'marketplace-integration', name: 'Marketplace integration (Amazon / Myntra / Flipkart)', group: 'Web & Marketing' },
+  { slug: 'ai-catalog-tagging',   name: 'AI catalog tagging',             group: 'Web & Marketing' },
+  { slug: 'ai-trend-forecast',    name: 'AI trend forecasting',           group: 'Web & Marketing' },
   { slug: 'fashion-website',      name: 'Website developer',              group: 'Web & Marketing' },
   { slug: 'uiux-figma-fashion',   name: 'UI/UX designer',                 group: 'Web & Marketing' },
   { slug: 'fashion-coding',       name: 'Shopify / e-commerce developer', group: 'Web & Marketing' },

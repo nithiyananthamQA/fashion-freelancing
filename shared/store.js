@@ -85,10 +85,14 @@
       svc('3d-fitting-clo3d',     '3D fitting (CLO3D)',        '3D & Sampling', 264, 220, 'photo-1521336575822-6da63fb45455'),
 
       svc('quality-technician',   'Quality technician / QA',   'Production', 286,  160, 'photo-1567789884554-0b844b597180'),
+      svc('third-party-inspection','Third-party inspection',   'Production', 142,  220, 'photo-1581094288338-2314dddb7ece'),
+      svc('social-compliance',    'Social compliance audit',   'Production', 48,   500, 'photo-1581094288338-2314dddb7ece'),
       svc('testing-lab',          'Testing & lab',             'Production', 102,  200, 'photo-1581094288338-2314dddb7ece'),
       svc('merchandiser',         'Merchandiser / sourcing',   'Production', 412,  320, 'photo-1542060748-10c28b62716f'),
+      svc('logistics-freight',    'Logistics & freight',       'Production', 76,   240, 'photo-1494412519320-aa613dfb7738'),
       svc('sustainability',       'Sustainability consulting', 'Production', 142,  380, 'photo-1542838132-92c53300491e'),
       svc('retail-management',    'Retail management',         'Production', 96,   480, 'photo-1441984904996-e0b6ba687e04'),
+      svc('screen-color-separation','Screen color separation', 'Technical',  64,   180, 'photo-1493106641515-6b5631de4bb9'),
 
       svc('fashion-photography',  'Fashion photography',       'Visual',     1766, 350, 'photo-1483985988355-763728e1935b'),
       svc('fashion-videography',  'Fashion videography',       'Visual',     824,  480, 'photo-1492691527719-9d1e07e534b4'),
@@ -98,6 +102,9 @@
       svc('makeup-artist',        'Makeup artist',             'Visual',     168,  180, 'photo-1487412947147-5cebf100ffc2'),
       svc('costume-design',       'Costume designer',          'Visual',     78,   800, 'photo-1559827260-dc66d52bef19'),
 
+      svc('marketplace-integration','Marketplace integration (Amazon / Myntra / Flipkart)', 'Web & Marketing', 142, 800, 'photo-1556742502-ec7c0e9f34b1'),
+      svc('ai-catalog-tagging',   'AI catalog tagging',        'Web & Marketing', 64,  400, 'photo-1620063633168-8b1bea99bafd'),
+      svc('ai-trend-forecast',    'AI trend forecasting',      'Web & Marketing', 88,  600, 'photo-1620063633168-8b1bea99bafd'),
       svc('fashion-website',      'Website developer',         'Web & Marketing', 384, 480, 'photo-1523289333742-be1143f6b766'),
       svc('uiux-figma-fashion',   'UI/UX designer',            'Web & Marketing', 246, 300, 'photo-1561070791-2526d30994b8'),
       svc('fashion-coding',       'Shopify / e-commerce developer', 'Web & Marketing', 168, 380, 'photo-1551288049-bebda4e38f71'),

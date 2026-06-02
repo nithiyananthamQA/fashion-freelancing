@@ -36,6 +36,21 @@
   // Tracks readiness so late listeners still fire.
   window.FF_READY = window.FF_READY || false;
 
+  // Floating AI chat widget — loaded on every page that boots site.js.
+  // intake.js (renderer) → ff-chat.js (launcher + panel). Independent
+  // chain from the api/store/ui chain so the widget appears even before
+  // those finish loading.
+  function loadStylesheet(href) {
+    if (document.querySelector(`link[href$="${href.split('/').pop()}"]`)) return;
+    const l = document.createElement('link');
+    l.rel = 'stylesheet'; l.href = href;
+    document.head.appendChild(l);
+  }
+  loadStylesheet(r('shared/intake.css'));
+  loadScript(r('shared/intake.js'))
+    .then(() => loadScript(r('assets/ff-chat.js')))
+    .catch(e => console.error('Chat widget failed to load:', e && e.message ? e.message : e));
+
   if (!window.api) {
     loadScript(r('assets/store.js'))
       .then(() => loadScript(r('assets/api.js')))
@@ -102,6 +117,7 @@
       </form>
 
       <nav class="topnav-links" aria-label="Primary">
+        <a href="${r("pages/agency.html")}" class="${current==='agency'?'active':''}">Our services</a>
         <a href="${r("pages/marketplace.html")}" class="${current==='talent'?'active':''}">Find a freelancer</a>
         <a href="${r("pages/marketplace.html")}#jobs" class="${current==='work'?'active':''}">Find a job</a>
         <a href="${r("pages/how-it-works.html")}" class="${current==='how'?'active':''}">How it works</a>
@@ -127,6 +143,7 @@
           <input name="q" placeholder="Search…"/>
         </form>
         <nav class="topnav-mobile-links" aria-label="Mobile primary">
+          <a href="${r("pages/agency.html")}">Our services</a>
           <a href="${r("pages/marketplace.html")}">Find a freelancer</a>
           <a href="${r("pages/marketplace.html")}#jobs">Find a job</a>
           <a href="${r("pages/how-it-works.html")}">How it works</a>
@@ -168,12 +185,12 @@
         </div>
 
         <div>
-          <h5>I want to hire</h5>
+          <h5>For companies</h5>
           <ul>
-            <li><a href="${r("pages/marketplace.html")}">Find a freelancer</a></li>
-            <li><a href="${r("pages/marketplace.html")}?cat=fashion-designer">Fashion designers</a></li>
-            <li><a href="${r("pages/marketplace.html")}?cat=tech-pack-designer">Tech pack designers</a></li>
-            <li><a href="${r("pages/marketplace.html")}?cat=fashion-photography">Fashion photographers</a></li>
+            <li><a href="${r("pages/agency.html")}">Our services</a></li>
+            <li><a href="${r("pages/start.html")}?audience=brand">Start a project</a></li>
+            <li><a href="${r("pages/agency.html")}#contact">Book a discovery call</a></li>
+            <li><a href="${r("pages/marketplace.html")}">Browse all freelancers</a></li>
             <li><a href="${r("pages/how-it-works.html")}">How it works</a></li>
           </ul>
         </div>

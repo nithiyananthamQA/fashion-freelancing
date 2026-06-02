@@ -1,0 +1,237 @@
+/* ============================================================
+   Fashion Freelancing — Shared intake renderer styles (.ffi-*)
+   Used by /pages/start.html AND the floating chat widget.
+   Self-contained: all design tokens declared with fallbacks so the
+   widget renders on Astro pages where styles.css isn't loaded.
+============================================================ */
+
+.ffi-root {
+  --ffi-bg:       var(--paper, #F4F4FB);
+  --ffi-surface:  var(--paper-3, #FFFFFF);
+  --ffi-ink:      var(--ink, #14132B);
+  --ffi-ink-3:    var(--ink-3, #3B3A57);
+  --ffi-ink-4:    var(--ink-4, #5C5A7E);
+  --ffi-ink-5:    var(--ink-5, #82809E);
+  --ffi-line:     var(--line, rgba(20,19,43,.09));
+  --ffi-accent:   var(--champagne, #5468F5);
+  --ffi-accent-50:var(--champagne-50, #EEEEFE);
+  --ffi-grad:     var(--grad, linear-gradient(118deg, #6E56F0 0%, #5468F5 50%, #2BA8E8 100%));
+  --ffi-radius:   12px;
+  --ffi-ease:     var(--easing, cubic-bezier(.22,1,.36,1));
+  font-family: var(--font-body, 'Inter', ui-sans-serif, system-ui, sans-serif);
+  color: var(--ffi-ink);
+}
+
+/* --- progress bar --- */
+.ffi-progress {
+  display: flex; gap: 5px; padding-bottom: 18px;
+}
+.ffi-progress span {
+  flex: 1; height: 3px; border-radius: 99px;
+  background: var(--ffi-line);
+  transition: background .4s var(--ffi-ease);
+}
+.ffi-progress span.done { background: var(--ffi-accent); }
+
+/* --- stream --- */
+.ffi-stream {
+  display: flex; flex-direction: column; gap: 14px;
+  overflow-y: auto;
+}
+
+/* --- bot bubble --- */
+.ffi-bot-row {
+  display: flex; gap: 12px; align-items: flex-start;
+  animation: ffi-rise-in .26s var(--ffi-ease) both;
+}
+.ffi-bot-av {
+  width: 36px; height: 36px; border-radius: 99px;
+  background: var(--ffi-grad);
+  color: #fff;
+  font-weight: 700; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 6px 16px -6px rgba(84,104,245,.5);
+}
+.ffi-bot-bubble {
+  background: rgba(20,19,43,.05);
+  color: var(--ffi-ink);
+  border-radius: 14px 14px 14px 4px;
+  padding: 12px 16px;
+  font-size: 15px; line-height: 1.5;
+  max-width: 460px;
+}
+.ffi-compact .ffi-bot-bubble {
+  font-size: 14px; padding: 10px 14px; max-width: 100%;
+}
+
+/* --- typing dots --- */
+.ffi-typing { display: inline-flex; gap: 3px; padding: 4px 0; }
+.ffi-typing span {
+  width: 6px; height: 6px; border-radius: 99px;
+  background: var(--ffi-ink-5);
+  animation: ffi-typing 1s ease-in-out infinite;
+}
+.ffi-typing span:nth-child(2) { animation-delay: .15s; }
+.ffi-typing span:nth-child(3) { animation-delay: .30s; }
+
+/* --- user bubble --- */
+.ffi-user-row {
+  display: flex; gap: 12px; align-items: flex-start;
+  justify-content: flex-end;
+  animation: ffi-rise-in .26s var(--ffi-ease) both;
+}
+.ffi-user-bubble {
+  background: var(--ffi-ink);
+  color: #fff;
+  border-radius: 14px 14px 4px 14px;
+  padding: 10px 15px;
+  font-size: 14.5px; line-height: 1.5;
+  max-width: 460px;
+}
+.ffi-compact .ffi-user-bubble { font-size: 14px; padding: 9px 13px; }
+
+/* --- answers grid --- */
+.ffi-answers {
+  margin-top: 14px;
+  display: grid; gap: 10px;
+  grid-template-columns: 1fr 1fr;
+  animation: ffi-rise-in .3s var(--ffi-ease) both;
+}
+.ffi-compact .ffi-answers,
+@media (max-width: 540px) {
+  .ffi-answers { grid-template-columns: 1fr; }
+}
+.ffi-compact .ffi-answers { grid-template-columns: 1fr; }
+
+.ffi-a-btn {
+  text-align: left;
+  background: var(--ffi-surface);
+  border: 1px solid var(--ffi-line);
+  border-radius: var(--ffi-radius);
+  padding: 12px 14px;
+  font: inherit; font-size: 14px;
+  color: var(--ffi-ink); cursor: pointer;
+  transition: border-color .25s var(--ffi-ease),
+              transform .25s var(--ffi-ease),
+              box-shadow .25s var(--ffi-ease),
+              background .25s var(--ffi-ease);
+}
+.ffi-a-btn:hover {
+  border-color: var(--ffi-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -16px rgba(84,104,245,.5);
+}
+.ffi-a-btn.is-on {
+  border-color: var(--ffi-accent);
+  background: var(--ffi-accent-50);
+}
+.ffi-a-btn strong { display: block; font-weight: 600; font-size: 14px; }
+.ffi-a-btn .ffi-sub {
+  display: block; margin-top: 4px;
+  color: var(--ffi-ink-5); font-size: 12.5px; font-weight: 400;
+}
+
+/* multi-select continue button — full width below the grid */
+.ffi-answers-multi .ffi-continue {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding: 12px 18px;
+  background: var(--ffi-grad);
+  color: #fff; font: inherit; font-weight: 600; font-size: 14.5px;
+  border: 0; border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 12px 28px -12px rgba(84,104,245,.5);
+  transition: transform .25s var(--ffi-ease), box-shadow .25s var(--ffi-ease);
+}
+.ffi-answers-multi .ffi-continue:disabled {
+  opacity: .45; cursor: not-allowed; box-shadow: none;
+}
+.ffi-answers-multi .ffi-continue:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px -12px rgba(84,104,245,.6);
+}
+
+.ffi-back {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  background: transparent; border: 0;
+  color: var(--ffi-ink-5);
+  font: inherit; font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+}
+.ffi-back:hover { color: var(--ffi-ink); }
+
+/* --- final summary card --- */
+.ffi-summary {
+  margin-top: 20px;
+  padding: 22px;
+  background: linear-gradient(135deg, rgba(110,86,240,.08), rgba(43,168,232,.05));
+  border: 1px solid rgba(110,86,240,.2);
+  border-radius: 16px;
+  animation: ffi-rise-in .35s var(--ffi-ease) both;
+}
+.ffi-summary h3 {
+  margin: 0 0 6px;
+  font-family: var(--font-display, 'Plus Jakarta Sans'); font-size: 17px; font-weight: 700;
+  letter-spacing: -0.012em;
+}
+.ffi-summary-text {
+  color: var(--ffi-ink-3); font-size: 14px; line-height: 1.55; margin: 0 0 14px;
+}
+.ffi-summary dl {
+  display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px;
+  margin: 0; font-size: 13.5px;
+}
+.ffi-compact .ffi-summary dl { grid-template-columns: 100px 1fr; }
+.ffi-summary dt { color: var(--ffi-ink-5); }
+.ffi-summary dd { margin: 0; color: var(--ffi-ink); }
+
+.ffi-cta-row {
+  margin-top: 18px;
+  display: flex; flex-wrap: wrap; gap: 10px;
+}
+.ffi-compact .ffi-cta-row { flex-direction: column; }
+.ffi-cta-primary, .ffi-cta-ghost {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 20px;
+  border-radius: 999px;
+  font: inherit; font-weight: 600; font-size: 14px;
+  cursor: pointer; text-decoration: none;
+  transition: transform .25s var(--ffi-ease), box-shadow .25s var(--ffi-ease);
+}
+.ffi-cta-primary {
+  background: var(--ffi-grad);
+  color: #fff; border: 0;
+  box-shadow: 0 12px 28px -12px rgba(84,104,245,.55);
+}
+.ffi-cta-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 36px -12px rgba(84,104,245,.65); }
+.ffi-cta-ghost {
+  background: #fff;
+  color: var(--ffi-ink);
+  border: 1px solid var(--ffi-line);
+}
+.ffi-cta-ghost:hover { border-color: var(--ffi-ink); }
+
+/* --- animations (self-contained) --- */
+@keyframes ffi-rise-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes ffi-typing {
+  0%,80%,100% { opacity: .3; transform: translateY(0); }
+  40%         { opacity: 1; transform: translateY(-2px); }
+}
+
+/* --- reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+  .ffi-bot-row, .ffi-user-row, .ffi-answers, .ffi-summary {
+    animation: none !important;
+  }
+  .ffi-typing { display: none !important; }
+  .ffi-a-btn { transition: background .12s, border-color .12s; }
+  .ffi-a-btn:hover { transform: none; box-shadow: none; }
+  .ffi-cta-primary, .ffi-cta-ghost { transition: none; }
+  .ffi-cta-primary:hover, .ffi-cta-ghost:hover { transform: none; box-shadow: none; }
+}

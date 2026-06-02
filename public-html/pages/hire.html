@@ -84,9 +84,21 @@
             <div class="choice-row">
               <span class="choice-icon">✍️</span>
               <div>
-                <div style="font-weight: 600;">Send a custom job</div>
-                <div class="lead text-sm mt-1" style="margin: 4px 0 0;">Got a bigger project? Describe what you need. Amara replies with a price and timeline. You agree, then we lock in the payment.</div>
+                <div style="font-weight: 600;">Send a custom job (fixed milestones)</div>
+                <div class="lead text-sm mt-1" style="margin: 4px 0 0;">Got a bigger project? Describe what you need. Amara replies with a price split into stages (sketch → tech pack → 3D → final). You approve each stage to release payment.</div>
                 <div class="text-xs muted mt-3">Reply usually within 1 hour</div>
+              </div>
+            </div>
+          </label>
+
+          <label class="choice" id="choice-hourly">
+            <input type="radio" name="hire-type" value="hourly"/>
+            <div class="choice-row">
+              <span class="choice-icon">⏱️</span>
+              <div>
+                <div style="font-weight: 600;">Pay by the hour</div>
+                <div class="lead text-sm mt-1" style="margin: 4px 0 0;">For ongoing or open-ended work. Amara logs hours weekly. You approve the timesheet; we release the payment from the agreed budget cap.</div>
+                <div class="text-xs muted mt-3">Hourly rate set by the freelancer · Weekly invoicing</div>
               </div>
             </div>
           </label>
@@ -212,6 +224,50 @@
             <a href="./profile.html" class="btn btn-ghost btn-lg">← Back to Amara</a>
           </div>
         </div>
+
+        <!-- Step 2: Hourly engagement form (hidden by default) -->
+        <div id="step-hourly" style="display: none; margin-top: 32px;">
+          <h2 class="h-3 mb-4">Step 2 · Set up the hourly engagement</h2>
+
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div>
+              <label class="label">What's the work?</label>
+              <textarea class="input" id="hr-desc" rows="4" placeholder="A few sentences about the ongoing work — e.g. 'Help us redesign 5 to 10 products a week for our Shopify store.'"></textarea>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div>
+                <label class="label">Hourly rate (USD)</label>
+                <input class="input" id="hr-rate" type="number" min="0" step="5" placeholder="65"/>
+                <p class="muted text-xs mt-2">Amara's typical rate is $55–80/hr.</p>
+              </div>
+              <div>
+                <label class="label">Weekly budget cap</label>
+                <input class="input" id="hr-cap" type="number" min="0" step="50" placeholder="1500"/>
+                <p class="muted text-xs mt-2">Work pauses if hours go over this cap until you approve more.</p>
+              </div>
+            </div>
+            <div>
+              <label class="label">Expected weekly hours</label>
+              <input class="input" id="hr-hours" type="number" min="0" step="1" placeholder="20"/>
+            </div>
+          </div>
+
+          <!-- Hourly fee breakdown — uses api.fees.breakdown on weekly cap -->
+          <div id="ff-hourly-breakdown" class="card card-pad mt-6" style="background:var(--paper-2);">
+            <div class="text-xs muted" style="text-transform:uppercase;letter-spacing:0.12em;">Each week you pay</div>
+            <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;font-size:14px;">
+              <div style="display:flex;justify-content:space-between;"><span>Weekly cap</span><span id="hbk-listed">—</span></div>
+              <div style="display:flex;justify-content:space-between;color:var(--ink-4);"><span>Service fee (10%)</span><span id="hbk-buyerFee">—</span></div>
+              <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--line);font-weight:600;"><span>Max per week</span><span id="hbk-total">—</span></div>
+            </div>
+            <div class="muted text-xs mt-3">Only the hours Amara actually logs are charged. We hold the cap each week and release on your timesheet approval.</div>
+          </div>
+
+          <div class="mt-8 flex gap-3 flex-wrap">
+            <button id="ff-hire-hourly-submit" class="btn btn-primary btn-lg" type="button">Start the hourly engagement →</button>
+            <a href="./profile.html" class="btn btn-ghost btn-lg">← Back to Amara</a>
+          </div>
+        </div>
       </div>
 
       <!-- RIGHT — order summary + safety -->
@@ -254,18 +310,41 @@
 <div id="site-footer"></div>
 <script src="../assets/site.js"></script>
 <script>
-  // Toggle between package and custom flow
+  // Toggle between package / custom-milestones / hourly engagement modes.
+  // Default = package (today's flow). Custom and hourly are additive.
   const choices = document.querySelectorAll('.choice');
   const stepPackage = document.getElementById('step-package');
   const stepCustom = document.getElementById('step-custom');
+  const stepHourly = document.getElementById('step-hourly');
+
+  function showStep(mode) {
+    stepPackage.style.display = mode === 'package' ? '' : 'none';
+    stepCustom.style.display  = mode === 'custom'  ? '' : 'none';
+    stepHourly.style.display  = mode === 'hourly'  ? '' : 'none';
+  }
 
   choices.forEach(c => c.addEventListener('click', () => {
     choices.forEach(x => x.classList.remove('selected'));
     c.classList.add('selected');
-    const isCustom = c.id === 'choice-custom';
-    stepPackage.style.display = isCustom ? 'none' : '';
-    stepCustom.style.display = isCustom ? '' : 'none';
+    const mode = c.id === 'choice-custom' ? 'custom'
+               : c.id === 'choice-hourly' ? 'hourly'
+               : 'package';
+    showStep(mode);
   }));
+
+  // Paint the weekly cap breakdown when the cap field changes
+  function paintHourlyBreakdown() {
+    const cap = parseFloat((document.getElementById('hr-cap') || {}).value || '0') || 0;
+    const fees = (window.api && api.fees && api.fees.breakdown)
+      ? api.fees.breakdown(cap)
+      : { listed: cap, buyerFee: cap * 0.10, buyerPays: cap * 1.10 };
+    const fmt$ = n => '$' + Math.round(n).toLocaleString();
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('hbk-listed',   cap ? fmt$(fees.listed) : '—');
+    set('hbk-buyerFee', cap ? fmt$(fees.buyerFee) : '—');
+    set('hbk-total',    cap ? fmt$(fees.buyerPays) : '—');
+  }
+  document.getElementById('hr-cap')?.addEventListener('input', paintHourlyBreakdown);
 
   // Package picker → update summary
   const packages = document.querySelectorAll('.package');
@@ -402,6 +481,42 @@
       } catch (err) {
         btn.disabled = false; btn.textContent = `Send to ${freelancer.name.split(' ')[0]} →`;
         UI.toast(err.message || 'Could not send', { kind: 'error' });
+      }
+    });
+
+    // ---- Hourly engagement submit ----
+    document.getElementById('ff-hire-hourly-submit')?.addEventListener('click', async () => {
+      if (!UI.requireAuth('to start the hourly engagement')) return;
+      const desc  = (document.getElementById('hr-desc')?.value || '').trim();
+      const rate  = parseFloat(document.getElementById('hr-rate')?.value || '0') || 0;
+      const cap   = parseFloat(document.getElementById('hr-cap')?.value  || '0') || 0;
+      const hours = parseFloat(document.getElementById('hr-hours')?.value || '0') || 0;
+      if (!cap || !rate) {
+        UI.toast('Please set an hourly rate and a weekly budget cap.', { kind: 'warn' });
+        return;
+      }
+      const btn = document.getElementById('ff-hire-hourly-submit');
+      btn.disabled = true; btn.textContent = 'Starting…';
+      try {
+        // Create the engagement as an order with metadata describing hourly mode.
+        // (The Prisma schema in /docs models this as EngagementType.HOURLY +
+        //  Timesheet rows. For the demo we capture it on the order itself.)
+        const order = await api.orders.create({
+          sellerId: freelancer.id,
+          packageId: null, briefId: null,
+          title: `Hourly engagement with ${freelancer.name.split(' ')[0]}`,
+          description:
+            `${desc || 'Open-ended ongoing work.'}\n\n` +
+            `Hourly rate: $${rate}\n` +
+            `Weekly cap: $${cap}\n` +
+            `Expected hours/week: ${hours || '—'}`,
+          amount: cap, currency: 'USD', dueInDays: 7,
+        });
+        UI.toast(`Hourly engagement started. ${freelancer.name.split(' ')[0]} will log hours weekly.`, { kind: 'success', duration: 5000 });
+        setTimeout(() => { window.location = `/dashboard/orders/view?id=${order.id}`; }, 800);
+      } catch (err) {
+        btn.disabled = false; btn.textContent = 'Start the hourly engagement →';
+        UI.toast(err.message || 'Could not start the engagement', { kind: 'error' });
       }
     });
   });

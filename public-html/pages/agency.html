@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Our services — hire the Fashion Freelancing team direct · Fashion Freelancing</title>
+<meta name="description" content="Fashion Freelancing is a fashion-tech team that delivers the whole production pipeline — concept, technical, 3D, production QC, visual, web and marketplace integration. One brief, one team, one delivery." />
+<meta name="keywords" content="fashion tech agency, tech pack service, CLO3D virtual sampling, garment quality audit, fashion marketplace integration Amazon Myntra Flipkart, apparel product development agency" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" /></noscript>
+<link rel="stylesheet" href="../assets/styles.css" />
+<style>
+  /* Pillar sections — alternating tinted backgrounds like the homepage rhythm */
+  .pillar-section { padding: 80px 0; scroll-margin-top: 96px; }
+  .pillar-section + .pillar-section { border-top: 1px solid var(--line); }
+  .pillar-section.alt { background: var(--paper-2); }
+  .pillar-head { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: end; margin-bottom: 36px; }
+  @media (max-width: 860px) { .pillar-head { grid-template-columns: 1fr; gap: 18px; } }
+  .pillar-stack { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+  .pillar-item {
+    background: rgba(255,255,255,.72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 20px; transition: border-color .3s var(--easing), transform .3s var(--easing), box-shadow .3s var(--easing);
+  }
+  .pillar-item:hover { border-color: var(--champagne); transform: translateY(-3px); box-shadow: var(--shadow-indigo); }
+  .pillar-item .ttl { font-weight: 600; font-size: 14.5px; color: var(--ink); }
+  .pillar-item .sub { color: var(--ink-4); font-size: 13px; margin-top: 4px; line-height: 1.5; }
+  .pillar-item .stack { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .pillar-item .stack span {
+    background: var(--paper-2); border: 1px solid var(--line); border-radius: 5px;
+    padding: 2px 7px; font-size: 11px; color: var(--ink-4); font-weight: 500;
+  }
+
+  /* Capability strip — software / certifications */
+  .cap-strip { display: flex; flex-wrap: wrap; gap: 8px; max-width: 760px; }
+  .cap-chip { display: inline-flex; align-items: center; gap: 7px;
+    background: #fff; border: 1px solid var(--line); border-radius: 999px;
+    padding: 7px 14px 7px 9px; font-size: 13px; font-weight: 500; color: var(--ink-3);
+  }
+  .cap-chip .dot {
+    width: 20px; height: 20px; border-radius: 999px;
+    background: var(--grad); color: #fff; font-size: 10px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+
+  /* Process timeline */
+  .timeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; position: relative; margin-top: 36px; }
+  @media (max-width: 860px) { .timeline { grid-template-columns: 1fr; gap: 18px; } }
+  .timeline-step {
+    padding: 22px 18px; position: relative;
+    border-right: 1px solid var(--line);
+  }
+  .timeline-step:last-child { border-right: 0; }
+  @media (max-width: 860px) { .timeline-step { border-right: 0; border-bottom: 1px solid var(--line); padding: 18px 0; } .timeline-step:last-child { border-bottom: 0; } }
+  .timeline-step .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 10px;
+    background: var(--grad); color: #fff; font-weight: 700; font-size: 14px;
+    margin-bottom: 12px;
+  }
+  .timeline-step .ttl { font-weight: 600; font-size: 14.5px; color: var(--ink); }
+  .timeline-step .sub { color: var(--ink-4); font-size: 13px; margin-top: 6px; line-height: 1.5; }
+
+  /* Contact form */
+  .contact-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 36px; align-items: start; }
+  @media (max-width: 860px) { .contact-grid { grid-template-columns: 1fr; gap: 24px; } }
+  .contact-form { display: grid; gap: 14px; }
+  .contact-form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 540px) { .contact-form .row { grid-template-columns: 1fr; } }
+  .contact-form label { display: block; }
+  .contact-form .label { font-size: 12px; font-weight: 600; color: var(--ink-3); margin-bottom: 6px; letter-spacing: .02em; text-transform: uppercase; }
+  .contact-aside { background: linear-gradient(135deg, rgba(110,86,240,.06), rgba(43,168,232,.04));
+    border: 1px solid var(--line); border-radius: 18px; padding: 28px; }
+  .contact-aside ul { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 12px; }
+  .contact-aside li { display: flex; gap: 10px; font-size: 14px; color: var(--ink-3); line-height: 1.6; }
+  .contact-aside li span:first-child {
+    flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px;
+    background: var(--grad); color: #fff; font-size: 12px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+
+  /* Quick stats grid — collapse to 2 columns on mobile */
+  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:0; border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff; }
+  .stats-grid > div { padding:24px; text-align:center; border-right:1px solid var(--line); }
+  .stats-grid > div:last-child { border-right:0; }
+  @media (max-width: 700px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .stats-grid > div:nth-child(2) { border-right:0; }
+    .stats-grid > div:nth-child(-n+2) { border-bottom:1px solid var(--line); }
+  }
+
+  /* "Sent" success card after form submit */
+  .sent-card {
+    background: linear-gradient(135deg, rgba(110,86,240,.08), rgba(43,168,232,.06));
+    border: 1px solid var(--champagne-100); border-radius: 18px; padding: 32px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div id="site-nav" data-current="agency"></div>
+
+<!-- ====================================================
+     HERO
+     ==================================================== -->
+<section class="fx-stage" style="padding: 88px 0 40px;">
+  <span class="fx-orb v lg" style="top:-220px;left:-160px;"></span>
+  <span class="fx-orb c md" style="top:-160px;right:-140px;animation-delay:-8s;"></span>
+  <div class="container reveal" style="max-width: 920px;">
+    <div style="text-align:center;">
+      <span class="eyebrow" style="margin-bottom:14px;">Hire our team direct</span>
+      <h1 class="h-display">Fashion Freelancing is a <span class="display-italic">fashion-tech team</span>.</h1>
+      <p class="lead mt-6" style="font-size:18px;max-width:700px;margin:14px auto 0;">
+        We build the whole pipeline for fashion brands and apparel exporters — from concept to factory-ready files to marketplace launch.
+        One team, one delivery, one accountable lead.
+      </p>
+      <div style="margin-top:30px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="./start.html?audience=brand" class="btn btn-primary btn-lg">Start a project →</a>
+        <a href="#contact" class="btn btn-ghost btn-lg">Book a discovery call →</a>
+      </div>
+      <p class="muted text-xs mt-4">Reply within 24 hours · NDA on request · No obligation</p>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================
+     QUICK STATS — credibility upfront
+     ==================================================== -->
+<section style="padding: 24px 0 48px;">
+  <div class="container">
+    <div class="stats-grid">
+      <div>
+        <div style="font-family:var(--font-display);font-size:32px;font-weight:700;letter-spacing:-0.02em;">38</div>
+        <div class="muted text-xs mt-1" style="text-transform:uppercase;letter-spacing:0.12em;">Services covered</div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-display);font-size:32px;font-weight:700;letter-spacing:-0.02em;">6</div>
+        <div class="muted text-xs mt-1" style="text-transform:uppercase;letter-spacing:0.12em;">Production stages</div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-display);font-size:32px;font-weight:700;letter-spacing:-0.02em;">24h</div>
+        <div class="muted text-xs mt-1" style="text-transform:uppercase;letter-spacing:0.12em;">Reply time</div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-display);font-size:32px;font-weight:700;letter-spacing:-0.02em;">100%</div>
+        <div class="muted text-xs mt-1" style="text-transform:uppercase;letter-spacing:0.12em;">NDA on request</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================
+     PILLAR 1 — CONCEPT & DESIGN
+     ==================================================== -->
+<section id="concept" class="pillar-section">
+  <div class="container">
+    <div class="pillar-head reveal">
+      <div>
+        <span class="eyebrow" style="margin-bottom:12px;">Pillar 01 · Concept &amp; design</span>
+        <h2 class="h-1">Trend, mood, <span class="display-italic">direction</span>.</h2>
+      </div>
+      <p class="lead" style="margin:0;">
+        We start where the sketch hasn't been drawn yet — trend forecasting, mood boards, capsule direction.
+        Senior fashion designers and creative directors with editorial backgrounds.
+      </p>
+    </div>
+
+    <div class="pillar-stack">
+      <div class="pillar-item"><div class="ttl">Trend forecasting</div><div class="sub">Season-ahead direction, colour story, silhouette outlooks.</div><div class="stack"><span>WGSN-informed</span><span>AI prompt</span></div></div>
+      <div class="pillar-item"><div class="ttl">Creative direction</div><div class="sub">Brand worlds, campaigns, art direction across collections.</div></div>
+      <div class="pillar-item"><div class="ttl">Fashion illustration</div><div class="sub">Hand-drawn and digital fashion art, line work, lookbook drops.</div><div class="stack"><span>Procreate</span><span>Photoshop</span></div></div>
+      <div class="pillar-item"><div class="ttl">AI moodboards &amp; prompts</div><div class="sub">AI-assisted concept exploration with brand-locked style.</div><div class="stack"><span>SDXL</span><span>Claude</span></div></div>
+      <div class="pillar-item"><div class="ttl">Textile design</div><div class="sub">Prints, patterns, surface design, recolour and repeat.</div><div class="stack"><span>Illustrator</span><span>NedGraphics</span></div></div>
+      <div class="pillar-item"><div class="ttl">Fashion design</div><div class="sub">Womenswear, menswear, streetwear, knit. Capsule or full collection.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================
+     PILLAR 2 — TECHNICAL DESIGN (the high-value layer)
+     ==================================================== -->
+<section id="technical" class="pillar-section alt">
+  <div class="container">
+    <div class="pillar-head reveal">
+      <div>
+        <span class="eyebrow" style="margin-bottom:12px;">Pillar 02 · Technical design</span>
+        <h2 class="h-1">Files that hit the factory <span class="display-italic">clean</span>.</h2>
+      </div>
+      <p class="lead" style="margin:0;">
+        Tech packs, patterns, CAD, grading. The high-value layer where brands lose money when freelancers send broken files.
+        We don't.
+      </p>
+    </div>
+
+    <div class="pillar-stack">
+      <div class="pillar-item"><div class="ttl">Tech pack design</div><div class="sub">Front / back / side flats, BOM, construction details, measurement chart.</div><div class="stack"><span>Illustrator</span><span>Excel</span></div></div>
+      <div class="pillar-item"><div class="ttl">Pattern making</div><div class="sub">Block patterns from scratch or from a fit sample. Adult and kids.</div><div class="stack"><span>Optitex</span><span>Tukatech</span><span>Lectra</span></div></div>
+      <div class="pillar-item"><div class="ttl">CAD &amp; CAM</div><div class="sub">Digital pattern grading, marker making, fabric utilisation optimisation.</div><div class="stack"><span>AccuMark</span><span>Optitex</span></div></div>
+      <div class="pillar-item"><div class="ttl">Technical designer</div><div class="sub">Full technical lead for a season — fits, comments, factory comms.</div></div>
+      <div class="pillar-item"><div class="ttl">Jacquard &amp; Dobby</div><div class="sub">Weave structures, repeat engineering, mill-grade files.</div><div class="stack"><span>NedGraphics</span><span>DesignKnit</span></div></div>
+      <div class="pillar-item"><div class="ttl">Screen color separation</div><div class="sub">Films for screen printing — channel separation, halftone, trapping.</div><div class="stack"><span>Photoshop</span></div></div>
+      <div class="pillar-item"><div class="ttl">Graphic design</div><div class="sub">Brand-aligned prints, logos, placement graphics, hangtag design.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================
+     PILLAR 3 — 3D & SAMPLING
+     ==================================================== -->
+<section id="sampling" class="pillar-section">
+  <div class="container">
+    <div class="pillar-head reveal">
+      <div>
+        <span class="eyebrow" style="margin-bottom:12px;">Pillar 03 · 3D virtual sampling</span>
+        <h2 class="h-1">Fit it <span class="display-italic">digitally</span> before you cut fabric.</h2>
+      </div>
+      <p class="lead" style="margin:0;">
+        Digital twins of your garments in CLO3D or Browzwear — fit, drape, fabric stretch.
+        Saves thousands per season on physical samples and cuts the dev cycle in half.
+      </p>
+    </div>
+
+    <div class="pillar-stack">
+      <div class="pillar-item"><div class="ttl">3D virtual sampling</div><div class="sub">Digital fits across base size + grading check. Buyer-ready renders.</div><div class="stack"><span>CLO3D</span><span>Browzwear</span></div></div>
+      <div class="pillar-item"><div class="ttl">Digital fashion (metaverse)</div><div class="sub">3D garments for digital twins, AR try-on, gaming skins.</div><div class="stack"><span>CLO3D</span><span>Blender</span></div></div>
+      <div class="pillar-item"><div class="ttl">Fabric drape simulation</div><div class="sub">Physical fabric property capture; realistic CLO simulation.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================
+     PILLAR 4 — PRODUCTION & QC
+     ==================================================== -->
+<section id="production" class="pillar-section alt">
+  <div class="container">
+    <div class="pillar-head reveal">
+      <div>
+        <span class="eyebrow" style="margin-bottom:12px;">Pillar 04 · Production &amp; QC</span>
+        <h2 class="h-1">From sample to <span class="display-italic">shipped</span>.</h2>
+      </div>
+      <p class="lead" style="margin:0;">
+        Sourcing, third-party inspection, social compliance, lab testing, logistics.
+        We protect the bulk order so the brand doesn't pay for a bad shipment.
+      </p>
+    </div>
+
+    <div class="pillar-stack">
+      <div class="pillar-item"><div class="ttl">Quality technician / QA</div><div class="sub">Remote QA workflows, AQL sampling, defect classification.</div></div>
+      <div class="pillar-item"><div class="ttl">Third-party inspection</div><div class="sub">On-site at factory before shipment, with photo report and pass/fail.</div></div>
+      <div class="pillar-item"><div class="ttl">Social compliance audit</div><div class="sub">SA8000, WRAP, BSCI prep and remediation guidance.</div></div>
+      <div class="pillar-item"><div class="ttl">Testing &amp; lab</div><div class="sub">Fabric and garment lab testing — shrinkage, colourfast, fibre.</div></div>
+      <div class="pillar-item"><div class="ttl">Sourcing &amp; merchandising</div><div class="sub">Factory finding, MOQ negotiation, production timeline build.</div></div>
+      <div class="pillar-item"><div class="ttl">Sustainability consulting</div><div class="sub">Material swaps, supply-chain audits, GOTS / OEKO-TEX prep.</div></div>
+      <div class="pillar-item"><div class="ttl">Logistics &amp; freight</div><div class="sub">Factory → warehouse routing, customs paperwork, FBA prep.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================
+     PILLAR 5 — VISUAL & MEDIA
+     ==================================================== -->
+<section id="visual" class="pillar-section">
+  <div class="container">
+    <div class="pillar-head reveal">
+      <div>
+        <span class="eyebrow" style="margin-bottom:12px;">Pillar 05 · Visual &amp; media</span>
+        <h2 class="h-1">The shoot, the model, the <span class="display-italic">final image</span>.</h2>
+      </div>
+      <p class="lead" style="margin:0;">
+        Studio and on-location: photography, video, models, makeup, set.
+        Editorial through e-commerce — same team, different brief.
+      </p>
+    </div>
+
+    <div class="pillar-stack">
+      <div class="pillar-item"><div class="ttl">Fashion photography</div><div class="sub">Editorial, e-commerce, lookbook. Studio or on-location.</div></div>
+      <div class="pillar-item"><div class="ttl">Fashion videography</div><div class="sub">Hero films, reels, behind-the-scenes, drop teasers.</div></div>
+      <div class="pillar-item"><div class="ttl">Ad film &amp; commercials</div><div class="sub">Concept to delivery with director, DP, post.</div></div>
+      <div class="pillar-item"><div class="ttl">Visual merchandising</div><div class="sub">Window concepts, store layouts, prop sourcing.</div></div>
+      <div class="pillar-item"><div class="ttl">Fashion models</div><div class="sub">Curated talent — editorial, runway, e-commerce, fittings.</div></div>
+      <div class="pillar-item"><div class="ttl">Makeup &amp; styling</div><div class="sub">Editorial, runway, advertising. Hair / makeup / styling crew.</div></div>
+      <div class="pillar-item"><div class="ttl">Costume designer</div><div class="sub">Film, TV, theatre, music video — period and contemporary.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================
+     PILLAR 6 — WEB & MARKETPLACE
+     ==================================================== -->
+<section id="web" class="pillar-section alt">
+  <div class="container">
+    <div class="pillar-head reveal">
+      <div>
+        <span class="eyebrow" style="margin-bottom:12px;">Pillar 06 · Web &amp; marketplace</span>
+        <h2 class="h-1">Storefronts and <span class="display-italic">marketplace sync</span>.</h2>
+      </div>
+      <p class="lead" style="margin:0;">
+        We build the storefront, integrate the marketplaces, and run the AI catalog ops.
+        Amazon, Flipkart, Myntra, Tata CLiQ, Shopify — one inventory, four channels.
+      </p>
+    </div>
+
+    <div class="pillar-stack">
+      <div class="pillar-item"><div class="ttl">Marketplace integration</div><div class="sub">Amazon / Flipkart / Myntra / Tata CLiQ. Listings, inventory sync, order pull.</div><div class="stack"><span>Seller APIs</span><span>Node</span></div></div>
+      <div class="pillar-item"><div class="ttl">AI catalog tagging</div><div class="sub">Auto-tag thousands of SKUs by colour, fit, material, occasion.</div><div class="stack"><span>CLIP</span><span>Claude</span></div></div>
+      <div class="pillar-item"><div class="ttl">AI trend forecasting</div><div class="sub">Custom LLM agents that surface seasonal direction from your sales data.</div></div>
+      <div class="pillar-item"><div class="ttl">Website developer</div><div class="sub">Storefronts, headless commerce, performance budgets, Cloudflare deploy.</div><div class="stack"><span>Next.js</span><span>Shopify</span><span>Astro</span></div></div>
+      <div class="pillar-item"><div class="ttl">UI/UX designer</div><div class="sub">Wireframes, design systems, Figma libraries, prototyping.</div><div class="stack"><span>Figma</span></div></div>
+      <div class="pillar-item"><div class="ttl">Shopify / e-commerce dev</div><div class="sub">Liquid templates, custom Shopify apps, headless storefronts.</div></div>
+      <div class="pillar-item"><div class="ttl">Fashion digital marketing</div><div class="sub">Performance ads, organic strategy, content + influencer.</div></div>
+      <div class="pillar-item"><div class="ttl">Fashion copywriting</div><div class="sub">Product copy, brand stories, press releases, marketplace listings.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================
+     SOFTWARE STACK
+     ==================================================== -->
+<section class="section">
+  <div class="container">
+    <div class="text-center reveal" style="max-width:680px;margin:0 auto 36px;">
+      <span class="eyebrow" style="margin-bottom:12px;">Our software stack</span>
+      <h2 class="h-2">What we ship <span class="display-italic">with</span>.</h2>
+      <p class="lead mt-3">Industry-standard tools across the production pipeline. We work in your file format, not ours.</p>
+    </div>
+
+    <div class="cap-strip reveal" style="margin:0 auto;justify-content:center;">
+      <span class="cap-chip"><span class="dot">A</span> Adobe Illustrator</span>
+      <span class="cap-chip"><span class="dot">P</span> Photoshop</span>
+      <span class="cap-chip"><span class="dot">3</span> CLO 3D</span>
+      <span class="cap-chip"><span class="dot">B</span> Browzwear</span>
+      <span class="cap-chip"><span class="dot">O</span> Optitex</span>
+      <span class="cap-chip"><span class="dot">T</span> Tukatech</span>
+      <span class="cap-chip"><span class="dot">L</span> Lectra</span>
+      <span class="cap-chip"><span class="dot">A</span> AccuMark</span>
+      <span class="cap-chip"><span class="dot">N</span> NedGraphics</span>
+      <span class="cap-chip"><span class="dot">C</span> Centric PLM</span>
+      <span class="cap-chip"><span class="dot">F</span> Figma</span>
+      <span class="cap-chip"><span class="dot">N</span> Next.js</span>
+      <span class="cap-chip"><span class="dot">S</span> Shopify</span>
+      <span class="cap-chip"><span class="dot">x</span> Excel · spec sheets</span>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================
+     HOW WE WORK — 5-step process
+     ==================================================== -->
+<section class="section" style="background:var(--paper-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);">
+  <div class="container">
+    <div class="text-center reveal" style="max-width:680px;margin:0 auto 12px;">
+      <span class="eyebrow" style="margin-bottom:12px;">How we work</span>
+      <h2 class="h-2">Five steps, <span class="display-italic">honestly accountable</span>.</h2>
+    </div>
+
+    <div class="timeline reveal">
+      <div class="timeline-step">
+        <div class="num">1</div>
+        <div class="ttl">Discovery</div>
+        <div class="sub">15-min call or written intake. We confirm scope, timeline, budget bracket. NDA if needed.</div>
+      </div>
+      <div class="timeline-step">
+        <div class="num">2</div>
+        <div class="ttl">Proposal</div>
+        <div class="sub">A clean SOW with milestones, deliverables, named lead and contract shape — fixed or hourly.</div>
+      </div>
+      <div class="timeline-step">
+        <div class="num">3</div>
+        <div class="ttl">Kick-off</div>
+        <div class="sub">Brand assets in, Slack / WhatsApp channel open, first milestone work begins same week.</div>
+      </div>
+      <div class="timeline-step">
+        <div class="num">4</div>
+        <div class="ttl">Deliver in stages</div>
+        <div class="sub">Each milestone goes through review + revisions. Payment only on your sign-off, per stage.</div>
+      </div>
+      <div class="timeline-step">
+        <div class="num">5</div>
+        <div class="ttl">Hand-off</div>
+        <div class="sub">Final files, factory comms, marketplace sync. We stay on call for 14 days post-delivery.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================
+     CONTACT — book a discovery call
+     ==================================================== -->
+<section id="contact" class="section">
+  <div class="container">
+    <div class="contact-grid">
+      <!-- left: form -->
+      <div class="reveal">
+        <span class="eyebrow" style="margin-bottom:12px;">Get in touch</span>
+        <h2 class="h-2">Book a <span class="display-italic">discovery call</span>.</h2>
+        <p class="lead mt-3">Tell us what you're building. A project manager replies within 24 hours.</p>
+
+        <form id="ff-contact-form" class="contact-form mt-8" autocomplete="on">
+          <div class="row">
+            <label>
+              <span class="label">Your name</span>
+              <input class="input" type="text" name="name" required placeholder="Full name"/>
+            </label>
+            <label>
+              <span class="label">Company</span>
+              <input class="input" type="text" name="company" placeholder="Brand or factory name"/>
+            </label>
+          </div>
+          <div class="row">
+            <label>
+              <span class="label">Email</span>
+              <input class="input" type="email" name="email" required placeholder="you@brand.com"/>
+            </label>
+            <label>
+              <span class="label">Phone (optional)</span>
+              <input class="input" type="tel" name="phone" placeholder="+91 / +1 / +44…"/>
+            </label>
+          </div>
+          <label>
+            <span class="label">Which pillar do you need?</span>
+            <select class="input" name="pillar">
+              <option value="">Pick one (or 'multiple')</option>
+              <option value="concept">Concept &amp; design</option>
+              <option value="technical">Technical design (tech packs, patterns, CAD)</option>
+              <option value="sampling">3D virtual sampling (CLO3D / Browzwear)</option>
+              <option value="production">Production &amp; QC (audits, inspection, sourcing)</option>
+              <option value="visual">Visual &amp; media (photo / video / model / makeup)</option>
+              <option value="web">Web &amp; marketplace (Amazon / Myntra / Shopify)</option>
+              <option value="multiple">Multiple pillars — full project</option>
+            </select>
+          </label>
+          <label>
+            <span class="label">Tell us about your project</span>
+            <textarea class="input" name="message" rows="5" required placeholder="What are you building? What's the timeline? Have you done any of this before?"></textarea>
+          </label>
+          <button type="submit" class="btn btn-primary btn-lg">Send — get a reply in 24h →</button>
+          <p class="muted text-xs">We'll never share your details. NDA available on request.</p>
+        </form>
+      </div>
+
+      <!-- right: trust aside -->
+      <aside class="contact-aside reveal">
+        <h3 class="h-3" style="font-size:20px;">Prefer the structured intake?</h3>
+        <p class="lead text-sm mt-2">The AI intake walks you through 5 questions and routes the brief to the right pillar lead. Takes 90 seconds.</p>
+        <a href="./start.html?audience=brand" class="btn btn-primary mt-4" style="width:100%;">Start the intake →</a>
+
+        <ul style="margin-top:28px;border-top:1px solid var(--line);padding-top:24px;">
+          <li><span>✓</span><span><strong>Reply within 24 hours.</strong> Usually same day during business hours.</span></li>
+          <li><span>✓</span><span><strong>NDA on request.</strong> Sent and signed before the first call if your project needs it.</span></li>
+          <li><span>✓</span><span><strong>No obligation.</strong> Discovery is free; proposals come with a clean SOW you can shop around.</span></li>
+          <li><span>✓</span><span><strong>India + global delivery.</strong> Studio time zones friendly to EU, US, JP.</span></li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+<script src="../assets/site.js"></script>
+<script>
+  // ---- Contact form handler (demo) ----
+  // Stores the lead in localStorage so it's visible during demo flows.
+  // When the email pipeline is wired, swap the body of this handler for a
+  // POST to /api/leads — the FormData fields stay identical.
+  window.onFFReady(() => {
+    const form = document.getElementById('ff-contact-form');
+    if (!form) return;
+    const submit = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries());
+      // Validate the basics
+      if (!data.name || !data.email || !data.message) {
+        UI && UI.toast('Please fill in name, email and message.', { kind: 'warn' });
+        return;
+      }
+
+      submit.disabled = true;
+      submit.textContent = 'Sending…';
+
+      // Persist locally so demo flows can show it; structured to match what
+      // a real backend would receive.
+      const lead = {
+        ...data,
+        receivedAt: new Date().toISOString(),
+        source: 'agency-page-contact-form',
+      };
+      try {
+        const existing = JSON.parse(localStorage.getItem('ff_leads') || '[]');
+        existing.push(lead);
+        localStorage.setItem('ff_leads', JSON.stringify(existing));
+      } catch (_) { /* localStorage may be off */ }
+
+      // For now we surface the payload in the console — wire to email later.
+      console.info('[Fashion Freelancing] Lead captured:', lead);
+
+      // Swap the form for a success card
+      const container = form.parentElement;
+      const sent = document.createElement('div');
+      sent.className = 'sent-card';
+      sent.innerHTML =
+        '<div style="font-size:42px;margin-bottom:12px;">✓</div>' +
+        '<h3 class="h-3">Thanks, ' + (data.name || '').split(' ')[0] + '. Brief received.</h3>' +
+        '<p class="lead mt-2" style="font-size:15px;">A project manager will reply within 24 hours at <strong>' + data.email + '</strong>.</p>' +
+        '<p class="muted text-xs mt-4">In a hurry? <a href="./start.html?audience=brand" class="ulink" style="color:var(--ink);font-weight:600;">Run the AI intake →</a></p>';
+      container.replaceChild(sent, form);
+      UI && UI.toast('Brief received — we’ll reply within 24 hours.', { kind: 'success', duration: 5000 });
+    });
+  });
+</script>
+</body>
+</html>

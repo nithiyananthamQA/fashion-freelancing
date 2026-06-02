@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Start a project · Fashion Freelancing</title>
+<meta name="description" content="Quick 5-question intake. Tell us what you're building and we'll route you to the right experts: tech packs, 3D, AI, marketplace integration, quality audits." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" /></noscript>
+<link rel="stylesheet" href="../assets/styles.css" />
+<style>
+  /* Chat-styled intake — deterministic 5-question flow. NOT pretending to
+     be an LLM. The output JSON matches /docs/02-ai-intake-agent.md so the
+     LLM swap later is a one-line submit-handler change. */
+  body { background: var(--paper); }
+  .chat-shell { max-width: 760px; margin: 32px auto; padding: 0 20px 64px; }
+  .chat-card {
+    background: rgba(255,255,255,.72);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 22px 22px 18px;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-1);
+  }
+  @media (min-width:768px){ .chat-card { padding: 30px 32px 24px; } }
+  .progress { display:flex; gap: 5px; margin-bottom: 22px; }
+  .progress span { flex:1; height: 3px; border-radius: 99px; background: var(--ink-8); transition: background .4s; }
+  .progress span.done { background: var(--champagne); }
+  .bot-row { display:flex; gap:14px; align-items:flex-start; margin-bottom: 6px; }
+  .bot-av {
+    width:38px; height:38px; border-radius:99px;
+    background: var(--grad);
+    color:#fff; display:flex; align-items:center; justify-content:center;
+    font-weight: 600; font-size: 15px; flex-shrink:0;
+    box-shadow: 0 6px 16px -6px rgba(84,104,245,.5);
+  }
+  .bot-bubble {
+    background: var(--paper-3); color: var(--ink);
+    border-radius: 14px 14px 14px 4px;
+    padding: 13px 17px; font-size: 15.5px;
+    max-width: 540px;
+  }
+  .bot-bubble strong { font-weight: 600; }
+  .typing { display:inline-flex; gap: 3px; padding: 4px 0; }
+  .typing span {
+    width: 6px; height: 6px; border-radius: 99px; background: var(--ink-5);
+    animation: typing 1s ease-in-out infinite;
+  }
+  .typing span:nth-child(2){ animation-delay: .15s }
+  .typing span:nth-child(3){ animation-delay: .30s }
+  @keyframes typing { 0%,80%,100% { opacity:.3; transform:translateY(0) } 40% { opacity:1; transform:translateY(-2px) } }
+
+  .answers { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 520px){ .answers { grid-template-columns: 1fr; } }
+  .a-btn {
+    text-align: left; padding: 14px 16px;
+    background: #fff; border: 1px solid var(--line); border-radius: 14px;
+    font: inherit; font-size: 14.5px; color: var(--ink); cursor: pointer;
+    transition: border-color .25s var(--easing), transform .25s var(--easing), box-shadow .25s var(--easing);
+  }
+  .a-btn:hover { border-color: var(--champagne); transform: translateY(-2px); box-shadow: var(--shadow-indigo); }
+  .a-btn .sub { display: block; font-size: 12.5px; color: var(--ink-5); margin-top: 4px; font-weight: 400; }
+  .a-back {
+    margin-top: 14px; background: none; border: 0; color: var(--ink-5);
+    font-size: 13px; cursor: pointer;
+  }
+  .a-back:hover { color: var(--ink); }
+
+  .user-row { display:flex; gap:14px; align-items:flex-start; justify-content:flex-end; margin-top: 8px; }
+  .user-bubble {
+    background: var(--ink); color: #fff;
+    border-radius: 14px 14px 4px 14px;
+    padding: 11px 16px; font-size: 14.5px; max-width: 540px;
+  }
+
+  .summary {
+    margin-top: 22px; padding: 22px;
+    background: linear-gradient(135deg, rgba(110,86,240,.07), rgba(43,168,232,.05));
+    border: 1px solid var(--champagne-100);
+    border-radius: 16px;
+  }
+  .summary h3 { font-size: 18px; margin-bottom: 8px; }
+  .summary dl { display:grid; grid-template-columns: 130px 1fr; gap: 8px 14px; margin: 14px 0 0; font-size: 14px; }
+  .summary dt { color: var(--ink-5); }
+  .summary dd { margin: 0; }
+</style>
+</head>
+<body>
+
+<div id="site-nav"></div>
+
+<div class="chat-shell">
+
+  <!-- Hero copy -->
+  <div style="text-align:center;margin-bottom:24px;">
+    <span class="eyebrow" style="margin-bottom:10px;">Quick project intake</span>
+    <h1 class="h-1" style="margin-top:6px;">Tell us what you're <span class="display-italic">building</span>.</h1>
+    <p class="lead mt-3" style="max-width:520px;margin:12px auto 0;">Five quick questions. We'll route you to the right experts, the right pricing, and the right contract shape — fixed or hourly.</p>
+    <p class="text-xs muted mt-2" style="max-width:520px;margin:8px auto 0;">This is a deterministic intake — buttons, not a chatbot. When we wire up the LLM later, the same questions and the same output JSON stay.</p>
+  </div>
+
+  <!-- The chat -->
+  <div class="chat-card">
+    <div class="progress" id="intake-progress" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div id="intake-stream" aria-live="polite"></div>
+  </div>
+
+  <p class="text-xs muted text-center mt-6">
+    Already know what you need? <a href="./marketplace.html" class="ulink" style="color:var(--ink);font-weight:600;">Browse the marketplace →</a>
+  </p>
+</div>
+
+<div id="site-footer"></div>
+<script src="../assets/site.js"></script>
+<script>
+(function () {
+  // -------------------------------------------------------------
+  //  The 5 questions. Each question:
+  //    field      — key on the intake JSON
+  //    botText    — what the bot "says"
+  //    options    — array of { label, value, sub? }; value is what we store
+  //  Output schema matches /docs/02-ai-intake-agent.md exactly.
+  // -------------------------------------------------------------
+  const QUESTIONS = [
+    {
+      field: 'clientType',
+      botText: 'Hi! What kind of business are you running?',
+      options: [
+        { value: 'startup',           label: 'I am a fashion brand / startup', sub: 'New collection, DTC store, early stage' },
+        { value: 'established_brand', label: 'Established brand',              sub: 'Multi-season label, retail or wholesale' },
+        { value: 'apparel_exporter',  label: 'Apparel exporter',               sub: 'Garment export house, factory floor' },
+        { value: 'industrial_factory',label: 'Industrial textile factory',     sub: 'Mill, weaving, knit, dye-house' },
+      ],
+    },
+    {
+      field: 'neededEcosystem',
+      botText: "Got it. Which piece of the puzzle do you need most help with today?",
+      // multi-select: we let users tap several, then submit
+      multi: true,
+      options: [
+        { value: 'tech_pack',                label: 'Tech packs & specs',         sub: 'Production-ready files for factories' },
+        { value: '3d_clo3d',                 label: '3D virtual sampling',        sub: 'CLO3D / Browzwear digital fitting' },
+        { value: 'ai_trend_forecast',        label: 'AI / LLM agent',             sub: 'Trend forecasting, catalog tagging' },
+        { value: 'ecom_amazon',              label: 'Marketplace integration',    sub: 'Amazon, Flipkart, Myntra, Tata CLiQ' },
+        { value: 'textile_jacquard',         label: 'Jacquard / Dobby / textile', sub: 'Mill-grade weave engineering' },
+        { value: 'quality_audit',            label: 'Quality audit / inspection', sub: 'Third-party QC, social compliance' },
+        { value: 'photography',              label: 'Photo / video',              sub: 'Editorial, e-commerce, lifestyle' },
+        { value: 'web_storefront',           label: 'Website / Shopify store',    sub: 'Storefront, UX, performance' },
+      ],
+    },
+    {
+      field: 'engagementType',
+      botText: 'How do you want to engage someone?',
+      options: [
+        { value: 'fixed_package',    label: 'Fixed package',     sub: 'Off-the-shelf — fastest start' },
+        { value: 'fixed_milestone',  label: 'Fixed milestones',  sub: 'Custom project, paid per stage' },
+        { value: 'hourly',           label: 'Hourly tracked',    sub: 'Open-ended, weekly timesheet' },
+        { value: 'retainer',         label: 'Monthly retainer',  sub: 'Ongoing work each month' },
+      ],
+    },
+    {
+      field: 'budgetBracket',
+      botText: 'Roughly what budget bracket are we working with?',
+      options: [
+        { value: 'under_1k',   label: 'Under $1,000' },
+        { value: '1k_5k',      label: '$1,000 – $5,000' },
+        { value: '5k_25k',     label: '$5,000 – $25,000' },
+        { value: '25k_100k',   label: '$25,000 – $100,000' },
+        { value: '100k_plus',  label: '$100,000+' },
+      ],
+    },
+    {
+      field: 'timeline',
+      botText: 'And when do you need this?',
+      options: [
+        { value: 'this_week',      label: 'This week',         sub: 'Urgent — pays a small rush fee' },
+        { value: 'this_month',     label: 'Within a month' },
+        { value: 'next_3_months',  label: 'Within 3 months' },
+        { value: 'this_quarter',   label: 'This quarter' },
+        { value: 'no_rush',        label: 'No rush' },
+      ],
+    },
+  ];
+
+  // -------------------------------------------------------------
+  //  Audience pre-fill — when arriving from the homepage hero,
+  //  ?audience= can prefill Q1 (clientType) so the bot greets accordingly.
+  // -------------------------------------------------------------
+  const AUDIENCE_MAP = {
+    brand:    'startup',
+    exporter: 'apparel_exporter',
+    factory:  'industrial_factory',
+    tech:     'startup',  // tech client routes through the startup flow
+  };
+
+  // -------------------------------------------------------------
+  //  State + render
+  // -------------------------------------------------------------
+  const params  = new URLSearchParams(location.search);
+  const audience = params.get('audience');
+  const intake = {
+    clientType: null,
+    neededEcosystem: [],
+    engagementType: null,
+    budgetBracket: null,
+    timeline: null,
+    currency: 'USD',
+    primaryServiceSlug: null,
+    suggestedRoadmap: [],
+    languagePreference: 'en',
+    summary: '',
+    rawTurns: [],
+  };
+  let step = 0;
+  const stream = document.getElementById('intake-stream');
+  const progressEl = document.getElementById('intake-progress');
+
+  function paintProgress() {
+    progressEl.querySelectorAll('span').forEach((s, i) => {
+      s.classList.toggle('done', i < step);
+    });
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+  }
+
+  function botBubble(text, withTyping) {
+    const row = document.createElement('div');
+    row.className = 'bot-row';
+    row.innerHTML =
+      '<div class="bot-av">FF</div>' +
+      '<div class="bot-bubble">' +
+        (withTyping
+          ? '<span class="typing"><span></span><span></span><span></span></span>'
+          : esc(text)) +
+      '</div>';
+    stream.appendChild(row);
+    if (withTyping) {
+      setTimeout(() => {
+        row.querySelector('.bot-bubble').textContent = text;
+      }, 700);
+    }
+    return row;
+  }
+
+  function userBubble(text) {
+    const row = document.createElement('div');
+    row.className = 'user-row';
+    row.innerHTML =
+      '<div class="user-bubble">' + esc(text) + '</div>';
+    stream.appendChild(row);
+    intake.rawTurns.push({ role: 'user', content: text });
+  }
+
+  function renderOptions(q) {
+    const wrap = document.createElement('div');
+    wrap.className = 'answers';
+    wrap.style.opacity = '0';
+    wrap.style.transform = 'translateY(8px)';
+    wrap.style.transition = 'opacity .35s var(--easing), transform .35s var(--easing)';
+
+    if (q.multi) {
+      // Render checkboxes-as-chips + a Continue button
+      q.options.forEach(opt => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'a-btn';
+        b.dataset.value = opt.value;
+        b.innerHTML = '<strong>' + esc(opt.label) + '</strong>' +
+          (opt.sub ? '<span class="sub">' + esc(opt.sub) + '</span>' : '');
+        b.addEventListener('click', () => {
+          const arr = intake[q.field];
+          const i = arr.indexOf(opt.value);
+          if (i >= 0) { arr.splice(i, 1); b.style.borderColor = ''; b.style.background = '#fff'; }
+          else { arr.push(opt.value); b.style.borderColor = 'var(--champagne)'; b.style.background = 'var(--champagne-50)'; }
+          continueBtn.disabled = arr.length === 0;
+        });
+        wrap.appendChild(b);
+      });
+      const continueBtn = document.createElement('button');
+      continueBtn.type = 'button';
+      continueBtn.className = 'btn btn-primary';
+      continueBtn.style.gridColumn = '1 / -1';
+      continueBtn.style.marginTop = '6px';
+      continueBtn.textContent = 'Continue →';
+      continueBtn.disabled = true;
+      continueBtn.addEventListener('click', () => {
+        const chosen = intake[q.field];
+        // Confirm in user voice
+        const labels = q.options.filter(o => chosen.includes(o.value)).map(o => o.label);
+        userBubble(labels.join(' · '));
+        wrap.remove();
+        nextStep();
+      });
+      wrap.appendChild(continueBtn);
+    } else {
+      q.options.forEach(opt => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'a-btn';
+        b.innerHTML = '<strong>' + esc(opt.label) + '</strong>' +
+          (opt.sub ? '<span class="sub">' + esc(opt.sub) + '</span>' : '');
+        b.addEventListener('click', () => {
+          intake[q.field] = opt.value;
+          userBubble(opt.label);
+          wrap.remove();
+          nextStep();
+        });
+        wrap.appendChild(b);
+      });
+    }
+
+    if (step > 0) {
+      const back = document.createElement('button');
+      back.type = 'button';
+      back.className = 'a-back';
+      back.textContent = '← Back';
+      back.addEventListener('click', () => {
+        step--; paintProgress();
+        // Remove the last bot row + answers we're showing
+        wrap.remove();
+        // Also remove the last user bubble and bot question
+        const rows = stream.querySelectorAll('.bot-row, .user-row');
+        for (let i = 0; i < 2 && rows.length; i++) {
+          rows[rows.length - 1 - i]?.remove();
+        }
+        askQuestion(QUESTIONS[step]);
+      });
+      wrap.appendChild(back);
+    }
+
+    stream.appendChild(wrap);
+    // animate in
+    requestAnimationFrame(() => { wrap.style.opacity = '1'; wrap.style.transform = 'none'; });
+  }
+
+  function askQuestion(q) {
+    paintProgress();
+    intake.rawTurns.push({ role: 'agent', content: q.botText });
+    botBubble(q.botText, true);
+    setTimeout(() => renderOptions(q), 900);
+  }
+
+  function nextStep() {
+    step++;
+    paintProgress();
+    if (step >= QUESTIONS.length) {
+      finish();
+      return;
+    }
+    setTimeout(() => askQuestion(QUESTIONS[step]), 350);
+  }
+
+  // -------------------------------------------------------------
+  //  Finish — build summary + JSON, deep-link to marketplace
+  // -------------------------------------------------------------
+  function inferPrimaryServiceSlug(ecosystem) {
+    // First-match wins from the order Dinesh prioritised
+    const map = {
+      tech_pack:                'tech-pack-designer',
+      '3d_clo3d':               '3d-fitting-clo3d',
+      ai_trend_forecast:        'ai-trend-forecast',
+      ecom_amazon:              'marketplace-integration',
+      textile_jacquard:         'jacquard-dobby',
+      quality_audit:            'quality-technician',
+      photography:              'fashion-photography',
+      web_storefront:           'fashion-website',
+    };
+    for (const eco of ecosystem) if (map[eco]) return map[eco];
+    return null;
+  }
+
+  function inferRoadmap(ecosystem) {
+    // Phases in the order they happen in production
+    const order = [
+      'ai_trend_forecast', 'tech_pack', '3d_clo3d',
+      'textile_jacquard', 'quality_audit', 'photography',
+      'web_storefront', 'ecom_amazon',
+    ];
+    return order.filter(p => ecosystem.includes(p));
+  }
+
+  function buildSummary() {
+    const audienceWord = {
+      startup:           'Fashion brand / startup',
+      established_brand: 'Established brand',
+      apparel_exporter:  'Apparel exporter',
+      industrial_factory:'Industrial textile factory',
+    }[intake.clientType] || 'Client';
+
+    const budgetLabel = {
+      under_1k:  'under $1k', '1k_5k': '$1k – $5k', '5k_25k': '$5k – $25k',
+      '25k_100k':'$25k – $100k', '100k_plus': '$100k+',
+    }[intake.budgetBracket] || intake.budgetBracket;
+
+    const timelineLabel = {
+      this_week: 'this week', this_month: 'within a month',
+      next_3_months: 'within 3 months', this_quarter: 'this quarter',
+      no_rush: 'no specific rush',
+    }[intake.timeline] || intake.timeline;
+
+    const ecoLabels = QUESTIONS[1].options
+      .filter(o => intake.neededEcosystem.includes(o.value))
+      .map(o => o.label.toLowerCase());
+
+    return audienceWord + ' looking for ' + ecoLabels.join(', ') +
+      '. Engagement: ' + (intake.engagementType || '').replace('_', ' ') +
+      '. Budget bracket ' + budgetLabel + ', timeline ' + timelineLabel + '.';
+  }
+
+  function finish() {
+    intake.primaryServiceSlug = inferPrimaryServiceSlug(intake.neededEcosystem);
+    intake.suggestedRoadmap  = inferRoadmap(intake.neededEcosystem);
+    intake.summary           = buildSummary();
+
+    // Persist locally so the matcher (next page) can read it
+    try { localStorage.setItem('ff_intake', JSON.stringify(intake)); } catch (_) {}
+
+    // Final bot turn
+    botBubble("Got everything I need. Here's the brief I'll send to the matcher.", true);
+
+    setTimeout(() => {
+      const summary = document.createElement('div');
+      summary.className = 'summary';
+      summary.innerHTML =
+        '<h3>Your project brief</h3>' +
+        '<p style="font-size:14.5px;color:var(--ink-3);line-height:1.55;">' + esc(intake.summary) + '</p>' +
+        '<dl>' +
+          '<dt>Type</dt><dd>' + esc(intake.clientType || '—') + '</dd>' +
+          '<dt>Needs</dt><dd>' + esc(intake.neededEcosystem.join(', ') || '—') + '</dd>' +
+          '<dt>Engagement</dt><dd>' + esc(intake.engagementType || '—') + '</dd>' +
+          '<dt>Budget</dt><dd>' + esc(intake.budgetBracket || '—') + '</dd>' +
+          '<dt>Timeline</dt><dd>' + esc(intake.timeline || '—') + '</dd>' +
+          (intake.primaryServiceSlug
+            ? '<dt>Best fit</dt><dd>' + esc(intake.primaryServiceSlug) + '</dd>' : '') +
+        '</dl>' +
+        '<div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;">' +
+          '<a href="./marketplace.html' +
+            (intake.primaryServiceSlug ? '?cat=' + encodeURIComponent(intake.primaryServiceSlug) : '') +
+            '" class="btn btn-primary">See matched freelancers →</a>' +
+          '<a href="./help.html#contact" class="btn btn-ghost">Talk to a human first</a>' +
+        '</div>';
+      stream.appendChild(summary);
+      // Mark progress full
+      step = QUESTIONS.length;
+      paintProgress();
+    }, 950);
+  }
+
+  // -------------------------------------------------------------
+  //  Kick off — apply audience pre-fill, then ask Q1 (or Q2 if pre-filled)
+  // -------------------------------------------------------------
+  if (audience && AUDIENCE_MAP[audience]) {
+    intake.clientType = AUDIENCE_MAP[audience];
+    // Show their pre-pick visually, then start at Q2
+    botBubble(QUESTIONS[0].botText, false);
+    userBubble(QUESTIONS[0].options.find(o => o.value === intake.clientType).label);
+    step = 1;
+    setTimeout(() => askQuestion(QUESTIONS[1]), 500);
+  } else {
+    askQuestion(QUESTIONS[0]);
+  }
+})();
+</script>
+</body>
+</html>

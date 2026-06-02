@@ -53,16 +53,23 @@
   </div>
 </section>
 
-<!-- Group chips -->
+<!-- Macro filter (Dinesh: top-level Design / AI / Production-QC buckets) -->
 <div class="container">
-  <div style="display: flex; gap: 8px; overflow-x: auto; padding: 12px 0; border-bottom: 1px solid var(--line);" id="group-nav">
-    <button class="chip chip-active" data-group="all">All freelancers</button>
-    <button class="chip" data-group="Design">Designers</button>
-    <button class="chip" data-group="Technical">Tech &amp; production</button>
-    <button class="chip" data-group="Visual">Photo &amp; video</button>
-    <button class="chip" data-group="Web &amp; UX">Web &amp; design</button>
-    <button class="chip" data-group="Business">Marketing &amp; retail</button>
-    <button class="chip" data-group="Niche">Other specialties</button>
+  <div style="display:flex;gap:10px;overflow-x:auto;padding:14px 0;border-bottom:1px solid var(--line);" id="macro-nav" role="tablist" aria-label="Service domain">
+    <button class="chip chip-active" data-macro="all">All services</button>
+    <button class="chip" data-macro="design_3d" title="Concept, Technical, 3D &amp; Sampling — pattern, tech pack, CLO3D, Adobe Suite">Design &amp; 3D</button>
+    <button class="chip" data-macro="ai_software" title="AI agents, marketplace integrations, website &amp; storefront">AI &amp; Software</button>
+    <button class="chip" data-macro="production_qc" title="QC, audits, inspection, sourcing, logistics, compliance">Production &amp; QC</button>
+  </div>
+  <!-- Sub-filter (production stage — auto-narrowed by macro above) -->
+  <div style="display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; border-bottom: 1px solid var(--line);" id="group-nav">
+    <button class="chip chip-active" data-group="all">All</button>
+    <button class="chip" data-group="Concept">Concept &amp; design</button>
+    <button class="chip" data-group="Technical">Technical</button>
+    <button class="chip" data-group="3D &amp; Sampling">3D &amp; sampling</button>
+    <button class="chip" data-group="Production">Production &amp; QC</button>
+    <button class="chip" data-group="Visual">Visual &amp; media</button>
+    <button class="chip" data-group="Web &amp; Marketing">Web &amp; marketing</button>
   </div>
 </div>
 
@@ -184,7 +191,22 @@
 
     async function refresh() {
       showLoading();
-      const result = await api.freelancers.list(filters);
+      // Split macroGroups out — the API only knows single-group, so when the
+      // macro spans several stages we apply that narrowing client-side.
+      const { macroGroups, ...apiFilters } = filters;
+      let result = await api.freelancers.list(apiFilters);
+      if (macroGroups && macroGroups.length) {
+        const allowedSlugs = new Set(
+          api._store.getState().services
+            .filter(s => macroGroups.includes(s.group))
+            .map(s => s.slug)
+        );
+        const filteredItems = result.items.filter(f =>
+          allowedSlugs.has(f.serviceSlug) ||
+          (f.serviceSlugs || []).some(s => allowedSlugs.has(s))
+        );
+        result = { ...result, items: filteredItems, total: filteredItems.length };
+      }
       countEl.textContent = result.total.toLocaleString();
       if (!result.items.length) {
         grid.innerHTML = `
@@ -247,6 +269,53 @@
       document.getElementById('view-jobs').style.display = b.dataset.mode === 'jobs' ? '' : 'none';
     });
     if (location.hash === '#jobs') mt.querySelector('[data-mode="jobs"]').click();
+
+    // ---- Macro filter (Dinesh: Design&3D / AI&Software / Production&QC) ----
+    // Each macro maps to a SET of underlying production-stage groups.
+    // Selecting a macro narrows the available sub-group chips and applies
+    // a filter that the data layer understands.
+    const MACRO_GROUPS = {
+      design_3d:     ['Concept', 'Technical', '3D & Sampling'],
+      ai_software:   ['Web & Marketing'],
+      production_qc: ['Production'],
+    };
+    const macroNav = document.getElementById('macro-nav');
+    let currentMacro = 'all';
+    function syncSubgroupsForMacro() {
+      const allow = currentMacro === 'all'
+        ? null
+        : new Set(MACRO_GROUPS[currentMacro] || []);
+      document.querySelectorAll('#group-nav .chip[data-group]').forEach(c => {
+        const g = c.dataset.group;
+        if (g === 'all') return;
+        if (!allow || allow.has(g)) {
+          c.style.display = '';
+          c.style.opacity = '';
+        } else {
+          c.style.display = 'none';
+        }
+      });
+    }
+    macroNav?.addEventListener('click', e => {
+      const b = e.target.closest('.chip[data-macro]'); if (!b) return;
+      macroNav.querySelectorAll('.chip').forEach(x => x.classList.remove('chip-active'));
+      b.classList.add('chip-active');
+      currentMacro = b.dataset.macro;
+      // Reset sub-group to "All" inside the new macro
+      document.querySelectorAll('#group-nav .chip').forEach(x => x.classList.remove('chip-active'));
+      document.querySelector('#group-nav .chip[data-group="all"]')?.classList.add('chip-active');
+      // Apply: if a single-group macro, set that as filter; if multi-group,
+      // we filter at the freelancer layer by allowed groups (see refresh()).
+      const allow = MACRO_GROUPS[currentMacro];
+      filters.group = (allow && allow.length === 1) ? allow[0] : undefined;
+      filters.macroGroups = (allow && allow.length > 1) ? allow : undefined;
+      filters.category = undefined;
+      syncSubgroupsForMacro();
+      const u = new URL(location.href);
+      u.searchParams.delete('cat');
+      history.replaceState({}, '', u);
+      refresh();
+    });
 
     // Group filter chips
     const gn = document.getElementById('group-nav');
