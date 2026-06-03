@@ -45,7 +45,7 @@ const nav = [
             <li>
               <a href={it.href} class={`nav-item ${current === it.k ? 'active' : ''}`}>
                 <span class="flex-1">{it.label}</span>
-                {it.badge && <span class={`text-[10px] mono px-1.5 py-0.5 rounded-full ${current === it.k ? 'bg-white/20 text-white' : 'bg-rose-50 text-rose-700'}`}>{it.badge}</span>}
+                {it.badge && <span data-badge-k={it.k} class={`text-[10px] mono px-1.5 py-0.5 rounded-full ${current === it.k ? 'bg-white/20 text-white' : 'bg-rose-50 text-rose-700'}`}>{it.badge}</span>}
               </a>
             </li>
           ))}
@@ -54,16 +54,47 @@ const nav = [
     ))}
   </div>
 
-  <div class="border-t border-line p-3">
-    <a href="/admin" class="flex items-center gap-3 p-2 rounded-lg hover:bg-paper-2">
+  <div class="border-t border-line p-3 relative">
+    <button type="button" id="adm-user-chip" class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-paper-2 text-left">
       <div class="w-9 h-9 rounded-full bg-ink text-paper flex items-center justify-center font-bold text-xs">A</div>
       <div class="min-w-0 flex-1">
         <div class="text-sm font-medium truncate">Admin user</div>
         <div class="text-[11px] text-ink-5 mono truncate">internal · v1</div>
       </div>
-    </a>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-ink-5"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <div id="adm-user-menu" class="hidden absolute left-3 right-3 bottom-[68px] bg-white border border-line rounded-xl shadow-xl py-1.5 z-50">
+      <a href="/admin/settings" class="block px-4 py-2 text-sm hover:bg-paper-2">Settings</a>
+      <div class="border-t border-line my-1"></div>
+      <button type="button" id="adm-signout" class="w-full text-left px-4 py-2 text-sm text-rose-700 hover:bg-rose-50">Sign out</button>
+    </div>
   </div>
 </aside>
+
+<script is:inline>
+  (function () {
+    const chip = document.getElementById('adm-user-chip');
+    const menu = document.getElementById('adm-user-menu');
+    const signout = document.getElementById('adm-signout');
+    if (!chip || !menu) return;
+    function close() { menu.classList.add('hidden'); }
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.classList.toggle('hidden');
+    });
+    document.addEventListener('click', (e) => {
+      if (!menu.contains(e.target) && e.target !== chip) close();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    if (signout) {
+      signout.addEventListener('click', async () => {
+        try { await window.api.users.signOut(); } catch (_) {}
+        window.UI && window.UI.toast && window.UI.toast('Signed out.', { kind: 'success' });
+        setTimeout(() => { location.href = '/'; }, 300);
+      });
+    }
+  })();
+</script>
 
 <script is:inline>
   (function () {
@@ -87,5 +118,34 @@ const nav = [
     });
     sidebar.querySelectorAll('a[href]').forEach(a => a.addEventListener('click', close));
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  })();
+</script>
+
+<!-- Live badge counts for moderation / verifications / disputes -->
+<script is:inline>
+  (function () {
+    function paintBadges() {
+      const api = window.api;
+      if (!api || !api._store) return;
+      const state = api._store.getState();
+      const fmt = n => (n | 0).toString();
+      const updates = {
+        ver: (state.freelancers || []).filter(f => f.approvalStatus === 'pending').length,
+        mod: 0,                                           // no moderation collection in store yet
+        dis: (state.orders || []).filter(o => o.status === 'disputed').length,
+      };
+      Object.entries(updates).forEach(([k, n]) => {
+        document.querySelectorAll('[data-badge-k="' + k + '"]').forEach(el => {
+          if (n > 0) {
+            el.textContent = fmt(n);
+            el.style.display = '';
+          } else {
+            el.style.display = 'none';   // hide the badge entirely when there's nothing pending
+          }
+        });
+      });
+    }
+    if (window.api) paintBadges();
+    else window.addEventListener('ff:ready', paintBadges, { once: true });
   })();
 </script>

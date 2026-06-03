@@ -342,6 +342,35 @@
       if (filters.serviceSlug) items = items.filter(p => p.serviceSlug === filters.serviceSlug);
       return items;
     },
+    /**
+     * Create a Package for a freelancer (used by onboarding Step 5 + the
+     * future "Add a service" page on the dashboard). Price comes in as
+     * whole USD; we store cents.
+     */
+    async create({ freelancerId, serviceSlug, tier, title, description, priceAmount, currency, deliveryDays, revisionsIncluded, bullets }) {
+      await lag();
+      if (!freelancerId) throw new Error('Missing freelancerId.');
+      if (!title) throw new Error('Package title is required.');
+      const pkg = {
+        id: uid('pkg'),
+        freelancerId,
+        serviceSlug: serviceSlug || null,
+        tier: tier || 'basic',
+        title,
+        description: description || '',
+        price: { amount: Math.round((priceAmount || 0) * 100), currency: currency || 'USD' },
+        priceAmount: priceAmount || 0,         // convenience for older readers
+        currency: currency || 'USD',
+        deliveryDays: deliveryDays || 7,
+        revisionsIncluded: revisionsIncluded == null ? 2 : revisionsIncluded,
+        bullets: bullets || [],
+        isActive: true,
+        createdAt: now(),
+        updatedAt: now(),
+      };
+      Store.setState(s => { s.packages.push(pkg); return s; });
+      return clone(pkg);
+    },
   };
 
   // ============================================================
@@ -479,10 +508,19 @@
       const session = Store.getSession();
       const _freelancerId = freelancerId || session?.userId;
       if (!_freelancerId) throw new Error('Not signed in.');
+      // Accept either a plain dollar number (legacy) or a {amount, currency} cents-object.
+      let amountCents = 0;
+      let currency = 'USD';
+      if (proposedAmount && typeof proposedAmount === 'object') {
+        amountCents = proposedAmount.amount || 0;
+        currency = proposedAmount.currency || 'USD';
+      } else {
+        amountCents = (Number(proposedAmount) || 0) * 100;
+      }
       Store.setState(s => {
         const app = {
           id, briefId, freelancerId: _freelancerId,
-          pitch, proposedAmount: { amount: (proposedAmount || 0) * 100, currency: 'USD' },
+          pitch, proposedAmount: { amount: amountCents, currency },
           proposedDurationDays: proposedDurationDays || 0,
           status: 'sent', sentAt: now(),
           attachmentIds: [],

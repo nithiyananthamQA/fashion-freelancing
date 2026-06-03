@@ -7,36 +7,39 @@ import { creators } from '@/data/mock';
   <div class="card p-5 mb-6 flex items-center gap-3 flex-wrap">
     <div class="flex-1 min-w-[260px] flex items-center gap-2 px-4 py-2 border border-line rounded-full bg-white">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-ink-400"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
-      <input class="flex-1 bg-transparent outline-none text-sm" placeholder="Search creators by craft, skill or city…"/>
+      <input id="tl-search" class="flex-1 bg-transparent outline-none text-sm" placeholder="Search creators by craft, skill or city…"/>
     </div>
-    <button class="chip">Filters</button>
-    <button class="chip">Save search</button>
-    <button class="btn-gold">+ Invite to my job</button>
+    <a href="/pages/marketplace.html" class="chip">More filters →</a>
+    <a href="/brand/post" class="btn-gold">+ Post a job</a>
   </div>
 
-  <div class="flex items-center gap-2 mb-5 overflow-x-auto pb-1">
-    <button class="chip chip-active">All · 12,400</button>
-    <button class="chip">Available now · 4,210</button>
-    <button class="chip">Top 1% · 124</button>
-    <button class="chip">Womenswear · 2,140</button>
-    <button class="chip">Tech pack · 980</button>
-    <button class="chip">Pattern · 1,302</button>
-    <button class="chip">Stylists · 1,766</button>
-    <button class="chip">Manufacturers · 412</button>
+  <div id="tl-chips" class="flex items-center gap-2 mb-5 overflow-x-auto pb-1">
+    <button class="chip chip-active" data-filter="all">All</button>
+    <button class="chip" data-filter="womenswear-designer">Womenswear</button>
+    <button class="chip" data-filter="tech-pack">Tech pack</button>
+    <button class="chip" data-filter="pattern-maker">Pattern</button>
+    <button class="chip" data-filter="stylist">Stylists</button>
+    <button class="chip" data-filter="photographer">Photographers</button>
+    <button class="chip" data-filter="ai-artist">AI artists</button>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+  <div id="tl-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
     {creators.map((c) => (
-      <div class="card overflow-hidden card-hover group">
-        <div class="plate aspect-[4/5] !rounded-none">
-          <img src={c.cover} alt=""/>
-          {c.badges[0] && <span class="pill pill-gold absolute top-3 left-3 z-10">{c.badges[0]}</span>}
-          <div class="absolute bottom-3 right-3 flex gap-1.5 z-10">
-            <button class="w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center text-ink-700 hover:text-gold transition">♡</button>
+      <div class="card overflow-hidden card-hover group" data-creator-id={c.id} data-service={c.specialty.toLowerCase().replace(/\s+/g, '-')} data-search={`${c.name} ${c.specialty} ${c.location} ${c.tags.join(' ')}`.toLowerCase()}>
+        <a href={`/pages/profile.html?id=${c.id}`} class="block">
+          <div class="plate aspect-[4/5] !rounded-none relative">
+            <img src={c.cover} alt=""/>
+            {c.badges[0] && <span class="pill pill-gold absolute top-3 left-3 z-10">{c.badges[0]}</span>}
           </div>
+        </a>
+        <div class="absolute" style="position:relative;">
+          <button type="button" class="absolute -top-12 right-3 w-9 h-9 rounded-full bg-white/95 backdrop-blur shadow flex items-center justify-center text-ink-700 hover:text-rose-600 transition z-10" data-act="save" data-creator-id={c.id} aria-label="Save">
+            <span data-icon-empty>♡</span>
+            <span data-icon-full style="display:none;color:var(--rose-700);">♥</span>
+          </button>
         </div>
         <div class="p-4">
-          <div class="flex items-start gap-3">
+          <a href={`/pages/profile.html?id=${c.id}`} class="flex items-start gap-3 no-underline text-ink-900">
             <img src={c.avatar} class="w-9 h-9 rounded-full object-cover -mt-7 ring-2 ring-white" alt=""/>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between">
@@ -45,17 +48,132 @@ import { creators } from '@/data/mock';
               </div>
               <div class="text-xs text-ink-500 truncate">{c.specialty} · {c.location}</div>
             </div>
-          </div>
+          </a>
           <div class="mt-3 flex flex-wrap gap-1.5">
             {c.tags.slice(0,3).map((t) => <span class="chip text-[11px] !py-0.5">{t}</span>)}
           </div>
           <div class="mt-4 flex items-center justify-between">
             <span class="text-xs text-ink-500">From <strong class="text-ink-900 text-sm">{c.currency === 'USD' ? '$' : c.currency === 'EUR' ? '€' : '£'}{c.from}</strong></span>
-            <button class="btn-gold !py-1.5 !px-3 text-xs">Invite</button>
+            <button type="button" class="btn-gold !py-1.5 !px-3 text-xs" data-act="invite" data-creator-id={c.id}>Invite</button>
           </div>
         </div>
       </div>
     ))}
   </div>
+
+  <div id="tl-empty" class="card p-10 text-center text-ink-500 hidden">
+    <div class="text-4xl mb-3">🔍</div>
+    <div class="font-medium text-ink mb-1">No creators match that filter</div>
+    <div class="text-sm">Try a different keyword or clear the filters.</div>
+  </div>
+
+  <script is:inline>
+    (function () {
+      function init() {
+        const api = window.api;
+        const UI = window.UI;
+        if (!api) return;
+        const session = api.users.sessionSync();
+
+        const grid    = document.getElementById('tl-grid');
+        const empty   = document.getElementById('tl-empty');
+        const searchE = document.getElementById('tl-search');
+        const chipsEl = document.getElementById('tl-chips');
+        if (!grid) return;
+
+        // Paint heart state for already-saved creators
+        function paintSaved() {
+          if (!session) return;
+          const me = api._store.getState().users.find(u => u.id === session.userId);
+          const saved = new Set((me && me.savedFreelancerIds) || []);
+          grid.querySelectorAll('[data-creator-id]').forEach(card => {
+            const id = card.getAttribute('data-creator-id');
+            const btn = card.querySelector('[data-act="save"]');
+            if (!btn) return;
+            const empty = btn.querySelector('[data-icon-empty]');
+            const full  = btn.querySelector('[data-icon-full]');
+            if (saved.has(id)) { empty.style.display = 'none'; full.style.display = ''; }
+            else { empty.style.display = ''; full.style.display = 'none'; }
+          });
+        }
+        paintSaved();
+
+        // Save heart
+        grid.addEventListener('click', async (e) => {
+          const btn = e.target.closest && e.target.closest('[data-act="save"]');
+          if (!btn) return;
+          e.preventDefault();
+          e.stopPropagation();
+          if (!session) {
+            UI && UI.toast('Sign in to save creators.', { kind: 'info' });
+            return;
+          }
+          const id = btn.getAttribute('data-creator-id');
+          try {
+            const savedIds = await api.users.toggleSavedFreelancer(id);
+            const isNowSaved = (savedIds || []).includes(id);
+            paintSaved();
+            UI && UI.toast(isNowSaved ? 'Saved to your pool.' : 'Removed from pool.', { kind: 'success' });
+          } catch (err) {
+            UI && UI.toast(err.message || 'Could not save', { kind: 'error' });
+          }
+        });
+
+        // Invite → start a conversation, jump to messages
+        grid.addEventListener('click', async (e) => {
+          const btn = e.target.closest && e.target.closest('[data-act="invite"]');
+          if (!btn) return;
+          e.preventDefault();
+          e.stopPropagation();
+          if (!session) {
+            location.href = '/pages/signin.html?next=' + encodeURIComponent(location.pathname);
+            return;
+          }
+          const id = btn.getAttribute('data-creator-id');
+          btn.disabled = true;
+          try {
+            const conv = await api.messages.startWith(id);
+            UI && UI.toast('Conversation opened.', { kind: 'success' });
+            location.href = '/brand/messages?c=' + encodeURIComponent(conv.id);
+          } catch (err) {
+            UI && UI.toast(err.message || 'Could not start chat', { kind: 'error' });
+            btn.disabled = false;
+          }
+        });
+
+        // Filter chips
+        let currentFilter = 'all';
+        let currentQuery = '';
+        function applyFilter() {
+          let shown = 0;
+          grid.querySelectorAll('[data-creator-id]').forEach(card => {
+            const svc = card.getAttribute('data-service') || '';
+            const hay = card.getAttribute('data-search') || '';
+            const matchesChip = currentFilter === 'all' || svc.includes(currentFilter);
+            const matchesQuery = !currentQuery || hay.includes(currentQuery);
+            const show = matchesChip && matchesQuery;
+            card.style.display = show ? '' : 'none';
+            if (show) shown++;
+          });
+          empty.classList.toggle('hidden', shown > 0);
+          grid.classList.toggle('hidden', shown === 0);
+        }
+        chipsEl.querySelectorAll('[data-filter]').forEach(chip => {
+          chip.addEventListener('click', () => {
+            chipsEl.querySelectorAll('[data-filter]').forEach(c => c.classList.remove('chip-active'));
+            chip.classList.add('chip-active');
+            currentFilter = chip.getAttribute('data-filter');
+            applyFilter();
+          });
+        });
+        searchE.addEventListener('input', () => {
+          currentQuery = searchE.value.toLowerCase().trim();
+          applyFilter();
+        });
+      }
+      if (window.api) init();
+      else window.addEventListener('ff:ready', init, { once: true });
+    })();
+  </script>
 
 </Dashboard>

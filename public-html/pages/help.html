@@ -104,19 +104,68 @@
       </div>
     </div>
 
-    <form class="card card-pad-lg mt-6">
+    <form id="ff-help-form" class="card card-pad-lg mt-6">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-        <div><label class="label">Your name</label><input class="input" type="text"/></div>
-        <div><label class="label">Your email</label><input class="input" type="email"/></div>
+        <div><label class="label">Your name</label><input class="input" type="text" name="name" required/></div>
+        <div><label class="label">Your email</label><input class="input" type="email" name="email" required/></div>
       </div>
-      <div style="margin-top: 14px;"><label class="label">What's it about?</label><select class="input"><option>I'm hiring someone</option><option>I'm a freelancer</option><option>Payments &amp; refunds</option><option>My account</option><option>Something else</option></select></div>
-      <div style="margin-top: 14px;"><label class="label">Tell us more</label><textarea class="input" rows="5"></textarea></div>
-      <button class="btn btn-primary mt-6">Send message →</button>
+      <div style="margin-top: 14px;"><label class="label">What's it about?</label><select class="input" name="topic"><option>I'm hiring someone</option><option>I'm a freelancer</option><option>Payments &amp; refunds</option><option>My account</option><option>Something else</option></select></div>
+      <div style="margin-top: 14px;"><label class="label">Tell us more</label><textarea class="input" rows="5" name="message" required></textarea></div>
+      <button type="submit" class="btn btn-primary mt-6">Send message →</button>
     </form>
   </div>
 </section>
 
+<style>
+  .sent-card {
+    background: linear-gradient(135deg, rgba(110,86,240,.08), rgba(43,168,232,.06));
+    border: 1px solid var(--champagne-100); border-radius: 18px; padding: 32px;
+    text-align: center;
+  }
+</style>
+
 <div id="site-footer"></div>
 <script src="../assets/site.js"></script>
+<script>
+  window.onFFReady(() => {
+    const form = document.getElementById('ff-help-form');
+    if (!form) return;
+    const submit = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries());
+      if (!data.name || !data.email || !data.message) {
+        UI && UI.toast('Please fill in name, email and message.', { kind: 'warn' });
+        return;
+      }
+      submit.disabled = true;
+      submit.textContent = 'Sending…';
+
+      const lead = {
+        ...data,
+        receivedAt: new Date().toISOString(),
+        source: 'help-page-contact-form',
+      };
+      try {
+        const existing = JSON.parse(localStorage.getItem('ff_leads') || '[]');
+        existing.push(lead);
+        localStorage.setItem('ff_leads', JSON.stringify(existing));
+      } catch (_) {}
+      console.info('[Fashion Freelancing] Help ticket captured:', lead);
+
+      const container = form.parentElement;
+      const sent = document.createElement('div');
+      sent.className = 'sent-card mt-6';
+      sent.innerHTML =
+        '<div style="font-size:42px;margin-bottom:12px;">✓</div>' +
+        '<h3 class="h-3">Got it, ' + (data.name || '').split(' ')[0] + '. Message sent.</h3>' +
+        '<p class="lead mt-2" style="font-size:15px;">A real person will reply within a day at <strong>' + data.email + '</strong>.</p>' +
+        '<p class="muted text-xs mt-4">In the meantime, the <a href="#faq" class="ulink" style="color:var(--ink);font-weight:600;">FAQ above</a> covers most things.</p>';
+      container.replaceChild(sent, form);
+      UI && UI.toast('Message sent — we’ll reply within a day.', { kind: 'success', duration: 5000 });
+    });
+  });
+</script>
 </body>
 </html>

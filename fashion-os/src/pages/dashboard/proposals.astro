@@ -1,48 +1,176 @@
 ---
 import Dashboard from '@/layouts/Dashboard.astro';
-import { proposals } from '@/data/mock';
-
-const pillFor = (s: string) =>
-  s === 'won' ? 'pill-green' : s === 'shortlisted' ? 'pill-gold' : s === 'declined' ? 'pill-rose' : 'pill-gray';
 ---
 <Dashboard title="Proposals" pageTitle="Proposals" current="proposals" role="creator">
 
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-500">Sent</div><div class="editorial text-3xl mt-1">12</div></div>
-    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-500">Shortlisted</div><div class="editorial text-3xl mt-1 gold-text">4</div></div>
-    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-500">Won</div><div class="editorial text-3xl mt-1">7</div></div>
-    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-500">Win rate</div><div class="editorial text-3xl mt-1">38%</div></div>
+    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-500">Sent</div><div id="ps-sent" class="editorial text-3xl mt-1">—</div></div>
+    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-500">Shortlisted</div><div id="ps-short" class="editorial text-3xl mt-1 gold-text">—</div></div>
+    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-500">Won</div><div id="ps-won" class="editorial text-3xl mt-1">—</div></div>
+    <div class="card p-5"><div class="text-[11px] mono uppercase tracking-[0.18em] text-ink-500">Win rate</div><div id="ps-rate" class="editorial text-3xl mt-1">—</div></div>
   </div>
 
   <div class="card overflow-hidden">
     <div class="px-6 py-4 border-b border-line flex items-center justify-between flex-wrap gap-3">
-      <div class="flex gap-2 flex-wrap">
-        <button class="chip chip-active">All · 12</button>
-        <button class="chip">Sent · 5</button>
-        <button class="chip">Shortlisted · 4</button>
-        <button class="chip">Won · 2</button>
-        <button class="chip">Declined · 1</button>
+      <div id="ps-filters" class="flex gap-2 flex-wrap">
+        <button class="chip chip-active" data-filter="all">All</button>
+        <button class="chip" data-filter="sent">Sent</button>
+        <button class="chip" data-filter="shortlisted">Shortlisted</button>
+        <button class="chip" data-filter="accepted">Won</button>
+        <button class="chip" data-filter="rejected">Declined</button>
       </div>
-      <a href="/dashboard/ai" class="btn-gold">+ New proposal · AI</a>
+      <a href="/pages/marketplace.html#jobs" class="btn-gold">+ Find a job to apply</a>
     </div>
 
-    <div class="divide-y divide-line">
-      {proposals.map((p) => (
-        <div class="grid grid-cols-12 gap-4 items-center px-6 py-4 hover:bg-ink-50/50 transition">
-          <div class="col-span-12 md:col-span-5">
-            <div class="font-medium">{p.project}</div>
-            <div class="text-xs text-ink-500 mt-0.5">{p.brand} · {p.milestones} milestones · Sent {p.sentAt}</div>
-          </div>
-          <div class="col-span-6 md:col-span-2 text-sm font-medium">{p.amount}</div>
-          <div class="col-span-6 md:col-span-2"><span class={`pill ${pillFor(p.status)}`}>{p.status}</span></div>
-          <div class="col-span-12 md:col-span-3 flex justify-end gap-2">
-            <button class="chip">View</button>
-            {p.status === 'sent' && <button class="chip">Withdraw</button>}
-            {p.status === 'shortlisted' && <button class="btn-gold !py-1.5 !px-3 text-xs">Open chat</button>}
-          </div>
-        </div>
-      ))}
+    <div id="ps-list" class="divide-y divide-line">
+      <div class="px-6 py-10 text-center text-ink-500">Loading…</div>
     </div>
   </div>
+
+  <script is:inline>
+    (function () {
+      function init() {
+        const api = window.api;
+        if (!api) return;
+        const session = api.users.sessionSync();
+        if (!session) return;
+
+        const $ = id => document.getElementById(id);
+        const listEl = $('ps-list');
+        const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => (
+          { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+
+        let allApps = [];
+        let currentFilter = 'all';
+
+        function pillFor(s) {
+          return s === 'accepted' ? 'pill-green'
+               : s === 'shortlisted' ? 'pill-champagne'
+               : s === 'rejected' ? 'pill-rose'
+               : s === 'withdrawn' ? 'pill-gray'
+               : 'pill-blue';
+        }
+        function readableStatus(s) {
+          return s === 'accepted' ? 'Won'
+               : s === 'shortlisted' ? 'Shortlisted'
+               : s === 'rejected' ? 'Declined'
+               : s === 'withdrawn' ? 'Withdrawn'
+               : 'Sent';
+        }
+
+        async function load() {
+          allApps = await api.applications.list({ freelancerId: session.userId });
+          // newest first
+          allApps.sort((a, b) => (b.sentAt > a.sentAt ? 1 : -1));
+          paintStats();
+          paintList();
+        }
+
+        function paintStats() {
+          const sent  = allApps.length;
+          const short = allApps.filter(a => a.status === 'shortlisted').length;
+          const won   = allApps.filter(a => a.status === 'accepted').length;
+          $('ps-sent').textContent  = sent;
+          $('ps-short').textContent = short;
+          $('ps-won').textContent   = won;
+          $('ps-rate').textContent  = sent ? Math.round(100 * won / sent) + '%' : '—';
+
+          // Update filter chip counts
+          const by = {
+            all: sent,
+            sent: allApps.filter(a => a.status === 'sent').length,
+            shortlisted: short,
+            accepted: won,
+            rejected: allApps.filter(a => a.status === 'rejected').length,
+          };
+          document.querySelectorAll('#ps-filters [data-filter]').forEach(chip => {
+            const f = chip.getAttribute('data-filter');
+            const label = chip.textContent.split('·')[0].trim();
+            chip.textContent = label + ' · ' + (by[f] || 0);
+          });
+        }
+
+        function paintList() {
+          const items = currentFilter === 'all'
+            ? allApps
+            : allApps.filter(a => a.status === currentFilter);
+
+          if (!items.length) {
+            listEl.innerHTML =
+              '<div class="px-6 py-16 text-center text-ink-500">' +
+                '<div class="text-4xl mb-3">📝</div>' +
+                '<div class="font-medium text-ink mb-1">No proposals here yet</div>' +
+                '<div class="text-sm">' +
+                  (currentFilter === 'all'
+                    ? 'Browse open jobs and apply to start sending pitches.'
+                    : 'Nothing in this bucket right now.') +
+                '</div>' +
+                '<a href="/pages/marketplace.html#jobs" class="btn btn-primary btn-sm mt-4 inline-flex">See open jobs →</a>' +
+              '</div>';
+            return;
+          }
+
+          const state = api._store.getState();
+          const briefMap = new Map((state.briefs || []).map(b => [b.id, b]));
+          const userMap  = new Map((state.users || []).map(u => [u.id, u]));
+
+          listEl.innerHTML = items.map(a => {
+            const brief = briefMap.get(a.briefId) || { title: a.briefId };
+            const brand = userMap.get(brief.brandId) || {};
+            const amount = a.proposedAmount && a.proposedAmount.amount
+              ? api.fmt.money(a.proposedAmount.amount, a.proposedAmount.currency || 'USD')
+              : '—';
+            const canWithdraw = a.status === 'sent';
+            const canChat = a.status === 'shortlisted' || a.status === 'accepted';
+            return '' +
+              '<div class="grid grid-cols-12 gap-4 items-center px-6 py-4 hover:bg-ink-50/50 transition" data-app-id="' + esc(a.id) + '">' +
+                '<div class="col-span-12 md:col-span-5">' +
+                  '<div class="font-medium">' + esc(brief.title || 'Untitled brief') + '</div>' +
+                  '<div class="text-xs text-ink-500 mt-0.5">' + esc(brand.name || 'Brand') + ' · ' + a.proposedDurationDays + ' days · Sent ' + esc(api.fmt.timeAgo(a.sentAt)) + '</div>' +
+                  (a.pitch ? '<div class="text-xs text-ink-500 mt-1 line-clamp-1">' + esc(a.pitch) + '</div>' : '') +
+                '</div>' +
+                '<div class="col-span-6 md:col-span-2 text-sm font-medium">' + amount + '</div>' +
+                '<div class="col-span-6 md:col-span-2"><span class="pill ' + pillFor(a.status) + '">' + esc(readableStatus(a.status)) + '</span></div>' +
+                '<div class="col-span-12 md:col-span-3 flex justify-end gap-2 flex-wrap">' +
+                  '<a href="/pages/brief.html?id=' + esc(a.briefId) + '" class="chip">View brief</a>' +
+                  (canChat ? '<a href="/dashboard/messages" class="btn-gold !py-1.5 !px-3 text-xs">Open chat</a>' : '') +
+                  (canWithdraw ? '<button type="button" class="chip" data-act="withdraw">Withdraw</button>' : '') +
+                '</div>' +
+              '</div>';
+          }).join('');
+
+          // Wire withdraw
+          listEl.querySelectorAll('[data-act="withdraw"]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              const row = btn.closest('[data-app-id]');
+              const appId = row && row.getAttribute('data-app-id');
+              if (!appId) return;
+              if (!confirm('Withdraw this proposal?')) return;
+              api._store.setState(s => {
+                s.applications = (s.applications || []).map(a =>
+                  a.id === appId ? { ...a, status: 'withdrawn', updatedAt: new Date().toISOString() } : a);
+                return s;
+              });
+              window.UI && UI.toast('Proposal withdrawn.', { kind: 'success' });
+              await load();
+            });
+          });
+        }
+
+        document.querySelectorAll('#ps-filters [data-filter]').forEach(chip => {
+          chip.addEventListener('click', () => {
+            document.querySelectorAll('#ps-filters [data-filter]').forEach(c => c.classList.remove('chip-active'));
+            chip.classList.add('chip-active');
+            currentFilter = chip.getAttribute('data-filter');
+            paintList();
+          });
+        });
+
+        load();
+      }
+      if (window.api) init();
+      else window.addEventListener('ff:ready', init, { once: true });
+    })();
+  </script>
 
 </Dashboard>

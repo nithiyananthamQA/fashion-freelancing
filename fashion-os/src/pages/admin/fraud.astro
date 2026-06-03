@@ -35,7 +35,7 @@ const signals = [
       </thead>
       <tbody>
         {signals.map(s => (
-          <tr class="border-t border-line hover:bg-paper-2/50 transition">
+          <tr class="border-t border-line hover:bg-paper-2/50 transition" data-frd-id={s.id} data-handle={s.user}>
             <td class="px-6 py-4 mono text-xs text-ink-5">{s.id}</td>
             <td class="px-6 py-4 mono text-sm">{s.user}</td>
             <td class="px-6 py-4">
@@ -48,11 +48,11 @@ const signals = [
             </td>
             <td class="px-6 py-4 text-sm">{s.signal}</td>
             <td class="px-6 py-4 text-xs text-ink-5 mono">{s.loc}</td>
-            <td class="px-6 py-4"><span class={s.action === 'auto-paused' ? 'pill-rose' : 'pill-champagne'}>{s.action}</span></td>
+            <td class="px-6 py-4"><span class={s.action === 'auto-paused' ? 'pill-rose' : 'pill-champagne'} data-act-pill>{s.action}</span></td>
             <td class="px-6 py-4 text-right">
               <div class="flex gap-1.5 justify-end">
-                <button class="btn btn-ghost btn-sm">Investigate</button>
-                <button class="btn btn-ghost btn-sm border-rose-200 text-rose-700">Suspend</button>
+                <button type="button" class="btn btn-ghost btn-sm" data-act="investigate">Investigate</button>
+                <button type="button" class="btn btn-ghost btn-sm border-rose-200 text-rose-700" data-act="suspend">Suspend</button>
               </div>
             </td>
           </tr>
@@ -60,5 +60,74 @@ const signals = [
       </tbody>
     </table></div>
   </div>
+
+  <div id="frd-empty" class="card p-10 text-center text-ink-500 hidden mt-6">
+    <div class="text-4xl mb-3">✓</div>
+    <div class="font-medium text-ink mb-1">No active fraud signals</div>
+    <div class="text-sm">All flagged accounts have been resolved.</div>
+  </div>
+
+  <script is:inline>
+    (function () {
+      function init() {
+        const api = window.api;
+        const UI = window.UI;
+        const rows = document.querySelectorAll('[data-frd-id]');
+        const empty = document.getElementById('frd-empty');
+
+        rows.forEach(row => {
+          row.querySelectorAll('[data-act]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              const act = btn.getAttribute('data-act');
+              const handle = row.getAttribute('data-handle');
+
+              if (act === 'investigate') {
+                const pill = row.querySelector('[data-act-pill]');
+                if (pill) {
+                  pill.textContent = 'under review';
+                  pill.className = 'pill-champagne';
+                }
+                UI && UI.toast('Case opened for ' + handle + '.', { kind: 'info' });
+                return;
+              }
+
+              if (act === 'suspend') {
+                if (!confirm('Suspend ' + handle + '? Their account will be locked immediately.')) return;
+                btn.disabled = true;
+                try {
+                  // Best-effort: if a real user with this handle exists in the store, update them.
+                  if (api && api._store) {
+                    const u = (api._store.getState().users || []).find(x => x.handle === handle);
+                    if (u) {
+                      api._store.setState(s => {
+                        s.users = (s.users || []).map(x =>
+                          x.id === u.id ? { ...x, status: 'suspended', updatedAt: new Date().toISOString() } : x);
+                        return s;
+                      });
+                    }
+                  }
+                  row.style.transition = 'opacity .25s, transform .25s';
+                  row.style.opacity = '0';
+                  row.style.transform = 'translateX(8px)';
+                  setTimeout(() => {
+                    row.remove();
+                    if (!document.querySelectorAll('[data-frd-id]').length && empty) {
+                      empty.classList.remove('hidden');
+                    }
+                  }, 250);
+                  UI && UI.toast(handle + ' suspended.', { kind: 'success' });
+                } catch (err) {
+                  UI && UI.toast(err.message || 'Could not suspend', { kind: 'error' });
+                  btn.disabled = false;
+                }
+              }
+            });
+          });
+        });
+      }
+      if (window.api) init();
+      else window.addEventListener('ff:ready', init, { once: true });
+    })();
+  </script>
 
 </Admin>

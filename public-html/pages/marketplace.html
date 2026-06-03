@@ -142,22 +142,22 @@
 
     <div class="card card-pad mb-6" style="background: var(--paper-2); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: space-between;">
       <div>
-        <strong>312 open jobs</strong> from <strong>248 fashion brands</strong>. <span class="muted">Apply with one click.</span>
+        <strong><span id="jobs-count">—</span> open jobs</strong> from <strong><span id="jobs-brand-count">—</span> fashion brands</strong>. <span class="muted">Apply with one click.</span>
       </div>
       <a href="./signup.html?role=creator" class="btn btn-primary btn-sm">Create my page first →</a>
     </div>
 
-    <div class="brief-card">
+    <div id="jobs-list" class="brief-card">
       <div class="brief-head"><span>Job</span><span>What for</span><span>How much</span><span>How long</span><span></span></div>
-      <a class="brief-row" href="./brief.html"><div style="display:flex;align-items:center;gap:12px;"><span class="brandmark">M·K</span><div><div style="font-weight:500;">Womenswear designer for spring collection</div><div class="text-xs muted">Maison Kirei · Paris · Remote · 2h ago</div></div></div><div class="text-sm">Designer</div><div><strong>$8,000–14,000</strong></div><div class="text-sm">8 weeks</div><div style="text-align:right;"><span class="btn btn-primary btn-sm">Apply</span></div></a>
-      <a class="brief-row" href="./brief.html"><div style="display:flex;align-items:center;gap:12px;"><span class="brandmark">VS</span><div><div style="font-weight:500;">Tech packs for new denim line — 12 styles <span class="pill pill-rose" style="margin-left:6px;">Urgent</span></div><div class="text-xs muted">Vestra · LA · 2 days/week in office · today</div></div></div><div class="text-sm">Tech pack</div><div><strong>$3,200</strong></div><div class="text-sm">3 weeks</div><div style="text-align:right;"><span class="btn btn-primary btn-sm">Apply</span></div></a>
-      <a class="brief-row" href="./brief.html"><div style="display:flex;align-items:center;gap:12px;"><span class="brandmark">L&amp;C</span><div><div style="font-weight:500;">Stylist for Vogue Italia February cover</div><div class="text-xs muted">Léon &amp; Co. · Milan · In person · yesterday</div></div></div><div class="text-sm">Stylist</div><div><strong>$12,000</strong></div><div class="text-sm">5 days</div><div style="text-align:right;"><span class="btn btn-primary btn-sm">Apply</span></div></a>
-      <a class="brief-row" href="./brief.html"><div style="display:flex;align-items:center;gap:12px;"><span class="brandmark">OB</span><div><div style="font-weight:500;">Pattern maker for sustainable knitwear capsule</div><div class="text-xs muted">Obscura · Berlin · Remote · 3d ago</div></div></div><div class="text-sm">Pattern maker</div><div><strong>$1,800–3,000</strong></div><div class="text-sm">4 weeks</div><div style="text-align:right;"><span class="btn btn-primary btn-sm">Apply</span></div></a>
-      <a class="brief-row" href="./brief.html"><div style="display:flex;align-items:center;gap:12px;"><span class="brandmark">HK</span><div><div style="font-weight:500;">Director for our 90-second launch video</div><div class="text-xs muted">Hanako Studio · Tokyo · Remote · 5h ago</div></div></div><div class="text-sm">Director</div><div><strong>€22,000</strong></div><div class="text-sm">6 weeks</div><div style="text-align:right;"><span class="btn btn-primary btn-sm">Apply</span></div></a>
+      <!-- Hydrated from api.briefs.list() on ff:ready -->
+      <div style="padding:48px 24px;text-align:center;color:var(--ink-5);">Loading open jobs…</div>
     </div>
 
-    <div style="text-align: center; margin-top: 32px;">
-      <button class="btn btn-ghost">Show more jobs →</button>
+    <div id="jobs-empty" class="card card-pad" style="display:none;text-align:center;padding:48px 24px;">
+      <div style="font-size:36px;margin-bottom:10px;">📭</div>
+      <div style="font-weight:600;margin-bottom:6px;">No open jobs right now</div>
+      <p class="muted text-sm">Brands post jobs regularly — check back soon, or create your page so they can find you.</p>
+      <a href="./signup.html?role=creator" class="btn btn-primary btn-sm mt-4">Create my page</a>
     </div>
   </div>
 </section>
@@ -348,6 +348,110 @@
 
     // First render
     refresh();
+  });
+
+  // ---- Jobs section (#view-jobs) — live from api.briefs.list ----
+  window.onFFReady(async () => {
+    const list = document.getElementById('jobs-list');
+    const empty = document.getElementById('jobs-empty');
+    const countEl = document.getElementById('jobs-count');
+    const brandCountEl = document.getElementById('jobs-brand-count');
+    if (!list) return;
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/[&<>"]/g, c => (
+        { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+    }
+    function brandMark(name) {
+      const n = (name || '').split(/\s+/).slice(0, 2).map(s => s[0] || '').join('').toUpperCase();
+      return n || 'FF';
+    }
+    function money(b) {
+      const min = b.budgetMin && b.budgetMin.amount ? b.budgetMin.amount / 100 : 0;
+      const max = b.budgetMax && b.budgetMax.amount ? b.budgetMax.amount / 100 : 0;
+      const cur = (b.budgetMin && b.budgetMin.currency) || (b.budgetMax && b.budgetMax.currency) || 'USD';
+      const sym = cur === 'EUR' ? '€' : cur === 'GBP' ? '£' : cur === 'INR' ? '₹' : '$';
+      if (min && max && min !== max) return sym + min.toLocaleString() + '–' + max.toLocaleString();
+      const v = max || min;
+      return v ? sym + v.toLocaleString() : '—';
+    }
+
+    try {
+      const open = await api.briefs.list({ status: 'open' });
+      countEl.textContent = open.length;
+      const brandIds = new Set(open.map(b => b.brandId));
+      brandCountEl.textContent = brandIds.size;
+
+      if (!open.length) {
+        list.style.display = 'none';
+        empty.style.display = '';
+        return;
+      }
+
+      const users = api._store.getState().users;
+      const userById = id => users.find(u => u.id === id) || {};
+
+      // Keep the existing head row, append live rows
+      const head = '<div class="brief-head"><span>Job</span><span>What for</span><span>How much</span><span>How long</span><span></span></div>';
+      list.innerHTML = head + open.map(b => {
+        const brand = userById(b.brandId);
+        const brandName = (brand.name || 'Brand').replace(/\s*·.*$/, '');
+        const initials = brandMark(brandName);
+        const where = (b.location || 'remote').replace(/_/g, ' ');
+        const posted = api.fmt.timeAgo(b.postedAt);
+        const urgent = b.isUrgent
+          ? ' <span class="pill pill-rose" style="margin-left:6px;">Urgent</span>'
+          : '';
+        const svc = (b.serviceSlug || '').replace(/-/g, ' ');
+        return '<div class="brief-row" data-brief-id="' + esc(b.id) + '" style="cursor:pointer;">' +
+          '<div style="display:flex;align-items:center;gap:12px;">' +
+            '<span class="brandmark">' + esc(initials) + '</span>' +
+            '<div>' +
+              '<div style="font-weight:500;">' + esc(b.title) + urgent + '</div>' +
+              '<div class="text-xs muted">' + esc(brandName) + ' · ' + esc(where) + ' · ' + esc(posted) + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="text-sm">' + esc(svc) + '</div>' +
+          '<div><strong>' + money(b) + '</strong></div>' +
+          '<div class="text-sm">' + esc(b.durationWeeks || '') + (b.durationWeeks ? ' weeks' : '') + '</div>' +
+          '<div style="text-align:right;">' +
+            '<button type="button" class="btn btn-primary btn-sm" data-apply-brief="' + esc(b.id) + '">Apply</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      // Row click → view brief (unless they clicked the Apply button)
+      list.querySelectorAll('[data-brief-id]').forEach(row => {
+        row.addEventListener('click', (ev) => {
+          if (ev.target.closest('[data-apply-brief]')) return;
+          location.href = './brief.html?id=' + encodeURIComponent(row.getAttribute('data-brief-id'));
+        });
+      });
+
+      // Apply button — gate on auth BEFORE navigating
+      list.querySelectorAll('[data-apply-brief]').forEach(btn => {
+        btn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          ev.preventDefault();
+          const id = btn.getAttribute('data-apply-brief');
+          const briefUrl = './brief.html?id=' + encodeURIComponent(id) + '&intent=apply';
+          const session = api.users.sessionSync && api.users.sessionSync();
+          if (!session) {
+            const next = encodeURIComponent('/pages/brief.html?id=' + id + '&intent=apply');
+            location.href = './login.html?next=' + next;
+            return;
+          }
+          if (session.role === 'brand') {
+            UI && UI.toast("You're signed in as a brand — only freelancers can apply to jobs.", { kind: 'warn' });
+            return;
+          }
+          location.href = briefUrl;
+        });
+      });
+    } catch (e) {
+      console.error('Failed to load jobs:', e);
+      list.innerHTML = '<div style="padding:48px 24px;text-align:center;color:var(--ink-5);">Could not load open jobs.</div>';
+    }
   });
 </script>
 </body>

@@ -124,16 +124,16 @@
       <div style="margin-top:24px;display:flex;flex-direction:column;gap:14px;">
         <div class="card card-pad" style="padding:18px;">
           <div style="display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;">
-            <div><label class="label">Package name</label><input class="input" placeholder="E.g. Tech pack for one piece"/></div>
-            <div><label class="label">Price</label><input class="input" placeholder="$120" style="width:120px;text-align:right;"/></div>
+            <div><label class="label">Package name</label><input class="input" id="ob-pkg-title" placeholder="E.g. Tech pack for one piece"/></div>
+            <div><label class="label">Price</label><input class="input" id="ob-pkg-price" placeholder="$120" style="width:120px;text-align:right;"/></div>
           </div>
-          <div style="margin-top:14px;"><label class="label">What's included?</label><textarea class="input" rows="3" placeholder="What the customer gets."></textarea></div>
+          <div style="margin-top:14px;"><label class="label">What's included?</label><textarea class="input" id="ob-pkg-description" rows="3" placeholder="What the customer gets."></textarea></div>
           <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <div><label class="label">Delivery time</label><select class="input"><option>24 hours</option><option>3 days</option><option>1 week</option><option>2 weeks</option><option>1 month</option></select></div>
-            <div><label class="label">Free changes</label><select class="input"><option>2</option><option>4</option><option>Unlimited</option></select></div>
+            <div><label class="label">Delivery time</label><select class="input" id="ob-pkg-delivery"><option value="1">24 hours</option><option value="3">3 days</option><option value="7">1 week</option><option value="14">2 weeks</option><option value="30">1 month</option></select></div>
+            <div><label class="label">Free changes</label><select class="input" id="ob-pkg-revisions"><option value="2">2</option><option value="4">4</option><option value="999">Unlimited</option></select></div>
           </div>
         </div>
-        <button class="btn btn-ghost">+ Add another package</button>
+        <p class="text-xs muted" style="text-align:center;">You can add more packages later from your dashboard.</p>
       </div>
     </div>
 
@@ -394,6 +394,16 @@
     const country = (document.getElementById('ob-country')?.value || '').trim();
     const skills = [...document.querySelectorAll('.skill.active')].map(s => s.textContent.trim()).filter(Boolean);
 
+    // Step 5 — pricing package (now actually read)
+    const pkgTitle = (document.getElementById('ob-pkg-title')?.value || '').trim();
+    const pkgPriceRaw = (document.getElementById('ob-pkg-price')?.value || '').trim();
+    const pkgDescription = (document.getElementById('ob-pkg-description')?.value || '').trim();
+    const pkgDelivery = parseInt(document.getElementById('ob-pkg-delivery')?.value || '7', 10);
+    const pkgRevisions = parseInt(document.getElementById('ob-pkg-revisions')?.value || '2', 10);
+    // Parse "$120", "120", "INR 1000" → 120 USD as the integer for now (currency conversion isn't in scope).
+    const priceMatch = pkgPriceRaw.match(/(\d[\d,.]*)/);
+    const pkgPriceAmount = priceMatch ? Math.round(parseFloat(priceMatch[1].replace(/,/g, ''))) : 0;
+
     // Soft validation — minimum portfolio + headline required for review.
     // Skip lets them bail; finish requires the basics.
     if (portfolioWorks.length < 1) {
@@ -417,9 +427,33 @@
         skills, languages: ['en'],
         city, country,
         currency: 'USD',
-        fromPrice: 0,
+        fromPrice: pkgPriceAmount,    // surfaces on the public profile "from $X"
         portfolio: portfolioWorks,
       });
+
+      // Create the freelancer's first package if they filled in title + price.
+      // We don't block onboarding on this — soft-fail with a console warn so a
+      // missing api.packages.create can't trap the user inside onboarding.
+      if (pkgTitle && pkgPriceAmount > 0 && typeof api.packages.create === 'function') {
+        try {
+          await api.packages.create({
+            freelancerId: session.userId,
+            serviceSlug,
+            tier: 'basic',
+            title: pkgTitle,
+            description: pkgDescription,
+            priceAmount: pkgPriceAmount,
+            currency: 'USD',
+            deliveryDays: pkgDelivery,
+            revisionsIncluded: pkgRevisions,
+            bullets: pkgDescription
+              ? pkgDescription.split(/\n+/).map(s => s.replace(/^[-•·*]\s*/, '').trim()).filter(Boolean).slice(0, 6)
+              : [],
+          });
+        } catch (e) {
+          console.warn('Package not created (continuing):', e && e.message);
+        }
+      }
 
       UI && UI.toast("Profile sent for review. We'll email you when it's approved.", { kind: 'success', duration: 5000 });
       // Land on the dashboard — the dashboard reads approvalStatus and shows the banner.

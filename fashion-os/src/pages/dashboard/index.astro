@@ -49,7 +49,7 @@ const statusPill = (s: string) => ({
 
         <div class="space-y-3">
           {myOrders.filter(o => o.status === 'in_progress' || o.status === 'ordered' || o.status === 'delivered').map((o) => (
-            <a href={`/dashboard/orders/${o.id}`} class="flex items-center gap-4 p-3 rounded-xl border border-line hover:border-ink-7 hover:bg-paper-2/50 transition">
+            <a href={`/dashboard/orders/view?id=${o.id}`} class="flex items-center gap-4 p-3 rounded-xl border border-line hover:border-ink-7 hover:bg-paper-2/50 transition">
               <span class="w-10 h-10 rounded-lg bg-paper-2 text-ink mono text-[10px] flex items-center justify-center font-semibold flex-shrink-0">{o.id.toUpperCase()}</span>
               <div class="flex-1 min-w-0">
                 <div class="font-medium text-sm truncate">{o.gigTitle}</div>

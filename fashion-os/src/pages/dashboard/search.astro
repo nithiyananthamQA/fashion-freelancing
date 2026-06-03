@@ -35,7 +35,7 @@ import { myOrders, myGigs, messages } from '@/data/mock';
       <div class="text-xs uppercase tracking-wider text-ink-5 mb-3 mono">Orders · 4</div>
       <div class="space-y-2">
         {myOrders.slice(0, 4).map(o => (
-          <a href={`/dashboard/orders/${o.id}`} class="flex items-center gap-4 p-4 card hover:border-ink-7 transition">
+          <a href={`/dashboard/orders/view?id=${o.id}`} class="flex items-center gap-4 p-4 card hover:border-ink-7 transition">
             <span class="w-10 h-10 rounded-lg bg-paper-2 flex items-center justify-center mono text-[10px] font-semibold">{o.id.toUpperCase()}</span>
             <div class="flex-1 min-w-0">
               <div class="font-medium text-sm">{o.gigTitle}</div>

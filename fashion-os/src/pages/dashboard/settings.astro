@@ -37,8 +37,24 @@ const tabs = [
             <select class="input"><option>Asia/Tokyo (JST)</option><option>Europe/Paris</option><option>America/New_York</option></select>
           </div>
         </div>
-        <button class="btn btn-primary mt-6">Save changes</button>
+        <div class="flex items-center justify-between mt-6 flex-wrap gap-3">
+          <button class="btn btn-primary">Save changes</button>
+          <button type="button" id="st-signout" class="btn btn-ghost text-rose-700 border-rose-200 hover:bg-rose-50">Sign out of this account</button>
+        </div>
       </section>
+
+      <script is:inline>
+        (function () {
+          const btn = document.getElementById('st-signout');
+          if (!btn) return;
+          btn.addEventListener('click', async () => {
+            if (!confirm('Sign out now?')) return;
+            try { await window.api.users.signOut(); } catch (_) {}
+            window.UI && window.UI.toast && window.UI.toast('Signed out.', { kind: 'success' });
+            setTimeout(() => { location.href = '/'; }, 300);
+          });
+        })();
+      </script>
 
       <!-- Notifications -->
       <section id="notifications" class="card p-6">

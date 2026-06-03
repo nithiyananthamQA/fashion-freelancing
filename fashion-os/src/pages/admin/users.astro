@@ -1,23 +1,21 @@
 ---
 import Admin from '@/layouts/Admin.astro';
-import { creators } from '@/data/mock';
 ---
-<Admin title="Users" pageTitle="Users · 12,438" current="users">
+<Admin title="Users" pageTitle="Users" current="users">
 
   <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
-    <div class="flex gap-2 flex-wrap">
-      <button class="chip chip-active">All</button>
-      <button class="chip">Creators · 8,210</button>
-      <button class="chip">Brands · 4,212</button>
-      <button class="chip">Admins · 16</button>
-      <button class="chip">Suspended · 47</button>
+    <div id="us-chips" class="flex gap-2 flex-wrap">
+      <button class="chip chip-active" data-filter="all">All</button>
+      <button class="chip" data-filter="creator">Creators</button>
+      <button class="chip" data-filter="brand">Brands</button>
+      <button class="chip" data-filter="admin">Admins</button>
+      <button class="chip" data-filter="suspended">Suspended</button>
     </div>
     <div class="flex items-center gap-2">
       <div class="relative">
-        <input class="input !py-1.5 text-sm" placeholder="Search by name, email, handle…" style="padding-left: 32px; width: 280px;"/>
+        <input id="us-search" class="input !py-1.5 text-sm" placeholder="Search by name, email, handle…" style="padding-left: 32px; width: 280px;"/>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="text-ink-5 absolute left-3 top-1/2 -translate-y-1/2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
       </div>
-      <button class="btn btn-ghost btn-sm">Export</button>
     </div>
   </div>
 
@@ -27,44 +25,155 @@ import { creators } from '@/data/mock';
         <tr class="bg-paper text-[11px] mono uppercase tracking-wider text-ink-5">
           <th class="text-left px-6 py-3 font-medium">User</th>
           <th class="text-left px-6 py-3 font-medium">Role</th>
-          <th class="text-left px-6 py-3 font-medium">Plan</th>
+          <th class="text-left px-6 py-3 font-medium">Email</th>
           <th class="text-left px-6 py-3 font-medium">Joined</th>
           <th class="text-left px-6 py-3 font-medium">GMV</th>
           <th class="text-left px-6 py-3 font-medium">Status</th>
           <th class="px-6 py-3"></th>
         </tr>
       </thead>
-      <tbody>
-        {creators.slice(0, 8).map((c, i) => (
-          <tr class="border-t border-line hover:bg-paper-2/50 transition">
-            <td class="px-6 py-4">
-              <div class="flex items-center gap-3">
-                <img src={c.avatar} class="w-9 h-9 rounded-full object-cover" alt=""/>
-                <div><div class="font-medium text-sm">{c.name}</div><div class="text-xs text-ink-5 mono">{c.handle}</div></div>
-              </div>
-            </td>
-            <td class="px-6 py-4 text-sm capitalize">creator</td>
-            <td class="px-6 py-4 text-sm">{i % 3 === 0 ? 'Pro' : 'Free'}</td>
-            <td class="px-6 py-4 text-sm text-ink-5">{['Apr 2024','Jan 2025','Mar 2024','Feb 2025','Dec 2023','Sep 2024','May 2024','Aug 2024'][i]}</td>
-            <td class="px-6 py-4 text-sm tabular-nums">${(c.from * 24).toLocaleString()}</td>
-            <td class="px-6 py-4"><span class={i === 6 ? 'pill-rose' : 'pill-green'}>{i === 6 ? 'suspended' : 'active'}</span></td>
-            <td class="px-6 py-4 text-right"><button class="btn btn-ghost btn-sm">View</button></td>
-          </tr>
-        ))}
+      <tbody id="us-tbody">
+        <tr><td colspan="7" class="px-6 py-10 text-center text-ink-5">Loading users…</td></tr>
       </tbody>
     </table></div>
     <div class="px-6 py-4 border-t border-line flex items-center justify-between text-sm">
-      <div class="text-ink-5">Showing 1–8 of 12,438</div>
-      <div class="flex gap-1">
-        <button class="chip">←</button>
-        <button class="chip chip-active">1</button>
-        <button class="chip">2</button>
-        <button class="chip">3</button>
-        <button class="chip">…</button>
-        <button class="chip">1,555</button>
-        <button class="chip">→</button>
-      </div>
+      <div id="us-count" class="text-ink-5">—</div>
+      <div class="flex gap-1 text-ink-5 text-xs">Pagination disabled — showing all loaded users</div>
     </div>
   </div>
+
+  <script is:inline>
+    (function () {
+      function init() {
+        const api = window.api;
+        const UI = window.UI;
+        if (!api || !api._store) return;
+        const tbody = document.getElementById('us-tbody');
+        const countEl = document.getElementById('us-count');
+        const searchEl = document.getElementById('us-search');
+        const chipsEl = document.getElementById('us-chips');
+        if (!tbody) return;
+
+        const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => (
+          { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+
+        const state = api._store.getState();
+        const allUsers = state.users || [];
+        const orders = state.orders || [];
+        const byUserGmv = new Map();
+        orders.forEach(o => {
+          const k = o.brandId;
+          const v = byUserGmv.get(k) || 0;
+          byUserGmv.set(k, v + ((o.amount && o.amount.amount) || 0));
+        });
+
+        let currentFilter = 'all';
+        let currentQuery = '';
+
+        function fmtDate(iso) {
+          if (!iso) return '—';
+          try {
+            const d = new Date(iso);
+            return d.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+          } catch (_) { return '—'; }
+        }
+        function money(c) {
+          if (!c) return '$0';
+          return '$' + Math.round(c / 100).toLocaleString();
+        }
+
+        function render() {
+          let rows = allUsers.slice();
+          if (currentFilter === 'suspended') {
+            rows = rows.filter(u => u.status === 'suspended');
+          } else if (currentFilter !== 'all') {
+            rows = rows.filter(u => u.role === currentFilter);
+          }
+          if (currentQuery) {
+            const q = currentQuery;
+            rows = rows.filter(u =>
+              (u.name || '').toLowerCase().includes(q) ||
+              (u.email || '').toLowerCase().includes(q) ||
+              (u.handle || '').toLowerCase().includes(q));
+          }
+          countEl.textContent = 'Showing ' + rows.length + ' of ' + allUsers.length;
+          if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-10 text-center text-ink-5">No users match.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = rows.map(u => {
+            const statusClass = u.status === 'suspended' ? 'pill-rose' : 'pill-green';
+            const gmv = money(byUserGmv.get(u.id) || 0);
+            const role = u.role === 'freelancer' ? 'creator' : (u.role || '—');
+            return '' +
+              '<tr class="border-t border-line hover:bg-paper-2/50 transition" data-uid="' + esc(u.id) + '">' +
+                '<td class="px-6 py-4">' +
+                  '<div class="flex items-center gap-3">' +
+                    '<img src="' + esc(u.avatar) + '" class="w-9 h-9 rounded-full object-cover" alt=""/>' +
+                    '<div><div class="font-medium text-sm">' + esc(u.name || '—') + '</div><div class="text-xs text-ink-5 mono">' + esc(u.handle || u.id) + '</div></div>' +
+                  '</div>' +
+                '</td>' +
+                '<td class="px-6 py-4 text-sm capitalize">' + esc(role) + '</td>' +
+                '<td class="px-6 py-4 text-sm text-ink-5">' + esc(u.email || '—') + '</td>' +
+                '<td class="px-6 py-4 text-sm text-ink-5">' + esc(fmtDate(u.createdAt)) + '</td>' +
+                '<td class="px-6 py-4 text-sm tabular-nums">' + gmv + '</td>' +
+                '<td class="px-6 py-4"><span class="' + statusClass + '">' + esc(u.status === 'suspended' ? 'suspended' : 'active') + '</span></td>' +
+                '<td class="px-6 py-4 text-right">' +
+                  (u.status === 'suspended'
+                    ? '<button type="button" class="btn btn-ghost btn-sm" data-act="unsuspend">Reactivate</button>'
+                    : '<button type="button" class="btn btn-ghost btn-sm text-rose-700" data-act="suspend">Suspend</button>') +
+                '</td>' +
+              '</tr>';
+          }).join('');
+
+          // Wire suspend / unsuspend
+          tbody.querySelectorAll('[data-act]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              const tr = btn.closest('[data-uid]');
+              const uid = tr && tr.getAttribute('data-uid');
+              const act = btn.getAttribute('data-act');
+              if (!uid) return;
+              btn.disabled = true;
+              try {
+                const newStatus = act === 'suspend' ? 'suspended' : 'active';
+                api._store.setState(s => {
+                  s.users = (s.users || []).map(x =>
+                    x.id === uid ? { ...x, status: newStatus, updatedAt: new Date().toISOString() } : x);
+                  return s;
+                });
+                const u = api._store.getState().users.find(x => x.id === uid);
+                if (u) {
+                  const i = allUsers.findIndex(x => x.id === uid);
+                  if (i >= 0) allUsers[i] = u;
+                }
+                UI && UI.toast(act === 'suspend' ? 'Account suspended.' : 'Account reactivated.', { kind: 'success' });
+                render();
+              } catch (err) {
+                UI && UI.toast(err.message || 'Action failed', { kind: 'error' });
+                btn.disabled = false;
+              }
+            });
+          });
+        }
+
+        chipsEl.querySelectorAll('[data-filter]').forEach(chip => {
+          chip.addEventListener('click', () => {
+            chipsEl.querySelectorAll('[data-filter]').forEach(c => c.classList.remove('chip-active'));
+            chip.classList.add('chip-active');
+            currentFilter = chip.getAttribute('data-filter');
+            render();
+          });
+        });
+        searchEl.addEventListener('input', () => {
+          currentQuery = searchEl.value.toLowerCase().trim();
+          render();
+        });
+
+        render();
+      }
+      if (window.api) init();
+      else window.addEventListener('ff:ready', init, { once: true });
+    })();
+  </script>
 
 </Admin>

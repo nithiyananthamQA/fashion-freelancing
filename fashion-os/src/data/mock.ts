@@ -36,7 +36,7 @@ export const categories: Category[] = [
 
 export const creators: Creator[] = [
   {
-    id: '1', slug: 'yuna-aoki', name: 'Yuna Aoki', handle: '@yunaaoki', specialty: 'Womenswear Designer',
+    id: 'u_yuna', slug: 'yuna-aoki', name: 'Yuna Aoki', handle: '@yunaaoki', specialty: 'Womenswear Designer',
     location: 'Tokyo, Japan', rating: 4.97, reviews: 142, from: 2400, currency: 'USD',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&auto=format&fit=crop',
     cover: 'https://images.unsplash.com/photo-1488161628813-04466f872be2?w=1200&auto=format&fit=crop',
@@ -53,7 +53,7 @@ export const creators: Creator[] = [
     experienceYears: 9, followers: 18400, completion: 99,
   },
   {
-    id: '2', slug: 'marco-reyes', name: 'Marco Reyes', handle: '@marcoreyes', specialty: 'Streetwear Designer',
+    id: 'u_marco', slug: 'marco-reyes', name: 'Marco Reyes', handle: '@marcoreyes', specialty: 'Streetwear Designer',
     location: 'Mexico City', rating: 4.92, reviews: 89, from: 1150, currency: 'USD',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop',
     cover: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1200&auto=format&fit=crop',
@@ -69,7 +69,7 @@ export const creators: Creator[] = [
     experienceYears: 6, followers: 9200, completion: 97,
   },
   {
-    id: '3', slug: 'amara-okafor', name: 'Amara Okafor', handle: '@amara.tp', specialty: 'Tech Pack Specialist',
+    id: 'u_amara', slug: 'amara-okafor', name: 'Amara Okafor', handle: '@amara.tp', specialty: 'Tech Pack Specialist',
     location: 'Lagos, Nigeria', rating: 5.0, reviews: 67, from: 840, currency: 'USD',
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&auto=format&fit=crop',
     cover: 'https://images.unsplash.com/photo-1521336575822-6da63fb45455?w=1200&auto=format&fit=crop',
@@ -84,7 +84,7 @@ export const creators: Creator[] = [
     experienceYears: 5, followers: 4100, completion: 100,
   },
   {
-    id: '4', slug: 'elena-marchetti', name: 'Elena Marchetti', handle: '@elenamarchetti', specialty: 'Editorial Stylist',
+    id: 'u_elena', slug: 'elena-marchetti', name: 'Elena Marchetti', handle: '@elenamarchetti', specialty: 'Editorial Stylist',
     location: 'Milan, Italy', rating: 4.98, reviews: 211, from: 3800, currency: 'EUR',
     avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&auto=format&fit=crop',
     cover: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=1200&auto=format&fit=crop',
@@ -100,7 +100,7 @@ export const creators: Creator[] = [
     experienceYears: 14, followers: 47200, completion: 98,
   },
   {
-    id: '5', slug: 'kai-nakamura', name: 'Kai Nakamura', handle: '@kainakamura', specialty: 'Pattern Maker',
+    id: 'u_kai', slug: 'kai-nakamura', name: 'Kai Nakamura', handle: '@kainakamura', specialty: 'Pattern Maker',
     location: 'Berlin, Germany', rating: 4.94, reviews: 73, from: 1600, currency: 'EUR',
     avatar: 'https://images.unsplash.com/photo-1463453091185-61582044d556?w=300&auto=format&fit=crop',
     cover: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=1200&auto=format&fit=crop',
@@ -115,7 +115,7 @@ export const creators: Creator[] = [
     experienceYears: 8, followers: 2800, completion: 96,
   },
   {
-    id: '6', slug: 'sofia-rosso', name: 'Sofia Rosso', handle: '@sofiarosso', specialty: 'Creative Director',
+    id: 'u_sofia', slug: 'sofia-rosso', name: 'Sofia Rosso', handle: '@sofiarosso', specialty: 'Creative Director',
     location: 'Paris, France', rating: 4.96, reviews: 38, from: 6500, currency: 'EUR',
     avatar: 'https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?w=300&auto=format&fit=crop',
     cover: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1200&auto=format&fit=crop',
@@ -130,7 +130,7 @@ export const creators: Creator[] = [
     experienceYears: 12, followers: 23800, completion: 100,
   },
   {
-    id: '7', slug: 'rina-patel', name: 'Rina Patel', handle: '@rinatextiles', specialty: 'Textile Designer',
+    id: 'u_rina', slug: 'rina-patel', name: 'Rina Patel', handle: '@rinatextiles', specialty: 'Textile Designer',
     location: 'Mumbai, India', rating: 4.91, reviews: 102, from: 720, currency: 'USD',
     avatar: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=300&auto=format&fit=crop',
     cover: 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=1200&auto=format&fit=crop',

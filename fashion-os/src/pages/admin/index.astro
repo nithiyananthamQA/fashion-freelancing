@@ -3,34 +3,83 @@ import Admin from '@/layouts/Admin.astro';
 ---
 <Admin title="Dashboard" pageTitle="Admin · Overview" current="dash">
 
-  <!-- Top KPIs -->
+  <!-- Top KPIs (live from the store; static demo numbers shown until ff:ready) -->
   <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
     <div class="card p-5">
       <div class="text-[11px] mono uppercase tracking-[0.16em] text-ink-5">Active users</div>
-      <div class="display text-3xl mt-1 tabular-nums">12,438</div>
-      <div class="text-xs text-emerald-700 mt-1">↗ +312 this week</div>
+      <div id="kpi-users" class="display text-3xl mt-1 tabular-nums">—</div>
+      <div class="text-xs text-emerald-700 mt-1">live count from store</div>
     </div>
     <div class="card p-5">
       <div class="text-[11px] mono uppercase tracking-[0.16em] text-ink-5">GMV · MTD</div>
-      <div class="display text-3xl mt-1 gold-text tabular-nums">$3.8M</div>
-      <div class="text-xs text-emerald-700 mt-1">↗ +24%</div>
+      <div id="kpi-gmv" class="display text-3xl mt-1 gold-text tabular-nums">—</div>
+      <div class="text-xs text-emerald-700 mt-1">summed from orders</div>
     </div>
     <div class="card p-5">
       <div class="text-[11px] mono uppercase tracking-[0.16em] text-ink-5">Active orders</div>
-      <div class="display text-3xl mt-1 tabular-nums">1,284</div>
-      <div class="text-xs text-ink-5 mt-1">86% on-time</div>
+      <div id="kpi-orders" class="display text-3xl mt-1 tabular-nums">—</div>
+      <div class="text-xs text-ink-5 mt-1">ordered + in-progress + delivered</div>
     </div>
     <div class="card p-5">
       <div class="text-[11px] mono uppercase tracking-[0.16em] text-ink-5">Pending review</div>
-      <div class="display text-3xl mt-1 tabular-nums text-rose-700">79</div>
-      <div class="text-xs text-rose-700 mt-1">24 mod · 47 verify · 8 disp</div>
+      <div id="kpi-pending" class="display text-3xl mt-1 tabular-nums text-rose-700">—</div>
+      <div class="text-xs text-rose-700 mt-1"><span id="kpi-pending-detail">freelancers awaiting approval</span></div>
     </div>
     <div class="card p-5">
       <div class="text-[11px] mono uppercase tracking-[0.16em] text-ink-5">Trust &amp; safety score</div>
-      <div class="display text-3xl mt-1 tabular-nums">98.4</div>
-      <div class="text-xs text-emerald-700 mt-1">healthy</div>
+      <div id="kpi-trust" class="display text-3xl mt-1 tabular-nums">—</div>
+      <div class="text-xs text-emerald-700 mt-1">% of orders without dispute</div>
     </div>
   </div>
+
+  <script is:inline>
+    (function () {
+      function init() {
+        const api = window.api;
+        if (!api || !api._store) return;
+        const state = api._store.getState();
+        const $ = id => document.getElementById(id);
+        const fmt = n => (n | 0).toLocaleString();
+
+        const users = state.users || [];
+        const orders = state.orders || [];
+        const freelancers = state.freelancers || [];
+
+        // 1. Active users
+        if ($('kpi-users')) $('kpi-users').textContent = fmt(users.length);
+
+        // 2. GMV — sum amounts (cents) on completed and in-progress orders
+        const gmvCents = orders.reduce((s, o) => s + ((o.amount && o.amount.amount) || 0), 0);
+        if ($('kpi-gmv')) {
+          const gmv = gmvCents / 100;
+          $('kpi-gmv').textContent = gmv >= 1000000 ? '$' + (gmv / 1000000).toFixed(1) + 'M'
+            : gmv >= 1000 ? '$' + (gmv / 1000).toFixed(1) + 'k'
+            : '$' + (gmv | 0).toLocaleString();
+        }
+
+        // 3. Active orders — anything not closed/cancelled
+        const activeStatuses = new Set(['ordered','in_progress','delivered']);
+        const active = orders.filter(o => activeStatuses.has(o.status));
+        if ($('kpi-orders')) $('kpi-orders').textContent = fmt(active.length);
+
+        // 4. Pending review — freelancers waiting on admin
+        const pending = freelancers.filter(f => f.approvalStatus === 'pending');
+        if ($('kpi-pending')) $('kpi-pending').textContent = fmt(pending.length);
+        if ($('kpi-pending-detail')) {
+          $('kpi-pending-detail').textContent = pending.length === 1
+            ? 'freelancer awaiting approval'
+            : 'freelancers awaiting approval';
+        }
+
+        // 5. Trust score — % of orders without a dispute marker
+        const disputed = orders.filter(o => o.status === 'disputed').length;
+        const trust = orders.length ? (100 * (1 - disputed / orders.length)) : 100;
+        if ($('kpi-trust')) $('kpi-trust').textContent = trust.toFixed(1);
+      }
+      if (window.api) init();
+      else window.addEventListener('ff:ready', init, { once: true });
+    })();
+  </script>
 
   <div class="grid grid-cols-12 gap-6">
 

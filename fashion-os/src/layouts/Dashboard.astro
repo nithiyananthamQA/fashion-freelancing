@@ -38,13 +38,11 @@ const { title = 'Dashboard', current = '', role = 'creator', pageTitle = 'Overvi
   <script is:inline>
     // Mark shared modules ready for any page hydration scripts
     window.dispatchEvent(new CustomEvent('ff:ready', { detail: { api: window.api, ui: window.UI } }));
-    // If no session, redirect to public sign-in. (For demo: bypass.)
+    // Require a real session. No more silent demo auto-signin —
+    // it made Sign out impossible (the reload re-signed you in).
     if (!window.api.users.sessionSync()) {
-      // Auto-sign-in as demo Yuna for the creator dashboard
-      const isBrand = location.pathname.startsWith('/brand');
-      const isAdmin = location.pathname.startsWith('/admin');
-      const email = isBrand ? 'sara@auriga.world' : isAdmin ? 'admin@fashionfreelancing.app' : 'yuna@example.com';
-      window.api.users.signIn({ email }).then(() => location.reload());
+      const next = encodeURIComponent(location.pathname + location.search);
+      location.replace('/pages/login.html?next=' + next);
     }
   </script>
 

@@ -20,13 +20,13 @@ import Dashboard from '@/layouts/Dashboard.astro';
         </div>
 
         <div class="grid grid-cols-2 gap-4">
-          <div><label class="label">Display name</label><input class="input" value="Yuna Aoki"/></div>
-          <div><label class="label">Handle</label><input class="input" value="@yunaaoki"/></div>
-          <div class="col-span-2"><label class="label">Headline</label><input class="input" value="Couture-trained womenswear designer · Tokyo · Available for SS27 capsules"/></div>
-          <div><label class="label">City</label><input class="input" value="Tokyo"/></div>
-          <div><label class="label">Country</label><input class="input" value="Japan"/></div>
+          <div><label class="label">Display name</label><input id="pf-name" class="input" value="Yuna Aoki"/></div>
+          <div><label class="label">Handle</label><input id="pf-handle" class="input" value="@yunaaoki"/></div>
+          <div class="col-span-2"><label class="label">Headline</label><input id="pf-headline" class="input" value="Couture-trained womenswear designer · Tokyo · Available for SS27 capsules"/></div>
+          <div><label class="label">City</label><input id="pf-city" class="input" value="Tokyo"/></div>
+          <div><label class="label">Country</label><input id="pf-country" class="input" value="Japan"/></div>
           <div class="col-span-2"><label class="label">Bio</label>
-            <textarea class="input" rows="4">Trained at Bunka Fashion College in Tokyo and Atelier Versace in Milan. I work mostly with indie luxury houses on capsule womenswear collections — silk drape, hand-embroidery and constructed tailoring.</textarea>
+            <textarea id="pf-bio" class="input" rows="4">Trained at Bunka Fashion College in Tokyo and Atelier Versace in Milan. I work mostly with indie luxury houses on capsule womenswear collections — silk drape, hand-embroidery and constructed tailoring.</textarea>
           </div>
         </div>
       </div>
@@ -95,8 +95,8 @@ import Dashboard from '@/layouts/Dashboard.astro';
       </div>
 
       <div class="flex justify-end gap-3 sticky bottom-4">
-        <button class="btn btn-ghost">Cancel</button>
-        <button class="btn-gold">Save changes</button>
+        <a href="/dashboard" class="btn btn-ghost">Cancel</a>
+        <button type="button" id="pf-save" class="btn-gold">Save changes</button>
       </div>
     </div>
 
@@ -108,11 +108,11 @@ import Dashboard from '@/layouts/Dashboard.astro';
         <div class="px-5 -mt-10 relative z-10">
           <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200" class="w-16 h-16 rounded-full ring-4 ring-white object-cover" alt=""/>
           <div class="mt-2 flex items-center gap-2">
-            <div class="editorial text-xl">Yuna Aoki</div>
+            <div id="pv-name" class="editorial text-xl">Yuna Aoki</div>
             <span class="pill pill-gold">Top 1%</span>
           </div>
-          <div class="text-xs text-ink-500">@yunaaoki · Tokyo</div>
-          <div class="text-sm text-ink-700 mt-3">Couture-trained womenswear designer · Tokyo · Available for SS27 capsules</div>
+          <div class="text-xs text-ink-500"><span id="pv-handle">@yunaaoki</span> · <span id="pv-city">Tokyo</span></div>
+          <div id="pv-headline" class="text-sm text-ink-700 mt-3">Couture-trained womenswear designer · Tokyo · Available for SS27 capsules</div>
           <div class="mt-3 flex flex-wrap gap-1.5">
             <span class="chip">Couture</span><span class="chip">Drape</span><span class="chip">Silk</span>
           </div>
@@ -124,5 +124,86 @@ import Dashboard from '@/layouts/Dashboard.astro';
       </div>
     </div>
   </div>
+
+  <script is:inline>
+    (function () {
+      function init() {
+        const api = window.api;
+        const UI = window.UI;
+        if (!api) return;
+        const session = api.users.sessionSync();
+        if (!session) return;
+
+        const $ = id => document.getElementById(id);
+        const state = api._store.getState();
+        const me = (state.users || []).find(u => u.id === session.userId);
+        const fl = (state.freelancers || []).find(f => f.id === session.userId);
+
+        // Hydrate form from the real signed-in record (if found)
+        if (me) {
+          if ($('pf-name')) $('pf-name').value = me.name || '';
+          if ($('pf-handle')) $('pf-handle').value = me.handle || '';
+          if ($('pf-city')) $('pf-city').value = (me.location || '').split(',')[0].trim() || '';
+          if ($('pf-country')) $('pf-country').value = (me.location || '').split(',').slice(1).join(',').trim() || '';
+        }
+        if (fl) {
+          if ($('pf-headline')) $('pf-headline').value = fl.headline || '';
+          if ($('pf-bio')) $('pf-bio').value = fl.bio || '';
+        }
+
+        function syncPreview() {
+          if ($('pv-name')) $('pv-name').textContent = $('pf-name').value || 'Your name';
+          if ($('pv-handle')) $('pv-handle').textContent = $('pf-handle').value || '@you';
+          if ($('pv-city')) $('pv-city').textContent = $('pf-city').value || 'Your city';
+          if ($('pv-headline')) $('pv-headline').textContent = $('pf-headline').value || '';
+        }
+        ['pf-name','pf-handle','pf-city','pf-headline'].forEach(id => {
+          const el = $(id);
+          if (el) el.addEventListener('input', syncPreview);
+        });
+        syncPreview();
+
+        const saveBtn = $('pf-save');
+        if (saveBtn) {
+          saveBtn.addEventListener('click', async () => {
+            saveBtn.disabled = true;
+            const original = saveBtn.textContent;
+            saveBtn.textContent = 'Saving…';
+            try {
+              const name = $('pf-name').value.trim();
+              const handle = $('pf-handle').value.trim();
+              const city = $('pf-city').value.trim();
+              const country = $('pf-country').value.trim();
+              const headline = $('pf-headline').value.trim();
+              const bio = $('pf-bio').value.trim();
+              const location = [city, country].filter(Boolean).join(', ');
+
+              // Update user record (name, handle, location)
+              api._store.setState(s => {
+                s.users = (s.users || []).map(u =>
+                  u.id === session.userId
+                    ? { ...u, name, handle, location, updatedAt: new Date().toISOString() }
+                    : u);
+                s.freelancers = (s.freelancers || []).map(f =>
+                  f.id === session.userId
+                    ? { ...f, name, handle, headline, bio, location, updatedAt: new Date().toISOString() }
+                    : f);
+                return s;
+              });
+
+              UI && UI.toast('Profile saved.', { kind: 'success' });
+            } catch (err) {
+              UI && UI.toast(err.message || 'Could not save', { kind: 'error' });
+            } finally {
+              saveBtn.disabled = false;
+              saveBtn.textContent = original;
+            }
+          });
+        }
+      }
+      if (window.api) init();
+      else window.addEventListener('ff:ready', init, { once: true });
+    })();
+  </script>
 
 </Dashboard>

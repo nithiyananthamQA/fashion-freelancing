@@ -39,29 +39,31 @@
       <!-- LEFT -->
       <div>
         <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
-          <span class="brandmark" style="width:48px;height:48px;font-size:14px;">M·K</span>
+          <span id="bf-brand-mark" class="brandmark" style="width:48px;height:48px;font-size:14px;">M·K</span>
           <div>
-            <div style="font-weight:500;">Maison Kirei</div>
-            <div class="muted text-xs">Paris · Trusted brand · ★ 4.9 from 12 past hires</div>
+            <div id="bf-brand-name" style="font-weight:500;">Maison Kirei</div>
+            <div id="bf-brand-sub" class="muted text-xs">Paris · Trusted brand · ★ 4.9 from 12 past hires</div>
           </div>
-          <span class="pill pill-green" style="margin-left:auto;">Open · 8 people applied so far</span>
+          <span id="bf-status-pill" class="pill pill-green" style="margin-left:auto;">Open</span>
         </div>
 
-        <h1 class="h-1">Womenswear designer for our <span class="display-italic" style="color:var(--ink-3);">spring collection</span>.</h1>
-        <p class="lead mt-3">Posted 2 hours ago · Will close in 5 days · 8 people applied so far</p>
+        <h1 id="bf-title" class="h-1">Womenswear designer for our <span class="display-italic" style="color:var(--ink-3);">spring collection</span>.</h1>
+        <p id="bf-meta-line" class="lead mt-3">Posted 2 hours ago · Will close in 5 days · 8 people applied so far</p>
 
         <div class="meta-row mt-6">
-          <div><div class="lbl">Looking for</div><div class="val">Designer</div></div>
-          <div><div class="lbl">Pays</div><div class="val">$8,000–$14,000</div></div>
-          <div><div class="lbl">How long</div><div class="val">8 weeks</div></div>
-          <div><div class="lbl">Where</div><div class="val">Work from anywhere</div></div>
+          <div><div class="lbl">Looking for</div><div id="bf-meta-svc" class="val">Designer</div></div>
+          <div><div class="lbl">Pays</div><div id="bf-meta-pay" class="val">$8,000–$14,000</div></div>
+          <div><div class="lbl">How long</div><div id="bf-meta-dur" class="val">8 weeks</div></div>
+          <div><div class="lbl">Where</div><div id="bf-meta-where" class="val">Work from anywhere</div></div>
         </div>
 
         <div class="mt-12">
           <h2 class="h-3">About the job</h2>
-          <p class="lead mt-3">We're an indie fashion brand based in Paris. We make <strong>ready-to-wear womenswear</strong>, sold online and in 12 stores across Europe. Our spring 2027 collection is 10 pieces, and we need a designer to lead it.</p>
-          <p class="lead mt-3"><strong>What we want:</strong> Quiet, considered fashion. Hand-finished tailoring with a few simple silk pieces. No logos, no loud branding. Think Khaite, Lemaire, early Phoebe Philo Céline.</p>
-          <p class="lead mt-3"><strong>What we make from:</strong> Organic linen blend, wool crepe, hand-woven cotton. We already have suppliers in Lisbon and Como.</p>
+          <div id="bf-description">
+            <p class="lead mt-3">We're an indie fashion brand based in Paris. We make <strong>ready-to-wear womenswear</strong>, sold online and in 12 stores across Europe. Our spring 2027 collection is 10 pieces, and we need a designer to lead it.</p>
+            <p class="lead mt-3"><strong>What we want:</strong> Quiet, considered fashion. Hand-finished tailoring with a few simple silk pieces. No logos, no loud branding. Think Khaite, Lemaire, early Phoebe Philo Céline.</p>
+            <p class="lead mt-3"><strong>What we make from:</strong> Organic linen blend, wool crepe, hand-woven cotton. We already have suppliers in Lisbon and Como.</p>
+          </div>
         </div>
 
         <div class="mt-8">
@@ -113,7 +115,7 @@
       <aside class="br-side">
         <div class="card card-pad">
           <h3 class="h-3">Apply for this job</h3>
-          <p class="lead text-sm mt-2">8 people applied. Average pitch was for $11,400 over 6 weeks.</p>
+          <p id="bf-side-meta" class="lead text-sm mt-2">Open job · be one of the first to apply.</p>
           <a href="#" id="apply-btn" class="btn btn-primary w-full mt-6">Apply now →</a>
           <button class="btn btn-ghost w-full mt-2">✦ Help me write my pitch</button>
 
@@ -128,9 +130,8 @@
         </div>
 
         <div class="card card-pad mt-4">
-          <h4 class="h-4">About Maison Kirei</h4>
-          <p class="lead text-sm mt-2">Indie fashion brand from Paris. Hired 12 freelancers before — all paid on time. ★ 4.9 from past freelancers.</p>
-          <a href="#" class="btn btn-link mt-3" style="font-size:13px;">See their other 11 jobs →</a>
+          <h4 id="bf-about-title" class="h-4">About Maison Kirei</h4>
+          <p id="bf-about-text" class="lead text-sm mt-2">Indie fashion brand from Paris. Hired 12 freelancers before — all paid on time. ★ 4.9 from past freelancers.</p>
         </div>
       </aside>
     </div>
@@ -140,10 +141,120 @@
 <div id="site-footer"></div>
 <script src="../assets/site.js"></script>
 <script>
-  // "Apply now" — must be signed in; freelancers apply, then land on their proposals
-  window.onFFReady(() => {
-    const applyBtn = document.getElementById('apply-btn');
+  // Live brief hydration + apply flow.
+  //   - If ?id= is in the URL, replace the demo content with the real brief.
+  //   - Apply uses the real brief id and the brief's price/duration.
+  //   - Signed-out users see "Sign in to apply →" so the next step is obvious.
+  window.onFFReady(async () => {
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => (
+      { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+
+    const params = new URLSearchParams(location.search);
+    const briefId = params.get('id');
+    const autoApply = params.get('intent') === 'apply';
+
+    let brief = null;
+    let brand = null;
+
+    if (briefId) {
+      try { brief = await api.briefs.get(briefId); } catch (_) {}
+      if (brief) {
+        brand = (api._store.getState().users || []).find(u => u.id === brief.brandId) || {};
+        paintBrief(brief, brand);
+      } else {
+        UI && UI.toast('That job is no longer available — showing a sample.', { kind: 'warn' });
+      }
+    }
+
+    function moneyRange(b) {
+      const min = b.budgetMin && b.budgetMin.amount ? b.budgetMin.amount / 100 : 0;
+      const max = b.budgetMax && b.budgetMax.amount ? b.budgetMax.amount / 100 : 0;
+      const cur = (b.budgetMin && b.budgetMin.currency) || (b.budgetMax && b.budgetMax.currency) || 'USD';
+      const sym = cur === 'EUR' ? '€' : cur === 'GBP' ? '£' : cur === 'INR' ? '₹' : '$';
+      if (min && max && min !== max) return sym + min.toLocaleString() + '–' + sym + max.toLocaleString();
+      const v = max || min;
+      return v ? sym + v.toLocaleString() : '—';
+    }
+    function brandMark(name) {
+      const n = (name || '').split(/\s+/).slice(0, 2).map(s => s[0] || '').join('').toUpperCase();
+      return n || 'FF';
+    }
+    function paintBrief(b, brandUser) {
+      const brandName = (brandUser && brandUser.name || 'Brand').replace(/\s*·.*$/, '');
+      document.title = b.title + ' · Fashion Freelancing';
+      if ($('bf-brand-mark')) $('bf-brand-mark').textContent = brandMark(brandName);
+      if ($('bf-brand-name')) $('bf-brand-name').textContent = brandName;
+      if ($('bf-brand-sub')) {
+        const loc = (brandUser && brandUser.location) || (b.location || '').replace(/_/g,' ');
+        $('bf-brand-sub').textContent = loc;
+      }
+      if ($('bf-status-pill')) {
+        $('bf-status-pill').textContent = b.status === 'open' ? 'Open' : b.status;
+        $('bf-status-pill').className = 'pill ' + (b.status === 'open' ? 'pill-green' : 'pill-gray');
+      }
+      if ($('bf-title')) $('bf-title').textContent = b.title;
+      if ($('bf-meta-line')) {
+        const ago = api.fmt && api.fmt.timeAgo ? api.fmt.timeAgo(b.postedAt) : '';
+        $('bf-meta-line').textContent =
+          'Posted ' + ago + ' · ' +
+          (b.applicantCount || 0) + ' applicant' + (b.applicantCount === 1 ? '' : 's');
+      }
+      if ($('bf-meta-svc')) $('bf-meta-svc').textContent = (b.serviceSlug || '').replace(/-/g, ' ');
+      if ($('bf-meta-pay')) $('bf-meta-pay').textContent = moneyRange(b);
+      if ($('bf-meta-dur')) $('bf-meta-dur').textContent = b.durationWeeks ? (b.durationWeeks + ' weeks') : '—';
+      if ($('bf-meta-where')) {
+        const w = (b.location || 'remote').replace(/_/g, ' ');
+        $('bf-meta-where').textContent = w === 'remote' ? 'Work from anywhere' : w;
+      }
+      if ($('bf-description')) {
+        const parts = (b.description || '').split(/\n\n+/);
+        $('bf-description').innerHTML = parts.length && parts[0]
+          ? parts.map(p => '<p class="lead mt-3">' + esc(p) + '</p>').join('')
+          : '<p class="lead mt-3 muted">No description provided.</p>';
+      }
+      if ($('bf-side-meta')) {
+        const n = b.applicantCount || 0;
+        $('bf-side-meta').textContent = n
+          ? n + ' applicant' + (n === 1 ? '' : 's') + ' so far.'
+          : 'Open job · be one of the first to apply.';
+      }
+      if ($('bf-about-title')) $('bf-about-title').textContent = 'About ' + brandName;
+      if ($('bf-about-text')) {
+        $('bf-about-text').textContent = (brandUser && brandUser.bio)
+          ? brandUser.bio
+          : brandName + ' posts jobs on Fashion Freelancing.';
+      }
+    }
+
+    const applyBtn = $('apply-btn');
     if (!applyBtn) return;
+
+    function refreshApplyCta() {
+      const session = api.users.sessionSync();
+      if (!session) {
+        applyBtn.textContent = 'Sign in to apply →';
+      } else if (session.role === 'brand') {
+        applyBtn.textContent = "You can't apply (brand account)";
+      } else {
+        applyBtn.textContent = 'Apply now →';
+      }
+    }
+    refreshApplyCta();
+    window.addEventListener('ff:session-changed', refreshApplyCta);
+
+    // If we arrived here via "Apply" with intent=apply, fire it now
+    // (only when signed in as a non-brand — otherwise the existing handler will guide them).
+    if (autoApply) {
+      const session = api.users.sessionSync();
+      if (session && session.role !== 'brand') {
+        setTimeout(() => applyBtn.click(), 200);
+      } else if (!session) {
+        // requireAuth toast will surface naturally on click
+        applyBtn.click();
+      }
+    }
+
     applyBtn.addEventListener('click', async (e) => {
       e.preventDefault();
       if (!UI.requireAuth('to apply for this job')) return;
@@ -154,7 +265,6 @@
         return;
       }
 
-      // Gate: only APPROVED freelancers can apply
       const me = api._store.getState().freelancers.find(f => f.id === session.userId);
       if (me && me.approvalStatus && me.approvalStatus !== 'approved') {
         const msg = me.approvalStatus === 'pending'
@@ -164,20 +274,29 @@
         return;
       }
 
+      // Use the real brief's id + price/duration when available.
+      // api.applications.create takes proposedAmount as dollars (it stores cents).
+      const targetBriefId = (brief && brief.id) || 'brief_kirei_ss27';
+      const minCents = brief && brief.budgetMin && brief.budgetMin.amount || 0;
+      const maxCents = brief && brief.budgetMax && brief.budgetMax.amount || 0;
+      const proposedDollars = Math.round((maxCents || minCents || 1100000) / 100);
+      const durationDays = (brief && brief.durationWeeks ? brief.durationWeeks * 7 : 42);
+
       applyBtn.style.pointerEvents = 'none';
       applyBtn.textContent = 'Sending your application…';
       try {
-        // Demo brief id; a real brief page would read ?id= from the URL
         await api.applications.create({
-          briefId: 'brief_kirei_ss27',
+          briefId: targetBriefId,
+          freelancerId: session.userId,
           pitch: 'I would love to work on this — see my profile for relevant work.',
-          proposedAmount: 11000, proposedDurationDays: 42,
+          proposedAmount: proposedDollars,
+          proposedDurationDays: durationDays,
         });
         UI.toast('Application sent. Good luck!', { kind: 'success' });
         setTimeout(() => { location.href = '/dashboard/proposals'; }, 700);
       } catch (err) {
         applyBtn.style.pointerEvents = '';
-        applyBtn.textContent = 'Apply now →';
+        refreshApplyCta();
         UI.toast(err.message || 'Could not send application', { kind: 'error' });
       }
     });

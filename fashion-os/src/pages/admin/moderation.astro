@@ -41,7 +41,7 @@ const riskClass = (r: string) => ({ high: 'pill-rose', med: 'pill-champagne', lo
       </thead>
       <tbody>
         {items.map(i => (
-          <tr class="border-t border-line hover:bg-paper-2/50 transition">
+          <tr class="border-t border-line hover:bg-paper-2/50 transition" data-mod-id={i.id}>
             <td class="px-6 py-4 mono text-xs text-ink-5">{i.id}</td>
             <td class="px-6 py-4 text-sm capitalize">{i.type}</td>
             <td class="px-6 py-4 text-sm font-medium">{i.target}</td>
@@ -51,8 +51,8 @@ const riskClass = (r: string) => ({ high: 'pill-rose', med: 'pill-champagne', lo
             <td class="px-6 py-4"><span class={riskClass(i.risk)}>{i.risk}</span></td>
             <td class="px-6 py-4 text-right">
               <div class="flex gap-1.5 justify-end">
-                <button class="btn btn-ghost btn-sm">Approve</button>
-                <button class="btn btn-ghost btn-sm border-rose-200 text-rose-700">Remove</button>
+                <button type="button" class="btn btn-ghost btn-sm" data-act="approve">Approve</button>
+                <button type="button" class="btn btn-ghost btn-sm border-rose-200 text-rose-700" data-act="remove">Remove</button>
               </div>
             </td>
           </tr>
@@ -60,5 +60,41 @@ const riskClass = (r: string) => ({ high: 'pill-rose', med: 'pill-champagne', lo
       </tbody>
     </table></div>
   </div>
+
+  <div id="mod-empty" class="card p-10 text-center text-ink-500 hidden">
+    <div class="text-4xl mb-3">✓</div>
+    <div class="font-medium text-ink mb-1">Queue cleared</div>
+    <div class="text-sm">All flagged items have been resolved.</div>
+  </div>
+
+  <script is:inline>
+    (function () {
+      function init() {
+        const UI = window.UI;
+        const rows = document.querySelectorAll('[data-mod-id]');
+        const empty = document.getElementById('mod-empty');
+        rows.forEach(row => {
+          row.querySelectorAll('[data-act]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const act = btn.getAttribute('data-act');
+              const msg = act === 'approve' ? 'Approved — kept on platform.' : 'Removed — content taken down.';
+              row.style.transition = 'opacity .25s, transform .25s';
+              row.style.opacity = '0';
+              row.style.transform = 'translateX(8px)';
+              setTimeout(() => {
+                row.remove();
+                if (!document.querySelectorAll('[data-mod-id]').length && empty) {
+                  empty.classList.remove('hidden');
+                }
+              }, 250);
+              UI && UI.toast(msg, { kind: act === 'approve' ? 'success' : 'info' });
+            });
+          });
+        });
+      }
+      if (window.api) init();
+      else window.addEventListener('ff:ready', init, { once: true });
+    })();
+  </script>
 
 </Admin>
