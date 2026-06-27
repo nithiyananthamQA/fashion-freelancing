@@ -1,0 +1,983 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title id="pg-title">Service — Fashion Freelancing</title>
+<meta name="description" id="pg-desc" content="" />
+
+<link rel="stylesheet" href="../assets/styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --u: 8px;
+  --paper:   #1C1D20;
+  --paper-2: #25272B;
+  --paper-3: #2E3035;
+  --ink:     #EAE7DD;
+  --ink-3:   rgba(234,231,221,.72);
+  --ink-5:   rgba(234,231,221,.50);
+  --ink-7:   rgba(234,231,221,.30);
+  --clay:    #FF5C1F;
+  --hair:    rgba(234,231,221,.10);
+  --hair-2:  rgba(234,231,221,.07);
+  --mono:    'IBM Plex Mono', monospace;
+  --sans:    'Inter', sans-serif;
+  --nav-h:   56px;
+}
+:root[data-theme="light"] {
+  --paper:   #E9E8E3;
+  --paper-2: #DDDBD4;
+  --paper-3: #D2D0C9;
+  --ink:     #1C1D20;
+  --ink-3:   rgba(28,29,32,.72);
+  --ink-5:   rgba(28,29,32,.50);
+  --ink-7:   rgba(28,29,32,.28);
+  --hair:    rgba(28,29,32,.12);
+  --hair-2:  rgba(28,29,32,.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--paper); color: var(--ink); -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+img { display: block; }
+
+.wrap { max-width: 1560px; margin: 0 auto; padding: 0 30px; }
+@media (max-width: 720px) { .wrap { padding: 0 20px; } }
+
+/* nav / footer overrides */
+.topnav, .topnav.is-scrolled { background: var(--paper) !important; backdrop-filter: none !important; border-bottom: 1px solid var(--clay) !important; box-shadow: none !important; }
+.topnav-inner { height: 56px !important; }
+.footer, #site-footer, #site-footer * { background-color: transparent !important; }
+#site-footer { background: var(--paper-2) !important; border-top: 1px solid var(--hair) !important; padding-top: 48px; padding-bottom: 32px; }
+#site-footer a { color: var(--ink-3) !important; }
+#site-footer a:hover { color: var(--clay) !important; }
+#site-footer .h-3, #site-footer h3, #site-footer h4 { color: var(--ink) !important; }
+#site-footer hr, #site-footer .line { border-color: var(--hair) !important; }
+#site-footer .text-xs, #site-footer .muted { color: var(--ink-5) !important; }
+
+/* theme toggle */
+#theme-toggle { position: fixed; right: 22px; top: 0; z-index: 9999; width: 40px; height: 56px; display: inline-flex; align-items: center; justify-content: center; background: transparent; color: var(--ink-5); border: none; cursor: pointer; padding: 0; transition: color .15s; }
+#theme-toggle:hover { color: var(--clay); }
+.ic-sun { display: block; }
+.ic-moon { display: none; }
+[data-theme="light"] .ic-sun { display: none; }
+[data-theme="light"] .ic-moon { display: block; }
+
+/* reveal */
+.rv { opacity: 0; transform: translateY(20px); transition: opacity .65s ease, transform .65s ease; }
+.rv.visible { opacity: 1; transform: none; }
+.rv-d1 { transition-delay: .1s; }
+.rv-d2 { transition-delay: .2s; }
+.rv-d3 { transition-delay: .3s; }
+.rv-d4 { transition-delay: .4s; }
+
+/* section label */
+.sv-label { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-5); margin-bottom: calc(var(--u) * 2); }
+
+/* buttons */
+.sv-btn { display: inline-flex; align-items: center; padding: 16px 28px; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; border: 1px solid transparent; cursor: pointer; white-space: nowrap; }
+.sv-btn-solid { background: var(--clay); color: #fff; border-color: var(--clay); }
+.sv-btn-solid:hover { background: transparent; color: var(--clay); border-color: var(--clay); }
+.sv-btn-ghost { background: transparent; color: var(--ink); border-color: var(--ink); }
+.sv-btn-ghost:hover { background: var(--ink); color: var(--paper); }
+
+/* image treatment */
+.sv-img img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(35%) brightness(0.6) contrast(1.1); transition: filter .8s ease, transform .8s ease; display: block; }
+.sv-img:hover img { filter: grayscale(10%) brightness(0.75) contrast(1.05); transform: scale(1.04); }
+
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.sv-hero {
+  position: relative;
+  min-height: calc(100vh - var(--nav-h));
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: calc(var(--u) * 6) 0 0;
+  overflow: hidden;
+}
+.sv-hero-bgimg {
+  position: absolute; inset: 0; z-index: 0; overflow: hidden;
+}
+.sv-hero-bgimg img {
+  width: 100%; height: 100%; object-fit: cover;
+  filter: grayscale(80%) brightness(0.18) contrast(1.1);
+  transform: scale(1.04);
+}
+.sv-hero-bgnum {
+  position: absolute; right: 5vw; bottom: -2vw; z-index: 1;
+  font-family: var(--mono); font-weight: 500;
+  font-size: clamp(200px, 30vw, 480px);
+  line-height: 0.85; letter-spacing: -0.06em;
+  color: var(--ink); opacity: 0.05;
+  pointer-events: none; user-select: none;
+}
+.sv-hero-top {
+  position: relative; z-index: 2;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px;
+}
+.sv-back { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-5); transition: color .2s; }
+.sv-back:hover { color: var(--clay); }
+.sv-eyebrow { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-5); text-align: right; }
+.sv-hero-main {
+  position: relative; z-index: 2;
+  padding: calc(var(--u) * 12) 0 calc(var(--u) * 8);
+}
+.sv-headline {
+  font-family: var(--sans); font-weight: 800;
+  font-size: clamp(54px, 8.5vw, 124px);
+  line-height: 1.0; letter-spacing: -0.04em;
+  color: var(--ink); margin-bottom: calc(var(--u) * 4);
+}
+.sv-hero-sub { font-size: clamp(17px, 1.6vw, 22px); line-height: 1.5; color: var(--ink-3); max-width: 56ch; }
+.sv-hero-foot {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; gap: calc(var(--u) * 2);
+  padding: calc(var(--u) * 4) 0 calc(var(--u) * 8);
+  border-top: 1px solid var(--hair);
+}
+@media (max-width: 600px) { .sv-hero-foot { flex-direction: column; align-items: flex-start; } .sv-btn { width: 100%; justify-content: center; } }
+
+
+/* ============================================================
+   STATS STRIP
+   ============================================================ */
+.sv-stats {
+  border-top: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+  background: var(--paper-2);
+}
+.sv-stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+}
+@media (max-width: 860px) { .sv-stats-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .sv-stats-grid { grid-template-columns: 1fr; } }
+.sv-stat {
+  padding: calc(var(--u) * 5) calc(var(--u) * 4);
+  border-right: 1px solid var(--hair);
+}
+.sv-stat:last-child { border-right: 0; }
+@media (max-width: 860px) { .sv-stat:nth-child(2) { border-right: 0; } .sv-stat:nth-child(3) { border-right: 1px solid var(--hair); } }
+@media (max-width: 480px) { .sv-stat { border-right: 0; border-bottom: 1px solid var(--hair); } .sv-stat:last-child { border-bottom: 0; } }
+.sv-stat-n { font-family: var(--mono); font-size: clamp(22px, 2.5vw, 34px); font-weight: 500; color: var(--clay); letter-spacing: -0.02em; margin-bottom: 4px; }
+.sv-stat-l { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-5); }
+
+
+/* ============================================================
+   ABOUT  (edge-to-edge 2-col)
+   ============================================================ */
+.sv-about {
+  display: grid; grid-template-columns: 7fr 5fr;
+  min-height: 80vh;
+  border-bottom: 1px solid var(--hair);
+}
+@media (max-width: 860px) { .sv-about { grid-template-columns: 1fr; min-height: auto; } }
+.sv-about-text-col { display: flex; align-items: center; }
+.sv-about-inner {
+  padding: calc(var(--u) * 14) 60px calc(var(--u) * 14) max(30px, calc((100vw - 1560px) / 2 + 30px));
+  max-width: 680px;
+}
+@media (max-width: 860px) { .sv-about-inner { padding: calc(var(--u) * 10) 20px; max-width: none; } }
+.sv-about-h2 {
+  font-family: var(--sans); font-weight: 700;
+  font-size: clamp(28px, 3.2vw, 48px);
+  line-height: 1.08; letter-spacing: -0.032em;
+  color: var(--ink); margin-bottom: calc(var(--u) * 4);
+}
+.sv-about-p { font-size: 17px; line-height: 1.75; color: var(--ink-3); margin-bottom: calc(var(--u) * 5); }
+.sv-about-bullets { display: grid; gap: calc(var(--u) * 2); }
+.sv-about-bullets li {
+  display: grid; grid-template-columns: 20px 1fr; gap: 14px;
+  font-size: 14.5px; line-height: 1.55; color: var(--ink-3);
+}
+.sv-about-bullets li::before { content: '—'; font-family: var(--mono); font-size: 11px; color: var(--clay); padding-top: 2px; }
+.sv-about-img-col {
+  position: relative; overflow: hidden;
+  background: var(--paper-2);
+}
+@media (max-width: 860px) { .sv-about-img-col { aspect-ratio: 4/3; min-height: 280px; } }
+.sv-about-img-col img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
+  filter: grayscale(30%) brightness(0.65) contrast(1.1);
+  transition: transform 8s ease-out;
+}
+.sv-about-img-col:hover img { transform: scale(1.05); }
+.sv-about-img-tag {
+  position: absolute; bottom: 24px; left: 24px;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--ink);
+  background: rgba(28,29,32,.82); backdrop-filter: blur(6px);
+  padding: 7px 14px; border: 1px solid var(--hair);
+}
+
+
+/* ============================================================
+   DELIVERABLES
+   ============================================================ */
+.sv-delivers { padding: calc(var(--u) * 14) 0; border-bottom: 1px solid var(--hair); }
+@media (max-width: 860px) { .sv-delivers { padding: calc(var(--u) * 10) 0; } }
+.sv-sec-head { margin-bottom: calc(var(--u) * 7); }
+.sv-sec-head h2 { font-family: var(--sans); font-weight: 700; font-size: clamp(24px, 2.8vw, 42px); line-height: 1.1; letter-spacing: -0.028em; }
+.sv-dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-left: 1px solid var(--hair); border-top: 1px solid var(--hair); }
+@media (max-width: 860px) { .sv-dl-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .sv-dl-grid { grid-template-columns: 1fr; } }
+.sv-dl-item { border-right: 1px solid var(--hair); border-bottom: 1px solid var(--hair); padding: calc(var(--u) * 4); display: grid; gap: calc(var(--u) * 2); transition: background .3s; }
+.sv-dl-item:hover { background: var(--paper-2); }
+.sv-dl-n { font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; color: var(--clay); }
+.sv-dl-title { font-family: var(--sans); font-weight: 700; font-size: 15px; line-height: 1.3; color: var(--ink); }
+.sv-dl-desc { font-size: 13.5px; line-height: 1.6; color: var(--ink-5); }
+
+
+/* ============================================================
+   GALLERY
+   ============================================================ */
+.sv-gallery { padding: calc(var(--u) * 14) 0; border-bottom: 1px solid var(--hair); }
+@media (max-width: 860px) { .sv-gallery { padding: calc(var(--u) * 10) 0; } }
+.sv-gallery-grid {
+  display: grid;
+  grid-template-columns: 8fr 4fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 30px;
+  height: 560px;
+}
+@media (max-width: 860px) { .sv-gallery-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 240px 240px; height: auto; } }
+@media (max-width: 520px) { .sv-gallery-grid { grid-template-columns: 1fr; grid-template-rows: 260px 220px 220px; } }
+.sv-gallery-item {
+  position: relative; overflow: hidden;
+  background: var(--paper-2);
+  cursor: default;
+}
+.sv-gallery-item:first-child { grid-row: 1 / 3; }
+@media (max-width: 520px) { .sv-gallery-item:first-child { grid-row: auto; } }
+.sv-gallery-item img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(35%) brightness(0.62) contrast(1.1); transition: filter .7s ease, transform 7s ease-out; }
+.sv-gallery-item:hover img { filter: grayscale(10%) brightness(0.78) contrast(1.05); transform: scale(1.06); }
+.sv-gallery-caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 40px 20px 16px;
+  background: linear-gradient(transparent, rgba(18,19,21,.85));
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--ink-5);
+}
+.sv-gallery-tag {
+  position: absolute; top: 16px; left: 16px;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em;
+  text-transform: uppercase; background: var(--clay); color: #fff;
+  padding: 5px 10px;
+}
+
+
+/* ============================================================
+   PROCESS
+   ============================================================ */
+.sv-process { padding: calc(var(--u) * 14) 0; border-bottom: 1px solid var(--hair); }
+@media (max-width: 860px) { .sv-process { padding: calc(var(--u) * 10) 0; } }
+.sv-proc-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-left: 1px solid var(--hair); border-top: 1px solid var(--hair); }
+@media (max-width: 860px) { .sv-proc-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .sv-proc-grid { grid-template-columns: 1fr; } }
+.sv-proc-cell { border-right: 1px solid var(--hair); border-bottom: 1px solid var(--hair); padding: calc(var(--u) * 5) calc(var(--u) * 4); display: grid; gap: calc(var(--u) * 2); }
+.sv-proc-n { font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; color: var(--clay); }
+.sv-proc-title { font-family: var(--sans); font-weight: 700; font-size: 18px; color: var(--ink); }
+.sv-proc-desc { font-size: 14px; line-height: 1.65; color: var(--ink-5); }
+
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.sv-faq { padding: calc(var(--u) * 14) 0; border-bottom: 1px solid var(--hair); }
+@media (max-width: 860px) { .sv-faq { padding: calc(var(--u) * 10) 0; } }
+.sv-faq-layout { display: grid; grid-template-columns: 4fr 8fr; gap: 30px; align-items: start; }
+@media (max-width: 860px) { .sv-faq-layout { grid-template-columns: 1fr; gap: 30px; } }
+.sv-faq-left h2 { font-family: var(--sans); font-weight: 700; font-size: clamp(24px, 2.8vw, 40px); line-height: 1.1; letter-spacing: -0.028em; }
+.sv-faq-list { display: grid; gap: 0; }
+.sv-faq-row { border-top: 1px solid var(--hair); }
+.sv-faq-row:last-child { border-bottom: 1px solid var(--hair); }
+.sv-faq-q {
+  width: 100%; background: none; border: none; color: var(--ink);
+  font-family: var(--sans); font-size: 15px; font-weight: 600; line-height: 1.4;
+  text-align: left; padding: calc(var(--u) * 3) 0;
+  cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+}
+.sv-faq-q:hover { color: var(--clay); }
+.sv-faq-icon { flex-shrink: 0; font-size: 20px; font-weight: 300; color: var(--clay); line-height: 1; transition: transform .3s; }
+.sv-faq-row.open .sv-faq-icon { transform: rotate(45deg); }
+.sv-faq-a { display: none; padding: 0 0 calc(var(--u) * 3); font-size: 14.5px; line-height: 1.7; color: var(--ink-3); max-width: 56ch; }
+.sv-faq-row.open .sv-faq-a { display: block; }
+
+
+/* ============================================================
+   START CTA
+   ============================================================ */
+.sv-start {
+  padding: calc(var(--u) * 18) 0;
+  background: var(--paper-2);
+  text-align: center;
+}
+@media (max-width: 860px) { .sv-start { padding: calc(var(--u) * 12) 0; } }
+.sv-start .sv-label { justify-content: center; }
+.sv-start h2 {
+  font-family: var(--sans); font-weight: 800;
+  font-size: clamp(32px, 5vw, 72px);
+  line-height: 1.04; letter-spacing: -0.04em;
+  color: var(--ink); margin-bottom: calc(var(--u) * 7);
+  max-width: 20ch; margin-left: auto; margin-right: auto;
+}
+.sv-start h2 em { font-style: italic; color: var(--clay); }
+.sv-start-btns { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; }
+
+
+/* ============================================================
+   NOT FOUND
+   ============================================================ */
+.sv-not-found { min-height: calc(100vh - var(--nav-h)); display: flex; align-items: center; justify-content: center; text-align: center; padding: 40px; }
+.sv-not-found h1 { font-size: clamp(32px, 5vw, 64px); font-weight: 800; letter-spacing: -0.04em; margin-bottom: 16px; }
+.sv-not-found p { color: var(--ink-5); margin-bottom: 32px; }
+</style>
+</head>
+<body>
+
+<button id="theme-toggle" type="button" aria-label="Toggle light / dark mode">
+  <svg class="ic-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6L19 19M19 5l-1.4 1.4M6.4 17.6L5 19"/></svg>
+  <svg class="ic-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+</button>
+
+<div id="site-nav" data-current="agency"></div>
+<main id="sv-main"></main>
+<div id="site-footer"></div>
+
+<script>
+(function () {
+
+const SERVICES = {
+
+  'tech-pack': {
+    side: 'Fashion design & development', num: '01', of: '05',
+    title: 'Tech Pack.',
+    headline: 'Factory-ready files that get your garment made right.',
+    sub: 'Complete specification documents built for real production pipelines.',
+    about: 'A tech pack is the single document a factory uses to understand your garment. Without one, samples come back wrong and re-sampling costs weeks and money. We build tech packs to production standard - every measurement, every trim, every stitch described clearly so factories can quote accurately, cut correctly, and deliver on spec.',
+    aboutBullets: ['Reduces sampling errors and re-sampling rounds', 'Gives factories everything they need to cut correctly', 'Covers measurements, materials, trims, and finishes', 'Works for all garment categories and markets'],
+    aboutImgTag: 'Women\'s woven, S/S 25',
+    stats: [
+      { n: '6', l: 'deliverables' }, { n: '3-5', l: 'working days' }, { n: '100%', l: 'factory-ready' }, { n: 'All', l: 'garment types' }
+    ],
+    deliverables: [
+      { n:'01', title:'Flat technical sketch',    desc:'Front and back line drawings with all design details and construction callouts.' },
+      { n:'02', title:'Measurement chart',        desc:'Full points of measure for every size in the grade, clearly formatted.' },
+      { n:'03', title:'Bill of materials',        desc:'Every fabric, trim, thread, and hardware item with supplier references.' },
+      { n:'04', title:'Construction notes',       desc:'Seam types, stitch specs, finishing methods, tolerances, and pressing.' },
+      { n:'05', title:'Colorway callouts',        desc:'Pantone or fabric sample references for every colorway in the range.' },
+      { n:'06', title:'Care & labeling specs',    desc:'Care label content, placement diagrams, and legal compliance notes.' },
+    ],
+    gallery: [
+      { seed:'fashion-tech', caption:'Women\'s blazer tech pack, S/S 25', tag:'Tech Pack' },
+      { seed:'fabric-detail', caption:'Construction detail - outerwear pocket', tag:'Detail' },
+      { seed:'garment-flat', caption:'Material specification - woven shell', tag:'Materials' },
+    ],
+    process: [
+      { n:'01', title:'Brief',           desc:'Share design references, sketches, target measurements, and any existing specs.' },
+      { n:'02', title:'Sketch sign-off', desc:'We confirm the flat technical drawing before building the full pack.' },
+      { n:'03', title:'Build',           desc:'Full spec document assembled - measurements, materials, construction, trims.' },
+      { n:'04', title:'Delivery',        desc:'Final PDF and editable source file handed over, factory-ready.' },
+    ],
+    faqs: [
+      { q:'How long does a tech pack take?', a:'Typically 3-5 working days from brief sign-off. Simple styles (t-shirts, basics) deliver in 2-3 days. Complex garments with multiple construction details take 4-5 days.' },
+      { q:'What do I need to share to get started?', a:'A sketch or reference image, your target measurements (or body size chart), fabric and trim references, and the end market. The more detail you share at brief stage, the faster and more accurate the output.' },
+      { q:'What file formats will I receive?', a:'A print-ready PDF for sharing with factories, plus the editable source file in Adobe Illustrator. If your factory requires Excel-based spec sheets, we can format for that instead.' },
+      { q:'Can you update an existing tech pack?', a:'Yes - we audit, clean up, and complete partial or outdated tech packs as well as build new ones. Share what you have and we\'ll assess the gap.' },
+    ],
+    ctaLabel: 'Start your tech pack',
+  },
+
+  '3d-virtual-sampling': {
+    side: 'Fashion design & development', num: '02', of: '05',
+    title: '3D Virtual Sampling.',
+    headline: 'See your garment before a single stitch is cut.',
+    sub: 'Photorealistic 3D samples that reduce physical sampling rounds.',
+    about: 'Physical sampling is expensive and slow - every round costs money and weeks. 3D virtual sampling lets you review fit, fabric fall, colorways, and design details before committing to production. We use CLO3D and Browzwear to simulate real fabric behavior, so you walk into your factory meeting with something to show.',
+    aboutBullets: ['Reduces physical sampling rounds by 40-60%', 'Fabric drape and weight simulated to real-world behavior', 'Review all colorways before sampling anything physical', 'Shareable renders for buyer meetings and approvals'],
+    aboutImgTag: 'CLO3D simulation - womenswear',
+    stats: [
+      { n: '6', l: 'deliverables' }, { n: '24h', l: 'first render' }, { n: 'Any', l: 'fabric type' }, { n: '360°', l: 'turntable video' }
+    ],
+    deliverables: [
+      { n:'01', title:'3D garment renders',      desc:'Front, side, and back views at full photorealistic quality.' },
+      { n:'02', title:'Fabric drape simulation', desc:'Weight, texture, and fall behavior matched to your material spec.' },
+      { n:'03', title:'Multiple colorways',      desc:'All colorways rendered from the same model - no rebuild needed.' },
+      { n:'04', title:'Flat lay export',         desc:'Clean overhead flat lay for tech pack or e-commerce use.' },
+      { n:'05', title:'360 turntable video',     desc:'Rotating view for buyer presentations and brand content.' },
+      { n:'06', title:'Presentation deck',       desc:'Formatted PDF deck ready to share with factories or buyers.' },
+    ],
+    gallery: [
+      { seed:'3d-garment', caption:'CLO3D render - womenswear S/S 25', tag:'3D Render' },
+      { seed:'fabric-sim', caption:'Fabric simulation - linen blazer', tag:'Simulation' },
+      { seed:'colorway-render', caption:'Colorway review - three options', tag:'Colorways' },
+    ],
+    process: [
+      { n:'01', title:'Brief',       desc:'Share your sketch or tech pack, fabric reference, and any fit notes.' },
+      { n:'02', title:'Model build', desc:'3D garment constructed and initial fabric simulation applied.' },
+      { n:'03', title:'Review',      desc:'You review renders and request fit, colorway, or fabric adjustments.' },
+      { n:'04', title:'Delivery',    desc:'Final renders, turntable video, and presentation deck delivered.' },
+    ],
+    faqs: [
+      { q:'Do I need a tech pack before 3D sampling?', a:'Not required, but a tech pack speeds up the model build significantly. We can work from a detailed sketch and fabric reference, but measurements and construction notes reduce back-and-forth.' },
+      { q:'How close to real do the renders look?', a:'Very close to photographic. Fabric drape, texture, and stitching are simulated based on your material spec. They\'re detailed enough for design review, buyer presentations, and colorway decisions - and they\'ll catch most major fit issues before physical sampling.' },
+      { q:'Can I request changes after the first render?', a:'Yes - one round of revisions is included. Adjustments to fit, colorway, fabric properties, or camera angle are all possible. Further revision rounds are available depending on scope.' },
+      { q:'What software do you use?', a:'We use CLO3D and Browzwear - the two industry-standard 3D fashion design platforms. The simulation accuracy is comparable between both; we choose based on garment type and your factory\'s requirements.' },
+    ],
+    ctaLabel: 'Start your 3D sample',
+  },
+
+  'seamless-pattern': {
+    side: 'Fashion design & development', num: '03', of: '05',
+    title: 'Seamless Pattern.',
+    headline: 'Surface designs that repeat without a seam showing.',
+    sub: 'Digital repeat patterns ready for print, weave, or transfer production.',
+    about: 'A good repeat pattern looks effortless - building one that tiles without visible joins, scales correctly for print specifications, and works across multiple colorways takes real skill. We design each pattern from initial motif to production-ready repeat file, formatted for your exact print or weave method.',
+    aboutBullets: ['Zero-break repeat tiling across all surface areas', 'Colorways produced from a single master artwork file', 'Formatted to your mill or printer\'s exact specification', 'Suitable for screen print, digital print, and woven repeat'],
+    aboutImgTag: 'Geometric repeat, spring capsule',
+    stats: [
+      { n: '6', l: 'deliverables' }, { n: 'Any', l: 'print method' }, { n: '300DPI', l: 'production ready' }, { n: 'Multi', l: 'colorway options' }
+    ],
+    deliverables: [
+      { n:'01', title:'Repeat pattern artwork',  desc:'Full repeat tile designed and verified for seamless, break-free tiling.' },
+      { n:'02', title:'Multiple colorways',      desc:'Each colorway produced from the same master file for consistency.' },
+      { n:'03', title:'Scaled to specification', desc:'Set to your required print scale, DPI, and exact repeat dimensions.' },
+      { n:'04', title:'Production files',        desc:'TIFF, AI, and PDF exports formatted for print or embroidery.' },
+      { n:'05', title:'Strike-off proof guide',  desc:'Reference sheet for approving physical strike-offs at the mill.' },
+      { n:'06', title:'Placement print option',  desc:'Engineered placement version available if required alongside the repeat.' },
+    ],
+    gallery: [
+      { seed:'pattern-design', caption:'Floral repeat - resort collection', tag:'Repeat Pattern' },
+      { seed:'print-detail', caption:'Print placement - woven silk', tag:'Print' },
+      { seed:'colorway-pattern', caption:'Colorway review - four options', tag:'Colorways' },
+    ],
+    process: [
+      { n:'01', title:'Brief',        desc:'Share motif references, color palette, scale, and print specification.' },
+      { n:'02', title:'Motif review', desc:'Initial motif artwork created and shared for direction approval.' },
+      { n:'03', title:'Repeat build', desc:'Full seamless repeat finalized with all colorway options.' },
+      { n:'04', title:'Delivery',     desc:'Production-ready files in all required formats.' },
+    ],
+    faqs: [
+      { q:'What\'s the difference between a repeat and a placement print?', a:'A repeat pattern tiles seamlessly across any surface area - you print a continuous roll. A placement print is an engineered design positioned at a specific location on the garment. We produce both; just specify which you need at brief stage.' },
+      { q:'What DPI and scale should I specify?', a:'150-300 DPI for most print methods. Scale depends on your intended repeat size - share your print spec sheet and we\'ll match it. If you\'re unsure, we\'ll recommend based on your garment type.' },
+      { q:'Can I get the same design in multiple colorways?', a:'Yes - all colorways are generated from the same master artwork file, so they\'re pixel-perfect consistent. Additional colorways beyond the initial set are available as a quick add-on.' },
+      { q:'Do you design the motif from scratch or work from my references?', a:'Both. We can develop an original motif based on your brief and mood board, or we can adapt and repeat artwork you\'ve already developed. Starting from your reference is usually faster.' },
+    ],
+    ctaLabel: 'Start your pattern',
+  },
+
+  'pattern-cad': {
+    side: 'Fashion design & development', num: '04', of: '05',
+    title: 'Pattern CAD.',
+    headline: 'Digital patterns that grade accurately for every size.',
+    sub: 'CAD-built garment patterns ready for sampling, grading, and marker making.',
+    about: 'Every garment starts with a pattern. A CAD pattern built correctly can be graded across a full size range, sent straight to a cutting room, and used for marker making - eliminating hand-drafting errors that cause bad fits and wasted fabric. We work in Lectra, Gerber, and Optitex.',
+    aboutBullets: ['Eliminates hand-drafting errors in sampling and production', 'Full grading from a single base pattern across all sizes', 'DXF export works directly with any industrial cutting system', 'Applied seam allowances, notches, and all construction marks'],
+    aboutImgTag: 'Tailored jacket base pattern, EU 38',
+    stats: [
+      { n: '6', l: 'deliverables' }, { n: 'XS-5XL', l: 'full grade range' }, { n: 'DXF/PLT', l: 'cutter ready' }, { n: 'Any', l: 'CAD system' }
+    ],
+    deliverables: [
+      { n:'01', title:'Base pattern pieces',  desc:'All pattern pieces for the garment, fully drafted in CAD.' },
+      { n:'02', title:'Full size grade',      desc:'Graded across your required size range with correct increments.' },
+      { n:'03', title:'Seam allowances',      desc:'Applied to all pieces with appropriate values per edge type.' },
+      { n:'04', title:'Construction marks',   desc:'Notches, grainlines, balance marks, and drill holes.' },
+      { n:'05', title:'DXF / PLT export',     desc:'Cutter-ready file for Lectra, Gerber, or direct plotter output.' },
+      { n:'06', title:'Paper print option',   desc:'Full-scale or 1:5 paper patterns available on request.' },
+    ],
+    gallery: [
+      { seed:'pattern-cad', caption:'Tailored jacket pattern, graded S-XL', tag:'Pattern CAD' },
+      { seed:'cad-screen', caption:'CAD grading screen, Lectra', tag:'Grading' },
+      { seed:'fabric-cut', caption:'Pattern cut on woven fabric', tag:'Production' },
+    ],
+    process: [
+      { n:'01', title:'Brief',        desc:'Share your sketch, measurement chart, and any fit reference.' },
+      { n:'02', title:'Base pattern', desc:'Initial base pattern drafted and shared for fit review.' },
+      { n:'03', title:'Grade',        desc:'Pattern graded across all sizes and checked for accuracy.' },
+      { n:'04', title:'Delivery',     desc:'CAD files exported in your required format with all marks.' },
+    ],
+    faqs: [
+      { q:'What CAD software do you use?', a:'We work in Lectra, Gerber, and Optitex - the three dominant industry systems. Let us know your factory\'s system at brief stage and we\'ll export in the matching format.' },
+      { q:'Is grading included with the base pattern?', a:'Yes - both are included as standard. We draft the base pattern, apply seam allowances and construction marks, then grade it across your full size range.' },
+      { q:'What if my measurements don\'t match a standard size system?', a:'We work with any measurement table - women\'s, men\'s, children\'s, plus size, or fully custom. Just share your spec sheet and we\'ll build to it exactly.' },
+      { q:'Can you digitize existing paper patterns?', a:'Yes. If you have existing paper patterns you want converted to CAD, we can digitize, clean up, and grade them. Share scans or photos at brief stage.' },
+    ],
+    ctaLabel: 'Start your CAD pattern',
+  },
+
+  'dobby-jacquard': {
+    side: 'Fashion design & development', num: '05', of: '05',
+    title: 'Dobby & Jacquard.',
+    headline: 'Woven structures designed for real production looms.',
+    sub: 'Custom dobby and jacquard designs developed for high-end textile production.',
+    about: 'Dobby and jacquard structures add texture, pattern, and depth directly into the fabric weave - no surface print required. We design with production feasibility built in: thread count, repeat size, and loom compatibility verified before you sign off. Suitable for fashion, furnishings, ethnic wear, and premium fabric development.',
+    aboutBullets: ['Design checked for loom compatibility before production', 'Covers dobby shuttle/rapier and digital jacquard systems', 'Peg plan and thread spec included for mill handover', 'CAD simulation render before committing to physical sampling'],
+    aboutImgTag: 'Jacquard weave simulation, AW sample',
+    stats: [
+      { n: '6', l: 'deliverables' }, { n: 'Dobby', l: '& jacquard' }, { n: 'Mill', l: 'verified specs' }, { n: 'Any', l: 'loom type' }
+    ],
+    deliverables: [
+      { n:'01', title:'Weave structure design',  desc:'Full dobby or jacquard weave design developed to your brief.' },
+      { n:'02', title:'Peg plan / point paper',  desc:'Loom-ready plan for dobby; point paper for jacquard.' },
+      { n:'03', title:'Thread specification',    desc:'Yarn type, count, color, and shaft specification.' },
+      { n:'04', title:'Colorway options',        desc:'Multiple thread color combinations from the same structure.' },
+      { n:'05', title:'Production repeat file',  desc:'Repeat sized and structured for your production loom setup.' },
+      { n:'06', title:'CAD simulation render',   desc:'Visual simulation of the finished fabric surface for approval.' },
+    ],
+    gallery: [
+      { seed:'jacquard-loom', caption:'Jacquard weave structure, luxury AW', tag:'Jacquard' },
+      { seed:'woven-fabric', caption:'Dobby fabric surface, shirting weight', tag:'Dobby' },
+      { seed:'weave-detail', caption:'Thread detail - dobby geometric', tag:'Structure' },
+    ],
+    process: [
+      { n:'01', title:'Brief',                 desc:'Share loom type, fabric end use, design reference, and any thread spec.' },
+      { n:'02', title:'Structure design',      desc:'Weave structure designed and presented as a CAD surface simulation.' },
+      { n:'03', title:'Production file build', desc:'Full peg plan and production repeat file formatted for your mill.' },
+      { n:'04', title:'Delivery',              desc:'All loom-ready files and thread specs handed over.' },
+    ],
+    faqs: [
+      { q:'Do you cover both dobby and jacquard?', a:'Yes - we work with dobby looms (shuttle and rapier) and all jacquard systems including digital jacquard. Specify your mill\'s setup at brief stage.' },
+      { q:'How detailed can a jacquard design be?', a:'This depends on the thread count and number of hooks on your mill\'s jacquard card. We\'ll confirm feasibility before building - it\'s better to know the constraints upfront than redesign at sample stage.' },
+      { q:'Can I see a simulation before going to production?', a:'Yes - we always provide a CAD surface render of the simulated woven fabric before finalizing the production file. You approve the visual before we output the loom-ready format.' },
+      { q:'Can you work with ethnic wear requirements?', a:'Yes - we regularly develop weave structures for sarees, sherwanis, dupattas, and other South Asian and Middle Eastern garments. Share the cultural and production requirements at brief stage.' },
+    ],
+    ctaLabel: 'Start your weave design',
+  },
+
+  'ai-content': {
+    side: 'AI, website & digital production', num: '01', of: '06',
+    title: 'AI Content Production.',
+    headline: 'Campaign-quality visuals. No studio. No models. No delays.',
+    sub: 'AI-generated fashion photography and lifestyle content at brand scale.',
+    about: 'Traditional fashion shoots are expensive, slow, and hard to scale. AI content production delivers campaign-quality model photography, lifestyle visuals, and product imagery - generated to brief, revised fast, and produced without booking a studio. We run the prompts, iterate on outputs, and hand over files ready to publish.',
+    aboutBullets: ['No studio booking, no model fees, no travel costs', 'Campaign-quality images in days, not weeks', 'All colorways and outfit variations from one brief', 'Platform-formatted crops included as standard'],
+    aboutImgTag: 'AI campaign shoot, Summer collection',
+    stats: [
+      { n: '6', l: 'deliverables' }, { n: 'No', l: 'studio needed' }, { n: '2-4', l: 'day turnaround' }, { n: '∞', l: 'colorways' }
+    ],
+    deliverables: [
+      { n:'01', title:'AI model photography',       desc:'Brand-styled model images generated to your visual direction.' },
+      { n:'02', title:'Lifestyle visuals',          desc:'Setting and atmosphere images that match your brand world.' },
+      { n:'03', title:'Product placement renders',  desc:'Products placed into appropriate lifestyle contexts.' },
+      { n:'04', title:'Colorway variations',        desc:'Multiple outfit and colorway versions from one brief at no extra cost.' },
+      { n:'05', title:'Platform-ready crops',       desc:'Square, portrait, and landscape formats for every channel.' },
+      { n:'06', title:'Raw + edited files',         desc:'Unedited source files plus final retouched versions.' },
+    ],
+    gallery: [
+      { seed:'ai-fashion', caption:'AI model shoot - autumn editorial', tag:'AI Content' },
+      { seed:'lifestyle-fashion', caption:'Lifestyle visual - brand campaign', tag:'Lifestyle' },
+      { seed:'product-placement', caption:'Product placement - social format', tag:'Product' },
+    ],
+    process: [
+      { n:'01', title:'Brief',      desc:'Share your brand references, products, mood board, and visual direction.' },
+      { n:'02', title:'Generation', desc:'First batch of images produced and presented for review.' },
+      { n:'03', title:'Refinement', desc:'Style, model, setting, and crop adjustments made across two rounds.' },
+      { n:'04', title:'Delivery',   desc:'Final image set in all required formats, ready to publish.' },
+    ],
+    faqs: [
+      { q:'What style of photography can you generate?', a:'Studio portraits, lifestyle and setting shots, flat lays, editorial looks, street-style aesthetics, and campaign-style compositions. We match the style to your brand references and mood board.' },
+      { q:'Can I use these images commercially?', a:'Yes - all AI-generated images we produce are delivered for your full commercial use, including paid advertising, website, social media, and print.' },
+      { q:'How many revisions are included?', a:'Two rounds of direction revisions are included in every brief. We can adjust style, model type, setting, color grade, and cropping. Additional rounds can be added.' },
+      { q:'Can you match our existing campaign look and feel?', a:'Yes - this is usually the most effective brief. Share three to five images from your existing campaigns and we\'ll match the lighting, model tone, setting style, and post-production feel.' },
+    ],
+    ctaLabel: 'Start AI content',
+  },
+
+  'product-photo-video': {
+    side: 'AI, website & digital production', num: '02', of: '06',
+    title: 'Product Photo & Video.',
+    headline: 'Visuals that make your product worth the price.',
+    sub: 'Clean product photography and short-form video built for digital commerce.',
+    about: 'Your product photos are your first salesperson. They set expectations, communicate quality, and convert browsers into buyers. We shoot and edit product stills and short-form video that works across Shopify, Amazon, Instagram, and paid ads - with backgrounds, lighting, and crops specified for each platform.',
+    aboutBullets: ['White background and lifestyle options in one brief', 'Detail photography that communicates quality and craft', 'Platform-specific crops and aspect ratios included', '15-30s product reel formatted for social and ads'],
+    aboutImgTag: 'Product shoot - ready to wear',
+    stats: [
+      { n: '6', l: 'deliverables' }, { n: '15-30s', l: 'reel included' }, { n: 'All', l: 'platforms' }, { n: '4K', l: 'resolution' }
+    ],
+    deliverables: [
+      { n:'01', title:'Hero product stills',     desc:'Primary product shot on white or lifestyle background.' },
+      { n:'02', title:'Detail close-ups',        desc:'Texture, stitch, print, and material quality photography.' },
+      { n:'03', title:'Flat lay photographs',    desc:'Overhead flat lay for e-commerce and social use.' },
+      { n:'04', title:'Short-form product video',desc:'15-30 second product reel formatted for social and paid ads.' },
+      { n:'05', title:'Platform-ready crops',    desc:'1:1, 4:5, and 16:9 versions for all major platforms.' },
+      { n:'06', title:'Edited final files',      desc:'Color-corrected JPEG and MP4 files ready to upload.' },
+    ],
+    gallery: [
+      { seed:'product-photo', caption:'Product hero shot - clean white', tag:'Product' },
+      { seed:'flatlay-fashion', caption:'Flat lay - accessories collection', tag:'Flat Lay' },
+      { seed:'detail-photo', caption:'Fabric detail photography', tag:'Detail' },
+    ],
+    process: [
+      { n:'01', title:'Brief',         desc:'Share products, brand guidelines, platform requirements, and examples.' },
+      { n:'02', title:'Shot planning', desc:'Shot list, styling, and settings confirmed before shoot day.' },
+      { n:'03', title:'Shoot & edit',  desc:'Photography and video captured, then color-corrected and edited.' },
+      { n:'04', title:'Delivery',      desc:'All files in required formats, organized by product and platform.' },
+    ],
+    faqs: [
+      { q:'Do you shoot flat product only or on-model too?', a:'Both. We handle flat product, mannequin, ghost mannequin, and on-model photography depending on your brief. Specify at enquiry stage and we\'ll quote accordingly.' },
+      { q:'What\'s the minimum order?', a:'We can shoot a single hero product or a full seasonal collection. Contact us with your item count and we\'ll provide a quote based on scope.' },
+      { q:'How are files delivered?', a:'Via a download link, organized by product and format. We deliver high-resolution JPEG, web-optimized JPEG, and MP4 for video. Raw files available on request.' },
+      { q:'Can you match an existing photography style?', a:'Yes - share three to five examples of your current product photography and we\'ll match the lighting setup, background, color grade, and post-processing style.' },
+    ],
+    ctaLabel: 'Start product photography',
+  },
+
+  'ecom-listing': {
+    side: 'AI, website & digital production', num: '03', of: '06',
+    title: 'E-Commerce Listing.',
+    headline: 'Listings that describe, persuade, and rank.',
+    sub: 'Fully written product listings built for Shopify, Amazon, and fashion marketplaces.',
+    about: 'A bad listing loses the sale before it starts. We build product listings that cover everything a buyer needs - accurate titles, benefit-led descriptions, complete specifications, and SEO structure that helps your product get found. Every listing is written for the platform it lives on, not copied from a generic template.',
+    aboutBullets: ['SEO keyword research and structured titles included', 'Benefit-led descriptions written for the target customer', 'Accurate measurements and specification tables', 'Formatted for Shopify, Amazon, Etsy, or your platform'],
+    aboutImgTag: 'E-commerce listing - ready to upload',
+    stats: [
+      { n: '6', l: 'deliverables' }, { n: 'SEO', l: 'optimized' }, { n: 'Any', l: 'platform' }, { n: 'Same', l: 'day brief reply' }
+    ],
+    deliverables: [
+      { n:'01', title:'Product title',        desc:'SEO-structured title with key attributes and search terms.' },
+      { n:'02', title:'Product description',  desc:'Benefit-led copy that sells the garment and sets accurate expectations.' },
+      { n:'03', title:'Bullet highlights',    desc:'Scannable feature points formatted to platform requirements.' },
+      { n:'04', title:'Size & spec table',    desc:'Accurate measurements and fit guide for each size in the range.' },
+      { n:'05', title:'Material & care info', desc:'Fabric composition, care instructions, and relevant certifications.' },
+      { n:'06', title:'Platform-ready file',  desc:'Formatted and ready to paste directly into Shopify, Amazon, or Etsy.' },
+    ],
+    gallery: [
+      { seed:'ecom-product', caption:'E-commerce listing - Shopify ready', tag:'Listing' },
+      { seed:'size-guide', caption:'Size guide and spec table', tag:'Sizing' },
+      { seed:'product-copy', caption:'Product copy and description', tag:'Copy' },
+    ],
+    process: [
+      { n:'01', title:'Brief',      desc:'Share product details, target customer, platform, and any brand tone notes.' },
+      { n:'02', title:'Copy draft', desc:'Full listing written - title, description, bullets, specs, and care info.' },
+      { n:'03', title:'Revision',   desc:'Adjustments to tone, keywords, specifications, or structure.' },
+      { n:'04', title:'Delivery',   desc:'Final listing formatted and ready to upload to your platform.' },
+    ],
+    faqs: [
+      { q:'Can you write for products you\'ve never seen physically?', a:'Yes - we work from your product images, tech pack or spec sheet, and any brand notes. We write what your customer needs to know, not just what we can observe.' },
+      { q:'Is SEO keyword research included?', a:'Yes - keyword research is included in every listing. We structure titles and descriptions to rank on the platform\'s internal search and Google Shopping where relevant.' },
+      { q:'How many products can you write in one brief?', a:'As many as you need. We quote per listing for individual items, with volume rates for collections of 10 or more products.' },
+      { q:'Do you write in English only?', a:'Primarily English. If you need listings in other languages, let us know at brief stage - we work with specialist translators for Arabic, French, and German.' },
+    ],
+    ctaLabel: 'Start your listing',
+  },
+
+  'website': {
+    side: 'AI, website & digital production', num: '04', of: '06',
+    title: 'Website.',
+    headline: 'A website that works as hard as you do.',
+    sub: 'Custom-built fashion brand websites designed for conversion and credibility.',
+    about: 'Your website is where first impressions become decisions. We design and develop fashion brand sites that look premium, load fast, and guide visitors toward action - whether that\'s a wholesale inquiry, a DTC purchase, or a brand partnership meeting. Built in Webflow, Shopify, or custom code depending on your requirements.',
+    aboutBullets: ['Designed for conversion - not just aesthetics', 'Mobile-first layout and performance as standard', 'CMS setup so your team can update content independently', 'Full QA and launch deployment included'],
+    aboutImgTag: 'Fashion brand website - Webflow',
+    stats: [
+      { n: '4-8', l: 'week build' }, { n: 'Mobile', l: 'first design' }, { n: 'Any', l: 'platform' }, { n: '100%', l: 'launch ready' }
+    ],
+    deliverables: [
+      { n:'01', title:'UX wireframes',          desc:'Page structure and user flow mapped before design starts.' },
+      { n:'02', title:'Visual design',          desc:'Full design for desktop and mobile, reviewed before build.' },
+      { n:'03', title:'Development',            desc:'Site built and CMS configured for your team to manage.' },
+      { n:'04', title:'Product pages',          desc:'Collection and product page setup with all required content.' },
+      { n:'05', title:'Contact & forms',        desc:'Inquiry forms built, tested, and connected to your inbox.' },
+      { n:'06', title:'Launch deployment',      desc:'Domain setup, final QA, and live deployment.' },
+    ],
+    gallery: [
+      { seed:'website-design', caption:'Fashion brand site - Webflow build', tag:'Website' },
+      { seed:'mobile-web', caption:'Mobile-first design - product page', tag:'Mobile' },
+      { seed:'ecom-web', caption:'E-commerce build - Shopify', tag:'Shopify' },
+    ],
+    process: [
+      { n:'01', title:'Brief',  desc:'Goals, pages, brand assets, and technical requirements confirmed.' },
+      { n:'02', title:'Design', desc:'Wireframes built then visual design reviewed and signed off.' },
+      { n:'03', title:'Build',  desc:'Development, content entry, and all integrations completed.' },
+      { n:'04', title:'Launch', desc:'Full QA, domain setup, and live deployment.' },
+    ],
+    faqs: [
+      { q:'Which platforms do you build on?', a:'Webflow for design-led brand sites, Shopify for DTC e-commerce, and custom HTML/CSS or Next.js for specific requirements. We recommend based on your goals at brief stage - no single platform is right for every brand.' },
+      { q:'Is ongoing maintenance included?', a:'The build is a one-time project. We offer optional monthly maintenance retainers, or we hand over with full documentation so your team can manage updates independently.' },
+      { q:'How long does a website project take?', a:'Typically 4-8 weeks from brief sign-off to launch. Scope, content readiness, and the number of revision rounds all affect the timeline. Simple brand sites are at the shorter end; full e-commerce builds take longer.' },
+      { q:'Do you write the copy for the website?', a:'Copywriting can be scoped separately. We\'ll let you know at brief stage whether your existing content is sufficient or whether we recommend our copywriting add-on.' },
+    ],
+    ctaLabel: 'Start your website',
+  },
+
+  'ai-agent': {
+    side: 'AI, website & digital production', num: '05', of: '06',
+    title: 'AI Agent.',
+    headline: 'A team member that never sleeps, never misses an inquiry.',
+    sub: 'Custom AI agents for customer service, lead capture, and business automation.',
+    about: 'AI agents handle the repetitive front-of-house work that eats your time - answering product questions, qualifying leads, collecting order details, and routing inquiries to the right person. We build agents trained on your products, brand tone, and business rules, then deploy them on your website or messaging platforms.',
+    aboutBullets: ['Handles customer service, lead capture, and FAQ queries 24/7', 'Trained on your product catalogue, policies, and brand voice', 'Integrates with your website, WhatsApp, or Instagram DM', 'Qualified leads routed to your team with full context'],
+    aboutImgTag: 'AI agent - live on brand website',
+    stats: [
+      { n: '24/7', l: 'always active' }, { n: '2wk', l: 'to go live' }, { n: 'Any', l: 'platform' }, { n: '0', l: 'missed enquiries' }
+    ],
+    deliverables: [
+      { n:'01', title:'Agent design',        desc:'Conversation scope, tone, and behavior defined for your brand.' },
+      { n:'02', title:'Knowledge base',      desc:'Products, FAQs, policies, and processes trained into the agent.' },
+      { n:'03', title:'Conversation flows',  desc:'Custom paths for lead capture, support, and sales queries.' },
+      { n:'04', title:'Website integration', desc:'Chat widget embedded and configured on your site.' },
+      { n:'05', title:'CRM handoff',         desc:'Qualified leads pushed to your inbox, CRM, or Slack.' },
+      { n:'06', title:'Testing & deploy',    desc:'Full QA with live testing before public launch.' },
+    ],
+    gallery: [
+      { seed:'ai-chat', caption:'AI agent - website chat interface', tag:'AI Agent' },
+      { seed:'dashboard-ai', caption:'Agent conversation dashboard', tag:'Dashboard' },
+      { seed:'lead-capture', caption:'Lead capture flow - qualification', tag:'Leads' },
+    ],
+    process: [
+      { n:'01', title:'Brief',  desc:'Business rules, tone, use cases, and integrations defined.' },
+      { n:'02', title:'Build',  desc:'Agent trained and conversation flows built to your requirements.' },
+      { n:'03', title:'Test',   desc:'Tested across edge cases and real scenarios with your team.' },
+      { n:'04', title:'Deploy', desc:'Embedded on your platform and handed over for management.' },
+    ],
+    faqs: [
+      { q:'What platforms can the agent run on?', a:'Website chat (custom embed or via Crisp/Intercom), WhatsApp Business, and Instagram DM. We recommend based on where your customers actually are.' },
+      { q:'How do you train the agent on our products?', a:'We ingest your product catalogue, FAQs, brand policies, and tone guidelines into the model\'s knowledge base. The more structured information you provide, the more accurate the agent\'s responses.' },
+      { q:'What happens when the agent can\'t answer a question?', a:'We configure a fallback flow that hands off to a human, captures a lead for follow-up, or routes to a specific contact method. The agent never leaves a customer without a path forward.' },
+      { q:'Can the agent qualify leads for sales?', a:'Yes - lead qualification is one of the most effective AI agent use cases. We design a conversation flow that gathers budget, timeline, and requirements before routing the lead to your sales team.' },
+    ],
+    ctaLabel: 'Start your AI agent',
+  },
+
+  'graphic-design': {
+    side: 'AI, website & digital production', num: '06', of: '06',
+    title: 'Graphic Design.',
+    headline: 'Design that makes your brand look like it means it.',
+    sub: 'Brand-aligned graphic design for digital, print, and marketing.',
+    about: 'Inconsistent design makes brands look amateur. We build graphic assets that carry a single visual identity across every touchpoint - social posts, campaign banners, lookbook layouts, packaging, and print collateral. Everything made to your brand guidelines, or developed alongside them.',
+    aboutBullets: ['Consistent visual identity across all touchpoints', 'Social, digital, and print in one brief', 'Built to your brand guidelines or developed with you', 'Print-ready and web-optimized files delivered together'],
+    aboutImgTag: 'Brand collateral - seasonal campaign',
+    stats: [
+      { n: '6', l: 'deliverables' }, { n: 'Print', l: '& digital' }, { n: 'Brand', l: 'consistent' }, { n: 'All', l: 'formats' }
+    ],
+    deliverables: [
+      { n:'01', title:'Social media creatives', desc:'Posts, stories, and reels designed to your brand style.' },
+      { n:'02', title:'Campaign banners & ads', desc:'Digital ad creatives in all standard platform sizes.' },
+      { n:'03', title:'Lookbook layout',        desc:'Editorial layout design for seasonal collections.' },
+      { n:'04', title:'Brand collateral',       desc:'Business cards, brochures, and brand print materials.' },
+      { n:'05', title:'Packaging design',       desc:'Product packaging and labeling design for physical goods.' },
+      { n:'06', title:'Export files',           desc:'Print-ready PDF and web-optimized files in all required sizes.' },
+    ],
+    gallery: [
+      { seed:'graphic-brand', caption:'Brand identity - seasonal campaign', tag:'Brand' },
+      { seed:'social-design', caption:'Social media creatives - Instagram', tag:'Social' },
+      { seed:'lookbook', caption:'Lookbook layout - AW collection', tag:'Lookbook' },
+    ],
+    process: [
+      { n:'01', title:'Brief',            desc:'Brand guidelines, examples, formats, and deliverables confirmed.' },
+      { n:'02', title:'Design direction', desc:'Initial concepts shared for style and direction feedback.' },
+      { n:'03', title:'Production',       desc:'Final artwork produced across all required formats.' },
+      { n:'04', title:'Delivery',         desc:'Print-ready PDF and digital files delivered, organized by format.' },
+    ],
+    faqs: [
+      { q:'Do I need to provide brand guidelines?', a:'Helpful, but not required. If you have guidelines we\'ll follow them. If not, we can develop a visual language as part of the brief - just share references that represent the look you\'re going for.' },
+      { q:'What file formats are included?', a:'Print-ready PDF, high-resolution PNG, and the editable source file in Adobe Illustrator or Figma, so your team can make future updates independently.' },
+      { q:'Can you design for both digital and print in the same brief?', a:'Yes - we build both from the same master design so they stay visually consistent. Specify all required outputs at brief stage and we\'ll quote the full scope.' },
+      { q:'Can you design packaging for physical products?', a:'Yes - we design retail packaging, swing tags, product labels, tissue paper, and e-commerce mailer boxes. Share your box dimensions or dieline template and we\'ll design to spec.' },
+    ],
+    ctaLabel: 'Start graphic design',
+  },
+
+};
+
+/* ================================================================
+   RENDER
+================================================================ */
+const slug = new URLSearchParams(location.search).get('svc') || '';
+const svc  = SERVICES[slug];
+const main = document.getElementById('sv-main');
+
+if (!svc) {
+  main.innerHTML = `<div class="sv-not-found"><div><h1>Service not found.</h1><p>We couldn't find that service.</p><a href="agency.html" class="sv-btn sv-btn-solid">See all services</a></div></div>`;
+  return;
+}
+
+document.getElementById('pg-title').textContent = svc.title.replace('.','') + ' - Fashion Freelancing';
+document.getElementById('pg-desc').content = svc.sub;
+
+const ctaHref = `agency.html?svc=${encodeURIComponent(slug)}#contact`;
+const imgBase = `https://picsum.photos/seed/${slug}`;
+
+const statsHTML = svc.stats.map(s => `
+  <div class="sv-stat rv">
+    <div class="sv-stat-n">${s.n}</div>
+    <div class="sv-stat-l">${s.l}</div>
+  </div>`).join('');
+
+const dlHTML = svc.deliverables.map((d,i) => `
+  <li class="sv-dl-item rv" style="transition-delay:${i*0.07}s">
+    <span class="sv-dl-n">${d.n}</span>
+    <strong class="sv-dl-title">${d.title}</strong>
+    <p class="sv-dl-desc">${d.desc}</p>
+  </li>`).join('');
+
+const galleryHTML = svc.gallery.map((g,i) => `
+  <div class="sv-gallery-item rv sv-img" style="transition-delay:${i*0.12}s">
+    <img src="https://picsum.photos/seed/${g.seed}/900/600" alt="${g.caption}" loading="lazy">
+    <span class="sv-gallery-tag">${g.tag}</span>
+    <div class="sv-gallery-caption">${g.caption}</div>
+  </div>`).join('');
+
+const procHTML = svc.process.map((p,i) => `
+  <div class="sv-proc-cell rv" style="transition-delay:${i*0.1}s">
+    <div class="sv-proc-n">${p.n}.</div>
+    <div class="sv-proc-title">${p.title}</div>
+    <p class="sv-proc-desc">${p.desc}</p>
+  </div>`).join('');
+
+const bulletsHTML = svc.aboutBullets.map(b => `<li>${b}</li>`).join('');
+
+const faqHTML = svc.faqs.map(f => `
+  <div class="sv-faq-row">
+    <button class="sv-faq-q" type="button">${f.q}<span class="sv-faq-icon">+</span></button>
+    <p class="sv-faq-a">${f.a}</p>
+  </div>`).join('');
+
+main.innerHTML = `
+
+  <!-- HERO -->
+  <section class="sv-hero">
+    <div class="sv-hero-bgimg">
+      <img src="${imgBase}-hero/1600/900" alt="" loading="eager">
+    </div>
+    <div class="sv-hero-bgnum" aria-hidden="true">${svc.num}</div>
+
+    <div class="wrap sv-hero-top">
+      <a href="agency.html" class="sv-back">← Our services</a>
+      <span class="sv-eyebrow">${svc.num} / ${svc.of} &nbsp;·&nbsp; ${svc.side}</span>
+    </div>
+
+    <div class="wrap sv-hero-main">
+      <h1 class="sv-headline">${svc.title}</h1>
+      <p class="sv-hero-sub">${svc.headline}</p>
+    </div>
+
+    <div class="wrap sv-hero-foot">
+      <a href="${ctaHref}" class="sv-btn sv-btn-solid">${svc.ctaLabel} →</a>
+      <a href="agency.html" class="sv-btn sv-btn-ghost">See all services</a>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="sv-stats">
+    <div class="wrap sv-stats-grid">${statsHTML}</div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="sv-about">
+    <div class="sv-about-text-col">
+      <div class="sv-about-inner">
+        <span class="sv-label rv">About this service</span>
+        <h2 class="sv-about-h2 rv">${svc.title.slice(0,-1)}<em style="color:var(--clay)">.</em></h2>
+        <p class="sv-about-p rv">${svc.about}</p>
+        <ul class="sv-about-bullets rv">${bulletsHTML}</ul>
+      </div>
+    </div>
+    <div class="sv-about-img-col rv">
+      <img src="${imgBase}-about/900/1200" alt="${svc.title}" loading="lazy">
+      <div class="sv-about-img-tag">${svc.aboutImgTag}</div>
+    </div>
+  </section>
+
+  <!-- DELIVERABLES -->
+  <section class="sv-delivers">
+    <div class="wrap">
+      <div class="sv-sec-head rv">
+        <span class="sv-label">What's included</span>
+        <h2>Everything you receive.</h2>
+      </div>
+      <ul class="sv-dl-grid">${dlHTML}</ul>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section class="sv-gallery">
+    <div class="wrap">
+      <div class="sv-sec-head rv">
+        <span class="sv-label">Our work</span>
+        <h2>Examples from the studio.</h2>
+      </div>
+      <div class="sv-gallery-grid">${galleryHTML}</div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section class="sv-process">
+    <div class="wrap">
+      <div class="sv-sec-head rv">
+        <span class="sv-label">How it works</span>
+        <h2>Four steps. One delivery.</h2>
+      </div>
+      <div class="sv-proc-grid">${procHTML}</div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="sv-faq">
+    <div class="wrap sv-faq-layout">
+      <div class="sv-faq-left rv">
+        <span class="sv-label">Common questions</span>
+        <h2>Got questions?<br>We've got answers.</h2>
+      </div>
+      <div class="sv-faq-right rv rv-d1">
+        <div class="sv-faq-list">${faqHTML}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- START CTA -->
+  <section class="sv-start">
+    <div class="wrap">
+      <span class="sv-label">Ready to begin?</span>
+      <h2>${svc.ctaLabel.charAt(0).toUpperCase() + svc.ctaLabel.slice(1)}<em>.</em></h2>
+      <div class="sv-start-btns">
+        <a href="${ctaHref}" class="sv-btn sv-btn-solid">${svc.ctaLabel} →</a>
+        <a href="agency.html" class="sv-btn sv-btn-ghost">See all services</a>
+      </div>
+    </div>
+  </section>
+`;
+
+/* scroll reveals */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.rv').forEach(el => obs.observe(el));
+
+/* FAQ accordion */
+document.querySelectorAll('.sv-faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const row = btn.parentElement;
+    const wasOpen = row.classList.contains('open');
+    document.querySelectorAll('.sv-faq-row.open').forEach(r => r.classList.remove('open'));
+    if (!wasOpen) row.classList.add('open');
+  });
+});
+
+/* theme toggle */
+const toggle = document.getElementById('theme-toggle');
+if (toggle) {
+  const root = document.documentElement;
+  const saved = localStorage.getItem('ff_theme') || 'dark';
+  root.setAttribute('data-theme', saved);
+  toggle.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('ff_theme', next);
+  });
+}
+
+})();
+</script>
+
+</body>
+</html>
