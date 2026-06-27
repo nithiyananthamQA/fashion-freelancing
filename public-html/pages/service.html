@@ -163,6 +163,31 @@ img { display: block; }
    ============================================================ */
 .topnav, .topnav.is-scrolled { background: var(--paper) !important; backdrop-filter: none !important; border-bottom: 1px solid var(--clay) !important; box-shadow: none !important; }
 .topnav-inner { height: 56px !important; }
+.topnav .logo svg { display: none !important; }
+.topnav .logo-text { font-family: var(--mono) !important; font-size: 11px !important; font-weight: 500 !important; letter-spacing: 0.22em !important; text-transform: uppercase !important; color: var(--ink) !important; }
+.topnav .logo-text span { background: none !important; -webkit-background-clip: unset !important; background-clip: unset !important; color: var(--clay) !important; font-weight: 500 !important; margin-left: 0 !important; }
+.topnav-search { display: none !important; }
+.topnav-links { flex: 1 !important; justify-content: center !important; gap: 32px !important; }
+.topnav-links a { font-family: var(--mono) !important; font-size: 10px !important; letter-spacing: 0.18em !important; text-transform: uppercase !important; color: var(--ink-5) !important; font-weight: 400 !important; }
+.topnav-links a:hover { color: var(--ink) !important; }
+.topnav-links a.active { color: var(--clay) !important; }
+.topnav-links a.active::after { display: none !important; }
+.topnav-signin { font-family: var(--mono) !important; font-size: 10px !important; letter-spacing: 0.18em !important; text-transform: uppercase !important; color: var(--ink-5) !important; }
+.topnav-signin:hover { color: var(--ink) !important; }
+.topnav .btn, .topnav .btn-primary, .topnav .btn-sm { background: var(--clay) !important; color: var(--paper) !important; border: 1px solid var(--clay) !important; border-radius: 0 !important; box-shadow: none !important; font-family: var(--mono) !important; font-size: 10px !important; letter-spacing: 0.18em !important; text-transform: uppercase !important; padding: 9px 18px !important; }
+.topnav .btn:hover, .topnav .btn-primary:hover { background: transparent !important; color: var(--clay) !important; }
+/* Mobile hamburger — dark theme */
+.topnav-burger { background: var(--paper-2) !important; border-color: var(--hair) !important; border-radius: 0 !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-shadow: none !important; }
+.topnav-burger:hover, .topnav-burger.is-open { border-color: var(--clay) !important; box-shadow: none !important; transform: none !important; }
+.topnav-burger span { background: var(--ink) !important; }
+/* Mobile slide-out menu */
+.topnav-mobile { background: var(--paper-2) !important; top: var(--nav-h) !important; border-top: 1px solid var(--clay) !important; border-bottom: 1px solid var(--hair) !important; }
+.topnav.is-scrolled .topnav-mobile { top: var(--nav-h) !important; }
+.topnav-mobile-inner { background: var(--paper-2) !important; }
+.topnav-mobile::before { display: none !important; }
+.topnav-mobile-links a { font-family: var(--mono) !important; font-size: 10px !important; letter-spacing: 0.18em !important; text-transform: uppercase !important; color: var(--ink-5) !important; border-color: var(--hair) !important; border-radius: 0 !important; background: transparent !important; }
+.topnav-mobile-links a:hover { color: var(--clay) !important; background: var(--paper-3) !important; }
+.topnav-mobile-cta { border-color: var(--hair) !important; }
 .footer, #site-footer, #site-footer * { background-color: transparent !important; }
 #site-footer { background: var(--paper-2) !important; border-top: 1px solid var(--hair) !important; padding-top: 48px; padding-bottom: 32px; }
 #site-footer a { color: var(--ink-3) !important; }

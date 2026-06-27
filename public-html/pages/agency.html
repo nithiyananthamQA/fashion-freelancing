@@ -95,6 +95,7 @@
 
   /* The base body resets every property the global stylesheet might have set,
      so this page renders identically regardless of what the nav script injects. */
+  html { overflow-x: hidden; }
   body {
     background: var(--paper);
     color: var(--ink);
@@ -103,7 +104,10 @@
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    overflow-x: hidden;
   }
+  /* Suppress styles.css light-theme background orbs on this dark page */
+  body::before, body::after { display: none !important; }
 
   /* -------- Type -------- */
   .mono {
@@ -474,7 +478,8 @@
   }
   .px-head-wrap {
     position: absolute; top: 0; left: 0; right: 0; z-index: 6;
-    padding-top: calc(var(--u) * 3);
+    max-width: none !important; margin-left: 0 !important; margin-right: 0 !important;
+    padding: calc(var(--u) * 3) 6vw 0 !important;
     pointer-events: none;
   }
   .px-head {
@@ -484,7 +489,7 @@
   }
   @media (max-width: 860px) {
     .px-head { grid-template-columns: 1fr; gap: calc(var(--u) * 3); }
-    .px-head-wrap { padding-top: calc(var(--u) * 3); }
+    .px-head-wrap { padding: calc(var(--u) * 3) 5vw 0 !important; }
   }
   .px-head .index {
     font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
@@ -641,19 +646,26 @@
     text-transform: uppercase; color: var(--ink-7);
   }
 
-  /* Mobile fallback — disable pin, let cards scroll-snap horizontally */
+  /* Mobile fallback — disable GSAP pin, let cards scroll-snap horizontally */
   @media (max-width: 720px) {
+    .px-block { min-height: 0; }
     .px-pin { height: auto; }
     .px-viewport {
       position: relative; top: auto; height: auto; overflow-x: auto; overflow-y: hidden;
       scroll-snap-type: x mandatory;
     }
     .px-viewport::before, .px-viewport::after { display: none; }
+    /* Make heading flow above the card track instead of absolute-overlaying it */
+    .px-head-wrap { position: relative !important; top: auto; left: auto; right: auto; padding: 24px 6vw 12px !important; pointer-events: auto; }
+    .px-head { grid-template-columns: 1fr; gap: 8px; }
+    /* Reset absolute offsets — position:relative + top:120px would push cards off-screen */
     .px-track {
-      position: relative; transform: none !important;
-      padding: 32px 6vw;
+      position: relative !important; transform: none !important;
+      top: auto !important; bottom: auto !important; left: auto !important;
+      padding: 16px 6vw 32px;
     }
-    .px-card { scroll-snap-align: center; height: 70vh; }
+    .px-card { scroll-snap-align: start; height: 72vh; flex-basis: 82vw; }
+    .px-card h3 { white-space: normal; font-size: clamp(22px, 6vw, 30px); }
     .px-cockpit { display: none; }
   }
 
@@ -693,7 +705,9 @@
     flex: 1; display: flex; flex-direction: column; justify-content: space-between;
     gap: calc(var(--u) * 1);
     /* small top gap below the header; bottom padding pushes the foot just above the pinned marquee (~80px) */
-    padding: calc(var(--u) * 3) 0 calc(var(--u) * 2 + 80px);
+    /* left/right come from .wrap (30px desktop, 20px mobile) */
+    padding-top: calc(var(--u) * 3);
+    padding-bottom: calc(var(--u) * 2 + 80px);
     min-height: 0;
   }
 
