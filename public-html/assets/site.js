@@ -88,8 +88,10 @@
       <defs>
         <linearGradient id="ffLogoGrad" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stop-color="#6E56F0"/>
-          <stop offset="0.5" stop-color="#5468F5"/>
-          <stop offset="1" stop-color="#2BA8E8"/>
+          <stop offset="0.25" stop-color="#2BA8E8"/>
+          <stop offset="0.5" stop-color="#00C853"/>
+          <stop offset="0.75" stop-color="#F0A93B"/>
+          <stop offset="1" stop-color="#FF0055"/>
         </linearGradient>
       </defs>
       <rect width="32" height="32" rx="9" fill="url(#ffLogoGrad)"/>
@@ -103,7 +105,7 @@
     <div class="container topnav-inner">
       <a href="${r("index.html")}" class="logo" aria-label="Fashion Freelancing home">
         ${logoSVG}
-        <span class="logo-text">Fashion<span>Freelancing</span></span>
+        <div style="display:flex; align-items:center;">Fashion<span style="color:#FF0055;font-weight:700;">Freelancing</span></div>
       </a>
 
       <!-- Persistent search (desktop) -->
@@ -166,8 +168,7 @@
       <div class="footer-grid">
         <div>
           <a href="${r("index.html")}" class="logo">
-            <span class="logo-mark">F</span>
-            <span class="logo-text">FASHION<span>Freelancing</span></span>
+            <img src="${r("assets/logo.png")}" alt="Fashion Freelancing Logo" style="height: 40px; width: auto; object-fit: contain;" />
           </a>
           <p style="color:var(--ink-5);font-size:14px;max-width:320px;margin-top:14px;line-height:1.55;">
             Hire fashion freelancers, or get hired as one. Pay safely. Get paid safely. That's it.

@@ -2,8 +2,5 @@
 const { className = '' } = Astro.props;
 ---
 <a href="/" class={`flex items-center gap-2.5 ${className}`}>
-  <span class="w-7 h-7 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-        style="background:linear-gradient(135deg,#6E56F0,#2BA8E8);box-shadow:0 4px 12px -4px rgba(84,104,245,.5);">F</span>
-  <span class="font-display font-bold tracking-tight text-ink-900">Fashion<span
-    style="background:linear-gradient(118deg,#6E56F0,#5468F5,#2BA8E8);-webkit-background-clip:text;background-clip:text;color:transparent;margin-left:4px;"> Freelancing</span></span>
+  <img src="/assets/logo.png" alt="Fashion Freelancing Logo" class="h-10 w-auto object-contain" />
 </a>

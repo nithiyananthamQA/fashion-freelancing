@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -22,7 +22,23 @@
   <div class="auth-pane fx-stage">
     <span class="fx-orb v md" style="top:-180px;left:-160px;"></span>
     <span class="fx-orb c sm" style="bottom:-140px;left:20%;animation-delay:-9s;"></span>
-    <a href="../index.html" class="logo"><span class="logo-mark">F</span><span class="logo-text">Fashion<span>Freelancing</span></span></a>
+    <a href="../index.html" class="logo" aria-label="Fashion Freelancing home" style="text-decoration:none; display:flex; align-items:center; gap:10px;">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+        <defs>
+          <linearGradient id="ffLogoGradLogin" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#6E56F0"/>
+            <stop offset="0.25" stop-color="#2BA8E8"/>
+            <stop offset="0.5" stop-color="#00C853"/>
+            <stop offset="0.75" stop-color="#F0A93B"/>
+            <stop offset="1" stop-color="#FF0055"/>
+          </linearGradient>
+        </defs>
+        <rect width="32" height="32" rx="9" fill="url(#ffLogoGradLogin)"/>
+        <path d="M10 23V9h12M10 16h9" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="23" cy="23" r="2.4" fill="#FFFFFF"/>
+      </svg>
+      <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--ink);">Fashion<span style="color:#FF0055;">Freelancing</span></div>
+    </a>
 
     <div style="flex:1;display:flex;align-items:center;">
       <div style="width:100%;max-width:400px;margin:0 auto;">
@@ -70,7 +86,7 @@
   </div>
 
   <div class="auth-side">
-    <img src="https://images.unsplash.com/photo-1488161628813-04466f872be2?w=1400&auto=format&fit=crop" alt=""/>
+    <img src="https://images.unsplash.com/photo-1529339944388-c71d604e30bc?w=1400&auto=format&fit=crop" alt=""/>
     <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,.5),transparent 60%);"></div>
     <div style="position:absolute;bottom:32px;left:32px;right:32px;color:#fff;">
       <div style="font-family:var(--font-display);font-size:32px;font-weight:480;line-height:1.15;max-width:420px;letter-spacing:-0.02em;">"Hired three freelancers in a week. Way easier than I expected."</div>

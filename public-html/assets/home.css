@@ -26,8 +26,8 @@
   --d-violet:    #6E56F0;
   --d-indigo:    #5468F5;
   --d-cyan:      #2BA8E8;
-  --d-grad:      linear-gradient(118deg, #6E56F0 0%, #5468F5 50%, #2BA8E8 100%);
-  --d-grad-soft: linear-gradient(118deg, rgba(110,86,240,.13), rgba(43,168,232,.12));
+  --d-grad:      linear-gradient(118deg, #6E56F0 0%, #2BA8E8 25%, #00C853 50%, #F0A93B 75%, #FF0055 100%);
+  --d-grad-soft: linear-gradient(118deg, rgba(110,86,240,.13), rgba(43,168,232,.12), rgba(0,200,83,.12), rgba(240,169,59,.12), rgba(255,0,85,.13));
 
   --d-ease:      cubic-bezier(.22,1,.36,1);
   /* Colored glow shadows — kept; they read on a tinted (non-white) base */

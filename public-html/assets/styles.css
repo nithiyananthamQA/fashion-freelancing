@@ -44,9 +44,9 @@
   --rose-50:  #FCEAEF; --rose-700:  #C8385C;
 
   /* Accent gradient — used by buttons, marks, fills */
-  --grad: linear-gradient(118deg, #6E56F0 0%, #5468F5 50%, #2BA8E8 100%);
+  --grad: linear-gradient(118deg, #6E56F0 0%, #2BA8E8 25%, #00C853 50%, #F0A93B 75%, #FF0055 100%);
 
-  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 22px;
+  --r-sm: 2px; --r-md: 2px; --r-lg: 2px; --r-xl: 2px;
 
   --shadow-1: 0 1px 2px rgba(20,19,43,.04), 0 1px 1px rgba(20,19,43,.03);
   --shadow-2: 0 16px 38px -16px rgba(40,40,90,.24);
@@ -271,7 +271,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Form */
 .input {
-  width: 100%; background: #fff; border: 1px solid var(--line); border-radius: 10px;
+  width: 100%; background: #fff; border: 1px solid var(--line); border-radius: 2px;
   padding: 12px 14px; font-size: 14px; color: var(--ink);
   transition: border-color .15s, box-shadow .15s; font-family: inherit;
 }
@@ -292,6 +292,10 @@ h1, h2, h3, h4, h5, h6 {
   border-bottom: 1px solid var(--line);
   animation: topnav-drop .7s var(--easing) both;
 }
+
+/* Fix sticky header vanishing when body overflow is hidden on mobile menu open */
+body:has(.topnav-burger.is-open) .topnav { position: fixed; left: 0; right: 0; }
+body:has(.topnav-burger.is-open) { padding-top: 80px; }
 /* glowing hairline along the bottom edge */
 .topnav::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;

@@ -13,7 +13,7 @@
   else root.FFStore = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
 
-  const KEY = 'ff_store_v1';
+  const KEY = 'ff_store_v2';
   const SESSION_KEY = 'ff_session';
   const isBrowser = typeof window !== 'undefined' && typeof localStorage !== 'undefined';
 
@@ -30,7 +30,7 @@
   // ============================================================
   function seed() {
     const t0 = now();
-    const u_yuna  = { id: 'u_yuna',  email: 'yuna@example.com',  name: 'Yuna Aoki',     handle: '@yunaaoki',     role: 'creator', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop', coverImage: 'https://images.unsplash.com/photo-1488161628813-04466f872be2?w=1400&auto=format&fit=crop', locale: 'en-US', timezone: 'Asia/Tokyo', emailVerified: true, phoneVerified: false, twoFactorEnabled: true, plan: 'pro', status: 'active', createdAt: t0, updatedAt: t0, savedFreelancerIds: [], savedJobIds: [], notificationPrefs: defaultNotifPrefs() };
+    const u_yuna  = { id: 'u_yuna',  email: 'yuna@example.com',  name: 'Yuna Aoki',     handle: '@yunaaoki',     role: 'creator', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop', locale: 'en-US', timezone: 'Asia/Tokyo', emailVerified: true, phoneVerified: false, twoFactorEnabled: true, plan: 'pro', status: 'active', createdAt: t0, updatedAt: t0, savedFreelancerIds: [], savedJobIds: [], notificationPrefs: defaultNotifPrefs() };
     const u_amara = { id: 'u_amara', email: 'amara@example.com', name: 'Amara Okafor',  handle: '@amara.tp',     role: 'creator', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop', locale: 'en-NG', timezone: 'Africa/Lagos', emailVerified: true, phoneVerified: true, twoFactorEnabled: true, plan: 'pro', status: 'active', createdAt: t0, updatedAt: t0, savedFreelancerIds: [], savedJobIds: [], notificationPrefs: defaultNotifPrefs() };
     const u_marco = { id: 'u_marco', email: 'marco@example.com', name: 'Marco Reyes',   handle: '@marcoreyes',   role: 'creator', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop', locale: 'es-MX', timezone: 'America/Mexico_City', emailVerified: true, phoneVerified: false, twoFactorEnabled: false, plan: 'free', status: 'active', createdAt: t0, updatedAt: t0, savedFreelancerIds: [], savedJobIds: [], notificationPrefs: defaultNotifPrefs() };
     const u_elena = { id: 'u_elena', email: 'elena@example.com', name: 'Elena Marchetti', handle: '@elenamarchetti', role: 'creator', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop', locale: 'it-IT', timezone: 'Europe/Rome', emailVerified: true, phoneVerified: true, twoFactorEnabled: true, plan: 'pro', status: 'active', createdAt: t0, updatedAt: t0, savedFreelancerIds: [], savedJobIds: [], notificationPrefs: defaultNotifPrefs() };
@@ -209,10 +209,26 @@
     return { emailNewOrder:true, emailNewMessage:true, emailDelivery:true, emailWeeklyDigest:true, emailMarketing:false, pushNewOrder:true, pushNewMessage:true };
   }
 
+  const FASHION_IDS = [
+    '1492633423870-43d1cd2a4407', '1515886657613-9f3515b0c78f', '1539109136881-3be0616acf4b',
+    '1550614000-4b95d4ed1419', '1600607686527-6fb886090705', '1583337130417-3346a1be7dee',
+    '1483985988355-763728e1935b', '1485230895920-ee9dc3fec72c', '1618331835717-801e976710b2',
+    '1558769132-cb1a9760ee24', '1529339944388-c71d604e30bc', '1512436991641-6745cdb1723f',
+    '1445205170230-053b83016050', '1469334031218-e382a71b716b', '1490481651871-ab68de25d43d',
+    '1576995853123-5a10305d93c0', '1509319111365-f32a79237699', '1460925895917-afdab827c52f'
+  ];
+
+  function getFashionCover(id) {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) { hash = id.charCodeAt(i) + ((hash << 5) - hash); }
+    const imgId = FASHION_IDS[Math.abs(hash) % FASHION_IDS.length];
+    return `https://images.unsplash.com/photo-${imgId}?auto=format&fit=crop&w=1400&q=80`;
+  }
+
   function mkFreelancer(user, o) {
     return {
       id: user.id, userId: user.id, name: user.name, handle: user.handle, avatar: user.avatar,
-      cover: user.coverImage || `https://images.unsplash.com/photo-1488161628813-04466f872be2?w=1400&auto=format&fit=crop`,
+      cover: user.coverImage || getFashionCover(user.id),
       headline: o.headline, bio: o.bio,
       serviceSlug: o.service, serviceSlugs: [o.service],
       skills: o.skills || [], tools: o.tools || [], languages: o.languages || ['en'],
