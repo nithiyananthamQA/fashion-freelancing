@@ -184,8 +184,8 @@
           </div>
         </div>
 
-        <div>
-          <h5>For companies</h5>
+        <details class="footer-acc">
+          <summary class="footer-acc-head"><h5>For companies</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
           <ul>
             <li><a href="${r("pages/agency.html")}">Our services</a></li>
             <li><a href="${r("pages/start.html")}?audience=brand">Start a project</a></li>
@@ -193,37 +193,37 @@
             <li><a href="${r("pages/marketplace.html")}">Browse all freelancers</a></li>
             <li><a href="${r("pages/how-it-works.html")}">How it works</a></li>
           </ul>
-        </div>
+        </details>
 
-        <div>
-          <h5>I want to get hired</h5>
+        <details class="footer-acc">
+          <summary class="footer-acc-head"><h5>Get hired</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
           <ul>
             <li><a href="${r("pages/marketplace.html")}#jobs">Find a job</a></li>
             <li><a href="${r("pages/signup.html")}">Create a profile</a></li>
             <li><a href="${r("pages/how-it-works.html")}">How it works</a></li>
             <li><a href="${r("pages/pricing.html")}">Pricing</a></li>
           </ul>
-        </div>
+        </details>
 
-        <div>
-          <h5>Help</h5>
+        <details class="footer-acc">
+          <summary class="footer-acc-head"><h5>Help</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
           <ul>
             <li><a href="${r("pages/help.html")}">Help center</a></li>
             <li><a href="${r("pages/help.html")}#contact">Contact us</a></li>
             <li><a href="${r("pages/login.html")}">Sign in</a></li>
             <li><a href="${r("pages/signup.html")}">Sign up</a></li>
           </ul>
-        </div>
+        </details>
 
-        <div>
-          <h5>About us</h5>
+        <details class="footer-acc">
+          <summary class="footer-acc-head"><h5>About us</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
           <ul>
             <li><a href="${r("pages/about.html")}">About</a></li>
             <li><a href="${r("pages/blog.html")}">Stories</a></li>
             <li><a href="${r("pages/community.html")}">Community</a></li>
             <li><a href="#">Careers</a></li>
           </ul>
-        </div>
+        </details>
       </div>
 
       <div class="footer-bottom">
