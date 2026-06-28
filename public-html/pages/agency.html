@@ -677,6 +677,7 @@
       scroll-snap-type: x mandatory;
       overscroll-behavior-x: contain;
       -webkit-overflow-scrolling: touch;
+      touch-action: pan-x;
     }
 
     .px-card {
@@ -2027,8 +2028,9 @@
         }
       }, { passive: true });
 
-      // ---------- GSAP fade-up ----------
-      if (window.gsap && window.ScrollTrigger) {
+      // ---------- GSAP fade-up (desktop only — avoid touch-event capture on mobile) ----------
+      const isDesktop = window.matchMedia('(min-width: 721px)').matches;
+      if (isDesktop && window.gsap && window.ScrollTrigger) {
         gsap.registerPlugin(ScrollTrigger);
         document.querySelectorAll('.rv').forEach((el, i) => {
           gsap.to(el, {
@@ -2045,7 +2047,7 @@
           onEnter: () => document.getElementById('hero-strip').classList.add('in')
         });
       } else {
-        // Fallback if GSAP didn't load: just reveal everything instantly
+        // Mobile or GSAP unavailable: reveal instantly, no ScrollTrigger touch capture
         document.querySelectorAll('.rv').forEach(el => { el.style.opacity = 1; el.style.transform = 'none'; });
         const strip = document.getElementById('hero-strip');
         if (strip) strip.classList.add('in');
