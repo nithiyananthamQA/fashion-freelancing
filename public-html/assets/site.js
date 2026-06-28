@@ -102,8 +102,7 @@
   <div class="topnav">
     <div class="container topnav-inner">
       <a href="${r("index.html")}" class="logo" aria-label="Fashion Freelancing home">
-        ${logoSVG}
-        <span class="logo-text">Fashion<span>Freelancing</span></span>
+        <img src="${r("assets/logo.png")}" alt="Fashion Freelancing Logo" style="height: 38px; width: auto; object-fit: contain;" />
       </a>
 
       <!-- Persistent search (desktop) -->
