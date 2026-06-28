@@ -648,17 +648,33 @@
 
   /* Mobile fallback — disable pin, let cards scroll-snap horizontally */
   @media (max-width: 720px) {
-    .px-pin { height: auto; }
+    .px-block { min-height: 0; }
+    .px-pin { height: auto; min-height: 0; }
     .px-viewport {
-      position: relative; top: auto; height: auto; overflow-x: auto; overflow-y: hidden;
+      position: relative; top: auto; height: auto;
+      overflow-x: auto; overflow-y: hidden;
       scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
     }
     .px-viewport::before, .px-viewport::after { display: none; }
+    .px-head-wrap {
+      position: relative !important; top: auto; left: auto; right: auto;
+      padding: 24px 6vw 12px !important;
+      pointer-events: auto;
+    }
+    .px-head { grid-template-columns: 1fr; gap: 8px; }
     .px-track {
       position: relative; transform: none !important;
-      padding: 32px 6vw;
+      top: auto !important; bottom: auto !important; left: auto !important;
+      align-items: flex-start;
+      padding: 12px 6vw 32px;
+      will-change: auto;
     }
-    .px-card { scroll-snap-align: center; height: 70vh; }
+    .px-card {
+      scroll-snap-align: start;
+      flex-basis: 82vw; min-height: 68vh; height: auto;
+    }
+    .px-card h3 { white-space: normal; font-size: clamp(20px, 5.5vw, 28px); }
     .px-cockpit { display: none; }
   }
 
@@ -697,8 +713,8 @@
     position: relative; z-index: 2;
     flex: 1; display: flex; flex-direction: column; justify-content: space-between;
     gap: calc(var(--u) * 1);
-    /* small top gap below the header; bottom padding pushes the foot just above the pinned marquee (~80px) */
-    padding: calc(var(--u) * 3) 0 calc(var(--u) * 2 + 80px);
+    /* split top/bottom so the inherited left/right from .wrap shows through */
+    padding-top: calc(var(--u) * 3); padding-bottom: calc(var(--u) * 2 + 80px);
     min-height: 0;
   }
 
@@ -1294,6 +1310,8 @@
   }
 
   /* Burger */
+  .topnav-burger { background: var(--paper-2) !important; border-color: var(--hair) !important; border-radius: 0 !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-shadow: none !important; }
+  .topnav-burger:hover, .topnav-burger.is-open { border-color: var(--clay) !important; box-shadow: none !important; transform: none !important; }
   .topnav-burger span { background: var(--ink) !important; }
 
   /* Mobile menu */
@@ -1340,7 +1358,8 @@
   #theme-toggle .ic-sun  { display: block; }
   :root[data-theme="light"] #theme-toggle .ic-sun  { display: none; }
   :root[data-theme="light"] #theme-toggle .ic-moon { display: block; }
-  @media (max-width: 720px) { #theme-toggle { right: 14px; height: 48px; } }
+  @media (max-width: 1099px) { #theme-toggle { right: 70px; } }
+  @media (max-width: 720px) { #theme-toggle { right: 70px; height: 48px; } }
 </style>
 </head>
 <body>
