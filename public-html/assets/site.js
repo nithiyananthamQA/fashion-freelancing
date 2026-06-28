@@ -134,26 +134,27 @@
         <span></span><span></span><span></span>
       </button>
     </div>
+  </div>
 
-    <!-- Mobile slide-out menu -->
-    <div class="topnav-mobile" id="nav-mobile" aria-hidden="true">
-      <div class="topnav-mobile-inner">
-        <form class="topnav-search topnav-search-mobile" action="${r("pages/marketplace.html")}" role="search">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-          <input name="q" placeholder="Search…"/>
-        </form>
-        <nav class="topnav-mobile-links" aria-label="Mobile primary">
-          <a href="${r("pages/agency.html")}">Our services</a>
-          <a href="${r("pages/marketplace.html")}">Find a freelancer</a>
-          <a href="${r("pages/marketplace.html")}#jobs">Find a job</a>
-          <a href="${r("pages/how-it-works.html")}">How it works</a>
-          <a href="${r("pages/pricing.html")}">Pricing</a>
-          <a href="${r("pages/help.html")}">Help</a>
-        </nav>
-        <div class="topnav-mobile-cta">
-          <a href="${r("pages/login.html")}" class="btn btn-ghost w-full">Sign in</a>
-          <a href="${r("pages/signup.html")}" class="btn btn-primary w-full">Join free</a>
-        </div>
+  <!-- Mobile slide-out menu — sibling of .topnav so backdrop-filter
+       on .topnav does not trap its fixed positioning -->
+  <div class="topnav-mobile" id="nav-mobile" aria-hidden="true">
+    <div class="topnav-mobile-inner">
+      <form class="topnav-search topnav-search-mobile" action="${r("pages/marketplace.html")}" role="search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <input name="q" placeholder="Search…"/>
+      </form>
+      <nav class="topnav-mobile-links" aria-label="Mobile primary">
+        <a href="${r("pages/agency.html")}">Our services</a>
+        <a href="${r("pages/marketplace.html")}">Find a freelancer</a>
+        <a href="${r("pages/marketplace.html")}#jobs">Find a job</a>
+        <a href="${r("pages/how-it-works.html")}">How it works</a>
+        <a href="${r("pages/pricing.html")}">Pricing</a>
+        <a href="${r("pages/help.html")}">Help</a>
+      </nav>
+      <div class="topnav-mobile-cta">
+        <a href="${r("pages/login.html")}" class="btn btn-ghost w-full">Sign in</a>
+        <a href="${r("pages/signup.html")}" class="btn btn-primary w-full">Join free</a>
       </div>
     </div>
   </div>`;
@@ -244,6 +245,17 @@
     if (navMount) navMount.outerHTML = navHTML(navMount.dataset.current || '');
     const footerMount = document.getElementById('site-footer');
     if (footerMount) footerMount.outerHTML = footerHTML;
+
+    // Footer accordion: always open on desktop, toggle on mobile
+    function syncFooterAccordion() {
+      const desktop = window.innerWidth >= 481;
+      document.querySelectorAll('.footer-acc').forEach(d => {
+        if (desktop) d.setAttribute('open', '');
+        else if (!d.dataset.userOpened) d.removeAttribute('open');
+      });
+    }
+    syncFooterAccordion();
+    window.addEventListener('resize', syncFooterAccordion);
 
     // Mobile hamburger
     const burger = document.getElementById('nav-burger');

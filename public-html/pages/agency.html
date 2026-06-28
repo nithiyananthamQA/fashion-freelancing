@@ -479,7 +479,7 @@
   }
   .px-head-wrap {
     position: absolute; top: 0; left: 0; right: 0; z-index: 6;
-    padding-top: calc(var(--u) * 3);
+    padding-top: calc(var(--u) * 6);
     pointer-events: none;
   }
   .px-head {
@@ -489,7 +489,7 @@
   }
   @media (max-width: 860px) {
     .px-head { grid-template-columns: 1fr; gap: calc(var(--u) * 3); }
-    .px-head-wrap { padding-top: calc(var(--u) * 3); }
+    .px-head-wrap { padding-top: calc(var(--u) * 5); }
   }
   .px-head .index {
     font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
@@ -504,8 +504,8 @@
     position: relative;
   }
   .px-viewport {
-    position: sticky; top: 0;
-    height: 100vh; overflow: hidden;
+    position: sticky; top: var(--nav-h, 56px);
+    height: calc(100vh - var(--nav-h, 56px)); overflow: hidden;
     background: var(--paper);
   }
   .px-viewport::before, .px-viewport::after {
@@ -646,47 +646,21 @@
     text-transform: uppercase; color: var(--ink-7);
   }
 
-  /* Mobile fallback — disable pin, track scrolls horizontally, viewport is just a column */
+  /* Mobile: keep sticky scroll-driven horizontal parallax (same as desktop).
+     Shift viewport below the nav so the heading h2 isn't hidden behind it.
+     Process section reverts to simple static layout. */
   @media (max-width: 720px) {
-    .px-block { min-height: 0; }
-    .px-pin { height: auto; min-height: 0; }
+    /* Use svh on mobile so browser chrome doesn't eat the bottom */
+    .px-viewport { height: calc(100svh - var(--nav-h, 56px)); }
 
-    /* Viewport: plain flex column — NOT the scroll container */
-    .px-viewport {
-      position: relative; top: auto; height: auto;
-      display: flex; flex-direction: column;
-      overflow: visible;
-    }
-    .px-viewport::before, .px-viewport::after { display: none; }
-
-    /* Heading: its own block above the track, constrained to viewport width */
-    .px-head-wrap {
-      position: relative !important; top: auto; left: auto; right: auto;
-      padding: 24px 20px 16px !important;
-      pointer-events: auto; flex-shrink: 0;
-    }
     .px-head { grid-template-columns: 1fr; gap: 8px; }
-
-    /* Track: IS the scroll container now */
-    .px-track {
-      position: relative; transform: none !important;
-      top: auto !important; bottom: auto !important; left: auto !important;
-      align-items: flex-start; will-change: auto;
-      padding: 0 20px 32px;
-      overflow-x: auto; overflow-y: hidden;
-      scroll-snap-type: x mandatory;
-      overscroll-behavior-x: contain;
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-x;
-    }
-
-    .px-card {
-      scroll-snap-align: start;
-      flex-basis: 82vw; height: auto;
-      grid-template-rows: auto auto auto;
-    }
+    .px-card { height: 62vh; padding: 20px 20px 20px 24px; }
     .px-card h3 { white-space: normal; font-size: clamp(20px, 5.5vw, 28px); }
-    .px-cockpit { display: none; }
+
+    /* Process: plain scrollable layout on mobile — no GSAP pin. */
+    .process { margin-top: 0; }
+    .process-pin { height: auto; min-height: 0; }
+    .process-cell { opacity: 1; }
   }
 
   /* ============================================================
@@ -1328,18 +1302,19 @@
   /* Mobile menu */
   .topnav-mobile {
     background: var(--paper-2) !important;
-    border-top: 1px solid var(--clay) !important;
-    border-bottom: 1px solid var(--hair) !important;
+    border: none !important;
   }
   .topnav-mobile-links a {
-    font-family: var(--mono) !important;
-    font-size: 10px !important;
-    letter-spacing: 0.18em !important;
-    text-transform: uppercase !important;
-    color: var(--ink-5) !important;
-    border-color: var(--hair) !important;
+    font-family: var(--font-display) !important;
+    font-size: clamp(28px, 8vw, 36px) !important;
+    letter-spacing: -0.025em !important;
+    text-transform: none !important;
+    font-weight: 700 !important;
+    color: var(--ink) !important;
+    border: none !important;
   }
-  .topnav-mobile-links a:hover { color: var(--clay) !important; }
+  .topnav-mobile-links a:hover,
+  .topnav-mobile-links a:active { color: var(--clay) !important; }
 
   /* Footer */
   .footer, #site-footer, #site-footer * {
@@ -2028,9 +2003,8 @@
         }
       }, { passive: true });
 
-      // ---------- GSAP fade-up (desktop only — avoid touch-event capture on mobile) ----------
-      const isDesktop = window.matchMedia('(min-width: 721px)').matches;
-      if (isDesktop && window.gsap && window.ScrollTrigger) {
+      // ---------- GSAP scroll animations (all screen sizes) ----------
+      if (window.gsap && window.ScrollTrigger) {
         gsap.registerPlugin(ScrollTrigger);
         document.querySelectorAll('.rv').forEach((el, i) => {
           gsap.to(el, {
@@ -2041,13 +2015,12 @@
             scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' }
           });
         });
-        // Hero strip image zoom-out on enter
         ScrollTrigger.create({
           trigger: '#hero-strip', start: 'top 80%',
           onEnter: () => document.getElementById('hero-strip').classList.add('in')
         });
       } else {
-        // Mobile or GSAP unavailable: reveal instantly, no ScrollTrigger touch capture
+        // GSAP unavailable: reveal instantly
         document.querySelectorAll('.rv').forEach(el => { el.style.opacity = 1; el.style.transform = 'none'; });
         const strip = document.getElementById('hero-strip');
         if (strip) strip.classList.add('in');
@@ -2059,7 +2032,6 @@
         const pxTrack = document.getElementById(opts.trackId);
         if (!pxPin || !pxTrack) return;
         if (!window.gsap || !window.ScrollTrigger) return;
-        if (!window.matchMedia('(min-width: 721px)').matches) return;
 
         const cards = pxTrack.querySelectorAll('.px-card');
         const wms = pxTrack.querySelectorAll('.px-wm');
@@ -2152,7 +2124,6 @@
         gsap.set(pin, { yPercent: 0, y: 0 });
 
         const vh = () => window.innerHeight;
-
         // PIN — lock full-viewport and light up the 4 steps one-by-one.
         ScrollTrigger.create({
           trigger: sec,
