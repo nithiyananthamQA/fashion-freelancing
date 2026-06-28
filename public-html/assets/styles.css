@@ -824,7 +824,7 @@ h1, h2, h3, h4, h5, h6 {
 /* ------------------ BRIEF TABLE ------------------ */
 
 .brief-card {
-  background: #fff; border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg);
   overflow: hidden;
 }
 .brief-row {

@@ -13,7 +13,6 @@
 <link rel="stylesheet" href="../assets/styles.css" />
 <style>
   .mp-grid { display:grid; grid-template-columns: 240px 1fr; gap:32px; align-items:flex-start; }
-  @media (max-width: 1024px) { .mp-grid { grid-template-columns: 1fr; } }
   .filters { position: sticky; top: 88px; }
   .filter-block { padding: 16px 0; border-bottom: 1px solid var(--line); }
   .filter-block:first-child { padding-top: 0; }
@@ -24,6 +23,18 @@
   .mode-tabs { display: inline-flex; background: var(--paper-2); border-radius: 99px; padding: 4px; gap: 2px; border: 1px solid var(--line); }
   .mode-tabs button { padding: 9px 18px; font-size: 14px; color: var(--ink-3); background: transparent; border: 0; border-radius: 99px; cursor: pointer; transition: all .15s; font-weight: 500; }
   .mode-tabs button.active { background: var(--ink); color: var(--paper); }
+  #mobile-filter-btn { display: none; }
+  @media (max-width: 1023px) {
+    .mp-grid { grid-template-columns: 1fr; }
+    .filters { position: static; order: 2; display: none; padding: 16px 0; border-top: 1px solid var(--line); margin-top: 8px; }
+    .filters.is-open { display: block; }
+    .mp-results { order: 1; }
+    #mobile-filter-btn { display: inline-flex; }
+  }
+  @media (max-width: 600px) {
+    .mode-tabs button { padding: 8px 14px; font-size: 13px; }
+    .gig-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+  }
 </style>
 </head>
 <body>
@@ -45,7 +56,7 @@
     </div>
 
     <!-- Search bar -->
-    <div style="margin-top: 18px; display: flex; gap: 8px; align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 99px; padding: 6px 6px 6px 18px; max-width: 720px; box-shadow: 0 1px 0 rgba(0,0,0,.02);">
+    <div style="margin-top: 18px; display: flex; gap: 8px; align-items: center; background: var(--paper); border: 1px solid var(--line); border-radius: 99px; padding: 6px 6px 6px 18px; max-width: 720px; box-shadow: 0 1px 0 rgba(0,0,0,.02);">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="color:var(--ink-5);"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       <input id="search" style="border:none;background:transparent;padding:10px 4px;flex:1;outline:none;font-size:14px;" placeholder="Search 'tech pack designer', 'pattern maker', 'photographer in Paris'…"/>
       <button class="btn btn-primary btn-sm">Search</button>
@@ -112,12 +123,15 @@
         <button class="btn btn-ghost w-full" style="margin-top:14px;">Reset all</button>
       </aside>
 
-      <div>
+      <div class="mp-results">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:8px;">
           <p style="font-size:14px;color:var(--ink-5);"><strong id="result-count" style="color:var(--ink);">1,284</strong> freelancers ready to work</p>
-          <select class="input" style="width:auto;padding:7px 12px;font-size:13px;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button id="mobile-filter-btn" class="btn btn-ghost btn-sm">Filters</button>
+            <select class="input" style="width:auto;padding:7px 12px;font-size:13px;">
             <option>Best match</option><option>Top-rated first</option><option>Cheapest first</option><option>Fastest first</option>
           </select>
+          </div>
         </div>
 
         <div class="gig-grid" id="gig-grid"><!-- populated --></div>
@@ -348,6 +362,14 @@
 
     // First render
     refresh();
+  });
+
+  // Mobile filter toggle
+  const filterBtn = document.getElementById('mobile-filter-btn');
+  const filtersEl = document.querySelector('.filters');
+  filterBtn?.addEventListener('click', () => {
+    const open = filtersEl.classList.toggle('is-open');
+    filterBtn.textContent = open ? 'Hide filters' : 'Filters';
   });
 
   // ---- Jobs section (#view-jobs) — live from api.briefs.list ----
