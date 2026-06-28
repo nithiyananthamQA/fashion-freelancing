@@ -646,30 +646,39 @@
     text-transform: uppercase; color: var(--ink-7);
   }
 
-  /* Mobile fallback — disable pin, let cards scroll-snap horizontally */
+  /* Mobile fallback — disable pin, track scrolls horizontally, viewport is just a column */
   @media (max-width: 720px) {
     .px-block { min-height: 0; }
     .px-pin { height: auto; min-height: 0; }
+
+    /* Viewport: plain flex column — NOT the scroll container */
     .px-viewport {
       position: relative; top: auto; height: auto;
-      overflow-x: auto; overflow-y: hidden;
-      scroll-snap-type: x mandatory;
-      overscroll-behavior-x: contain;
+      display: flex; flex-direction: column;
+      overflow: visible;
     }
     .px-viewport::before, .px-viewport::after { display: none; }
+
+    /* Heading: its own block above the track, constrained to viewport width */
     .px-head-wrap {
       position: relative !important; top: auto; left: auto; right: auto;
-      padding: 24px 6vw 12px !important;
-      pointer-events: auto;
+      padding: 24px 20px 16px !important;
+      pointer-events: auto; flex-shrink: 0;
     }
     .px-head { grid-template-columns: 1fr; gap: 8px; }
+
+    /* Track: IS the scroll container now */
     .px-track {
       position: relative; transform: none !important;
       top: auto !important; bottom: auto !important; left: auto !important;
-      align-items: flex-start;
-      padding: 12px 6vw 32px;
-      will-change: auto;
+      align-items: flex-start; will-change: auto;
+      padding: 0 20px 32px;
+      overflow-x: auto; overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+      -webkit-overflow-scrolling: touch;
     }
+
     .px-card {
       scroll-snap-align: start;
       flex-basis: 82vw; min-height: 68vh; height: auto;
