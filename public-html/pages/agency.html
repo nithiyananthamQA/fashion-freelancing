@@ -646,18 +646,56 @@
     text-transform: uppercase; color: var(--ink-7);
   }
 
-  /* Mobile: keep sticky scroll-driven horizontal parallax (same as desktop).
-     Shift viewport below the nav so the heading h2 isn't hidden behind it.
-     Process section reverts to simple static layout. */
+  /* Mobile: convert horizontal parallax to a clean vertical card stack.
+     GSAP wireParallaxBlock() is skipped below 721px in JS. */
   @media (max-width: 720px) {
-    /* Use svh on mobile so browser chrome doesn't eat the bottom */
-    .px-viewport { height: calc(100svh - var(--nav-h, 56px)); }
+    /* Strip the JS-inflated section height */
+    .px-block { min-height: 0; border-bottom: 1px solid var(--hair); }
+    .px-pin { height: auto !important; min-height: 0; }
 
-    .px-head { grid-template-columns: 1fr; gap: 8px; }
-    .px-card { height: 62vh; padding: 20px 20px 20px 24px; }
-    .px-card h3 { white-space: normal; font-size: clamp(20px, 5.5vw, 28px); }
+    /* Un-sticky the viewport so cards flow normally */
+    .px-viewport {
+      position: relative;
+      height: auto !important;
+      overflow: visible;
+    }
+    .px-viewport::before, .px-viewport::after { display: none; }
 
-    /* Process: plain scrollable layout on mobile — no GSAP pin. */
+    /* Section heading: flows above the cards */
+    .px-head-wrap {
+      position: relative;
+      padding: calc(var(--u) * 5) calc(var(--u) * 3) calc(var(--u) * 2);
+    }
+    .px-head { grid-template-columns: 1fr; gap: 6px; }
+
+    /* Card track: vertical stack */
+    .px-track {
+      position: relative !important;
+      top: auto !important; bottom: auto !important; left: auto !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      padding: 0 calc(var(--u) * 2) calc(var(--u) * 5) !important;
+      gap: 10px !important;
+      transform: none !important;
+      will-change: unset !important;
+    }
+
+    /* Cards: full width, natural height */
+    .px-card {
+      flex: none !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
+      padding: 20px 18px !important;
+    }
+    .px-card h3 { white-space: normal; font-size: clamp(18px, 5vw, 24px); }
+    .px-card ul { margin-top: 10px; }
+    .px-card li { padding: 8px 0; font-size: 13px; }
+
+    /* Hide cockpit (no horizontal progress tracker needed) */
+    .px-cockpit { display: none !important; }
+
+    /* Process: plain scrollable layout on mobile */
     .process { margin-top: 0; }
     .process-pin { height: auto; min-height: 0; }
     .process-cell { opacity: 1; }
@@ -2032,6 +2070,7 @@
         const pxTrack = document.getElementById(opts.trackId);
         if (!pxPin || !pxTrack) return;
         if (!window.gsap || !window.ScrollTrigger) return;
+        if (window.innerWidth <= 720) return; // vertical stack on mobile - skip GSAP
 
         const cards = pxTrack.querySelectorAll('.px-card');
         const wms = pxTrack.querySelectorAll('.px-wm');
