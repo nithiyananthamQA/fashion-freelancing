@@ -88,10 +88,8 @@
       <defs>
         <linearGradient id="ffLogoGrad" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stop-color="#6E56F0"/>
-          <stop offset="0.25" stop-color="#2BA8E8"/>
-          <stop offset="0.5" stop-color="#00C853"/>
-          <stop offset="0.75" stop-color="#F0A93B"/>
-          <stop offset="1" stop-color="#FF0055"/>
+          <stop offset="0.5" stop-color="#5468F5"/>
+          <stop offset="1" stop-color="#2BA8E8"/>
         </linearGradient>
       </defs>
       <rect width="32" height="32" rx="9" fill="url(#ffLogoGrad)"/>
@@ -105,7 +103,7 @@
     <div class="container topnav-inner">
       <a href="${r("index.html")}" class="logo" aria-label="Fashion Freelancing home">
         ${logoSVG}
-        <div style="display:flex; align-items:center;">Fashion<span style="color:#FF0055;font-weight:700;">Freelancing</span></div>
+        <span class="logo-text">Fashion<span>Freelancing</span></span>
       </a>
 
       <!-- Persistent search (desktop) -->
