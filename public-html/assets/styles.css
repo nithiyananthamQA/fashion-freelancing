@@ -46,7 +46,7 @@
   /* Accent gradient — used by buttons, marks, fills */
   --grad: linear-gradient(118deg, #6E56F0 0%, #2BA8E8 25%, #00C853 50%, #F0A93B 75%, #FF0055 100%);
 
-  --r-sm: 2px; --r-md: 2px; --r-lg: 2px; --r-xl: 2px;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 16px; --r-xl: 22px;
 
   --shadow-1: 0 1px 2px rgba(20,19,43,.04), 0 1px 1px rgba(20,19,43,.03);
   --shadow-2: 0 16px 38px -16px rgba(40,40,90,.24);
@@ -357,6 +357,14 @@ body:has(.topnav-burger.is-open) { padding-top: 80px; }
 }
 .logo:hover { opacity: 0.8; }
 .logo svg { display: block; }
+/* New full-wordmark logo image — fits the nav height, never clips the words */
+.logo-img {
+  display: block; height: 38px; width: auto; max-width: 100%;
+  object-fit: contain;
+  transition: height .32s var(--easing);
+}
+.topnav.is-scrolled .logo-img { height: 32px; }
+@media (max-width: 520px) { .logo-img { height: 30px; } }
 /* gradient tile mark — used by footer + auth pages (<span class="logo-mark">F</span>) */
 .logo-mark {
   display: inline-flex; align-items: center; justify-content: center;
@@ -371,6 +379,11 @@ body:has(.topnav-burger.is-open) { padding-top: 80px; }
   flex-shrink: 0;
   box-shadow: 0 4px 12px -4px rgba(84,104,245,.5);
 }
+/* When the mark contains an inline SVG (it carries its own gradient tile),
+   let the SVG be the visual — no doubled background, size to the SVG. */
+.logo-mark:has(svg) { width: auto; height: auto; background: none; box-shadow: none; border-radius: 0; }
+.logo-mark svg { display: block; border-radius: 9px; box-shadow: 0 4px 12px -4px rgba(84,104,245,.5); transition: transform .32s var(--easing); }
+.topnav.is-scrolled .logo-mark svg { transform: scale(.9); }
 .logo-text {
   font-family: var(--font-display);
   font-weight: 500;

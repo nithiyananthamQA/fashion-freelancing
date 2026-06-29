@@ -36,6 +36,18 @@
   button { font: inherit; background: none; border: 0; cursor: pointer; color: inherit; }
   ul { list-style: none; padding: 0; margin: 0; }
 
+  /* -------- Skip link (keyboard a11y) -------- */
+  .skip-link {
+    position: fixed; top: -100px; left: 20px; z-index: 10001;
+    background: var(--champagne); color: #fff;
+    padding: 12px 20px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    border: 2px solid #fff;
+    transition: top .2s ease;
+    white-space: nowrap;
+  }
+  .skip-link:focus { top: 20px; }
+
   /* -------- BRUTALIST MONO — concrete gray + signal orange --------
      These overrides the global stylesheet's tokens so the injected
      header + footer (which read from these vars) also go dark. */
@@ -50,6 +62,10 @@
 
     /* One spacing token, used everywhere */
     --u: 8px;
+
+    /* Sticky-nav height. JS (setNavH) overwrites this with the real measured
+       nav height; this default keeps first-paint correct (real nav is 80px). */
+    --nav-h: 80px;
   }
 
   /* ============================================================
@@ -151,22 +167,39 @@
     .intro { min-height: auto; padding: calc(var(--u) * 10) 0; }
     .intro-grid { grid-template-columns: 1fr; gap: calc(var(--u) * 4); }
   }
-  .intro .label { margin-bottom: calc(var(--u) * 3); }
+  .intro .label { margin-bottom: calc(var(--u) * 3); color: var(--champagne-3, var(--champagne)); }
   .intro p { margin-bottom: calc(var(--u) * 3); }
   .intro p:last-child { margin-bottom: 0; }
   .intro-stats {
-    margin-top: calc(var(--u) * 6); padding-top: calc(var(--u) * 4);
-    border-top: 1px solid var(--line);
-    display: grid; grid-template-columns: repeat(4, 3fr); gap: 30px;
+    margin-top: calc(var(--u) * 7);
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
   }
-  @media (max-width: 720px) { .intro-stats { grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 4); } }
+  @media (max-width: 720px) { .intro-stats { grid-template-columns: 1fr 1fr; gap: 14px; } }
+  /* Each stat is a premium white card, matching the slide tiles */
+  .intro-stats .cell {
+    --c: var(--champagne);
+    position: relative; overflow: hidden;
+    background: var(--paper-3, #fff);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg, 16px);
+    box-shadow: var(--shadow-1);
+    padding: calc(var(--u) * 3) calc(var(--u) * 3) calc(var(--u) * 3);
+  }
+  .intro-stats .cell::before {
+    content: ''; position: absolute; right: -25%; top: -40%;
+    width: 70%; height: 90%; border-radius: 50%;
+    background: radial-gradient(circle, var(--c), transparent 70%);
+    opacity: .12; transition: opacity .4s ease;
+  }
+  .intro-stats .cell:nth-child(1){ --c:#6E56F0; } .intro-stats .cell:nth-child(2){ --c:#2BA8E8; }
+  .intro-stats .cell:nth-child(3){ --c:#F0A93B; } .intro-stats .cell:nth-child(4){ --c:#00C853; }
   .intro-stats .cell .n {
-    font-family: var(--sans); font-weight: 700;
-    font-size: clamp(32px, 3.4vw, 48px); line-height: 1;
-    letter-spacing: -0.034em;
-    font-variant-numeric: tabular-nums;
+    font-family: var(--font-display, var(--sans)); font-weight: 800;
+    font-size: clamp(30px, 3.2vw, 46px); line-height: 1;
+    letter-spacing: -0.034em; color: var(--ink);
+    font-variant-numeric: tabular-nums; position: relative; z-index: 1;
   }
-  .intro-stats .cell .s { font-size: 13px; color: var(--ink-5); margin-top: 8px; }
+  .intro-stats .cell .s { font-size: 12.5px; color: var(--ink-4); margin-top: 10px; position: relative; z-index: 1; }
 
 
   /* ============================================================
@@ -325,7 +358,7 @@
   }
   .process-cell .n {
     font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--ink-5);
+    text-transform: uppercase; color: var(--ink-4);
     margin-bottom: calc(var(--u) * 3);
   }
   .process-cell h3 {
@@ -337,7 +370,7 @@
   }
   .process-cell p {
     font-size: 15px;
-    color: var(--ink-5);
+    color: var(--ink-4);
     line-height: 1.6;
     margin: 0;
     max-width: 28ch;
@@ -398,38 +431,77 @@
     text-align: left;
   }
   @media (max-width: 860px) { .contact-grid { grid-template-columns: 1fr; gap: calc(var(--u) * 4); } }
-  .contact-form { display: grid; gap: 14px; background: var(--paper-2); padding: calc(var(--u) * 4); border-radius: 0; border: 1px solid var(--line-2); }
-  .contact-form .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  /* Form — premium white card matching the slide tiles (rounded, soft shadow) */
+  .contact-form {
+    display: grid; gap: 16px;
+    background: var(--paper-3, #fff);
+    padding: calc(var(--u) * 5);
+    border-radius: var(--r-xl, 22px);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-2);
+  }
+  .contact-form .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 540px) { .contact-form .row2 { grid-template-columns: 1fr; } }
   .contact-form label { display: block; }
   .contact-form .label {
     font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em;
-    text-transform: uppercase; color: var(--ink-5); margin-bottom: 6px;
+    text-transform: uppercase; color: var(--ink-5); margin-bottom: 7px;
   }
+  .contact-form .label .req { color: var(--champagne-2); margin-left: 3px; }
   .contact-form .input {
-    width: 100%; padding: 13px 14px; border: 1px solid var(--line-2);
-    border-radius: 0; font-family: var(--sans); font-size: 14.5px;
-    background: var(--paper); color: var(--ink);
+    width: 100%; padding: 14px 15px; border: 1px solid var(--line-2);
+    border-radius: var(--r-sm, 8px); font-family: var(--sans); font-size: 14.5px;
+    background: var(--paper); color: var(--ink); min-height: 48px;
+    transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
   }
-  .contact-form .input::placeholder { color: var(--ink-7); }
-  .contact-form .input:focus { outline: 2px solid var(--champagne); outline-offset: -1px; border-color: var(--champagne); }
-  .contact-form textarea.input { resize: vertical; min-height: 110px; }
+  .contact-form .input::placeholder { color: var(--ink-4); }
+  .contact-form .input:hover { border-color: var(--ink-7); }
+  .contact-form .input:focus {
+    outline: none; border-color: var(--champagne);
+    box-shadow: 0 0 0 3px var(--champagne-50, rgba(84,104,245,.18));
+    background: var(--paper-3, #fff);
+  }
+  .contact-form textarea.input { resize: vertical; min-height: 120px; }
+  .contact-form .btn-ink { border-radius: var(--r-md, 12px); padding: 15px 30px; min-height: 50px; }
 
-  .promise-block .label { margin-bottom: calc(var(--u) * 2); }
-  .promise-block h3 { font-family: var(--sans); font-weight: 700; font-size: 28px; letter-spacing: -0.028em; line-height: 1.15; margin: 0 0 calc(var(--u) * 3); }
-  .promise-block ul { display: grid; gap: 14px; }
+  /* Promise — accent card with gradient edge, like a slide tile */
+  .promise-block {
+    background: var(--paper-3, #fff);
+    border: 1px solid var(--line);
+    border-radius: var(--r-xl, 22px);
+    box-shadow: var(--shadow-1);
+    padding: calc(var(--u) * 5);
+    position: relative; overflow: hidden;
+  }
+  .promise-block::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    background: var(--grad);
+  }
+  .promise-block .label { margin-bottom: calc(var(--u) * 2); color: var(--champagne-3, var(--champagne)); }
+  .promise-block h3 { font-family: var(--font-display, var(--sans)); font-weight: 700; font-size: clamp(22px, 2vw, 28px); letter-spacing: -0.028em; line-height: 1.15; margin: 0 0 calc(var(--u) * 3); color: var(--ink); }
+  .promise-block ul { display: grid; gap: 16px; }
   .promise-block li {
     display: flex; align-items: flex-start; gap: 12px;
     font-size: 15px; color: var(--ink-3); line-height: 1.5;
   }
-  .promise-block li::before { content: '+'; font-family: var(--mono); color: var(--champagne); font-size: 15px; flex-shrink: 0; padding-top: 1px; }
-  .sent-card { background: var(--paper-2); border: 1px solid var(--line-2); border-radius: 0; padding: calc(var(--u) * 5); text-align: center; }
-  .sent-card .ok { font-family: var(--sans); font-weight: 700; font-size: 36px; color: var(--champagne); }
+  .promise-block li::before {
+    content: ''; width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px;
+    border-radius: 50%; background: var(--champagne-50, rgba(84,104,245,.16));
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235468F5' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: center;
+  }
+  .sent-card { background: var(--paper-3, #fff); border: 1px solid var(--line); border-radius: var(--r-xl, 22px); box-shadow: var(--shadow-2); padding: calc(var(--u) * 5); text-align: center; }
+  .sent-card .ok { font-family: var(--font-display, var(--sans)); font-weight: 700; font-size: 36px; color: var(--champagne); }
 
   /* ============================================================
      REVEAL — used by GSAP for fade-up
      ============================================================ */
   .rv { opacity: 0; transform: translateY(28px); }
+  /* H5 — backstop: never leave .rv content hidden when motion is reduced
+     (the JS reveal is skipped for reduced-motion users). */
+  @media (prefers-reduced-motion: reduce) {
+    .rv { opacity: 1 !important; transform: none !important; }
+  }
 
   /* ============================================================
      HORIZONTAL PARALLAX CARDS — single section, vertical scroll
@@ -471,8 +543,8 @@
     position: relative;
   }
   .px-viewport {
-    position: sticky; top: var(--nav-h, 56px);
-    height: calc(100vh - var(--nav-h, 56px)); overflow: hidden;
+    position: sticky; top: var(--nav-h, 80px);
+    height: calc(100vh - var(--nav-h, 80px)); overflow: hidden;
     background: var(--paper);
   }
   .px-viewport::before, .px-viewport::after {
@@ -499,6 +571,7 @@
     height: clamp(300px, 52vh, 480px); max-height: none;
     position: relative;
     border: 1px solid var(--line-2);
+    border-radius: var(--r-xl, 22px);
     background: transparent;
     padding: calc(var(--u) * 3);
     display: grid; grid-template-rows: auto 1fr auto;
@@ -538,7 +611,7 @@
   }
   .px-card .px-num {
     font-family: var(--mono); font-size: 13px; font-weight: 500;
-    letter-spacing: 0.18em; color: var(--ink-5);
+    letter-spacing: 0.18em; color: var(--ink-4);
   }
   .px-card .px-num .of { color: var(--ink-7); }
   .px-card .px-side {
@@ -684,8 +757,8 @@
      ============================================================ */
   .hero-t {
     position: relative;
-    margin-top: 56px;
-    height: calc(100vh - var(--nav-h, 56px));
+    margin-top: var(--nav-h, 80px);
+    height: calc(100vh - var(--nav-h, 80px));
     min-height: 600px;
     background: var(--paper);
     overflow: hidden;
@@ -693,21 +766,38 @@
     padding-top: 0;
   }
 
-  /* Background ghost-words — sit way back, drift up on scroll */
+  /* Background — soft colour auras (brand violet→indigo→cyan + a warm accent)
+     give the lavender canvas depth without any imagery. Plus faint ghost-words. */
   .hero-t-bg {
     position: absolute; inset: 0;
     pointer-events: none; z-index: 0;
     overflow: hidden;
   }
+  .hero-t-bg::before,
+  .hero-t-bg::after {
+    content: ''; position: absolute; border-radius: 50%;
+    filter: blur(90px); opacity: .5;
+    will-change: transform;
+  }
+  /* indigo→cyan aura, upper-right */
+  .hero-t-bg::before {
+    width: 52vw; height: 52vw; top: -16vw; right: -12vw;
+    background: radial-gradient(circle at 50% 50%, rgba(110,86,240,.42), rgba(43,168,232,.20) 55%, transparent 72%);
+  }
+  /* warm pink/violet aura, lower-left — echoes the per-card accents */
+  .hero-t-bg::after {
+    width: 40vw; height: 40vw; bottom: -10vw; left: -10vw;
+    background: radial-gradient(circle at 50% 50%, rgba(255,0,85,.18), rgba(110,86,240,.16) 55%, transparent 72%);
+  }
   .bgw {
     position: absolute;
     font-family: var(--sans); font-weight: 800;
     letter-spacing: -0.04em; line-height: 0.85;
-    color: var(--ink); opacity: 0.045;
+    color: var(--ink); opacity: 0.04;
     user-select: none; white-space: nowrap;
     will-change: transform;
   }
-  .bgw-1 { top: 6%;  right: 2%; font-size: clamp(80px, 10vw, 160px); }
+  .bgw-1 { top: 8%;  right: 3%; font-size: clamp(80px, 11vw, 190px); }
 
   .hero-t-wrap {
     position: relative; z-index: 2;
@@ -718,17 +808,114 @@
     min-height: 0;
   }
 
+  /* ===== OPTION 2 — centred giant type + floating service chips ===== */
+  .hero-t-center {
+    flex: 1; position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; min-height: 0;
+  }
+  .hero-t-center .hero-t-eyebrow { margin-bottom: calc(var(--u) * 3); }
+  .hero-t-center .hero-t-headline {
+    margin: 0 auto; max-width: 18ch; text-align: center;
+  }
+  .hero-t-center .hero-t-sub {
+    margin: calc(var(--u) * 4) auto 0; max-width: 52ch; text-align: center;
+    font-size: clamp(15px, 1.35vw, 19px); line-height: 1.6; color: var(--ink-3);
+  }
+  .hero-t-center .hero-t-ctas {
+    display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+    margin-top: calc(var(--u) * 5);
+  }
 
-  /* The headline — large, fills the upper hero with confident type */
+  /* Floating service chips — scattered around the headline, each its own colour.
+     Absolute on desktop; they collapse into an inline row on small screens. */
+  .hero-chips { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+  .hero-chip {
+    position: absolute; pointer-events: auto;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 16px; border-radius: 999px;
+    background: var(--paper-3, #fff); border: 1px solid var(--line);
+    box-shadow: var(--shadow-2);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    color: var(--ink); text-decoration: none; white-space: nowrap;
+    opacity: 0; transform: translateY(14px) scale(.96);
+    transition: transform .5s var(--easing), box-shadow .35s ease, border-color .3s ease, opacity .5s ease;
+    will-change: transform;
+  }
+  .hero-t.in .hero-chip { opacity: 1; transform: none; }
+  .hero-chip::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--champagne)); }
+  .hero-chip:hover { transform: translateY(-3px) scale(1.04); box-shadow: var(--shadow-3); border-color: var(--c, var(--champagne)); }
+  .hero-chip.c-violet { --c:#6E56F0; } .hero-chip.c-cyan { --c:#2BA8E8; }
+  .hero-chip.c-green  { --c:#00C853; } .hero-chip.c-amber{ --c:#F0A93B; }
+  .hero-chip.c-pink   { --c:#FF0055; } .hero-chip.c-indigo{ --c:#5468F5; }
+
+  /* scattered positions (desktop) + gentle float drift */
+  .hero-chip.p1 { top: 16%;  left: 7%;  animation: chipfloat 7s ease-in-out infinite; }
+  .hero-chip.p2 { top: 26%;  right: 8%;  animation: chipfloat 8s ease-in-out infinite .4s; }
+  .hero-chip.p3 { top: 50%;  left: 3%;   animation: chipfloat 9s ease-in-out infinite .8s; }
+  .hero-chip.p4 { top: 56%;  right: 5%;  animation: chipfloat 7.5s ease-in-out infinite .2s; }
+  .hero-chip.p5 { bottom: 22%; left: 13%; animation: chipfloat 8.5s ease-in-out infinite .6s; }
+  .hero-chip.p6 { bottom: 19%; right: 14%; animation: chipfloat 9.5s ease-in-out infinite 1s; }
+  @keyframes chipfloat { 50% { transform: translateY(-9px); } }
+  @media (prefers-reduced-motion: reduce) { .hero-chip { animation: none !important; } }
+
+  /* H4 — honour prefers-reduced-motion: kill all looping/decorative motion and
+     force every JS/scroll-revealed element into its final, visible state so no
+     content is left hidden when motion is suppressed. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+    .htm-track, .hss-track, .ht-cue-line::after, .hero-chip { animation: none !important; }
+    .rv, .hero-t-eyebrow, .hero-t-marquee, .hero-t-cue, .ht-w {
+      opacity: 1 !important; transform: none !important;
+    }
+  }
+
+  /* On small screens, chips stop floating and sit as a centred wrap row below the CTAs */
+  @media (max-width: 860px) {
+    .hero-chips {
+      position: static; inset: auto; pointer-events: auto;
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+      margin-top: calc(var(--u) * 4);
+    }
+    .hero-chip { position: static !important; animation: none !important; }
+  }
+
+
+  /* The headline — oversized statement type (Exaggerated Minimalism). */
   .hero-t-headline {
-    font-family: var(--sans);
-    font-weight: 700;
-    font-size: clamp(42px, 6vw, 92px);
-    line-height: 1.05;
-    letter-spacing: -0.03em;
+    font-family: var(--font-display, var(--sans));
+    font-weight: 800;
+    font-size: clamp(46px, 7.2vw, 116px);
+    line-height: 0.98;
+    letter-spacing: -0.04em;
     margin: auto 0;
     color: var(--ink);
-    max-width: 22ch;
+    max-width: 16ch;
+  }
+  /* The accent phrase — painted in the brand gradient for fashion colour energy */
+  .ht-grad .ht-w {
+    background: var(--grad);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+    font-weight: 800;
+  }
+  /* Eyebrow above the headline */
+  .hero-t-eyebrow {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--champagne-3, var(--champagne));
+    margin-bottom: calc(var(--u) * 3);
+    opacity: 0; transform: translateY(14px);
+    transition: opacity .8s ease .2s, transform .8s cubic-bezier(.22,1,.36,1) .2s;
+  }
+  .hero-t.in .hero-t-eyebrow { opacity: 1; transform: translateY(0); }
+  .hero-t-eyebrow::before {
+    content: ''; width: 28px; height: 2px; background: var(--grad);
   }
   .ht-line { padding: 0; }
   .ht-line {
@@ -851,6 +1038,23 @@
   }
   .hero-t.in .hero-t-cue { opacity: 1; }
   @media (max-width: 720px) { .hero-t-cue { display: none; } }
+
+  /* C6 — mobile hero: the centred stack (eyebrow + chips + headline + sub +
+     2 CTAs) overflows the 100vh box on phones/landscape, so the absolutely
+     pinned marquee paints over it and overflow:hidden clips the rest. On small
+     screens let the hero grow with its content and flow the marquee inline. */
+  @media (max-width: 720px) {
+    .hero-t {
+      height: auto; min-height: 0; overflow: visible;
+      margin-top: var(--nav-h, 80px);
+    }
+    .hero-t-wrap { padding-bottom: calc(var(--u) * 4); }
+    .hero-t-marquee {
+      position: relative; left: auto; right: auto; bottom: auto;
+      margin-top: calc(var(--u) * 4);
+    }
+    .hero-t-center { justify-content: flex-start; }
+  }
   .ht-cue-line {
     width: 1px; height: 50px; background: var(--ink);
     position: relative; overflow: hidden;
@@ -1185,11 +1389,12 @@
   .btn-ghost:hover { background: var(--champagne) !important; color: var(--paper) !important; border-color: var(--champagne) !important; }
   .btn-ink:hover   { background: var(--champagne) !important; color: var(--paper) !important; }
 
-  /* Intro stats — numbers shift to orange when the section is hovered */
+  /* Intro stat cards — lift, glow, and the number takes its own accent on hover */
+  .intro-stats .cell { transition: transform .4s var(--easing), box-shadow .4s var(--easing), border-color .3s ease; }
+  .intro-stats .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-3); border-color: var(--c); }
   .intro-stats .cell .n { transition: color .35s ease; }
-  .intro-grid:hover .intro-stats .cell:hover .n { color: var(--champagne); }
-  .intro-stats .cell { transition: transform .35s cubic-bezier(.22,1,.36,1); cursor: default; }
-  .intro-stats .cell:hover { transform: translateY(-2px); }
+  .intro-stats .cell:hover .n { color: var(--c); }
+  .intro-stats .cell:hover::before { opacity: .26; }
 
   /* Process cells — title turns orange on hover, mono prefix follows */
   .process-cell { transition: background .3s ease; }
@@ -1227,110 +1432,8 @@
   .body-lg { transition: color .3s ease; }
   .body-lg:hover { color: var(--ink); }
 
-  /* ============================================================
-     HEADER REDESIGN — agency page
-     Slim dark bar · monospace wordmark · centered nav · no search
-     ============================================================ */
-  .topnav, .topnav.is-scrolled {
-    background: var(--paper) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border-bottom: 1px solid var(--champagne) !important;
-    box-shadow: none !important;
-  }
-  .topnav::after { display: none !important; }
-  .topnav-inner { height: 56px !important; }
-
-  /* Logo — text-only wordmark, no icon */
-  .topnav .logo svg { display: none !important; }
-  .topnav .logo-text {
-    font-family: var(--mono) !important;
-    font-size: 11px !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.22em !important;
-    text-transform: uppercase !important;
-    color: var(--ink) !important;
-  }
-  .topnav .logo-text span {
-    background: none !important;
-    -webkit-background-clip: unset !important;
-    background-clip: unset !important;
-    color: var(--champagne) !important;
-    font-weight: 500 !important;
-    margin-left: 0 !important;
-  }
-
-  /* Hide search — irrelevant on a services page */
-  .topnav-search { display: none !important; }
-
-  /* Nav links — centered, monospace, dim at rest */
-  .topnav-links {
-    flex: 1 !important;
-    justify-content: center !important;
-    gap: 32px !important;
-  }
-  .topnav-links a {
-    font-family: var(--mono) !important;
-    font-size: 10px !important;
-    letter-spacing: 0.18em !important;
-    text-transform: uppercase !important;
-    color: var(--ink-5) !important;
-    font-weight: 400 !important;
-  }
-  .topnav-links a:hover { color: var(--ink) !important; }
-  .topnav-links a.active { color: var(--champagne) !important; }
-  .topnav-links a.active::after { display: none !important; }
-
-  /* Sign in — plain text */
-  .topnav-signin {
-    font-family: var(--mono) !important;
-    font-size: 10px !important;
-    letter-spacing: 0.18em !important;
-    text-transform: uppercase !important;
-    color: var(--ink-5) !important;
-  }
-  .topnav-signin:hover { color: var(--ink) !important; }
-
-  /* Join free button — square, orange, outline on hover */
-  .topnav .btn, .topnav .btn-primary, .topnav .btn-sm {
-    background: var(--champagne) !important;
-    color: var(--paper) !important;
-    border: 1px solid var(--champagne) !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    font-family: var(--mono) !important;
-    font-size: 10px !important;
-    letter-spacing: 0.18em !important;
-    text-transform: uppercase !important;
-    padding: 9px 18px !important;
-  }
-  .topnav .btn:hover, .topnav .btn-primary:hover {
-    background: transparent !important;
-    color: var(--champagne) !important;
-  }
-
-  /* Burger */
-  .topnav-burger { background: var(--paper-2) !important; border-color: var(--line) !important; border-radius: 0 !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-shadow: none !important; }
-  .topnav-burger:hover, .topnav-burger.is-open { border-color: var(--champagne) !important; box-shadow: none !important; transform: none !important; }
-  .topnav-burger span { background: var(--ink) !important; }
-
-  /* Mobile menu */
-  .topnav-mobile {
-    top: 56px !important;
-    background: var(--paper-2) !important;
-    border: none !important;
-  }
-  .topnav-mobile-links a {
-    font-family: var(--font-display) !important;
-    font-size: clamp(28px, 8vw, 36px) !important;
-    letter-spacing: -0.025em !important;
-    text-transform: none !important;
-    font-weight: 700 !important;
-    color: var(--ink) !important;
-    border: none !important;
-  }
-  .topnav-mobile-links a:hover,
-  .topnav-mobile-links a:active { color: var(--champagne) !important; }
+  /* Header: uses the standard global site header (same as the homepage) —
+     no page overrides, so .topnav from styles.css renders identically here. */
 
   /* Footer */
   .footer, #site-footer, #site-footer * {
@@ -1369,6 +1472,9 @@
 </head>
 <body>
 
+<!-- Skip link — first focusable element for keyboard users -->
+<a class="skip-link" href="#agency-main">Skip to content</a>
+
 <!-- Light / dark mode toggle -->
 <button id="theme-toggle" type="button" aria-label="Toggle light / dark mode" title="Toggle theme">
   <svg class="ic-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
@@ -1382,6 +1488,9 @@
 <!-- Project's standard site nav (renders into this mount via site.js) -->
 <div id="site-nav" data-current="agency"></div>
 
+<!-- Main content landmark — wraps hero through contact (nav + footer stay outside) -->
+<main id="agency-main" tabindex="-1">
+
 <!-- ============================ HERO (TYPE-ONLY) ============================ -->
 <section class="hero-t">
   <!-- Layer 0: faint orbiting word ghosts that drift on scroll -->
@@ -1390,19 +1499,31 @@
   </div>
 
   <div class="wrap hero-t-wrap">
-    <!-- The headline — every word lifts from a mask, line by line -->
-    <h1 class="hero-t-headline" id="hero-t-headline">
-      <span class="ht-line"><span class="ht-mask"><span class="ht-w">Everything</span></span></span>
-      <span class="ht-line"><span class="ht-mask"><span class="ht-w">your fashion</span></span></span>
-      <span class="ht-line"><span class="ht-mask"><span class="ht-w">business needs</span></span></span>
-      <span class="ht-line ht-line-soft"><span class="ht-mask"><span class="ht-w">- under one team.</span></span></span>
-    </h1>
+    <div class="hero-t-center">
 
-    <!-- Subline + CTAs row -->
-    <div class="hero-t-foot">
+      <!-- Floating, colour-coded service chips around the headline -->
+      <div class="hero-chips" aria-hidden="true">
+        <a href="#side-01" class="hero-chip c-violet p1">Tech Pack</a>
+        <a href="#side-01" class="hero-chip c-cyan   p2">3D Sampling</a>
+        <a href="#side-01" class="hero-chip c-green  p3">Pattern CAD</a>
+        <a href="#side-02" class="hero-chip c-amber  p4">AI Content</a>
+        <a href="#side-02" class="hero-chip c-pink   p5">Website</a>
+        <a href="#side-02" class="hero-chip c-indigo p6">Photo &amp; Video</a>
+      </div>
+
+      <span class="hero-t-eyebrow">11 services · 2 sides · one team</span>
+
+      <!-- Headline -->
+      <h1 class="hero-t-headline" id="hero-t-headline">
+        <span class="ht-line"><span class="ht-mask"><span class="ht-w">Every fashion</span></span></span>
+        <span class="ht-line"><span class="ht-mask"><span class="ht-w">service you need,</span></span></span>
+        <span class="ht-line"><span class="ht-mask"><span class="ht-w">start to finish,</span></span></span>
+        <span class="ht-line ht-grad"><span class="ht-mask"><span class="ht-w">one studio.</span></span></span>
+      </h1>
+
       <p class="hero-t-sub">
-        From the first sketch to the box at your warehouse. Designs, factory files,
-        photos, your website - one team handles it all.
+        Designs, tech packs, 3D samples, patterns, AI content, photography, listings
+        and websites — eleven services, delivered factory-ready by one in-house team.
       </p>
       <div class="hero-t-ctas">
         <a href="#side-01" class="ht-btn ht-btn-solid">See our services</a>
@@ -1833,8 +1954,8 @@
     <div class="contact-grid">
       <form id="ff-contact-form" class="contact-form" autocomplete="on">
         <div class="row2">
-          <label><span class="label">Your name</span><input class="input" type="text" name="name" required placeholder="First &amp; last"></label>
-          <label><span class="label">Your email</span><input class="input" type="email" name="email" required placeholder="you@brand.com"></label>
+          <label><span class="label">Your name<span class="req" aria-hidden="true">*</span></span><input class="input" type="text" name="name" required placeholder="First &amp; last"></label>
+          <label><span class="label">Your email<span class="req" aria-hidden="true">*</span></span><input class="input" type="email" name="email" required placeholder="you@brand.com"></label>
         </div>
         <label><span class="label">Company / brand</span><input class="input" type="text" name="company" placeholder="Optional"></label>
         <label>
@@ -1860,7 +1981,7 @@
           </select>
         </label>
         <label>
-          <span class="label">Tell us about it</span>
+          <span class="label">Tell us about it<span class="req" aria-hidden="true">*</span></span>
           <textarea class="input" name="message" rows="5" required placeholder="What are you making? When do you need it by? Anything we should know up front?"></textarea>
         </label>
         <button type="submit" class="btn btn-ink" style="justify-self:start;margin-top:6px;">Send it</button>
@@ -1880,6 +2001,8 @@
     </div>
   </div>
 </section>
+
+</main>
 
 <!-- Project's standard site footer mount -->
 <div id="site-footer"></div>
@@ -1910,6 +2033,10 @@
 
     ready(() => {
 
+      // H4 — respect the user's reduced-motion preference. When true we add the
+      // hero's reveal class synchronously and skip all scroll-driven / GSAP motion.
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
       // ---------- Light / dark theme toggle ----------
       // Toggles for the current view only — NOT persisted. Every page load
       // starts in dark (the default); reloading resets to dark.
@@ -1929,11 +2056,16 @@
 
       // ---------- HERO (type-only): trigger entrance animations ----------
       const heroT = document.querySelector('.hero-t');
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          heroT && heroT.classList.add('in');
-        }, 150);
-      });
+      if (reduce) {
+        // Reveal the hero immediately — no staggered entrance for reduced-motion.
+        heroT && heroT.classList.add('in');
+      } else {
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            heroT && heroT.classList.add('in');
+          }, 150);
+        });
+      }
 
       // Measure the sticky top-nav so the hero fills exactly the space below it
       // (prevents the next section bleeding into the bottom of the first viewport).
@@ -1955,9 +2087,11 @@
         });
         bgwTicking = false;
       }
-      window.addEventListener('scroll', () => {
-        if (!bgwTicking) { requestAnimationFrame(paintBgw); bgwTicking = true; }
-      }, { passive: true });
+      if (!reduce) {
+        window.addEventListener('scroll', () => {
+          if (!bgwTicking) { requestAnimationFrame(paintBgw); bgwTicking = true; }
+        }, { passive: true });
+      }
 
       // ---------- HERO: auto-cycling card carousel ----------
       // The 3 cards rotate active → next → waiting on a 3.5s loop.
@@ -2014,16 +2148,18 @@
         });
         ticking = false;
       }
-      window.addEventListener('scroll', () => {
-        lastScrollY = window.scrollY;
-        if (!ticking) {
-          window.requestAnimationFrame(updateParallax);
-          ticking = true;
-        }
-      }, { passive: true });
+      if (!reduce) {
+        window.addEventListener('scroll', () => {
+          lastScrollY = window.scrollY;
+          if (!ticking) {
+            window.requestAnimationFrame(updateParallax);
+            ticking = true;
+          }
+        }, { passive: true });
+      }
 
       // ---------- GSAP scroll animations (all screen sizes) ----------
-      if (window.gsap && window.ScrollTrigger) {
+      if (!reduce && window.gsap && window.ScrollTrigger) {
         gsap.registerPlugin(ScrollTrigger);
         document.querySelectorAll('.rv').forEach((el, i) => {
           gsap.to(el, {
@@ -2047,6 +2183,7 @@
 
       // ---------- Horizontal parallax cards (reusable for all .px-block sections) ----------
       function wireParallaxBlock(opts) {
+        if (reduce) return; // no horizontal scroll-scrub for reduced-motion
         const pxPin = document.getElementById(opts.pinId);
         const pxTrack = document.getElementById(opts.trackId);
         if (!pxPin || !pxTrack) return;
@@ -2095,18 +2232,16 @@
             wms.forEach(wm => {
               wm.style.setProperty('--wm-shift', (travel * 0.25 * self.progress) + 'px');
             });
-            const vc = window.innerWidth / 2;
-            let bestCard = null, bestDist = Infinity;
-            cards.forEach(c => {
-              const r = c.getBoundingClientRect();
-              const cx = r.left + r.width / 2;
-              const d = Math.abs(cx - vc);
-              if (d < bestDist) { bestDist = d; bestCard = c; }
-            });
+            // Highlight by scroll PROGRESS mapped across all cards, so the FIRST
+            // card is active at the start and the LAST at the end. (The old
+            // "closest to viewport centre" logic skipped card 1 and the last card,
+            // because they never reach the exact centre at the scroll extremes.)
+            const n = cards.length;
+            const activeIdx = Math.min(n - 1, Math.max(0, Math.floor(self.progress * n + 1e-6)));
+            const bestCard = cards[activeIdx];
             if (bestCard) {
-              cards.forEach(c => c.classList.remove('is-active'));
-              bestCard.classList.add('is-active');
-              
+              cards.forEach((c, i) => c.classList.toggle('is-active', i === activeIdx));
+
               const step = parseInt(bestCard.getAttribute('data-step'), 10);
               const side = bestCard.getAttribute('data-side');
               const display = step + offset;
@@ -2151,6 +2286,7 @@
       // (the card section stays pinned/sticky beneath; this rises over it like a vertical
       // cover), then it pins full-viewport and lights up each of the 4 steps in turn. ----------
       (function wireProcess() {
+        if (reduce) return; // no slide-up/pin scrub for reduced-motion
         const pin = document.getElementById('process-pin');
         const sec = document.getElementById('process');
         if (!pin || !sec || !window.gsap || !window.ScrollTrigger) return;

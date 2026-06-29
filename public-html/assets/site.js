@@ -102,7 +102,7 @@
   <div class="topnav">
     <div class="container topnav-inner">
       <a href="${r("index.html")}" class="logo" aria-label="Fashion Freelancing home">
-        <img src="${r("assets/logo.png")}" alt="Fashion Freelancing Logo" style="height: 38px; width: auto; object-fit: contain;" />
+        <img class="logo-img" src="${r("assets/logo.png")}" alt="Fashion Freelancing" />
       </a>
 
       <!-- Persistent search (desktop) -->
@@ -165,7 +165,7 @@
       <div class="footer-grid">
         <div>
           <a href="${r("index.html")}" class="logo">
-            <img src="${r("assets/logo.png")}" alt="Fashion Freelancing Logo" style="height: 40px; width: auto; object-fit: contain;" />
+            <img class="logo-img" src="${r("assets/logo.png")}" alt="Fashion Freelancing" style="height:36px;" />
           </a>
           <p style="color:var(--ink-5);font-size:14px;max-width:320px;margin-top:14px;line-height:1.55;">
             Hire fashion freelancers, or get hired as one. Pay safely. Get paid safely. That's it.
