@@ -1,10 +1,11 @@
 <!doctype html>
+<!-- GENERATED from pages/service.html by scripts/generate-service-pages.mjs — edit the template, then re-run the script. -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Service - Fashion Freelancing</title>
-<meta name="description" content="Professional fashion services including tech packs, 3D sampling, pattern CAD, AI content, and more." />
+<title>AI Photography - Fashion Freelancing</title>
+<meta name="description" content="Campaign-quality AI-generated model, product, and lifestyle photography at brand scale. No studio, no models, no delays." />
 
 <!-- Favicon -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF0055'/%3E%3Cstop offset='1' stop-color='%236E56F0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='19' font-weight='600' fill='%23fff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" />
@@ -16,7 +17,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" /></noscript>
 <!-- Global stylesheet -->
-<link rel="stylesheet" href="../assets/styles.css">
+<link rel="stylesheet" href="../../assets/styles.css">
 
 <!--
   REDIRECT — every service now has its own static page under services/
@@ -39,7 +40,7 @@
 -->
 <script>
 (function () {
-  var slug = new URLSearchParams(location.search).get('svc') || '';
+  var slug = 'ai-photography';
   var SEO = {
     'tech-pack':           { t: 'Tech Pack',               d: 'Complete specification documents built for real production pipelines. Every measurement, trim, and construction detail factory-ready.' },
     '3d-virtual-sampling': { t: '3D Virtual Sampling',     d: 'Photorealistic 3D samples that reduce physical sampling rounds. Review fit, colorways, and fabric fall before a single stitch is cut.' },
@@ -55,7 +56,7 @@
   var s = SEO[slug];
   if (!s) return;
 
-  var baseUrl = location.origin + location.pathname + '?svc=' + encodeURIComponent(slug);
+  var baseUrl = location.origin + location.pathname;
 
   /* Title + description */
   document.title = s.t + ' - Fashion Freelancing';
@@ -586,7 +587,7 @@
   <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px;background:#1C1D20;color:#EAE7DD;font-family:sans-serif;">
     <div>
       <p style="font-size:18px;margin-bottom:16px;">This page requires JavaScript to display service content.</p>
-      <a href="agency.html" style="color:#FF0055;font-size:14px;">← View all services</a>
+      <a href="../agency.html" style="color:#FF0055;font-size:14px;">← View all services</a>
     </div>
   </div>
 </noscript>
@@ -991,7 +992,7 @@ const SERVICES = {
 /* ================================================================
    RENDER
 ================================================================ */
-const slug = new URLSearchParams(location.search).get('svc') || '';
+const slug = 'ai-photography';
 const svc  = SERVICES[slug];
 const main = document.getElementById('sv-main');
 
@@ -1017,7 +1018,7 @@ if (!svc) {
       <div>
         <h1>Service not found.</h1>
         <p>We could not find that service.</p>
-        <a href="agency.html" class="sv-btn sv-btn-solid">See all services</a>
+        <a href="../agency.html" class="sv-btn sv-btn-solid">See all services</a>
       </div>
     </div>`;
   return;
@@ -1060,7 +1061,7 @@ const bulletsHTML = svc.aboutBullets.map(b => `<li>${b}</li>`).join('');
 /* ---- Image-free service hero (centred statement + stats, per-service accent) ---- */
 const accStyle = `--acc:${ACC.c};--acc-d:${ACC.d}`;
 const heroStatsHTML = svc.stats.map(s => `<div class="stat"><div class="n">${s.n}</div><div class="l">${s.l}</div></div>`).join('');
-const heroBtns = `<a href="${ctaHref}" class="ht-btn ht-solid">${svc.ctaLabel}&thinsp;&rarr;</a><a href="agency.html" class="ht-btn ht-ghost">See all services</a>`;
+const heroBtns = `<a href="${ctaHref}" class="ht-btn ht-solid">${svc.ctaLabel}&thinsp;&rarr;</a><a href="../agency.html" class="ht-btn ht-ghost">See all services</a>`;
 
 const HERO_HTML = `
   <section class="svh svhA" style="${accStyle}" aria-label="${cleanTitle} service overview">
@@ -1187,7 +1188,7 @@ main.innerHTML = `
             <li>A mutual NDA, signed before any reference file moves.</li>
             <li>Source files and full ownership handed over on final payment.</li>
           </ul>
-          <a class="all" href="agency.html">See all services &rarr;</a>
+          <a class="all" href="../agency.html">See all services &rarr;</a>
         </aside>
       </div>
     </div>
@@ -1285,6 +1286,6 @@ document.querySelectorAll('.sv-faq-q').forEach(btn => {
 })();
 </script>
 
-<script src="../assets/site.js"></script>
+<script src="../../assets/site.js"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Our services — hire the Fashion Freelancing team direct</title>
-<meta name="description" content="Everything your fashion business needs under one team. Designs, tech packs, 3D sampling, patterns, AI content, photography, e-commerce listings, websites, AI agents and graphic design. One brief in, one delivery out." />
+<meta name="description" content="Everything your fashion business needs under one team. Designs, tech packs, 3D sampling, patterns, AI photography, e-commerce listings, website development, AI agents and graphic design. One brief in, one delivery out." />
 
 <!-- Project's global stylesheet so the injected header + footer render properly. -->
 <link rel="stylesheet" href="../assets/styles.css">
@@ -150,56 +150,152 @@
      in the right 2/3rds. Has hairlines top + bottom.
      ============================================================ */
   .intro {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: calc(var(--u) * 14) 0;
+    padding: calc(var(--u) * 16) 0;
     border-bottom: 1px solid var(--line);
   }
   .intro-grid {
     display: grid;
-    grid-template-columns: 6fr 6fr;
-    gap: 30px;
+    grid-template-columns: 7fr 5fr;
+    gap: calc(var(--u) * 8);
     align-items: start;
   }
   @media (max-width: 860px) {
     .intro { min-height: auto; padding: calc(var(--u) * 10) 0; }
-    .intro-grid { grid-template-columns: 1fr; gap: calc(var(--u) * 4); }
+    .intro-grid { grid-template-columns: 1fr; gap: calc(var(--u) * 6); }
   }
-  .intro .label { margin-bottom: calc(var(--u) * 3); color: var(--champagne-3, var(--champagne)); }
-  .intro p { margin-bottom: calc(var(--u) * 3); }
-  .intro p:last-child { margin-bottom: 0; }
-  .intro-stats {
-    margin-top: calc(var(--u) * 7);
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  .intro .label { display: inline-block; margin-bottom: calc(var(--u) * 3); color: var(--champagne-3, var(--champagne)); }
+  .intro-lead h2 { margin: 0 0 calc(var(--u) * 3); }
+  .intro-lead p { margin: 0; max-width: 46ch; }
+
+  /* ---- Two-sides strip: two editorial rows that preview (and link to) the
+     Side 01 / Side 02 sections below. Large index numeral + mono kicker,
+     matching the display/mono language used across the page. ---- */
+  .intro-sides {
+    margin-top: calc(var(--u) * 5);
+    display: grid; gap: 14px;
   }
-  @media (max-width: 720px) { .intro-stats { grid-template-columns: 1fr 1fr; gap: 14px; } }
-  /* Each stat is a premium white card, matching the slide tiles */
-  .intro-stats .cell {
+  .intro-side {
     --c: var(--champagne);
-    position: relative; overflow: hidden;
+    position: relative; display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center; column-gap: calc(var(--u) * 3);
+    padding: calc(var(--u) * 3) calc(var(--u) * 3.5);
     background: var(--paper-3, #fff);
     border: 1px solid var(--line);
     border-radius: var(--r-lg, 16px);
     box-shadow: var(--shadow-1);
-    padding: calc(var(--u) * 3) calc(var(--u) * 3) calc(var(--u) * 3);
+    text-decoration: none; color: inherit;
+    overflow: hidden;
+    transition: transform .4s var(--easing), box-shadow .4s var(--easing), border-color .4s ease;
   }
-  .intro-stats .cell::before {
-    content: ''; position: absolute; right: -25%; top: -40%;
-    width: 70%; height: 90%; border-radius: 50%;
-    background: radial-gradient(circle, var(--c), transparent 70%);
-    opacity: .12; transition: opacity .4s ease;
+  /* Accent hairline that sweeps in from the left edge on hover */
+  .intro-side::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px; background: var(--c);
+    transform: scaleY(0); transform-origin: top;
+    transition: transform .45s var(--easing);
   }
+  .intro-side:nth-child(1) { --c:#6E56F0; }
+  .intro-side:nth-child(2) { --c:#2BA8E8; }
+  .intro-side:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-2); border-color: var(--c);
+  }
+  .intro-side:hover::before { transform: scaleY(1); }
+
+  .intro-side .is-index {
+    font-family: var(--font-display, var(--sans)); font-weight: 800;
+    font-size: clamp(30px, 3vw, 44px); line-height: 1;
+    letter-spacing: -0.04em; color: var(--ink-7, #cfcfcf);
+    font-variant-numeric: tabular-nums;
+    transition: color .4s ease;
+  }
+  .intro-side:hover .is-index { color: var(--c); }
+
+  .intro-side .is-body { display: grid; gap: 5px; min-width: 0; }
+  .intro-side .is-kicker {
+    font-family: var(--mono); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--c);
+  }
+  .intro-side .is-name {
+    font-family: var(--sans); font-weight: 700; font-size: clamp(16px, 1.5vw, 20px);
+    letter-spacing: -0.018em; color: var(--ink); line-height: 1.15;
+  }
+  .intro-side .is-meta {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    color: var(--ink-4);
+  }
+  .intro-side .is-arrow {
+    display: grid; place-items: center;
+    width: 40px; height: 40px; flex: none;
+    border-radius: 50%; border: 1px solid var(--line);
+    color: var(--ink-4);
+    transition: transform .4s var(--easing), color .4s ease,
+                border-color .4s ease, background .4s ease;
+  }
+  .intro-side .is-arrow svg { width: 17px; height: 17px; }
+  .intro-side:hover .is-arrow {
+    transform: translateX(4px);
+    color: var(--paper); background: var(--c); border-color: var(--c);
+  }
+
+  /* ---- Stat cards ---- */
+  .intro-stats {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    align-self: stretch; grid-auto-rows: 1fr;
+  }
+  @media (max-width: 720px) { .intro-stats { gap: 14px; } }
+  /* Each stat is a premium white card, matching the slide tiles */
+  .intro-stats .cell {
+    --c: var(--champagne);
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between;
+    gap: calc(var(--u) * 2);
+    background: var(--paper-3, #fff);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg, 16px);
+    box-shadow: var(--shadow-1);
+    padding: calc(var(--u) * 3.25) calc(var(--u) * 3.25);
+    transition: transform .4s var(--easing), box-shadow .4s var(--easing), border-color .4s ease;
+  }
+  /* Top row: mono index, echoing the section numbering language */
+  .intro-stats .cell .k {
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.2em; color: var(--ink-4); position: relative; z-index: 1;
+    transition: color .4s ease;
+  }
+  .intro-stats .cell:hover .k { color: var(--c); }
+  /* Bottom cluster keeps number + label + descriptor together at the base */
+  .intro-stats .cell .n { margin-top: auto; }
+  .intro-stats .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-2); border-color: var(--c); }
+  /* Accent bar that grows along the bottom edge on hover — restrained, editorial */
+  .intro-stats .cell::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
+    background: var(--c);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform .5s var(--easing);
+  }
+  .intro-stats .cell:hover::after { transform: scaleX(1); }
   .intro-stats .cell:nth-child(1){ --c:#6E56F0; } .intro-stats .cell:nth-child(2){ --c:#2BA8E8; }
   .intro-stats .cell:nth-child(3){ --c:#F0A93B; } .intro-stats .cell:nth-child(4){ --c:#00C853; }
   .intro-stats .cell .n {
     font-family: var(--font-display, var(--sans)); font-weight: 800;
-    font-size: clamp(30px, 3.2vw, 46px); line-height: 1;
-    letter-spacing: -0.034em; color: var(--ink);
+    font-size: clamp(38px, 4vw, 60px); line-height: 0.95;
+    letter-spacing: -0.04em; color: var(--ink);
     font-variant-numeric: tabular-nums; position: relative; z-index: 1;
+    transition: color .4s ease;
   }
-  .intro-stats .cell .s { font-size: 12.5px; color: var(--ink-4); margin-top: 10px; position: relative; z-index: 1; }
+  .intro-stats .cell:hover .n { color: var(--c); }
+  .intro-stats .cell .s {
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-4); margin-top: 10px; position: relative; z-index: 1;
+    padding-top: 12px; border-top: 1px solid var(--line);
+  }
+  .intro-stats .cell .d {
+    margin: 8px 0 0; font-size: 13px; line-height: 1.4;
+    color: var(--ink-3); position: relative; z-index: 1;
+  }
 
 
   /* ============================================================
@@ -626,15 +722,23 @@
   /* Body: title + bullets */
   .px-card .px-body {
     position: relative; z-index: 2;
-    display: grid; gap: calc(var(--u) * 4); align-content: start;
+    display: grid; gap: calc(var(--u) * 3); align-content: start;
   }
   .px-card h3 {
     font-family: var(--sans); font-weight: 800;
     font-size: clamp(26px, 2.8vw, 38px);
     line-height: 1.1; letter-spacing: -0.03em;
     white-space: nowrap;
-    margin: 0; color: var(--ink);
+    margin: 0 0 6px; color: var(--ink);
     transition: color .35s;
+  }
+  /* Minimal one-line description under the title — sits tight to the heading
+     so the numbered list simply shifts down without growing the card. */
+  .px-card .px-desc {
+    margin: -14px 0 0; padding: 0;
+    font-family: var(--sans); font-weight: 400;
+    font-size: 13px; line-height: 1.5; color: var(--ink-5, var(--ink-4));
+    max-width: 42ch;
   }
   .px-card:hover h3, .px-card.is-active h3 { color: var(--local-accent, var(--champagne)); }
   .px-card h3 .amp { color: var(--ink-7); font-weight: 500; }
@@ -757,7 +861,6 @@
      ============================================================ */
   .hero-t {
     position: relative;
-    margin-top: var(--nav-h, 80px);
     height: calc(100vh - var(--nav-h, 80px));
     min-height: 600px;
     background: var(--paper);
@@ -1046,7 +1149,6 @@
   @media (max-width: 720px) {
     .hero-t {
       height: auto; min-height: 0; overflow: visible;
-      margin-top: var(--nav-h, 80px);
     }
     .hero-t-wrap { padding-bottom: calc(var(--u) * 4); }
     .hero-t-marquee {
@@ -1378,10 +1480,10 @@
      ============================================================ */
 
   /* All text-style links transition to clay on hover */
-  a:not(.btn):not(.px-cta):not(.si-cta):not(.stage-cta):not(.start-cta) {
+  a:not(.btn):not(.px-cta):not(.si-cta):not(.stage-cta):not(.start-cta):not(.intro-side) {
     transition: color .25s ease;
   }
-  a:not(.btn):not(.px-cta):not(.si-cta):not(.stage-cta):not(.start-cta):hover {
+  a:not(.btn):not(.px-cta):not(.si-cta):not(.stage-cta):not(.start-cta):not(.intro-side):hover {
     color: var(--champagne);
   }
 
@@ -1389,12 +1491,8 @@
   .btn-ghost:hover { background: var(--champagne) !important; color: var(--paper) !important; border-color: var(--champagne) !important; }
   .btn-ink:hover   { background: var(--champagne) !important; color: var(--paper) !important; }
 
-  /* Intro stat cards — lift, glow, and the number takes its own accent on hover */
-  .intro-stats .cell { transition: transform .4s var(--easing), box-shadow .4s var(--easing), border-color .3s ease; }
+  /* Intro stat cards — deeper lift; number + accent bar take the cell colour on hover */
   .intro-stats .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-3); border-color: var(--c); }
-  .intro-stats .cell .n { transition: color .35s ease; }
-  .intro-stats .cell:hover .n { color: var(--c); }
-  .intro-stats .cell:hover::before { opacity: .26; }
 
   /* Process cells — title turns orange on hover, mono prefix follows */
   .process-cell { transition: background .3s ease; }
@@ -1461,6 +1559,59 @@
   #theme-toggle:hover { color: var(--champagne); }
   #theme-toggle .ic-moon { display: none; }
   #theme-toggle .ic-sun  { display: block; }
+  /* ============================================================
+   FEEL PACK — ambient depth, scroll progress, count-up, spotlight
+   (additive only; adapts to both themes via tokens)
+   ============================================================ */
+  /* thin scroll progress bar under the nav */
+  .ff-progress {
+    position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 10002;
+    background: linear-gradient(90deg, var(--champagne), var(--champagne-2, var(--champagne)));
+    transform-origin: 0 50%; transform: scaleX(0);
+    pointer-events: none;
+  }
+  /* ambient layer: dot grid + two soft glows; colours derive from tokens
+     so light/dark both work */
+  .ff-bg {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--ink) 9%, transparent) 1px, transparent 1px);
+    background-size: 26px 26px;
+    -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 25%, transparent 72%);
+            mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 25%, transparent 72%);
+  }
+  .ff-bg::before, .ff-bg::after {
+    content: ''; position: absolute; border-radius: 50%;
+    filter: blur(100px); will-change: transform;
+  }
+  .ff-bg::before {
+    width: 560px; height: 560px; top: -240px; right: -160px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--champagne) 26%, transparent), transparent 65%);
+    animation: ff-drift-a 24s ease-in-out infinite alternate;
+  }
+  .ff-bg::after {
+    width: 460px; height: 460px; top: 45vh; left: -200px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--champagne) 16%, transparent), transparent 65%);
+    animation: ff-drift-b 28s ease-in-out infinite alternate;
+  }
+  @keyframes ff-drift-a { to { transform: translate(-80px, 60px) scale(1.12); } }
+  @keyframes ff-drift-b { to { transform: translate(70px, -50px) scale(1.08); } }
+  /* cursor spotlight on the intro stat cards and service cards —
+     tinted by each card's own accent (--c) */
+  .intro-stats .cell::before, .px-card::before {
+    content: ''; position: absolute; inset: 0; z-index: 0; opacity: 0;
+    background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%),
+                color-mix(in srgb, var(--c, var(--champagne)) 13%, transparent), transparent 65%);
+    transition: opacity .35s ease;
+    pointer-events: none;
+  }
+  .intro-stats .cell:hover::before, .px-card:hover::before { opacity: 1; }
+  .px-card { position: relative; }
+  .px-card > * { position: relative; z-index: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .ff-bg::before, .ff-bg::after { animation: none; }
+    .ff-progress { display: none; }
+  }
+
   :root[data-theme="light"] #theme-toggle .ic-sun  { display: none; }
   :root[data-theme="light"] #theme-toggle .ic-moon { display: block; }
   @media (max-width: 1099px) { #theme-toggle { right: 70px; } }
@@ -1471,6 +1622,10 @@
 </style>
 </head>
 <body>
+
+<!-- Feel pack: ambient depth + scroll progress (decorative) -->
+<div class="ff-bg" aria-hidden="true"></div>
+<div class="ff-progress" id="ff-progress" aria-hidden="true"></div>
 
 <!-- Skip link — first focusable element for keyboard users -->
 <a class="skip-link" href="#agency-main">Skip to content</a>
@@ -1506,12 +1661,12 @@
         <a href="#side-01" class="hero-chip c-violet p1">Tech Pack</a>
         <a href="#side-01" class="hero-chip c-cyan   p2">3D Sampling</a>
         <a href="#side-01" class="hero-chip c-green  p3">Pattern CAD</a>
-        <a href="#side-02" class="hero-chip c-amber  p4">AI Content</a>
+        <a href="#side-02" class="hero-chip c-amber  p4">AI Photography</a>
         <a href="#side-02" class="hero-chip c-pink   p5">Website</a>
-        <a href="#side-02" class="hero-chip c-indigo p6">Photo &amp; Video</a>
+        <a href="#side-02" class="hero-chip c-indigo p6">AI Agent</a>
       </div>
 
-      <span class="hero-t-eyebrow">11 services · 2 sides · one team</span>
+      <span class="hero-t-eyebrow">10 services · 2 sides · one team</span>
 
       <!-- Headline -->
       <h1 class="hero-t-headline" id="hero-t-headline">
@@ -1522,8 +1677,8 @@
       </h1>
 
       <p class="hero-t-sub">
-        Designs, tech packs, 3D samples, patterns, AI content, photography, listings
-        and websites — eleven services, delivered factory-ready by one in-house team.
+        Designs, tech packs, 3D samples, patterns, AI photography, listings
+        and websites — ten services, delivered factory-ready by one in-house team.
       </p>
       <div class="hero-t-ctas">
         <a href="#side-01" class="ht-btn ht-btn-solid">See our services</a>
@@ -1532,7 +1687,7 @@
     </div>
   </div>
 
-  <!-- Streaming services marquee — 11 names looping infinitely -->
+  <!-- Streaming services marquee — 10 names looping infinitely -->
   <div class="hero-t-marquee" aria-hidden="true">
     <div class="htm-track">
       <span>Tech Pack</span><i class="htm-dot"></i>
@@ -1540,22 +1695,20 @@
       <span>Seamless Pattern</span><i class="htm-dot"></i>
       <span>Pattern CAD</span><i class="htm-dot"></i>
       <span>Dobby &amp; Jacquard</span><i class="htm-dot"></i>
-      <span>AI Content Production</span><i class="htm-dot"></i>
-      <span>Product Photo &amp; Video</span><i class="htm-dot"></i>
-      <span>E-Commerce Listing</span><i class="htm-dot"></i>
-      <span>Website</span><i class="htm-dot"></i>
+      <span>Website Development</span><i class="htm-dot"></i>
       <span>AI Agent</span><i class="htm-dot"></i>
+      <span>AI Photography</span><i class="htm-dot"></i>
+      <span>E-Commerce Listing</span><i class="htm-dot"></i>
       <span>Graphic Design</span><i class="htm-dot"></i>
       <span>Tech Pack</span><i class="htm-dot"></i>
       <span>3D Virtual Sampling</span><i class="htm-dot"></i>
       <span>Seamless Pattern</span><i class="htm-dot"></i>
       <span>Pattern CAD</span><i class="htm-dot"></i>
       <span>Dobby &amp; Jacquard</span><i class="htm-dot"></i>
-      <span>AI Content Production</span><i class="htm-dot"></i>
-      <span>Product Photo &amp; Video</span><i class="htm-dot"></i>
-      <span>E-Commerce Listing</span><i class="htm-dot"></i>
-      <span>Website</span><i class="htm-dot"></i>
+      <span>Website Development</span><i class="htm-dot"></i>
       <span>AI Agent</span><i class="htm-dot"></i>
+      <span>AI Photography</span><i class="htm-dot"></i>
+      <span>E-Commerce Listing</span><i class="htm-dot"></i>
       <span>Graphic Design</span><i class="htm-dot"></i>
     </div>
   </div>
@@ -1565,26 +1718,67 @@
 <!-- ============================ INTRO ============================ -->
 <section id="intro" class="intro">
   <div class="wrap intro-grid">
-    <div>
-      <span class="mono with-rule label">Hire our team direct</span>
+    <!-- Left: positioning + the two sides, structured to mirror the sections below -->
+    <div class="intro-lead">
+      <span class="mono with-rule label rv">Hire our team direct</span>
       <h2 class="display md rv">One brief in. <span class="it">One delivery out.</span></h2>
-    </div>
-    <div>
       <p class="body-lg rv">
-        Fashion Freelancing is a fashion-tech marketplace for every service brands need -
-        designers, tech packs, photography, models, makeup, websites, AI, 3D and more.
-        Hire safely. Get paid safely. Simple as that.
-      </p>
-      <p class="body-lg rv">
-        On this page you hire our in-house team direct - eleven services across two sides.
-        Fashion design &amp; development on one. AI, websites and digital production on the other.
+        Fashion Freelancing is a fashion-tech marketplace for every service a brand needs —
+        design, tech packs, photography, websites, AI and 3D. Hire safely, get paid safely,
+        all under one in-house team.
       </p>
 
-      <div class="intro-stats rv">
-        <div class="cell"><div class="n">11</div><div class="s">services</div></div>
-        <div class="cell"><div class="n">2</div><div class="s">sides · one team</div></div>
-        <div class="cell"><div class="n">24h</div><div class="s">reply window</div></div>
-        <div class="cell"><div class="n">100%</div><div class="s">paid safely</div></div>
+      <div class="intro-sides rv">
+        <a class="intro-side" href="#side-01">
+          <span class="is-index" aria-hidden="true">01</span>
+          <span class="is-body">
+            <span class="is-kicker">Side 01</span>
+            <span class="is-name">Fashion design &amp; development</span>
+            <span class="is-meta">5 services · factory-ready files</span>
+          </span>
+          <span class="is-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span>
+        </a>
+        <a class="intro-side" href="#side-02">
+          <span class="is-index" aria-hidden="true">02</span>
+          <span class="is-body">
+            <span class="is-kicker">Side 02</span>
+            <span class="is-name">AI, website &amp; digital production</span>
+            <span class="is-meta">5 services · launch &amp; sell ready</span>
+          </span>
+          <span class="is-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Right: the numbers, as premium stat cards -->
+    <div class="intro-stats rv">
+      <div class="cell">
+        <span class="k" aria-hidden="true">01</span>
+        <div class="n"><span data-count="10">0</span></div>
+        <div class="s">services</div>
+        <p class="d">Every discipline a brand needs, in one place.</p>
+      </div>
+      <div class="cell">
+        <span class="k" aria-hidden="true">02</span>
+        <div class="n"><span data-count="2">0</span></div>
+        <div class="s">sides · one team</div>
+        <p class="d">Design &amp; development, plus AI &amp; digital.</p>
+      </div>
+      <div class="cell">
+        <span class="k" aria-hidden="true">03</span>
+        <div class="n"><span data-count="24">0</span>h</div>
+        <div class="s">reply window</div>
+        <p class="d">A real human replies within one working day.</p>
+      </div>
+      <div class="cell">
+        <span class="k" aria-hidden="true">04</span>
+        <div class="n"><span data-count="100">0</span>%</div>
+        <div class="s">paid safely</div>
+        <p class="d">Escrow protection on every project, start to finish.</p>
       </div>
     </div>
   </div>
@@ -1612,6 +1806,7 @@
           <div class="px-top"><span class="px-num">01<span class="of"> / 05</span></span><span class="px-side">Fashion dev.</span></div>
           <div class="px-body">
             <h3>Tech Pack.</h3>
+            <p class="px-desc">Factory-ready spec files that tell the maker exactly how to build it.</p>
             <ul>
               <li><span class="li-n">01</span><span>We create professional tech packs for fashion production.</span></li>
               <li><span class="li-n">02</span><span>Each file includes measurements, trims, fabrics, construction details, and specifications.</span></li>
@@ -1620,7 +1815,7 @@
             </ul>
           </div>
           <div class="px-foot">
-            <a class="px-cta start-cta" data-svc="tech-pack" href="service.html?svc=tech-pack">Start →</a>
+            <a class="px-cta start-cta" data-svc="tech-pack" href="services/tech-pack.html">Start →</a>
             <span class="px-hint">Card 01</span>
           </div>
         </article>
@@ -1630,6 +1825,7 @@
           <div class="px-top"><span class="px-num">02<span class="of"> / 05</span></span><span class="px-side">Fashion dev.</span></div>
           <div class="px-body">
             <h3>3D Virtual Sampling.</h3>
+            <p class="px-desc">Photoreal garment samples, made and reviewed before a stitch is cut.</p>
             <ul>
               <li><span class="li-n">01</span><span>We create realistic 3D garment samples before physical production.</span></li>
               <li><span class="li-n">02</span><span>This helps visualize fit, silhouette, fabric fall, and design details.</span></li>
@@ -1638,7 +1834,7 @@
             </ul>
           </div>
           <div class="px-foot">
-            <a class="px-cta start-cta" data-svc="3d-virtual-sampling" href="service.html?svc=3d-virtual-sampling">Start →</a>
+            <a class="px-cta start-cta" data-svc="3d-virtual-sampling" href="services/3d-virtual-sampling.html">Start →</a>
             <span class="px-hint">Card 02</span>
           </div>
         </article>
@@ -1648,6 +1844,7 @@
           <div class="px-top"><span class="px-num">03<span class="of"> / 05</span></span><span class="px-side">Fashion dev.</span></div>
           <div class="px-body">
             <h3>Seamless Pattern.</h3>
+            <p class="px-desc">Repeat prints that tile flawlessly across any fabric or surface.</p>
             <ul>
               <li><span class="li-n">01</span><span>We design seamless repeat patterns for fabrics, prints, and textiles.</span></li>
               <li><span class="li-n">02</span><span>Each pattern is made to repeat smoothly without visible breaks.</span></li>
@@ -1656,7 +1853,7 @@
             </ul>
           </div>
           <div class="px-foot">
-            <a class="px-cta start-cta" data-svc="seamless-pattern" href="service.html?svc=seamless-pattern">Start →</a>
+            <a class="px-cta start-cta" data-svc="seamless-pattern" href="services/seamless-pattern.html">Start →</a>
             <span class="px-hint">Card 03</span>
           </div>
         </article>
@@ -1666,6 +1863,7 @@
           <div class="px-top"><span class="px-num">04<span class="of"> / 05</span></span><span class="px-side">Fashion dev.</span></div>
           <div class="px-body">
             <h3>Pattern CAD.</h3>
+            <p class="px-desc">Precise digital patterns, graded and ready for sampling to production.</p>
             <ul>
               <li><span class="li-n">01</span><span>We create accurate digital garment patterns using CAD software.</span></li>
               <li><span class="li-n">02</span><span>Patterns are developed with proper measurements, fit, and construction logic.</span></li>
@@ -1674,7 +1872,7 @@
             </ul>
           </div>
           <div class="px-foot">
-            <a class="px-cta start-cta" data-svc="pattern-cad" href="service.html?svc=pattern-cad">Start →</a>
+            <a class="px-cta start-cta" data-svc="pattern-cad" href="services/pattern-cad.html">Start →</a>
             <span class="px-hint">Card 04</span>
           </div>
         </article>
@@ -1684,6 +1882,7 @@
           <div class="px-top"><span class="px-num">05<span class="of"> / 05</span></span><span class="px-side">Fashion dev.</span></div>
           <div class="px-body">
             <h3>Dobby &amp; Jacquard.</h3>
+            <p class="px-desc">Custom woven textile designs with a premium, high-end finish.</p>
             <ul>
               <li><span class="li-n">01</span><span>We create detailed dobby and jacquard textile designs for woven fabrics.</span></li>
               <li><span class="li-n">02</span><span>Designs are developed with structure, repeat, texture, and production feasibility in mind.</span></li>
@@ -1692,7 +1891,7 @@
             </ul>
           </div>
           <div class="px-foot">
-            <a class="px-cta start-cta" data-svc="dobby-jacquard" href="service.html?svc=dobby-jacquard">Start →</a>
+            <a class="px-cta start-cta" data-svc="dobby-jacquard" href="services/dobby-jacquard.html">Start →</a>
             <span class="px-hint">Card 05</span>
           </div>
         </article>
@@ -1718,72 +1917,19 @@
             <h2 class="display md">AI, website <span class="it">&amp; digital production.</span></h2>
           </div>
           <div class="index">
-            AI content, photography, e-commerce listings, websites, AI agents and graphic design.<br>
-            <span style="color:var(--ink-7);">Six services · launch &amp; sell ready.</span>
+            Website development, AI agents, AI photography, e-commerce listings and graphic design.<br>
+            <span style="color:var(--ink-7);">Five services · launch &amp; sell ready.</span>
           </div>
         </div>
       </div>
       <div class="px-track" id="px-track-s2">
 
-        <article class="px-card" data-step="1" data-side="Side 02" data-side-tag="02" data-svc="ai-content">
+        <article class="px-card" data-step="1" data-side="Side 02" data-side-tag="02" data-svc="website">
           <span class="px-wm">01</span>
-          <div class="px-top"><span class="px-num">01<span class="of"> / 06</span></span><span class="px-side">Digital prod.</span></div>
+          <div class="px-top"><span class="px-num">01<span class="of"> / 05</span></span><span class="px-side">Digital prod.</span></div>
           <div class="px-body">
-            <h3>AI Content Production.</h3>
-            <ul>
-              <li><span class="li-n">01</span><span>We create AI-powered model photography, videography, and product visuals.</span></li>
-              <li><span class="li-n">02</span><span>This helps brands produce campaign-style content without traditional shoot limitations.</span></li>
-              <li><span class="li-n">03</span><span>Ideal for fashion, lifestyle, product launches, and social media.</span></li>
-              <li><span class="li-n">04</span><span>It saves time, cost, and gives brands more creative flexibility.</span></li>
-            </ul>
-          </div>
-          <div class="px-foot">
-            <a class="px-cta start-cta" data-svc="ai-content" href="service.html?svc=ai-content">Start →</a>
-            <span class="px-hint">Card 01</span>
-          </div>
-        </article>
-
-        <article class="px-card" data-step="2" data-side="Side 02" data-side-tag="02" data-svc="product-photo-video">
-          <span class="px-wm">02</span>
-          <div class="px-top"><span class="px-num">02<span class="of"> / 06</span></span><span class="px-side">Digital prod.</span></div>
-          <div class="px-body">
-            <h3>Product Photo &amp; Video.</h3>
-            <ul>
-              <li><span class="li-n">01</span><span>We create clean and professional product photos and videos for digital use.</span></li>
-              <li><span class="li-n">02</span><span>Each visual is designed to highlight product details, quality, and usage.</span></li>
-              <li><span class="li-n">03</span><span>Suitable for websites, social media, ads, and marketplaces.</span></li>
-              <li><span class="li-n">04</span><span>This helps products look more premium and trustworthy online.</span></li>
-            </ul>
-          </div>
-          <div class="px-foot">
-            <a class="px-cta start-cta" data-svc="product-photo-video" href="service.html?svc=product-photo-video">Start →</a>
-            <span class="px-hint">Card 02</span>
-          </div>
-        </article>
-
-        <article class="px-card" data-step="3" data-side="Side 02" data-side-tag="02" data-svc="ecom-listing">
-          <span class="px-wm">03</span>
-          <div class="px-top"><span class="px-num">03<span class="of"> / 06</span></span><span class="px-side">Digital prod.</span></div>
-          <div class="px-body">
-            <h3>E-Commerce Listing.</h3>
-            <ul>
-              <li><span class="li-n">01</span><span>We create optimized product listings for online stores and marketplaces.</span></li>
-              <li><span class="li-n">02</span><span>This includes product titles, descriptions, images, specifications, and listing structure.</span></li>
-              <li><span class="li-n">03</span><span>Each listing is designed to improve clarity and buyer confidence.</span></li>
-              <li><span class="li-n">04</span><span>It helps customers understand the product and make faster purchase decisions.</span></li>
-            </ul>
-          </div>
-          <div class="px-foot">
-            <a class="px-cta start-cta" data-svc="ecom-listing" href="service.html?svc=ecom-listing">Start →</a>
-            <span class="px-hint">Card 03</span>
-          </div>
-        </article>
-
-        <article class="px-card" data-step="4" data-side="Side 02" data-side-tag="02" data-svc="website">
-          <span class="px-wm">04</span>
-          <div class="px-top"><span class="px-num">04<span class="of"> / 06</span></span><span class="px-side">Digital prod.</span></div>
-          <div class="px-body">
-            <h3>Website.</h3>
+            <h3>Website Development.</h3>
+            <p class="px-desc">Modern, mobile-ready sites that turn visitors into customers.</p>
             <ul>
               <li><span class="li-n">01</span><span>We design and develop modern websites for brands and businesses.</span></li>
               <li><span class="li-n">02</span><span>Each website is built to look professional, clear, and easy to use.</span></li>
@@ -1792,16 +1938,17 @@
             </ul>
           </div>
           <div class="px-foot">
-            <a class="px-cta start-cta" data-svc="website" href="service.html?svc=website">Start →</a>
-            <span class="px-hint">Card 04</span>
+            <a class="px-cta start-cta" data-svc="website" href="services/website.html">Start →</a>
+            <span class="px-hint">Card 01</span>
           </div>
         </article>
 
-        <article class="px-card" data-step="5" data-side="Side 02" data-side-tag="02" data-svc="ai-agent">
-          <span class="px-wm">05</span>
-          <div class="px-top"><span class="px-num">05<span class="of"> / 06</span></span><span class="px-side">Digital prod.</span></div>
+        <article class="px-card" data-step="2" data-side="Side 02" data-side-tag="02" data-svc="ai-agent">
+          <span class="px-wm">02</span>
+          <div class="px-top"><span class="px-num">02<span class="of"> / 05</span></span><span class="px-side">Digital prod.</span></div>
           <div class="px-body">
             <h3>AI Agent.</h3>
+            <p class="px-desc">Always-on assistants that answer, guide, and capture leads 24/7.</p>
             <ul>
               <li><span class="li-n">01</span><span>We build AI agents that can support customer service, lead generation, and business automation.</span></li>
               <li><span class="li-n">02</span><span>They can answer questions, guide users, collect enquiries, and reduce manual work.</span></li>
@@ -1810,16 +1957,55 @@
             </ul>
           </div>
           <div class="px-foot">
-            <a class="px-cta start-cta" data-svc="ai-agent" href="service.html?svc=ai-agent">Start →</a>
-            <span class="px-hint">Card 05</span>
+            <a class="px-cta start-cta" data-svc="ai-agent" href="services/ai-agent.html">Start →</a>
+            <span class="px-hint">Card 02</span>
           </div>
         </article>
 
-        <article class="px-card" data-step="6" data-side="Side 02" data-side-tag="02" data-svc="graphic-design">
-          <span class="px-wm">06</span>
-          <div class="px-top"><span class="px-num">06<span class="of"> / 06</span></span><span class="px-side">Digital prod.</span></div>
+        <article class="px-card" data-step="3" data-side="Side 02" data-side-tag="02" data-svc="ai-photography">
+          <span class="px-wm">03</span>
+          <div class="px-top"><span class="px-num">03<span class="of"> / 05</span></span><span class="px-side">Digital prod.</span></div>
+          <div class="px-body">
+            <h3>AI Photography.</h3>
+            <p class="px-desc">Campaign-grade model and product visuals, made without a shoot.</p>
+            <ul>
+              <li><span class="li-n">01</span><span>We create AI-powered model, product, and lifestyle photography.</span></li>
+              <li><span class="li-n">02</span><span>This helps brands produce campaign-style visuals without a studio or shoot.</span></li>
+              <li><span class="li-n">03</span><span>Ideal for fashion, e-commerce, product launches, and social media.</span></li>
+              <li><span class="li-n">04</span><span>It saves time, cost, and gives brands unlimited creative flexibility.</span></li>
+            </ul>
+          </div>
+          <div class="px-foot">
+            <a class="px-cta start-cta" data-svc="ai-photography" href="services/ai-photography.html">Start →</a>
+            <span class="px-hint">Card 03</span>
+          </div>
+        </article>
+
+        <article class="px-card" data-step="4" data-side="Side 02" data-side-tag="02" data-svc="ecom-listing">
+          <span class="px-wm">04</span>
+          <div class="px-top"><span class="px-num">04<span class="of"> / 05</span></span><span class="px-side">Digital prod.</span></div>
+          <div class="px-body">
+            <h3>E-Commerce Listing.</h3>
+            <p class="px-desc">Optimised listings that turn browsers into faster buying decisions.</p>
+            <ul>
+              <li><span class="li-n">01</span><span>We create optimized product listings for online stores and marketplaces.</span></li>
+              <li><span class="li-n">02</span><span>This includes product titles, descriptions, images, specifications, and listing structure.</span></li>
+              <li><span class="li-n">03</span><span>Each listing is designed to improve clarity and buyer confidence.</span></li>
+              <li><span class="li-n">04</span><span>It helps customers understand the product and make faster purchase decisions.</span></li>
+            </ul>
+          </div>
+          <div class="px-foot">
+            <a class="px-cta start-cta" data-svc="ecom-listing" href="services/ecom-listing.html">Start →</a>
+            <span class="px-hint">Card 04</span>
+          </div>
+        </article>
+
+        <article class="px-card" data-step="5" data-side="Side 02" data-side-tag="02" data-svc="graphic-design">
+          <span class="px-wm">05</span>
+          <div class="px-top"><span class="px-num">05<span class="of"> / 05</span></span><span class="px-side">Digital prod.</span></div>
           <div class="px-body">
             <h3>Graphic Design.</h3>
+            <p class="px-desc">Polished creatives and brand assets for every channel, print or digital.</p>
             <ul>
               <li><span class="li-n">01</span><span>We create professional graphic designs for digital and print communication.</span></li>
               <li><span class="li-n">02</span><span>This includes social media creatives, brochures, banners, branding assets, and marketing materials.</span></li>
@@ -1828,16 +2014,16 @@
             </ul>
           </div>
           <div class="px-foot">
-            <a class="px-cta start-cta" data-svc="graphic-design" href="service.html?svc=graphic-design">Start →</a>
-            <span class="px-hint">Card 06</span>
+            <a class="px-cta start-cta" data-svc="graphic-design" href="services/graphic-design.html">Start →</a>
+            <span class="px-hint">Card 05</span>
           </div>
         </article>
 
       </div>
 
       <div class="px-cockpit">
-        <div class="pc-num"><span class="now" id="pc-now-s2">01</span><span style="color:var(--ink-5);"> / 06</span></div>
-        <div class="pc-track" id="pc-track-cockpit-s2" style="--p:17%;"></div>
+        <div class="pc-num"><span class="now" id="pc-now-s2">01</span><span style="color:var(--ink-5);"> / 05</span></div>
+        <div class="pc-track" id="pc-track-cockpit-s2" style="--p:20%;"></div>
         <div class="pc-side" id="pc-side-s2">Side 02</div>
       </div>
     </div>
@@ -1907,7 +2093,7 @@
       <div class="faq-row">
         <div class="faq-q">Can I hire you for just one service?<span class="plus">+</span></div>
         <div class="faq-a"><div class="faq-a-inner">
-          Yes. Every one of our 11 services can be booked stand-alone. Most brands start with one -
+          Yes. Every one of our 10 services can be booked stand-alone. Most brands start with one -
           a tech pack, a CLO3D sample, an AI shoot - and add more once the first delivery lands.
         </div></div>
       </div>
@@ -1970,11 +2156,10 @@
               <option value="dobby-jacquard">Dobby &amp; Jacquard Design</option>
             </optgroup>
             <optgroup label="AI, website &amp; digital production">
-              <option value="ai-content">AI Content Production</option>
-              <option value="product-photo-video">Product Photography &amp; Videography</option>
-              <option value="ecom-listing">E-Commerce Product Listing</option>
-              <option value="website">Website</option>
+              <option value="website">Website Development</option>
               <option value="ai-agent">AI Agent</option>
+              <option value="ai-photography">AI Photography</option>
+              <option value="ecom-listing">E-Commerce Product Listing</option>
               <option value="graphic-design">Graphic Design</option>
             </optgroup>
             <option value="multiple">A bit of everything — full project</option>
@@ -2398,6 +2583,64 @@
       });
     });
   })();
+</script>
+
+<script>
+/* Feel pack — scroll progress, stat count-up, cursor spotlight.
+   Dependency-free; honours prefers-reduced-motion. */
+(function () {
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var prog = document.getElementById('ff-progress');
+  if (prog && !reduced) {
+    var pt = false;
+    var onS = function () {
+      if (pt) return;
+      pt = true;
+      requestAnimationFrame(function () {
+        var h = document.documentElement;
+        var max = h.scrollHeight - h.clientHeight;
+        prog.style.transform = 'scaleX(' + (max > 0 ? h.scrollTop / max : 0) + ')';
+        pt = false;
+      });
+    };
+    window.addEventListener('scroll', onS, { passive: true });
+    onS();
+  }
+
+  var counters = document.querySelectorAll('.intro-stats [data-count]');
+  function countUp(el) {
+    var target = parseInt(el.getAttribute('data-count'), 10);
+    var t0 = null, dur = 1200;
+    function stepFn(ts) {
+      if (!t0) t0 = ts;
+      var pr = Math.min((ts - t0) / dur, 1);
+      el.textContent = Math.round((1 - Math.pow(1 - pr, 3)) * target);
+      if (pr < 1) requestAnimationFrame(stepFn);
+    }
+    requestAnimationFrame(stepFn);
+  }
+  if ('IntersectionObserver' in window && !reduced) {
+    var cio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { countUp(e.target); cio.unobserve(e.target); }
+      });
+    }, { threshold: 0.6 });
+    counters.forEach(function (el) { cio.observe(el); });
+  } else {
+    counters.forEach(function (el) { el.textContent = el.getAttribute('data-count'); });
+  }
+
+  if (!reduced && window.matchMedia('(hover: hover)').matches) {
+    document.addEventListener('pointermove', function (e) {
+      var card = e.target.closest('.intro-stats .cell, .px-card');
+      if (!card) return;
+      var r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    }, { passive: true });
+  }
+})();
 </script>
 
 </body>

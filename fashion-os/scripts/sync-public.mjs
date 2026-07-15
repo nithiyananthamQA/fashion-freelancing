@@ -14,6 +14,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');            // fashion-os/
@@ -32,6 +33,14 @@ function copyDir(from, to) {
 }
 
 console.log('[sync-public] syncing public site into fashion-os/public …');
+
+// 0. regenerate the per-service static pages from the service.html template
+//    (public-html/pages/services/*.html) so they are never stale.
+try {
+  execFileSync(process.execPath, [join(here, 'generate-service-pages.mjs')], { stdio: 'inherit' });
+} catch (e) {
+  console.warn('[sync-public] generate-service-pages failed — continuing with existing pages:', e.message);
+}
 
 // 1. homepage
 if (existsSync(join(publicHtml, 'index.html'))) {

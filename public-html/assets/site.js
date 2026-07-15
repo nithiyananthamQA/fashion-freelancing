@@ -5,8 +5,10 @@
   // server, AND Cloudflare Pages — which serves /pages/signup.html at the
   // CLEAN URL /pages/signup (no .html). So detect the /pages/ segment by
   // path, not by file extension.
+  // Service pages live one level deeper (/pages/services/<slug>.html).
+  const inServicesDir = /\/pages\/services\//i.test(location.pathname);
   const inPagesDir = /\/pages\//i.test(location.pathname);
-  const ROOT = inPagesDir ? '../' : './';
+  const ROOT = inServicesDir ? '../../' : inPagesDir ? '../' : './';
   const r = (p) => ROOT + p.replace(/^\/+/, '');
 
   // Expose path resolver for pages that need it
@@ -280,6 +282,15 @@
       mobile.querySelectorAll('a').forEach(a => a.addEventListener('click', close));
       // Close on escape
       document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+      // Close on backdrop tap (any non-interactive area of the panel)
+      mobile.addEventListener('click', (e) => {
+        if (!e.target.closest('a, button, input, form')) close();
+      });
+      // Never leave the body scroll-locked if the burger disappears
+      // (rotate to landscape / resize past the 1100px desktop breakpoint)
+      window.addEventListener('resize', () => {
+        if (window.innerWidth >= 1100 && mobile.classList.contains('is-open')) close();
+      });
     }
 
     // Cmd/Ctrl + K → focus search
