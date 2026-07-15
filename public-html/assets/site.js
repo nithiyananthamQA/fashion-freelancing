@@ -103,11 +103,12 @@
   const navHTML = (current) => `
   <div class="topnav">
     <div class="container topnav-inner">
-      <a href="${r("index.html")}" class="logo" aria-label="Fashion Freelancing home">
+      <!-- LAUNCH: logo points at the services page (current homepage) -->
+      <a href="${r("pages/agency.html")}" class="logo" aria-label="Fashion Freelancing home">
         <img class="logo-img" src="${r("assets/logo.png")}" alt="Fashion Freelancing" />
       </a>
 
-      <!-- Persistent search (desktop) -->
+      <!-- HIDDEN FOR LAUNCH: marketplace search
       <form class="topnav-search" action="${r("pages/marketplace.html")}" role="search" aria-label="Search freelancers">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/>
@@ -116,18 +117,27 @@
         <input name="q" placeholder="Search 'tech pack designer', 'photographer'…" aria-label="Search"/>
         <kbd>⌘K</kbd>
       </form>
+      HIDDEN FOR LAUNCH -->
 
       <nav class="topnav-links" aria-label="Primary">
         <a href="${r("pages/agency.html")}" class="${current==='agency'?'active':''}">Our services</a>
+        <a href="${r("pages/about.html")}">About</a>
+        <a href="${r("pages/help.html")}">Help</a>
+        <!-- HIDDEN FOR LAUNCH: marketplace links
         <a href="${r("pages/marketplace.html")}" class="${current==='talent'?'active':''}">Find a freelancer</a>
         <a href="${r("pages/marketplace.html")}#jobs" class="${current==='work'?'active':''}">Find a job</a>
         <a href="${r("pages/how-it-works.html")}" class="${current==='how'?'active':''}">How it works</a>
         <a href="${r("pages/pricing.html")}" class="${current==='pricing'?'active':''}">Pricing</a>
+        HIDDEN FOR LAUNCH -->
       </nav>
 
       <div class="topnav-cta">
+        <!-- LAUNCH: single CTA to the brief form -->
+        <a href="${r("pages/agency.html")}#contact" class="btn btn-primary btn-sm">Start a project</a>
+        <!-- HIDDEN FOR LAUNCH: auth
         <a href="${r("pages/login.html")}" class="topnav-signin">Sign in</a>
         <a href="${r("pages/signup.html")}" class="btn btn-primary btn-sm">Join free</a>
+        HIDDEN FOR LAUNCH -->
       </div>
 
       <!-- Mobile hamburger -->
@@ -141,21 +151,30 @@
        on .topnav does not trap its fixed positioning -->
   <div class="topnav-mobile" id="nav-mobile" aria-hidden="true">
     <div class="topnav-mobile-inner">
+      <!-- HIDDEN FOR LAUNCH: mobile search
       <form class="topnav-search topnav-search-mobile" action="${r("pages/marketplace.html")}" role="search">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
         <input name="q" placeholder="Search…"/>
       </form>
+      HIDDEN FOR LAUNCH -->
       <nav class="topnav-mobile-links" aria-label="Mobile primary">
         <a href="${r("pages/agency.html")}">Our services</a>
+        <a href="${r("pages/about.html")}">About</a>
+        <a href="${r("pages/help.html")}">Help</a>
+        <!-- HIDDEN FOR LAUNCH: marketplace links
         <a href="${r("pages/marketplace.html")}">Find a freelancer</a>
         <a href="${r("pages/marketplace.html")}#jobs">Find a job</a>
         <a href="${r("pages/how-it-works.html")}">How it works</a>
         <a href="${r("pages/pricing.html")}">Pricing</a>
-        <a href="${r("pages/help.html")}">Help</a>
+        HIDDEN FOR LAUNCH -->
       </nav>
       <div class="topnav-mobile-cta">
+        <!-- LAUNCH: single CTA to the brief form -->
+        <a href="${r("pages/agency.html")}#contact" class="btn btn-primary w-full">Start a project</a>
+        <!-- HIDDEN FOR LAUNCH: auth
         <a href="${r("pages/login.html")}" class="btn btn-ghost w-full">Sign in</a>
         <a href="${r("pages/signup.html")}" class="btn btn-primary w-full">Join free</a>
+        HIDDEN FOR LAUNCH -->
       </div>
     </div>
   </div>`;
@@ -166,12 +185,19 @@
     <div class="container">
       <div class="footer-grid">
         <div>
-          <a href="${r("index.html")}" class="logo">
+          <!-- LAUNCH: logo points at the services page (current homepage) -->
+          <a href="${r("pages/agency.html")}" class="logo">
             <img class="logo-img" src="${r("assets/logo.png")}" alt="Fashion Freelancing" style="height:36px;" />
           </a>
+          <!-- LAUNCH: services positioning (original tagline kept below) -->
+          <p style="color:var(--ink-5);font-size:14px;max-width:320px;margin-top:14px;line-height:1.55;">
+            Every service a fashion business needs — one brief in, one delivery out.
+          </p>
+          <!-- HIDDEN FOR LAUNCH: marketplace tagline
           <p style="color:var(--ink-5);font-size:14px;max-width:320px;margin-top:14px;line-height:1.55;">
             Hire fashion freelancers, or get hired as one. Pay safely. Get paid safely. That's it.
           </p>
+          HIDDEN FOR LAUNCH -->
           <div style="margin-top:20px;display:flex;gap:10px;">
             <a href="#" class="chip" style="width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.92a8.2 8.2 0 0 1-2.36.65 4.12 4.12 0 0 0 1.8-2.27 8.23 8.23 0 0 1-2.6 1A4.1 4.1 0 0 0 11.8 9.3 11.65 11.65 0 0 1 3.4 4.86a4.1 4.1 0 0 0 1.27 5.47 4.1 4.1 0 0 1-1.86-.51v.05a4.1 4.1 0 0 0 3.29 4.02 4.12 4.12 0 0 1-1.85.07 4.1 4.1 0 0 0 3.83 2.85A8.23 8.23 0 0 1 2 18.4a11.62 11.62 0 0 0 6.29 1.84c7.55 0 11.68-6.26 11.68-11.68v-.53A8.35 8.35 0 0 0 22 5.92z"/></svg>
@@ -189,10 +215,13 @@
           <summary class="footer-acc-head"><h5>For companies</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
           <ul>
             <li><a href="${r("pages/agency.html")}">Our services</a></li>
-            <li><a href="${r("pages/start.html")}?audience=brand">Start a project</a></li>
+            <li><a href="${r("pages/agency.html")}#contact">Start a project</a></li>
             <li><a href="${r("pages/agency.html")}#contact">Book a discovery call</a></li>
+            <!-- HIDDEN FOR LAUNCH: marketplace links
+            <li><a href="${r("pages/start.html")}?audience=brand">Start a project</a></li>
             <li><a href="${r("pages/marketplace.html")}">Browse all freelancers</a></li>
             <li><a href="${r("pages/how-it-works.html")}">How it works</a></li>
+            HIDDEN FOR LAUNCH -->
           </ul>
         </details>
 
@@ -211,8 +240,10 @@
           <ul>
             <li><a href="${r("pages/help.html")}">Help center</a></li>
             <li><a href="${r("pages/help.html")}#contact">Contact us</a></li>
+            <!-- HIDDEN FOR LAUNCH: auth
             <li><a href="${r("pages/login.html")}">Sign in</a></li>
             <li><a href="${r("pages/signup.html")}">Sign up</a></li>
+            HIDDEN FOR LAUNCH -->
           </ul>
         </details>
 
@@ -220,9 +251,11 @@
           <summary class="footer-acc-head"><h5>About us</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
           <ul>
             <li><a href="${r("pages/about.html")}">About</a></li>
+            <!-- HIDDEN FOR LAUNCH: not ready yet
             <li><a href="${r("pages/blog.html")}">Stories</a></li>
             <li><a href="${r("pages/community.html")}">Community</a></li>
             <li><a href="#">Careers</a></li>
+            HIDDEN FOR LAUNCH -->
           </ul>
         </details>
       </div>
@@ -233,7 +266,9 @@
           <a href="${r("pages/privacy.html")}">Privacy</a>
           <a href="${r("pages/terms.html")}">Terms</a>
           <a href="${r("pages/cookies.html")}">Cookies</a>
+          <!-- HIDDEN FOR LAUNCH: placeholder link
           <a href="#">Accessibility</a>
+          HIDDEN FOR LAUNCH -->
         </div>
       </div>
     </div>

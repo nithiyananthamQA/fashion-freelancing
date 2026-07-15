@@ -1,0 +1,2844 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Our services — hire the Fashion Freelancing team direct</title>
+<meta name="description" content="Everything your fashion business needs under one team. Designs, tech packs, 3D sampling, patterns, AI photography, e-commerce listings, website development, AI agents and graphic design. One brief in, one delivery out." />
+
+<!-- Project's global stylesheet so the injected header + footer render properly. -->
+<link rel="stylesheet" href="../assets/styles.css">
+
+<!-- Business-class type stack: Inter + IBM Plex Mono. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+
+<!-- GSAP for scroll-driven motion (open source, via CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+  /* ============================================================
+     STUDIO PAGE — FULLY SCOPED, NOTHING REUSED.
+     This page does not import styles.css on purpose. The site's
+     standard nav + footer are still injected by site.js into the
+     #site-nav and #site-footer mounts below; that's the only
+     visual dependency. Everything else is local.
+     ============================================================ */
+
+  /* -------- Reset (page-local) -------- */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  img, video, svg { display: block; max-width: 100%; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; background: none; border: 0; cursor: pointer; color: inherit; }
+  ul { list-style: none; padding: 0; margin: 0; }
+
+  /* -------- Skip link (keyboard a11y) -------- */
+  .skip-link {
+    position: fixed; top: -100px; left: 20px; z-index: 10001;
+    background: var(--champagne); color: #fff;
+    padding: 12px 20px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    border: 2px solid #fff;
+    transition: top .2s ease;
+    white-space: nowrap;
+  }
+  .skip-link:focus { top: 20px; }
+
+  /* -------- BRUTALIST MONO — concrete gray + signal orange --------
+     These overrides the global stylesheet's tokens so the injected
+     header + footer (which read from these vars) also go dark. */
+  :root {
+
+
+    /* Business-class type stack. Inter for everything — display weight for
+       headlines, regular for body. IBM Plex Mono for technical annotations only. */
+    --serif:      'Inter', system-ui, sans-serif;   /* aliased so existing rules keep working */
+    --sans:       'Inter', system-ui, sans-serif;
+    --mono:       'IBM Plex Mono', ui-monospace, monospace;
+
+    /* One spacing token, used everywhere */
+    --u: 8px;
+
+    /* Sticky-nav height. JS (setNavH) overwrites this with the real measured
+       nav height; this default keeps first-paint correct (real nav is 80px). */
+    --nav-h: 80px;
+  }
+
+  /* ============================================================
+     LIGHT MODE — the exact inverse of dark. Surfaces (--paper*)
+     flip from dark grey to light/off-white; text (--ink*) flips
+     from bone to near-black. Orange (--clay) stays the accent.
+     Toggle sets data-theme="light" on <html>; choice persisted.
+     ============================================================ */
+
+
+  /* The base body resets every property the global stylesheet might have set,
+     so this page renders identically regardless of what the nav script injects. */
+  /* overflow-x: clip (not hidden) — clips without creating a scroll container,
+     so position:sticky on .px-viewport keeps working */
+  html { overflow-x: clip; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+  body::before, body::after { display: none !important; }
+
+  /* -------- Type -------- */
+  .mono {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-5);
+  }
+  .mono.with-rule::before {
+    content: ''; display: inline-block;
+    width: 28px; height: 1px; background: currentColor;
+    margin-right: 12px; vertical-align: middle;
+  }
+
+  /* Display = tight grotesk, business-class. Linear / Stripe / Vercel rhythm.
+     Heavy weights, very tight tracking, no italic flourishes. */
+  .display {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-style: normal;
+    letter-spacing: -0.035em;
+    line-height: 1.0;
+  }
+  .display.lg { font-size: clamp(48px, 7.5vw, 104px); font-weight: 700; letter-spacing: -0.04em; line-height: 1.02; }
+  .display.md { font-size: clamp(24px, 2.8vw, 42px); font-weight: 700; letter-spacing: -0.028em; }
+  .display.sm { font-size: clamp(26px, 2.8vw, 40px); font-weight: 600; letter-spacing: -0.026em; line-height: 1.1; }
+  /* "It" used to be italic; in business-class type we just shift it to muted weight. */
+  .display .it { font-style: normal; font-weight: 500; color: var(--ink-5); }
+
+  .body-lg { font-size: clamp(16px, 1.4vw, 19px); line-height: 1.55; color: var(--ink-3); max-width: 56ch; }
+  .body { font-size: 15px; line-height: 1.6; color: var(--ink-3); }
+
+  /* -------- Layout primitives, kept tiny -------- */
+  .wrap { width: 100%; max-width: 1560px; margin: 0 auto; padding: 0 30px; }
+  @media (max-width: 720px) { .wrap { padding: 0 20px; } }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 16px 24px; border-radius: 0;
+    font-family: var(--sans); font-size: 13px; font-weight: 600;
+    letter-spacing: 0.02em; text-transform: uppercase;
+    border: 1px solid transparent;
+  }
+  .btn-ink { background: var(--ink); color: var(--paper); }
+  .btn-ink:hover { background: var(--champagne); color: var(--paper); }
+  .btn-ghost { color: var(--ink); border-color: var(--ink); background: transparent; }
+  .btn-ghost:hover { background: var(--champagne); color: var(--paper); border-color: var(--champagne); }
+
+
+  /* ============================================================
+     INTRO  —  asymmetric two-column, body on the right
+     Different rhythm: heading hangs on the left rail, body lives
+     in the right 2/3rds. Has hairlines top + bottom.
+     ============================================================ */
+  .intro {
+    padding: calc(var(--u) * 16) 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .intro-grid {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: calc(var(--u) * 8);
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .intro { min-height: auto; padding: calc(var(--u) * 10) 0; }
+    .intro-grid { grid-template-columns: 1fr; gap: calc(var(--u) * 6); }
+  }
+  .intro .label { display: inline-block; margin-bottom: calc(var(--u) * 3); color: var(--champagne-3, var(--champagne)); }
+  .intro-lead h2 { margin: 0 0 calc(var(--u) * 3); }
+  .intro-lead p { margin: 0; max-width: 46ch; }
+
+  /* ---- Two-sides strip: two editorial rows that preview (and link to) the
+     Side 01 / Side 02 sections below. Large index numeral + mono kicker,
+     matching the display/mono language used across the page. ---- */
+  .intro-sides {
+    margin-top: calc(var(--u) * 5);
+    display: grid; gap: 14px;
+  }
+  .intro-side {
+    --c: var(--champagne);
+    position: relative; display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center; column-gap: calc(var(--u) * 3);
+    padding: calc(var(--u) * 3) calc(var(--u) * 3.5);
+    background: var(--paper-3, #fff);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg, 16px);
+    box-shadow: var(--shadow-1);
+    text-decoration: none; color: inherit;
+    overflow: hidden;
+    transition: transform .4s var(--easing), box-shadow .4s var(--easing), border-color .4s ease;
+  }
+  /* Accent hairline that sweeps in from the left edge on hover */
+  .intro-side::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px; background: var(--c);
+    transform: scaleY(0); transform-origin: top;
+    transition: transform .45s var(--easing);
+  }
+  .intro-side:nth-child(1) { --c:#6E56F0; }
+  .intro-side:nth-child(2) { --c:#2BA8E8; }
+  .intro-side:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-2); border-color: var(--c);
+  }
+  .intro-side:hover::before { transform: scaleY(1); }
+
+  .intro-side .is-index {
+    font-family: var(--font-display, var(--sans)); font-weight: 800;
+    font-size: clamp(30px, 3vw, 44px); line-height: 1;
+    letter-spacing: -0.04em; color: var(--ink-7, #cfcfcf);
+    font-variant-numeric: tabular-nums;
+    transition: color .4s ease;
+  }
+  .intro-side:hover .is-index { color: var(--c); }
+
+  .intro-side .is-body { display: grid; gap: 5px; min-width: 0; }
+  .intro-side .is-kicker {
+    font-family: var(--mono); font-size: 10px; font-weight: 500;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--c);
+  }
+  .intro-side .is-name {
+    font-family: var(--sans); font-weight: 700; font-size: clamp(16px, 1.5vw, 20px);
+    letter-spacing: -0.018em; color: var(--ink); line-height: 1.15;
+  }
+  .intro-side .is-meta {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    color: var(--ink-4);
+  }
+  .intro-side .is-arrow {
+    display: grid; place-items: center;
+    width: 40px; height: 40px; flex: none;
+    border-radius: 50%; border: 1px solid var(--line);
+    color: var(--ink-4);
+    transition: transform .4s var(--easing), color .4s ease,
+                border-color .4s ease, background .4s ease;
+  }
+  .intro-side .is-arrow svg { width: 17px; height: 17px; }
+  .intro-side:hover .is-arrow {
+    transform: translateX(4px);
+    color: var(--paper); background: var(--c); border-color: var(--c);
+  }
+
+  /* ---- Stat cards ---- */
+  .intro-stats {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    align-self: stretch; grid-auto-rows: 1fr;
+  }
+  @media (max-width: 720px) { .intro-stats { gap: 14px; } }
+  /* Each stat is a premium white card, matching the slide tiles */
+  .intro-stats .cell {
+    --c: var(--champagne);
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between;
+    gap: calc(var(--u) * 2);
+    background: var(--paper-3, #fff);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg, 16px);
+    box-shadow: var(--shadow-1);
+    padding: calc(var(--u) * 3.25) calc(var(--u) * 3.25);
+    transition: transform .4s var(--easing), box-shadow .4s var(--easing), border-color .4s ease;
+  }
+  /* Top row: mono index, echoing the section numbering language */
+  .intro-stats .cell .k {
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.2em; color: var(--ink-4); position: relative; z-index: 1;
+    transition: color .4s ease;
+  }
+  .intro-stats .cell:hover .k { color: var(--c); }
+  /* Bottom cluster keeps number + label + descriptor together at the base */
+  .intro-stats .cell .n { margin-top: auto; }
+  .intro-stats .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-2); border-color: var(--c); }
+  /* Accent bar that grows along the bottom edge on hover — restrained, editorial */
+  .intro-stats .cell::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
+    background: var(--c);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform .5s var(--easing);
+  }
+  .intro-stats .cell:hover::after { transform: scaleX(1); }
+  .intro-stats .cell:nth-child(1){ --c:#6E56F0; } .intro-stats .cell:nth-child(2){ --c:#2BA8E8; }
+  .intro-stats .cell:nth-child(3){ --c:#F0A93B; } .intro-stats .cell:nth-child(4){ --c:#00C853; }
+  .intro-stats .cell .n {
+    font-family: var(--font-display, var(--sans)); font-weight: 800;
+    font-size: clamp(38px, 4vw, 60px); line-height: 0.95;
+    letter-spacing: -0.04em; color: var(--ink);
+    font-variant-numeric: tabular-nums; position: relative; z-index: 1;
+    transition: color .4s ease;
+  }
+  .intro-stats .cell:hover .n { color: var(--c); }
+  .intro-stats .cell .s {
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-4); margin-top: 10px; position: relative; z-index: 1;
+    padding-top: 12px; border-top: 1px solid var(--line);
+  }
+  .intro-stats .cell .d {
+    margin: 8px 0 0; font-size: 13px; line-height: 1.4;
+    color: var(--ink-3); position: relative; z-index: 1;
+  }
+
+
+  /* ============================================================
+     SERVICE STACK  —  alternating image / text rows
+     Owner's exact 4-line copy on each row.
+     ============================================================ */
+  .svc {
+    display: grid;
+    grid-template-columns: 6fr 6fr;
+    gap: 30px;
+    align-items: center;
+    padding: calc(var(--u) * 12) 0;
+    border-top: 1px solid var(--line);
+  }
+  .svc:last-of-type { border-bottom: 1px solid var(--line); }
+  @media (max-width: 860px) {
+    .svc { grid-template-columns: 1fr; gap: calc(var(--u) * 4); padding: calc(var(--u) * 8) 0; }
+  }
+  .svc.flip .svc-media { order: 2; }
+  @media (max-width: 860px) { .svc.flip .svc-media { order: 0; } }
+
+  .svc-media {
+    position: relative; aspect-ratio: 4 / 5; border-radius: 0;
+    overflow: hidden; background: var(--paper-2);
+    border: 1px solid var(--line);
+  }
+  .svc-media img {
+    width: 100%; height: 100%; object-fit: cover;
+    transform: scale(1.04); transition: transform 8s ease-out;
+  }
+  .svc-media:hover img { transform: scale(1.12); }
+  .svc-media .tag {
+    position: absolute; top: 16px; left: 16px;
+    background: var(--champagne); color: var(--paper);
+    padding: 6px 12px; border-radius: 0;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    font-weight: 500;
+  }
+  .svc-media .corner {
+    position: absolute; bottom: 16px; right: 16px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink);
+    background: rgba(28,29,32,.85);
+    padding: 6px 12px; border-radius: 0;
+    backdrop-filter: blur(6px);
+    font-weight: 500;
+  }
+
+  .svc-text .label { margin-bottom: calc(var(--u) * 2); }
+  .svc-text h2 {
+    font-family: var(--sans); font-weight: 700;
+    font-size: clamp(32px, 3.6vw, 56px);
+    line-height: 1.05; letter-spacing: -0.032em;
+    margin: 0 0 calc(var(--u) * 3);
+  }
+  .svc-text h2 .pn { color: var(--ink-7); font-style: normal; font-weight: 500; margin-right: 8px; }
+  .svc-lines {
+    display: grid; gap: 10px;
+    padding-top: calc(var(--u) * 2);
+    border-top: 1px solid var(--line);
+  }
+  .svc-lines li {
+    padding-left: 22px; position: relative;
+    font-size: 15.5px; line-height: 1.55; color: var(--ink-3);
+  }
+  .svc-lines li::before {
+    content: ''; position: absolute; left: 0; top: 12px;
+    width: 12px; height: 1px; background: var(--ink-7);
+  }
+  .svc-text .cta {
+    margin-top: calc(var(--u) * 4);
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--ink);
+    padding-bottom: 4px; border-bottom: 1px solid var(--ink);
+    transition: color .25s, border-color .25s, gap .25s;
+  }
+  .svc-text .cta:hover { color: var(--champagne); border-color: var(--champagne); gap: 14px; }
+
+  /* ============================================================
+     PROCESS  —  4 cells across the page, edge-aligned, no card chrome
+     ============================================================ */
+  /* PROCESS — pinned full-viewport section. As the user scrolls, the
+     section stays in view while the 4 cells reveal one at a time. */
+  .process {
+    position: relative;
+    z-index: 3;                  /* sits ABOVE the sticky card viewport so it covers it */
+    /* pull up by one viewport so it overlaps the card section's last screen; the
+       JS slides .process-pin up (yPercent 100 -> 0) to reveal the cover. */
+    margin-top: -100vh;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: var(--paper-2);
+  }
+  .process-pin {
+    min-height: 100vh; height: 100vh;
+    padding: calc(var(--u) * 6) 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--paper-2);  /* opaque so it fully hides the section it covers */
+    overflow: hidden;
+  }
+  .process-cell.is-active h3 { color: var(--champagne); }
+  .process-cell.is-active .n { color: var(--champagne); }
+  .process-cell { transition: background .4s ease, opacity .5s ease; opacity: 0.4; }
+  .process-cell.is-active { opacity: 1; background: rgba(255,92,31,.03); }
+  .process > .wrap { width: 100%; }
+  .process-head {
+    display: grid;
+    grid-template-columns: 6fr 6fr;
+    gap: 30px;
+    align-items: end;
+    margin-bottom: calc(var(--u) * 10);
+  }
+  @media (max-width: 860px) {
+    .process-head {
+      grid-template-columns: 1fr;
+      gap: 30px;
+      margin-bottom: calc(var(--u) * 6);
+    }
+  }
+  .process-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--line-2);
+    border-bottom: 1px solid var(--line-2);
+  }
+  @media (max-width: 860px) { .process-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 540px) { .process-grid { grid-template-columns: 1fr; } }
+  .process-cell {
+    padding: calc(var(--u) * 6) calc(var(--u) * 4) calc(var(--u) * 6) calc(var(--u) * 4);
+    border-right: 1px solid var(--line-2);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 320px;
+  }
+  .process-cell:first-child { padding-left: 0; }
+  .process-cell:last-child { padding-right: 0; border-right: 0; }
+  @media (max-width: 860px) {
+    .process-cell {
+      padding: calc(var(--u) * 5) calc(var(--u) * 3);
+      border-right: 1px solid var(--line-2);
+      border-bottom: 1px solid var(--line-2);
+      min-height: 240px;
+    }
+    .process-cell:nth-child(2n) { border-right: 0; }
+    .process-cell:nth-last-child(-n+2) { border-bottom: 0; }
+    .process-cell:first-child, .process-cell:last-child { padding: calc(var(--u) * 5) calc(var(--u) * 3); }
+  }
+  @media (max-width: 540px) {
+    .process-cell { border-right: 0; border-bottom: 1px solid var(--line-2); min-height: 180px; }
+    .process-cell:last-child { border-bottom: 0; }
+  }
+  .process-cell .n {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--ink-4);
+    margin-bottom: calc(var(--u) * 3);
+  }
+  .process-cell h3 {
+    font-family: var(--sans); font-weight: 700;
+    font-size: clamp(22px, 2.2vw, 30px);
+    letter-spacing: -0.028em; line-height: 1.15;
+    margin: 0 0 calc(var(--u) * 3);
+    color: var(--ink);
+  }
+  .process-cell p {
+    font-size: 15px;
+    color: var(--ink-4);
+    line-height: 1.6;
+    margin: 0;
+    max-width: 28ch;
+  }
+
+  /* ============================================================
+     FAQ  —  thin lines, big serif questions
+     ============================================================ */
+  .faq {
+    padding: calc(var(--u) * 14) 0;
+  }
+  .faq-head {
+    display: grid; grid-template-columns: 6fr 6fr; gap: 30px;
+    align-items: end; margin-bottom: calc(var(--u) * 5);
+  }
+  @media (max-width: 860px) { .faq-head { grid-template-columns: 1fr; gap: 30px; } }
+  .faq-list { border-top: 1px solid var(--line); }
+  .faq-row { padding: calc(var(--u) * 3) 0; border-bottom: 1px solid var(--line); }
+  .faq-q {
+    display: flex; justify-content: space-between; align-items: center; gap: calc(var(--u) * 3);
+    font-family: var(--sans); font-weight: 600;
+    font-size: clamp(18px, 1.8vw, 22px); letter-spacing: -0.018em; line-height: 1.35;
+  }
+  .faq-q .plus {
+    flex-shrink: 0; width: 38px; height: 38px; border: 1px solid var(--line-2); border-radius: 0;
+    display: grid; place-items: center; font-family: var(--mono); font-size: 17px;
+    transition: transform .45s cubic-bezier(.22,1,.36,1), background .25s, color .25s, border-color .25s;
+  }
+  .faq-row.open .faq-q .plus {
+    transform: rotate(135deg); background: var(--champagne); color: var(--paper); border-color: var(--champagne);
+  }
+  .faq-a { max-height: 0; overflow: hidden; transition: max-height .55s cubic-bezier(.22,1,.36,1); }
+  .faq-a-inner {
+    padding: calc(var(--u) * 2) 60px 4px 0;
+    max-width: 720px;
+    font-size: 15.5px; color: var(--ink-3); line-height: 1.65;
+  }
+  .faq-row.open .faq-a { max-height: 320px; }
+
+  /* ============================================================
+     CONTACT  —  centered serif headline, left form / right promise
+     ============================================================ */
+  .contact {
+    padding: calc(var(--u) * 14) 0;
+    border-top: 1px solid var(--line);
+    background: var(--paper-2);
+  }
+  #contact .wrap { padding: 0 30px; }
+  @media (max-width: 720px) { #contact .wrap { padding: 0 20px; } }
+  .contact .lead-block { max-width: 720px; margin: 0 auto; }
+  .contact h2 { margin: calc(var(--u) * 3) auto 0; }
+  .contact p.body-lg { margin: calc(var(--u) * 3) auto 0; }
+
+  .contact-grid {
+    margin-top: calc(var(--u) * 10);
+    display: grid; grid-template-columns: 7fr 5fr;
+    gap: 30px;
+    text-align: left;
+  }
+  @media (max-width: 860px) { .contact-grid { grid-template-columns: 1fr; gap: calc(var(--u) * 4); } }
+  /* Form — premium white card matching the slide tiles (rounded, soft shadow) */
+  .contact-form {
+    display: grid; gap: 16px;
+    background: var(--paper-3, #fff);
+    padding: calc(var(--u) * 5);
+    border-radius: var(--r-xl, 22px);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-2);
+  }
+  .contact-form .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 540px) { .contact-form .row2 { grid-template-columns: 1fr; } }
+  .contact-form label { display: block; }
+  .contact-form .label {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink-5); margin-bottom: 7px;
+  }
+  .contact-form .label .req { color: var(--champagne-2); margin-left: 3px; }
+  .contact-form .input {
+    width: 100%; padding: 14px 15px; border: 1px solid var(--line-2);
+    border-radius: var(--r-sm, 8px); font-family: var(--sans); font-size: 14.5px;
+    background: var(--paper); color: var(--ink); min-height: 48px;
+    transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
+  }
+  .contact-form .input::placeholder { color: var(--ink-4); }
+  .contact-form .input:hover { border-color: var(--ink-7); }
+  .contact-form .input:focus {
+    outline: none; border-color: var(--champagne);
+    box-shadow: 0 0 0 3px var(--champagne-50, rgba(84,104,245,.18));
+    background: var(--paper-3, #fff);
+  }
+  .contact-form textarea.input { resize: vertical; min-height: 120px; }
+  .contact-form .btn-ink { border-radius: var(--r-md, 12px); padding: 15px 30px; min-height: 50px; }
+
+  /* Promise — accent card with gradient edge, like a slide tile */
+  .promise-block {
+    background: var(--paper-3, #fff);
+    border: 1px solid var(--line);
+    border-radius: var(--r-xl, 22px);
+    box-shadow: var(--shadow-1);
+    padding: calc(var(--u) * 5);
+    position: relative; overflow: hidden;
+  }
+  .promise-block::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    background: var(--grad);
+  }
+  .promise-block .label { margin-bottom: calc(var(--u) * 2); color: var(--champagne-3, var(--champagne)); }
+  .promise-block h3 { font-family: var(--font-display, var(--sans)); font-weight: 700; font-size: clamp(22px, 2vw, 28px); letter-spacing: -0.028em; line-height: 1.15; margin: 0 0 calc(var(--u) * 3); color: var(--ink); }
+  .promise-block ul { display: grid; gap: 16px; }
+  .promise-block li {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 15px; color: var(--ink-3); line-height: 1.5;
+  }
+  .promise-block li::before {
+    content: ''; width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px;
+    border-radius: 50%; background: var(--champagne-50, rgba(84,104,245,.16));
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235468F5' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: center;
+  }
+  .sent-card { background: var(--paper-3, #fff); border: 1px solid var(--line); border-radius: var(--r-xl, 22px); box-shadow: var(--shadow-2); padding: calc(var(--u) * 5); text-align: center; }
+  .sent-card .ok { font-family: var(--font-display, var(--sans)); font-weight: 700; font-size: 36px; color: var(--champagne); }
+
+  /* ============================================================
+     REVEAL — used by GSAP for fade-up
+     ============================================================ */
+  .rv { opacity: 0; transform: translateY(28px); }
+  /* H5 — backstop: never leave .rv content hidden when motion is reduced
+     (the JS reveal is skipped for reduced-motion users). */
+  @media (prefers-reduced-motion: reduce) {
+    .rv { opacity: 1 !important; transform: none !important; }
+  }
+
+  /* ============================================================
+     HORIZONTAL PARALLAX CARDS — single section, vertical scroll
+     drives horizontal card travel. Each of 11 cards glides past
+     with its own depth layer (number watermark + body + meta) so
+     parallax reads in 3D. Pure text, no images.
+     ============================================================ */
+  .px-block {
+    background: var(--paper);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    min-height: 100vh;
+  }
+  .px-head-wrap {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 6;
+    padding-top: calc(var(--u) * 6);
+    pointer-events: none;
+  }
+  .px-head {
+    padding: 0;
+    display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 6);
+    align-items: end;
+  }
+  @media (max-width: 860px) {
+    .px-head { grid-template-columns: 1fr; gap: calc(var(--u) * 3); }
+    .px-head-wrap { padding-top: calc(var(--u) * 5); }
+  }
+  .px-head .index {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--ink-5); line-height: 1.7;
+  }
+
+  /* Pinned section — JS sets the exact height equal to the horizontal
+     travel distance, so there's NO empty scroll after the cards finish.
+     The min-height keeps the section visible if JS hasn't run yet. */
+  .px-pin {
+    min-height: 100vh;
+    position: relative;
+  }
+  .px-viewport {
+    position: sticky; top: var(--nav-h, 80px);
+    height: calc(100vh - var(--nav-h, 80px)); overflow: hidden;
+    background: var(--paper);
+  }
+  .px-viewport::before, .px-viewport::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 80px; z-index: 5;
+    pointer-events: none;
+  }
+  .px-viewport::before {
+    left: 0; background: linear-gradient(90deg, var(--paper), transparent);
+  }
+  .px-viewport::after {
+    right: 0; background: linear-gradient(270deg, var(--paper), transparent);
+  }
+
+  .px-track {
+    position: absolute; top: calc(var(--u) * 15); bottom: calc(var(--u) * 7); left: 0;
+    display: flex; align-items: center; gap: calc(var(--u) * 2);
+    padding: 0 6vw;
+    will-change: transform;
+  }
+  @media (max-width: 860px) { .px-track { padding: 0 5vw; gap: calc(var(--u) * 2); } }
+
+  .px-card {
+    flex: 0 0 clamp(360px, 42vw, 560px);
+    height: clamp(300px, 52vh, 480px); max-height: none;
+    position: relative;
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-xl, 22px);
+    background: transparent;
+    padding: calc(var(--u) * 3);
+    display: grid; grid-template-rows: auto 1fr auto;
+    gap: calc(var(--u) * 4);
+    overflow: hidden;
+    transition: background .4s, border-color .4s, transform .6s cubic-bezier(.22,1,.36,1), opacity .4s ease;
+    opacity: 0.35; transform: scale(0.96);
+  }
+  @media (max-width: 860px) { .px-card { flex-basis: 78vw; height: 72vh; padding: calc(var(--u) * 4); } }
+  
+  /* Multi-color styling for active cards based on brand logo colors */
+  .px-card:nth-child(5n+1) { --local-accent: #6E56F0; } /* Violet */
+  .px-card:nth-child(5n+2) { --local-accent: #2BA8E8; } /* Cyan */
+  .px-card:nth-child(5n+3) { --local-accent: #00C853; } /* Green */
+  .px-card:nth-child(5n+4) { --local-accent: #F0A93B; } /* Yellow/Orange */
+  .px-card:nth-child(5n+5) { --local-accent: #FF0055; } /* Pink */
+
+  .px-card:hover, .px-card.is-active { background: #fff; border-color: var(--local-accent, var(--champagne)); opacity: 1; transform: scale(1); box-shadow: var(--shadow-2); }
+
+  /* Watermark number — sits behind everything, drifts at a slower speed */
+  .px-card .px-wm {
+    position: absolute; inset: auto 6% 6% auto;
+    font-family: var(--mono); font-weight: 500;
+    font-size: clamp(64px, 9vw, 120px);
+    line-height: 0.85; letter-spacing: -0.04em;
+    color: var(--ink); opacity: 0.06;
+    pointer-events: none; user-select: none; z-index: 0;
+    transform: translateX(var(--wm-shift, 0px));
+    transition: opacity .4s;
+    will-change: transform;
+  }
+  .px-card:hover .px-wm, .px-card.is-active .px-wm { opacity: 0.12; }
+
+  .px-card .px-top {
+    display: flex; justify-content: flex-start; align-items: center;
+    position: relative; z-index: 2;
+  }
+  .px-card .px-num {
+    font-family: var(--mono); font-size: 13px; font-weight: 500;
+    letter-spacing: 0.18em; color: var(--ink-4);
+  }
+  .px-card .px-num .of { color: var(--ink-7); }
+  .px-card .px-side {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--paper);
+    background: var(--ink); padding: 6px 12px;
+    transition: background .35s;
+  }
+  .px-card[data-side-tag="02"] .px-side { background: var(--local-accent, var(--champagne)); }
+  .px-card:hover .px-side, .px-card.is-active .px-side { background: var(--local-accent, var(--champagne)); }
+
+  /* Body: title + bullets */
+  .px-card .px-body {
+    position: relative; z-index: 2;
+    display: grid; gap: calc(var(--u) * 3); align-content: start;
+  }
+  .px-card h3 {
+    font-family: var(--sans); font-weight: 800;
+    font-size: clamp(26px, 2.8vw, 38px);
+    line-height: 1.1; letter-spacing: -0.03em;
+    white-space: nowrap;
+    margin: 0 0 6px; color: var(--ink);
+    transition: color .35s;
+  }
+  /* Minimal one-line description under the title — sits tight to the heading
+     so the numbered list simply shifts down without growing the card. */
+  .px-card .px-desc {
+    margin: -14px 0 0; padding: 0;
+    font-family: var(--sans); font-weight: 400;
+    font-size: 13px; line-height: 1.5; color: var(--ink-5, var(--ink-4));
+    max-width: 42ch;
+  }
+  .px-card:hover h3, .px-card.is-active h3 { color: var(--local-accent, var(--champagne)); }
+  .px-card h3 .amp { color: var(--ink-7); font-weight: 500; }
+  .px-card ul {
+    display: grid; gap: 10px; margin: 0; padding: 0; list-style: none;
+  }
+  .px-card li {
+    display: grid; grid-template-columns: 24px 1fr; gap: 12px;
+    font-size: 14px; line-height: 1.5; color: var(--ink-3);
+  }
+  .px-card li .li-n {
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em;
+    color: var(--ink-7); padding-top: 4px;
+  }
+
+  /* Bottom row: CTA */
+  .px-card .px-foot {
+    position: relative; z-index: 2;
+    display: flex; justify-content: space-between; align-items: end; gap: 12px;
+  }
+  .px-card .px-cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--ink);
+    padding: 12px 16px; border: 1px solid var(--ink);
+    transition: background .25s, color .25s, border-color .25s, gap .25s;
+  }
+  .px-card:hover .px-cta, .px-card.is-active .px-cta { background: var(--local-accent, var(--champagne)); color: var(--paper); border-color: var(--local-accent, var(--champagne)); gap: 14px; }
+  .px-card .px-hint { display: none; }
+
+  /* Cockpit pinned at the bottom of the viewport */
+  .px-cockpit {
+    position: absolute; left: 0; right: 0; bottom: calc(var(--u) * 3); z-index: 6;
+    display: grid; grid-template-columns: auto 1fr auto;
+    align-items: center; gap: calc(var(--u) * 4);
+    padding: 0 8vw;
+    pointer-events: none;
+  }
+  .px-cockpit .pc-num {
+    font-family: var(--mono); font-size: 13px; letter-spacing: 0.18em;
+    color: var(--ink);
+  }
+  .px-cockpit .pc-num .now { color: var(--champagne); font-size: 28px; font-weight: 500; padding-right: 8px; }
+  .px-cockpit .pc-track {
+    position: relative; height: 2px; background: var(--line-2);
+  }
+  .px-cockpit .pc-track::after {
+    content: ''; position: absolute; left: 0; top: 0; height: 100%;
+    width: var(--p, 0%); background: var(--champagne);
+  }
+  .px-cockpit .pc-side { display: none; }
+  .px-card .px-side { display: none; }
+  .px-card .px-wm { display: none; }
+  .px-cockpit .pc-scroll {
+    position: absolute; top: 24px; left: 0; right: 0;
+    text-align: center;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--ink-7);
+  }
+
+  /* Mobile: convert horizontal parallax to a clean vertical card stack.
+     GSAP wireParallaxBlock() is skipped below 721px in JS. */
+  @media (max-width: 720px) {
+    /* Strip the JS-inflated section height */
+    .px-block { min-height: 0; border-bottom: 1px solid var(--line); }
+    .px-pin { height: auto !important; min-height: 0; }
+
+    /* Un-sticky the viewport so cards flow normally */
+    .px-viewport {
+      position: relative;
+      height: auto !important;
+      overflow: visible;
+    }
+    .px-viewport::before, .px-viewport::after { display: none; }
+
+    /* Section heading: flows above the cards */
+    .px-head-wrap {
+      position: relative;
+      padding: calc(var(--u) * 5) calc(var(--u) * 3) calc(var(--u) * 2);
+    }
+    .px-head { grid-template-columns: 1fr; gap: 6px; }
+
+    /* Card track: vertical stack */
+    .px-track {
+      position: relative !important;
+      top: auto !important; bottom: auto !important; left: auto !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      padding: 0 calc(var(--u) * 2) calc(var(--u) * 5) !important;
+      gap: 10px !important;
+      transform: none !important;
+      will-change: unset !important;
+    }
+
+    /* Cards: full width, natural height */
+    .px-card {
+      flex: none !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
+      padding: 20px 18px !important;
+    }
+    .px-card h3 { white-space: normal; font-size: clamp(18px, 5vw, 24px); }
+    .px-card ul { margin-top: 10px; }
+    .px-card li { padding: 8px 0; font-size: 13px; }
+
+    /* Hide cockpit (no horizontal progress tracker needed) */
+    .px-cockpit { display: none !important; }
+
+    /* Process: plain scrollable layout on mobile */
+    .process { margin-top: 0; }
+    .process-pin { height: auto; min-height: 0; }
+    .process-cell { opacity: 1; }
+  }
+
+  /* ============================================================
+     HERO (TYPE-ONLY) — no cards, no media. Pure type, big motion.
+     Word reveals climb out of clip-masks. Background watermarks
+     drift on scroll (parallax). Counter pops in. Marquee streams.
+     ============================================================ */
+  .hero-t {
+    position: relative;
+    height: calc(100vh - var(--nav-h, 80px));
+    min-height: 600px;
+    background: var(--paper);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    padding-top: 0;
+  }
+
+  /* Background — soft colour auras (brand violet→indigo→cyan + a warm accent)
+     give the lavender canvas depth without any imagery. Plus faint ghost-words. */
+  .hero-t-bg {
+    position: absolute; inset: 0;
+    pointer-events: none; z-index: 0;
+    overflow: hidden;
+  }
+  .hero-t-bg::before,
+  .hero-t-bg::after {
+    content: ''; position: absolute; border-radius: 50%;
+    filter: blur(90px); opacity: .5;
+    will-change: transform;
+  }
+  /* indigo→cyan aura, upper-right */
+  .hero-t-bg::before {
+    width: 52vw; height: 52vw; top: -16vw; right: -12vw;
+    background: radial-gradient(circle at 50% 50%, rgba(110,86,240,.42), rgba(43,168,232,.20) 55%, transparent 72%);
+  }
+  /* warm pink/violet aura, lower-left — echoes the per-card accents */
+  .hero-t-bg::after {
+    width: 40vw; height: 40vw; bottom: -10vw; left: -10vw;
+    background: radial-gradient(circle at 50% 50%, rgba(255,0,85,.18), rgba(110,86,240,.16) 55%, transparent 72%);
+  }
+  .bgw {
+    position: absolute;
+    font-family: var(--sans); font-weight: 800;
+    letter-spacing: -0.04em; line-height: 0.85;
+    color: var(--ink); opacity: 0.04;
+    user-select: none; white-space: nowrap;
+    will-change: transform;
+  }
+  .bgw-1 { top: 8%;  right: 3%; font-size: clamp(80px, 11vw, 190px); }
+
+  .hero-t-wrap {
+    position: relative; z-index: 2;
+    flex: 1; display: flex; flex-direction: column; justify-content: space-between;
+    gap: calc(var(--u) * 1);
+    /* split top/bottom so the inherited left/right from .wrap shows through */
+    padding-top: calc(var(--u) * 3); padding-bottom: calc(var(--u) * 2 + 80px);
+    min-height: 0;
+  }
+
+  /* ===== OPTION 2 — centred giant type + floating service chips ===== */
+  .hero-t-center {
+    flex: 1; position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; min-height: 0;
+  }
+  .hero-t-center .hero-t-eyebrow { margin-bottom: calc(var(--u) * 3); }
+  .hero-t-center .hero-t-headline {
+    margin: 0 auto; max-width: 18ch; text-align: center;
+  }
+  .hero-t-center .hero-t-sub {
+    margin: calc(var(--u) * 4) auto 0; max-width: 52ch; text-align: center;
+    font-size: clamp(15px, 1.35vw, 19px); line-height: 1.6; color: var(--ink-3);
+  }
+  .hero-t-center .hero-t-ctas {
+    display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+    margin-top: calc(var(--u) * 5);
+  }
+
+  /* Floating service chips — scattered around the headline, each its own colour.
+     Absolute on desktop; they collapse into an inline row on small screens. */
+  .hero-chips { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+  .hero-chip {
+    position: absolute; pointer-events: auto;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 16px; border-radius: 999px;
+    background: var(--paper-3, #fff); border: 1px solid var(--line);
+    box-shadow: var(--shadow-2);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    color: var(--ink); text-decoration: none; white-space: nowrap;
+    opacity: 0; transform: translateY(14px) scale(.96);
+    transition: transform .5s var(--easing), box-shadow .35s ease, border-color .3s ease, opacity .5s ease;
+    will-change: transform;
+  }
+  .hero-t.in .hero-chip { opacity: 1; transform: none; }
+  .hero-chip::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--champagne)); }
+  .hero-chip:hover { transform: translateY(-3px) scale(1.04); box-shadow: var(--shadow-3); border-color: var(--c, var(--champagne)); }
+  .hero-chip.c-violet { --c:#6E56F0; } .hero-chip.c-cyan { --c:#2BA8E8; }
+  .hero-chip.c-green  { --c:#00C853; } .hero-chip.c-amber{ --c:#F0A93B; }
+  .hero-chip.c-pink   { --c:#FF0055; } .hero-chip.c-indigo{ --c:#5468F5; }
+
+  /* scattered positions (desktop) + gentle float drift */
+  .hero-chip.p1 { top: 16%;  left: 7%;  animation: chipfloat 7s ease-in-out infinite; }
+  .hero-chip.p2 { top: 26%;  right: 8%;  animation: chipfloat 8s ease-in-out infinite .4s; }
+  .hero-chip.p3 { top: 50%;  left: 3%;   animation: chipfloat 9s ease-in-out infinite .8s; }
+  .hero-chip.p4 { top: 56%;  right: 5%;  animation: chipfloat 7.5s ease-in-out infinite .2s; }
+  .hero-chip.p5 { bottom: 22%; left: 13%; animation: chipfloat 8.5s ease-in-out infinite .6s; }
+  .hero-chip.p6 { bottom: 19%; right: 14%; animation: chipfloat 9.5s ease-in-out infinite 1s; }
+  @keyframes chipfloat { 50% { transform: translateY(-9px); } }
+  @media (prefers-reduced-motion: reduce) { .hero-chip { animation: none !important; } }
+
+  /* H4 — honour prefers-reduced-motion: kill all looping/decorative motion and
+     force every JS/scroll-revealed element into its final, visible state so no
+     content is left hidden when motion is suppressed. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+    .htm-track, .hss-track, .ht-cue-line::after, .hero-chip { animation: none !important; }
+    .rv, .hero-t-eyebrow, .hero-t-marquee, .hero-t-cue, .ht-w {
+      opacity: 1 !important; transform: none !important;
+    }
+  }
+
+  /* On small screens, chips stop floating and sit as a centred wrap row below the CTAs */
+  @media (max-width: 860px) {
+    .hero-chips {
+      position: static; inset: auto; pointer-events: auto;
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+      margin-top: calc(var(--u) * 4);
+    }
+    .hero-chip { position: static !important; animation: none !important; }
+  }
+
+
+  /* The headline — oversized statement type (Exaggerated Minimalism). */
+  .hero-t-headline {
+    font-family: var(--font-display, var(--sans));
+    font-weight: 800;
+    font-size: clamp(46px, 7.2vw, 116px);
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    margin: auto 0;
+    color: var(--ink);
+    max-width: 16ch;
+  }
+  /* The accent phrase — painted in the brand gradient for fashion colour energy */
+  .ht-grad .ht-w {
+    background: var(--grad);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+    font-weight: 800;
+  }
+  /* Eyebrow above the headline */
+  .hero-t-eyebrow {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--champagne-3, var(--champagne));
+    margin-bottom: calc(var(--u) * 3);
+    opacity: 0; transform: translateY(14px);
+    transition: opacity .8s ease .2s, transform .8s cubic-bezier(.22,1,.36,1) .2s;
+  }
+  .hero-t.in .hero-t-eyebrow { opacity: 1; transform: translateY(0); }
+  .hero-t-eyebrow::before {
+    content: ''; width: 28px; height: 2px; background: var(--grad);
+  }
+  .ht-line { padding: 0; }
+  .ht-line {
+    display: block;
+    overflow: hidden;
+  }
+  .ht-mask {
+    display: inline-block;
+    overflow: hidden;
+    line-height: 1;
+    padding-bottom: 0.08em;
+  }
+  .ht-w {
+    display: inline-block;
+    transform: translateY(110%) skewY(7deg);
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+  .hero-t.in .ht-w {
+    transform: translateY(0) skewY(0);
+    opacity: 1;
+    transition:
+      transform 1.1s cubic-bezier(.22,1,.36,1),
+      opacity .8s ease;
+  }
+  .hero-t.in .ht-line:nth-child(1) .ht-w { transition-delay: .35s; }
+  .hero-t.in .ht-line:nth-child(2) .ht-w { transition-delay: .50s; }
+  .hero-t.in .ht-line:nth-child(3) .ht-w { transition-delay: .65s; }
+  .hero-t.in .ht-line:nth-child(4) .ht-w { transition-delay: .80s; }
+  .ht-line-soft .ht-w { color: var(--ink-5); font-weight: 500; }
+
+  /* Sub-line + CTAs sit side by side, anchored to the lower hero */
+  .hero-t-foot {
+    display: grid; grid-template-columns: 8fr 4fr;
+    gap: 30px;
+    align-items: end;
+    margin-top: calc(var(--u) * 1);
+    padding-top: calc(var(--u) * 3);
+    padding-bottom: calc(var(--u) * 3);
+    border-top: 1px solid var(--line);
+    opacity: 0; transform: translateY(20px);
+    transition: opacity .9s ease 1.1s, transform .9s cubic-bezier(.22,1,.36,1) 1.1s;
+  }
+  .hero-t-sub {
+    font-size: clamp(15px, 1.35vw, 19px);
+    line-height: 1.6;
+    color: var(--ink-3);
+    max-width: 560px;
+    margin: 0;
+  }
+  .hero-t.in .hero-t-foot { opacity: 1; transform: translateY(0); }
+  @media (max-width: 860px) {
+    .hero-t-foot { grid-template-columns: 1fr; gap: calc(var(--u) * 4); }
+  }
+  .hero-t-ctas {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    justify-self: end;
+  }
+  @media (max-width: 860px) { .hero-t-ctas { justify-self: start; } }
+
+  .ht-btn {
+    display: inline-flex; align-items: center;
+    padding: 18px 28px;
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    border: 1px solid transparent;
+    text-decoration: none;
+  }
+  .ht-btn-solid {
+    background: var(--champagne); color: #fff;
+    border-color: var(--champagne);
+  }
+  .ht-btn-solid:hover { background: transparent; color: var(--champagne); border-color: var(--champagne); }
+  .ht-btn-ghost {
+    background: transparent; color: var(--ink); border-color: var(--ink);
+  }
+  .ht-btn-ghost:hover { background: var(--ink); color: var(--paper); }
+
+  /* Streaming services marquee — LOCKED to the bottom edge of the hero.
+     position:absolute pins it there no matter what changes in the headline/foot
+     above, so the running strip always sits flush at the bottom of the viewport. */
+  .hero-t-marquee {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 4;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 16px 0;
+    overflow: hidden;
+    background: var(--paper-2);
+    opacity: 0;
+    transition: opacity 1s ease 1.3s;
+  }
+  .hero-t.in .hero-t-marquee { opacity: 1; }
+  .htm-track {
+    display: flex; gap: 0; white-space: nowrap;
+    animation: htm-scroll 35s linear infinite;
+    will-change: transform;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: clamp(18px, 1.8vw, 24px);
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .htm-track > span { padding: 0; flex-shrink: 0; }
+  .htm-track .htm-dot {
+    display: inline-block;
+    width: 6px; height: 6px; background: var(--champagne);
+    margin: 0 36px; flex-shrink: 0;
+    align-self: center;
+  }
+  .hero-t-marquee:hover .htm-track { animation-play-state: paused; }
+  @keyframes htm-scroll { to { transform: translateX(-50%); } }
+
+  /* Scroll cue — bottom-left vertical line + label */
+  .hero-t-cue {
+    position: absolute; right: calc(var(--u) * 4); bottom: calc(var(--u) * 12);
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 1s ease 1.6s;
+  }
+  .hero-t.in .hero-t-cue { opacity: 1; }
+  @media (max-width: 720px) { .hero-t-cue { display: none; } }
+
+  /* C6 — mobile hero: the centred stack (eyebrow + chips + headline + sub +
+     2 CTAs) overflows the 100vh box on phones/landscape, so the absolutely
+     pinned marquee paints over it and overflow:hidden clips the rest. On small
+     screens let the hero grow with its content and flow the marquee inline. */
+  @media (max-width: 720px) {
+    .hero-t {
+      height: auto; min-height: 0; overflow: visible;
+    }
+    .hero-t-wrap { padding-bottom: calc(var(--u) * 4); }
+    .hero-t-marquee {
+      position: relative; left: auto; right: auto; bottom: auto;
+      margin-top: calc(var(--u) * 4);
+    }
+    .hero-t-center { justify-content: flex-start; }
+  }
+  .ht-cue-line {
+    width: 1px; height: 50px; background: var(--ink);
+    position: relative; overflow: hidden;
+  }
+  .ht-cue-line::after {
+    content: ''; position: absolute; top: -50%; left: 0; right: 0;
+    height: 50%; background: var(--champagne);
+    animation: ht-cue 2.2s ease-in-out infinite;
+  }
+  @keyframes ht-cue {
+    0%   { top: -50%; }
+    100% { top: 100%; }
+  }
+  .ht-cue-label {
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--ink-5);
+    writing-mode: vertical-rl; transform: rotate(180deg);
+  }
+
+  /* ============================================================
+     (Legacy) HERO V2 — kept for compatibility but no longer rendered.
+     ============================================================ */
+  /* ============================================================
+     HERO V2 — full animation kit
+     Parallax depth · word-by-word text reveal · stacked card
+     slide-in · horizontal scrolling strip.
+     ============================================================ */
+  .hero-v2 {
+    position: relative;
+    padding: calc(var(--u) * 12) 0 0;
+    overflow: hidden;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+
+  /* Parallax depth layer */
+  .hero-parallax {
+    position: absolute; inset: 0;
+    pointer-events: none; z-index: 0;
+    overflow: hidden;
+  }
+  .parallax-mark {
+    position: absolute;
+    font-family: var(--mono); font-weight: 500;
+    line-height: 0.8; letter-spacing: -0.04em;
+    color: var(--ink); opacity: 0.04;
+    user-select: none; will-change: transform;
+  }
+  .parallax-mark.p-1 {
+    top: 10%; right: -4%;
+    font-size: clamp(280px, 38vw, 560px);
+  }
+  .parallax-mark.p-2 {
+    bottom: 22%; left: -2%;
+    font-size: clamp(180px, 22vw, 340px);
+  }
+  .parallax-mark.p-3 {
+    top: 38%; left: 28%;
+    font-size: clamp(120px, 14vw, 220px);
+    opacity: 0.025;
+  }
+
+  .hero-grid {
+    position: relative; z-index: 2;
+    display: grid; grid-template-columns: 7fr 5fr;
+    gap: calc(var(--u) * 8);
+    align-items: center;
+    padding-bottom: calc(var(--u) * 10);
+  }
+  @media (max-width: 960px) {
+    .hero-grid { grid-template-columns: 1fr; gap: calc(var(--u) * 5); padding-bottom: calc(var(--u) * 6); }
+  }
+  .hero-copy { max-width: 720px; }
+  .h-eyebrow { display: inline-flex; }
+
+  /* Word-by-word text reveal */
+  .hero-headline {
+    font-family: var(--sans); font-weight: 800;
+    font-size: clamp(44px, 7vw, 96px);
+    line-height: 0.98; letter-spacing: -0.045em;
+    margin: calc(var(--u) * 3) 0 calc(var(--u) * 4);
+    color: var(--ink);
+  }
+  .hero-headline .hl-line {
+    display: block; overflow: hidden;
+  }
+  .hero-headline .hl-w {
+    display: inline-block;
+    transform: translateY(120%);
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+  .hero-headline.in .hl-w {
+    transform: translateY(0);
+    opacity: 1;
+    transition: transform .9s cubic-bezier(.22,1,.36,1), opacity .7s ease;
+  }
+  .hero-headline .hl-italic .hl-w { color: var(--ink-5); }
+  .hero-headline.in .hl-italic .hl-w { transition-delay: 0.5s; }
+  /* Staggered delays per word */
+  .hero-headline.in .hl-line:nth-child(1) .hl-w:nth-child(1) { transition-delay: .05s; }
+  .hero-headline.in .hl-line:nth-child(1) .hl-w:nth-child(2) { transition-delay: .12s; }
+  .hero-headline.in .hl-line:nth-child(1) .hl-w:nth-child(3) { transition-delay: .19s; }
+  .hero-headline.in .hl-line:nth-child(2) .hl-w:nth-child(1) { transition-delay: .26s; }
+  .hero-headline.in .hl-line:nth-child(2) .hl-w:nth-child(2) { transition-delay: .33s; }
+  .hero-headline.in .hl-line:nth-child(3) .hl-w:nth-child(1) { transition-delay: .48s; }
+  .hero-headline.in .hl-line:nth-child(3) .hl-w:nth-child(2) { transition-delay: .55s; }
+  .hero-headline.in .hl-line:nth-child(3) .hl-w:nth-child(3) { transition-delay: .62s; }
+
+  .h-body {
+    opacity: 0; transform: translateY(20px);
+    transition: opacity .8s ease .8s, transform .8s cubic-bezier(.22,1,.36,1) .8s;
+    margin-bottom: calc(var(--u) * 4);
+  }
+  .h-body.in { opacity: 1; transform: translateY(0); }
+
+  .h-ctas {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity .8s ease 1s, transform .8s cubic-bezier(.22,1,.36,1) 1s;
+  }
+  .h-ctas.in { opacity: 1; transform: translateY(0); }
+
+  /* Stacked cards */
+  .hero-stack {
+    position: relative;
+    height: 560px;
+    perspective: 1400px;
+    padding: 60px;            /* room for the fanned-out cards */
+  }
+  @media (max-width: 960px) {
+    .hero-stack { height: 440px; max-width: 480px; padding: 40px; }
+  }
+  .stack-card {
+    position: absolute; inset: 0;
+    background: var(--paper-2);
+    border: 1px solid var(--line-2);
+    padding: calc(var(--u) * 3) calc(var(--u) * 3);
+    display: grid; grid-template-rows: auto 1fr auto auto;
+    gap: calc(var(--u) * 1);
+    opacity: 0;
+    transition: transform 1s cubic-bezier(.22,1,.36,1), opacity .8s ease, background .4s, border-color .4s;
+    will-change: transform, opacity;
+    cursor: pointer;
+    transform-origin: center center;
+  }
+  .stack-card:hover { background: var(--paper-3); border-color: var(--champagne); }
+  .stack-card .sc-tag {
+    align-self: start;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--paper);
+    background: var(--ink); padding: 6px 12px;
+    justify-self: start;
+    transition: background .35s;
+  }
+  .stack-card:hover .sc-tag { background: var(--champagne); }
+  .stack-card .sc-num {
+    font-family: var(--mono); font-weight: 500;
+    font-size: clamp(80px, 9vw, 140px);
+    line-height: 0.86; letter-spacing: -0.04em;
+    color: var(--ink); opacity: 0.18;
+    align-self: end;
+    transition: color .35s, opacity .35s;
+  }
+  .stack-card:hover .sc-num { color: var(--champagne); opacity: 0.55; }
+  .stack-card .sc-label {
+    font-family: var(--sans); font-weight: 700;
+    font-size: clamp(20px, 2vw, 28px);
+    letter-spacing: -0.025em; line-height: 1.1;
+    color: var(--ink);
+  }
+  .stack-card .sc-list {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.06em; line-height: 1.7;
+    color: var(--ink-5);
+    padding-top: calc(var(--u) * 2);
+    border-top: 1px solid var(--line-2);
+  }
+  /* Bullet pairs — two service names per row, mono, divider between */
+  .stack-card .sc-bullets {
+    list-style: none; padding: 0; margin: 0;
+    display: grid; gap: 6px;
+    padding-top: calc(var(--u) * 2);
+    border-top: 1px solid var(--line-2);
+  }
+  .stack-card .sc-bullets li {
+    display: flex; gap: 12px; align-items: center;
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.04em; color: var(--ink-3);
+  }
+  .stack-card .sc-bullets li span {
+    flex: 1; padding: 2px 0;
+  }
+  .stack-card .sc-bullets li span + span {
+    border-left: 1px solid var(--line-2);
+    padding-left: 12px;
+  }
+  /* Footer — summary + arrow */
+  .stack-card .sc-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: calc(var(--u) * 2);
+    border-top: 1px solid var(--line-2);
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-5);
+  }
+  .stack-card .sc-arr {
+    font-family: var(--mono); font-size: 14px;
+    color: var(--ink-7); transition: color .35s, transform .35s;
+  }
+  .stack-card.is-active .sc-arr { color: var(--champagne); transform: translateX(4px); }
+  /* Initial OFF-SCREEN positions — cards enter from below */
+  .stack-card.sc-1 { transform: translate(0, 140%) rotate(-12deg) scale(.85); z-index: 3; }
+  .stack-card.sc-2 { transform: translate(0, 140%) rotate(0deg)   scale(.85); z-index: 2; }
+  .stack-card.sc-3 { transform: translate(0, 140%) rotate(12deg)  scale(.85); z-index: 1; }
+
+  /* Auto-cycling carousel — only the active card sits front-and-center.
+     The two waiting cards stack behind it, slightly offset and dimmed.
+     Cards cycle automatically every ~3.5s via JS toggling .is-active. */
+  .stack-card {
+    transition:
+      transform 1.1s cubic-bezier(.22,1,.36,1),
+      opacity .8s ease,
+      background .4s, border-color .4s,
+      box-shadow .6s ease;
+  }
+  /* Default state — waiting in the back */
+  .hero-stack.in .stack-card {
+    opacity: 0.42;
+    transform: translate(40px, 40px) rotate(6deg) scale(.86);
+    z-index: 1;
+  }
+  /* Active card — front and center */
+  .hero-stack.in .stack-card.is-active {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    z-index: 5;
+    box-shadow: 0 30px 70px -30px rgba(0,0,0,.45);
+    background: var(--paper-3);
+    border-color: var(--champagne);
+  }
+  /* The card directly behind the active one — slightly visible to telegraph it's next */
+  .hero-stack.in .stack-card.is-next {
+    opacity: 0.7;
+    transform: translate(20px, 20px) rotate(3deg) scale(.92);
+    z-index: 3;
+  }
+  /* Highlight the active card's accents */
+  .hero-stack.in .stack-card.is-active .sc-tag { background: var(--champagne); }
+  .hero-stack.in .stack-card.is-active .sc-num { color: var(--champagne); opacity: 0.55; }
+  .hero-stack.in .stack-card.is-active .sc-label { color: var(--ink); }
+  /* Hover pause — give users the "I can grab this" hint */
+  .stack-card { cursor: pointer; }
+  .stack-card:hover { box-shadow: 0 30px 70px -30px rgba(0,0,0,.45); }
+
+  /* Progress dots — small UI to show which card is active */
+  .stack-dots {
+    position: absolute; left: 0; right: 0; bottom: -32px;
+    display: flex; gap: 10px; justify-content: center;
+    z-index: 6;
+  }
+  .stack-dots button {
+    width: 28px; height: 3px;
+    background: var(--line-2);
+    cursor: pointer; border: 0; padding: 0;
+    transition: background .35s, width .35s;
+  }
+  .stack-dots button.is-active {
+    background: var(--champagne);
+    width: 44px;
+  }
+  .stack-dots button:hover { background: var(--ink-5); }
+  .stack-dots button.is-active:hover { background: var(--champagne); }
+
+  @media (max-width: 960px) {
+    .hero-stack.in .stack-card { transform: translate(24px, 24px) rotate(4deg) scale(.88); }
+    .hero-stack.in .stack-card.is-next { transform: translate(12px, 12px) rotate(2deg) scale(.94); }
+  }
+
+  /* Horizontal scrolling strip */
+  .hero-scroll-strip {
+    margin-top: auto;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+    padding: 22px 0;
+    background: var(--paper-2);
+    position: relative; z-index: 2;
+  }
+  .hss-track {
+    display: flex; gap: 0; white-space: nowrap;
+    animation: hss-scroll 60s linear infinite;
+    font-family: var(--sans); font-weight: 500;
+    font-size: clamp(18px, 1.8vw, 24px);
+    letter-spacing: -0.018em;
+    color: var(--ink);
+    will-change: transform;
+  }
+  .hss-track > span {
+    display: inline-flex; align-items: center;
+    padding-right: 0;
+  }
+  .hss-track .dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--champagne); margin: 0 32px;
+    flex-shrink: 0;
+  }
+  .hero-scroll-strip:hover .hss-track { animation-play-state: paused; }
+  @keyframes hss-scroll {
+    to { transform: translateX(-50%); }
+  }
+
+  /* ============================================================
+     UNIFIED HOVER MODEL — page-wide
+     Every interactive element on this page uses the same hover
+     language as the services section: text shifts to clay (orange)
+     with a smooth 0.25s transition, optional underline animates in,
+     CTAs invert to solid orange. Consistency across all sections.
+     ============================================================ */
+
+  /* All text-style links transition to clay on hover */
+  a:not(.btn):not(.px-cta):not(.si-cta):not(.stage-cta):not(.start-cta):not(.intro-side) {
+    transition: color .25s ease;
+  }
+  a:not(.btn):not(.px-cta):not(.si-cta):not(.stage-cta):not(.start-cta):not(.intro-side):hover {
+    color: var(--champagne);
+  }
+
+  /* Hero CTAs already use .btn — ensure ghost hover lands on orange */
+  .btn-ghost:hover { background: var(--champagne) !important; color: var(--paper) !important; border-color: var(--champagne) !important; }
+  .btn-ink:hover   { background: var(--champagne) !important; color: var(--paper) !important; }
+
+  /* Intro stat cards — deeper lift; number + accent bar take the cell colour on hover */
+  .intro-stats .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-3); border-color: var(--c); }
+
+  /* Process cells — title turns orange on hover, mono prefix follows */
+  .process-cell { transition: background .3s ease; }
+  .process-cell h3 { transition: color .3s ease; }
+  .process-cell:hover { background: rgba(255,92,31,.03); }
+  .process-cell:hover h3 { color: var(--champagne); }
+  .process-cell:hover .n { color: var(--champagne); }
+
+  /* FAQ rows — question text shifts to orange on hover, plus icon follows */
+  .faq-q { transition: color .25s ease; cursor: pointer; }
+  .faq-row:hover .faq-q { color: var(--champagne); }
+  .faq-row:hover .plus { border-color: var(--champagne); color: var(--champagne); }
+  .faq-row.open:hover .plus { background: var(--champagne); color: var(--paper); border-color: var(--champagne); }
+
+  /* Promise list items in contact section */
+  .promise-block li { transition: color .25s ease; cursor: default; }
+  .promise-block li:hover { color: var(--ink); }
+  .promise-block li::before { transition: transform .25s ease; }
+  .promise-block li:hover::before { transform: scale(1.3); }
+
+  /* Marquee strip — pause and orange dots when hovered */
+  .strip:hover .strip-track { animation-play-state: paused; }
+  .strip-track .dot { transition: background .3s ease, transform .3s ease; }
+  .strip:hover .strip-track .dot { transform: scale(1.4); }
+
+  /* Mono eyebrows — subtle dash extension on hover of their parent block */
+  .mono.with-rule::before { transition: width .35s cubic-bezier(.22,1,.36,1), background .35s ease; }
+  section:hover .mono.with-rule::before { width: 42px; background: var(--champagne); }
+
+  /* Section headlines: italic muted spans turn orange */
+  .display .it { transition: color .35s ease; }
+  section:hover .display .it { color: var(--champagne); }
+
+  /* Body lead paragraphs lift slightly when hovered */
+  .body-lg { transition: color .3s ease; }
+  .body-lg:hover { color: var(--ink); }
+
+  /* Header: uses the standard global site header (same as the homepage) —
+     no page overrides, so .topnav from styles.css renders identically here. */
+
+  /* Footer */
+  .footer, #site-footer, #site-footer * {
+    background-color: transparent !important;
+  }
+  #site-footer { background: var(--paper-2) !important; border-top: 1px solid var(--line) !important; padding-top: 48px; padding-bottom: 32px; }
+  #site-footer a { color: var(--ink-3) !important; }
+  #site-footer a:hover { color: var(--champagne) !important; }
+  #site-footer .h-3, #site-footer h3, #site-footer h4 { color: var(--ink) !important; }
+  #site-footer hr, #site-footer .line { border-color: var(--line) !important; background: var(--line) !important; }
+  #site-footer .text-xs, #site-footer .muted { color: var(--ink-5) !important; }
+
+  /* Theme toggle — top-right in the header zone, where users expect a theme switch.
+     Sits above the sticky nav (z-index over it) and vertically centred in nav height. */
+  #theme-toggle {
+    position: fixed; right: 22px; top: 0; z-index: 9999;
+    width: 40px; height: 56px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent; color: var(--ink-5);
+    border: none; border-radius: 0;
+    cursor: pointer; padding: 0;
+    box-shadow: none;
+    transition: color .15s;
+  }
+  #theme-toggle:hover { color: var(--champagne); }
+  #theme-toggle .ic-moon { display: none; }
+  #theme-toggle .ic-sun  { display: block; }
+  /* ============================================================
+   FEEL PACK — ambient depth, scroll progress, count-up, spotlight
+   (additive only; adapts to both themes via tokens)
+   ============================================================ */
+  /* thin scroll progress bar under the nav */
+  .ff-progress {
+    position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 10002;
+    background: linear-gradient(90deg, var(--champagne), var(--champagne-2, var(--champagne)));
+    transform-origin: 0 50%; transform: scaleX(0);
+    pointer-events: none;
+  }
+  /* ambient layer: dot grid + two soft glows; colours derive from tokens
+     so light/dark both work */
+  .ff-bg {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--ink) 9%, transparent) 1px, transparent 1px);
+    background-size: 26px 26px;
+    -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 25%, transparent 72%);
+            mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 25%, transparent 72%);
+  }
+  .ff-bg::before, .ff-bg::after {
+    content: ''; position: absolute; border-radius: 50%;
+    filter: blur(100px); will-change: transform;
+  }
+  .ff-bg::before {
+    width: 560px; height: 560px; top: -240px; right: -160px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--champagne) 26%, transparent), transparent 65%);
+    animation: ff-drift-a 24s ease-in-out infinite alternate;
+  }
+  .ff-bg::after {
+    width: 460px; height: 460px; top: 45vh; left: -200px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--champagne) 16%, transparent), transparent 65%);
+    animation: ff-drift-b 28s ease-in-out infinite alternate;
+  }
+  @keyframes ff-drift-a { to { transform: translate(-80px, 60px) scale(1.12); } }
+  @keyframes ff-drift-b { to { transform: translate(70px, -50px) scale(1.08); } }
+  /* cursor spotlight on the intro stat cards and service cards —
+     tinted by each card's own accent (--c) */
+  .intro-stats .cell::before, .px-card::before {
+    content: ''; position: absolute; inset: 0; z-index: 0; opacity: 0;
+    background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%),
+                color-mix(in srgb, var(--c, var(--champagne)) 13%, transparent), transparent 65%);
+    transition: opacity .35s ease;
+    pointer-events: none;
+  }
+  .intro-stats .cell:hover::before, .px-card:hover::before { opacity: 1; }
+  .px-card { position: relative; }
+  .px-card > * { position: relative; z-index: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .ff-bg::before, .ff-bg::after { animation: none; }
+    .ff-progress { display: none; }
+  }
+
+  :root[data-theme="light"] #theme-toggle .ic-sun  { display: none; }
+  :root[data-theme="light"] #theme-toggle .ic-moon { display: block; }
+  @media (max-width: 1099px) { #theme-toggle { right: 70px; } }
+  @media (max-width: 720px) { #theme-toggle { right: 70px; height: 48px; } }
+  @media (max-width: 960px) {
+    .px-block { margin-bottom: 80px; }
+  }
+</style>
+
+<!-- ============================================================
+     GLASS SKIN — complete dark-glassmorphism reskin (July 2026).
+     Additive layer: remove this style block, the .ff-scene markup and
+     the glass-skin script block at the end of the body to restore the
+     previous light design. Inspired reference: fashion-freelance-glass.html
+     ============================================================ -->
+<style id="ff-glass-skin">
+  /* ---- 1. Token flip: light lavender → deep-night glass ---- */
+  :root {
+    --paper:   #0C0A1C;
+    --paper-2: #131024;
+    --paper-3: rgba(255,255,255,.055);
+    --ink:     #F4F2FA;
+    --ink-2:   #EDEAF7;
+    --ink-3:   rgba(244,242,250,.84);
+    --ink-4:   rgba(244,242,250,.64);
+    --ink-5:   rgba(244,242,250,.48);
+    --ink-6:   rgba(244,242,250,.34);
+    --ink-7:   rgba(244,242,250,.20);
+    --line:    rgba(255,255,255,.10);
+    --line-2:  rgba(255,255,255,.16);
+    --champagne:    #8B5CF6;
+    --champagne-2:  #A78BFA;
+    --champagne-3:  #A78BFA;
+    --champagne-50: rgba(139,92,246,.22);
+    --shadow-1: 0 4px 18px rgba(0,0,0,.35);
+    --shadow-2: 0 18px 50px -12px rgba(0,0,0,.55);
+    --shadow-3: 0 34px 80px -20px rgba(0,0,0,.65);
+    /* glass utility */
+    --glass:        rgba(255,255,255,.055);
+    --glass-hover:  rgba(255,255,255,.095);
+    --glass-border: rgba(255,255,255,.14);
+    --grad-hot: linear-gradient(90deg, #8B5CF6, #FF4FA0);
+    /* the five logo colours — one per service card, cycling */
+    --lg-orange: #F5A623;
+    --lg-coral:  #F1543F;
+    --lg-green:  #34C165;
+    --lg-sky:    #4AA8F0;
+    --lg-yellow: #EFD84A;
+  }
+  html { color-scheme: dark; }
+  body { background: var(--paper); }
+  ::selection { background: #8B5CF6; color: #fff; }
+
+  /* ---- 2. Scene: drifting logo-colour blobs + grain + cursor glow ---- */
+  .ff-scene { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .ff-scene .blob { position: absolute; border-radius: 50%; filter: blur(95px); opacity: .38; will-change: transform; }
+  .ff-scene .b1 { width: 520px; height: 520px; background: #8B5CF6; top: -150px; left: -110px; animation: ffb-1 24s ease-in-out infinite; }
+  .ff-scene .b2 { width: 440px; height: 440px; background: var(--lg-coral); top: 30%; right: -160px; animation: ffb-2 28s ease-in-out infinite; opacity: .28; }
+  .ff-scene .b3 { width: 430px; height: 430px; background: var(--lg-green); bottom: -140px; left: 14%; animation: ffb-3 26s ease-in-out infinite; opacity: .22; }
+  .ff-scene .b4 { width: 360px; height: 360px; background: var(--lg-sky); top: 62%; right: 10%; animation: ffb-1 32s ease-in-out infinite reverse; opacity: .26; }
+  .ff-scene .b5 { width: 300px; height: 300px; background: var(--lg-orange); top: 12%; left: 42%; animation: ffb-2 30s ease-in-out infinite reverse; opacity: .2; }
+  @keyframes ffb-1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(60px,40px) scale(1.12); } }
+  @keyframes ffb-2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-70px,50px) scale(.9); } }
+  @keyframes ffb-3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,-60px) scale(1.08); } }
+  .ff-grain {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .ff-glow {
+    position: fixed; width: 440px; height: 440px; border-radius: 50%; pointer-events: none; z-index: 2;
+    background: radial-gradient(circle, rgba(139,92,246,.14), transparent 70%);
+    transform: translate(-50%,-50%); left: -600px; top: -600px;
+    transition: left .12s linear, top .12s linear;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ff-scene .blob { animation: none; }
+    .ff-glow { display: none; }
+  }
+  /* old feel-pack aurora replaced by the scene; keep its dot grid */
+  .ff-bg::before, .ff-bg::after { display: none; }
+  .ff-bg { opacity: .5; z-index: 0; }
+  .ff-progress { background: var(--grad-hot); }
+  main, .wrap, section { position: relative; z-index: 3; }
+
+  /* ---- 3. Nav + footer: dark glass ---- */
+  .topnav {
+    background: rgba(12,10,28,.55) !important;
+    backdrop-filter: saturate(150%) blur(18px) !important;
+    -webkit-backdrop-filter: saturate(150%) blur(18px) !important;
+    border-bottom: 1px solid rgba(255,255,255,.08) !important;
+    box-shadow: none !important;
+  }
+  .topnav-links a { color: rgba(244,242,250,.66) !important; }
+  .topnav-links a:hover, .topnav-links a.active { color: #fff !important; }
+  .topnav-burger span { background: #F4F2FA !important; }
+  /* the logo artwork has dark strokes — give it a small light chip so it reads on night */
+  .topnav .logo-img, .footer .logo-img {
+    background: #fff; border-radius: 10px; padding: 3px 7px; box-shadow: 0 2px 12px rgba(0,0,0,.35);
+  }
+  .topnav .btn-primary, .topnav-mobile .btn-primary {
+    background: var(--grad-hot) !important; color: #fff !important;
+    border-radius: 999px !important; border: 0 !important;
+    box-shadow: 0 8px 26px rgba(139,92,246,.4) !important;
+  }
+  .topnav-mobile { background: rgba(12,10,28,.92) !important; }
+  .topnav-mobile-links a { color: rgba(244,242,250,.8) !important; }
+  .footer { background: rgba(255,255,255,.03) !important; border-top: 1px solid var(--line) !important; }
+  .footer, #site-footer, #site-footer * { background-color: transparent; }
+
+  /* ---- 4. Type: gradient accents ---- */
+  .display .it {
+    color: transparent !important;
+    background: var(--grad-hot);
+    -webkit-background-clip: text; background-clip: text;
+  }
+  .mono.with-rule::before { background: var(--grad-hot); height: 2px; }
+
+  /* ---- 5. Buttons: pill + gradient primary, glass ghost ---- */
+  .btn { border-radius: 999px !important; }
+  .btn-ink, .btn-primary {
+    background: var(--grad-hot) !important; color: #fff !important; border: 0 !important;
+    box-shadow: 0 8px 30px rgba(139,92,246,.35);
+    transition: transform .25s ease, box-shadow .25s ease !important;
+  }
+  .btn-ink:hover, .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,79,160,.4); }
+  .btn-ghost {
+    background: var(--glass) !important; color: var(--ink) !important;
+    border: 1px solid var(--glass-border) !important;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  .btn-ghost:hover { background: var(--glass-hover) !important; }
+
+  /* ---- 6. Glass surfaces everywhere a card lives ---- */
+  .px-card, .intro-side, .intro-stats .cell, .contact-form, .promise-block,
+  .sent-card, .process-cell, .svc-media, .faq-row, .faq-q {
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+  .intro-side, .intro-stats .cell, .contact-form, .promise-block, .sent-card {
+    background: var(--glass) !important;
+    border-color: var(--glass-border) !important;
+  }
+  .intro-side:hover, .intro-stats .cell:hover { background: var(--glass-hover) !important; }
+  .px-card { background: var(--glass); border-color: var(--glass-border); border-radius: 20px; }
+  .px-card:hover, .px-card.is-active {
+    background: var(--glass-hover);
+    border-color: color-mix(in srgb, var(--local-accent, #8B5CF6) 60%, transparent);
+    box-shadow: 0 18px 55px -18px color-mix(in srgb, var(--local-accent, #8B5CF6) 45%, transparent);
+  }
+  .px-card .px-wm { color: var(--local-accent, var(--ink)); opacity: .1; }
+  .px-card:hover .px-wm, .px-card.is-active .px-wm { opacity: .2; }
+
+  /* ---- 7. The five logo colours, one per card (cycling) ---- */
+  .px-card:nth-child(5n+1) { --local-accent: var(--lg-orange); }
+  .px-card:nth-child(5n+2) { --local-accent: var(--lg-sky); }
+  .px-card:nth-child(5n+3) { --local-accent: var(--lg-green); }
+  .px-card:nth-child(5n+4) { --local-accent: var(--lg-yellow); }
+  .px-card:nth-child(5n+5) { --local-accent: var(--lg-coral); }
+  .px-card .px-side { color: var(--local-accent); border-color: color-mix(in srgb, var(--local-accent) 40%, transparent); }
+  .px-card .px-cta, .px-card .start-cta { color: var(--local-accent); border-color: color-mix(in srgb, var(--local-accent) 45%, transparent); }
+  .px-card .px-cta:hover, .px-card .start-cta:hover { background: var(--local-accent); color: #0C0A1C; border-color: var(--local-accent); }
+  .intro-side:nth-child(1) { --c: var(--lg-orange); }
+  .intro-side:nth-child(2) { --c: var(--lg-sky); }
+  .intro-stats .cell:nth-child(1) { --c: var(--lg-orange); }
+  .intro-stats .cell:nth-child(2) { --c: var(--lg-sky); }
+  .intro-stats .cell:nth-child(3) { --c: var(--lg-green); }
+  .intro-stats .cell:nth-child(4) { --c: var(--lg-yellow); }
+
+  /* ---- 8. Forms on glass ---- */
+  .contact-form .input {
+    background: rgba(255,255,255,.06) !important;
+    border-color: var(--glass-border) !important;
+    color: var(--ink) !important;
+  }
+  .contact-form .input::placeholder { color: var(--ink-5) !important; }
+  .contact-form .input:focus {
+    border-color: #8B5CF6 !important;
+    box-shadow: 0 0 0 3px rgba(139,92,246,.25) !important;
+    background: rgba(255,255,255,.08) !important;
+  }
+  .contact-form select.input option { background: #131024; color: var(--ink); }
+
+  /* ---- 9. Hide the theme toggle — this page is night-only now ---- */
+  #theme-toggle { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- Feel pack: ambient depth + scroll progress (decorative) -->
+<div class="ff-bg" aria-hidden="true"></div>
+<div class="ff-progress" id="ff-progress" aria-hidden="true"></div>
+<!-- GLASS SKIN scene -->
+<div class="ff-scene" aria-hidden="true">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <div class="blob b4"></div><div class="blob b5"></div>
+</div>
+<div class="ff-grain" aria-hidden="true"></div>
+<div class="ff-glow" id="ff-glow" aria-hidden="true"></div>
+
+<!-- Skip link — first focusable element for keyboard users -->
+<a class="skip-link" href="#agency-main">Skip to content</a>
+
+<!-- Light / dark mode toggle -->
+<button id="theme-toggle" type="button" aria-label="Toggle light / dark mode" title="Toggle theme">
+  <svg class="ic-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6L19 19M19 5l-1.4 1.4M6.4 17.6L5 19"/>
+  </svg>
+  <svg class="ic-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+  </svg>
+</button>
+
+<!-- Project's standard site nav (renders into this mount via site.js) -->
+<div id="site-nav" data-current="agency"></div>
+
+<!-- Main content landmark — wraps hero through contact (nav + footer stay outside) -->
+<main id="agency-main" tabindex="-1">
+
+<!-- ============================ HERO (TYPE-ONLY) ============================ -->
+<section class="hero-t">
+  <!-- Layer 0: faint orbiting word ghosts that drift on scroll -->
+  <div class="hero-t-bg" aria-hidden="true">
+    <span class="bgw bgw-1">SERVICES</span>
+  </div>
+
+  <div class="wrap hero-t-wrap">
+    <div class="hero-t-center">
+
+      <!-- Floating, colour-coded service chips around the headline -->
+      <div class="hero-chips" aria-hidden="true">
+        <a href="#side-01" class="hero-chip c-violet p1">Tech Pack</a>
+        <a href="#side-01" class="hero-chip c-cyan   p2">3D Sampling</a>
+        <a href="#side-01" class="hero-chip c-green  p3">Pattern CAD</a>
+        <a href="#side-02" class="hero-chip c-amber  p4">AI Photography</a>
+        <a href="#side-02" class="hero-chip c-pink   p5">Website</a>
+        <a href="#side-02" class="hero-chip c-indigo p6">AI Agent</a>
+      </div>
+
+      <span class="hero-t-eyebrow">10 services · 2 sides · one team</span>
+
+      <!-- Headline -->
+      <h1 class="hero-t-headline" id="hero-t-headline">
+        <span class="ht-line"><span class="ht-mask"><span class="ht-w">Every fashion</span></span></span>
+        <span class="ht-line"><span class="ht-mask"><span class="ht-w">service you need,</span></span></span>
+        <span class="ht-line"><span class="ht-mask"><span class="ht-w">start to finish,</span></span></span>
+        <span class="ht-line ht-grad"><span class="ht-mask"><span class="ht-w">one studio.</span></span></span>
+      </h1>
+
+      <p class="hero-t-sub">
+        Designs, tech packs, 3D samples, patterns, AI photography, listings
+        and websites — ten services, delivered factory-ready by one in-house team.
+      </p>
+      <div class="hero-t-ctas">
+        <a href="#side-01" class="ht-btn ht-btn-solid">See our services</a>
+        <a href="#contact" class="ht-btn ht-btn-ghost">Start a project</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Streaming services marquee — 10 names looping infinitely -->
+  <div class="hero-t-marquee" aria-hidden="true">
+    <div class="htm-track">
+      <span>Tech Pack</span><i class="htm-dot"></i>
+      <span>3D Virtual Sampling</span><i class="htm-dot"></i>
+      <span>Seamless Pattern</span><i class="htm-dot"></i>
+      <span>Pattern CAD</span><i class="htm-dot"></i>
+      <span>Dobby &amp; Jacquard</span><i class="htm-dot"></i>
+      <span>Website Development</span><i class="htm-dot"></i>
+      <span>AI Agent</span><i class="htm-dot"></i>
+      <span>AI Photography</span><i class="htm-dot"></i>
+      <span>E-Commerce Listing</span><i class="htm-dot"></i>
+      <span>Graphic Design</span><i class="htm-dot"></i>
+      <span>Tech Pack</span><i class="htm-dot"></i>
+      <span>3D Virtual Sampling</span><i class="htm-dot"></i>
+      <span>Seamless Pattern</span><i class="htm-dot"></i>
+      <span>Pattern CAD</span><i class="htm-dot"></i>
+      <span>Dobby &amp; Jacquard</span><i class="htm-dot"></i>
+      <span>Website Development</span><i class="htm-dot"></i>
+      <span>AI Agent</span><i class="htm-dot"></i>
+      <span>AI Photography</span><i class="htm-dot"></i>
+      <span>E-Commerce Listing</span><i class="htm-dot"></i>
+      <span>Graphic Design</span><i class="htm-dot"></i>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============================ INTRO ============================ -->
+<section id="intro" class="intro">
+  <div class="wrap intro-grid">
+    <!-- Left: positioning + the two sides, structured to mirror the sections below -->
+    <div class="intro-lead">
+      <span class="mono with-rule label rv">Hire our team direct</span>
+      <h2 class="display md rv">One brief in. <span class="it">One delivery out.</span></h2>
+      <p class="body-lg rv">
+        Fashion Freelancing is a fashion-tech marketplace for every service a brand needs —
+        design, tech packs, photography, websites, AI and 3D. Hire safely, get paid safely,
+        all under one in-house team.
+      </p>
+
+      <div class="intro-sides rv">
+        <a class="intro-side" href="#side-01">
+          <span class="is-index" aria-hidden="true">01</span>
+          <span class="is-body">
+            <span class="is-kicker">Side 01</span>
+            <span class="is-name">Fashion design &amp; development</span>
+            <span class="is-meta">5 services · factory-ready files</span>
+          </span>
+          <span class="is-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span>
+        </a>
+        <a class="intro-side" href="#side-02">
+          <span class="is-index" aria-hidden="true">02</span>
+          <span class="is-body">
+            <span class="is-kicker">Side 02</span>
+            <span class="is-name">AI, website &amp; digital production</span>
+            <span class="is-meta">5 services · launch &amp; sell ready</span>
+          </span>
+          <span class="is-arrow" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Right: the numbers, as premium stat cards -->
+    <div class="intro-stats rv">
+      <div class="cell">
+        <span class="k" aria-hidden="true">01</span>
+        <div class="n"><span data-count="10">0</span></div>
+        <div class="s">services</div>
+        <p class="d">Every discipline a brand needs, in one place.</p>
+      </div>
+      <div class="cell">
+        <span class="k" aria-hidden="true">02</span>
+        <div class="n"><span data-count="2">0</span></div>
+        <div class="s">sides · one team</div>
+        <p class="d">Design &amp; development, plus AI &amp; digital.</p>
+      </div>
+      <div class="cell">
+        <span class="k" aria-hidden="true">03</span>
+        <div class="n"><span data-count="24">0</span>h</div>
+        <div class="s">reply window</div>
+        <p class="d">A real human replies within one working day.</p>
+      </div>
+      <div class="cell">
+        <span class="k" aria-hidden="true">04</span>
+        <div class="n"><span data-count="100">0</span>%</div>
+        <div class="s">paid safely</div>
+        <p class="d">Escrow protection on every project, start to finish.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ SIDE 01 ONLY — same px-block mechanism ============================ -->
+<section id="side-01" class="px-block">
+  <div class="px-pin" id="px-pin-s1">
+    <div class="px-viewport">
+      <div class="wrap px-head-wrap">
+        <div class="px-head">
+          <div>
+            <h2 class="display md">Fashion design <span class="it">&amp; development.</span></h2>
+          </div>
+          <div class="index">
+            Tech packs, 3D virtual sampling, repeat patterns, CAD, and woven structures.<br>
+            <span style="color:var(--ink-7);">Five services · factory-ready files.</span>
+          </div>
+        </div>
+      </div>
+      <div class="px-track" id="px-track-s1">
+
+        <article class="px-card" data-step="1" data-side="Side 01" data-side-tag="01" data-svc="tech-pack">
+          <span class="px-wm">01</span>
+          <div class="px-top"><span class="px-num">01<span class="of"> / 05</span></span><span class="px-side">Fashion dev.</span></div>
+          <div class="px-body">
+            <h3>Tech Pack.</h3>
+            <p class="px-desc">Factory-ready spec files that tell the maker exactly how to build it.</p>
+            <ul>
+              <li><span class="li-n">01</span><span>We create professional tech packs for fashion production.</span></li>
+              <li><span class="li-n">02</span><span>Each file includes measurements, trims, fabrics, construction details, and specifications.</span></li>
+              <li><span class="li-n">03</span><span>This helps factories understand the design clearly.</span></li>
+              <li><span class="li-n">04</span><span>It reduces sampling errors, delays, and production confusion.</span></li>
+            </ul>
+          </div>
+          <div class="px-foot">
+            <a class="px-cta start-cta" data-svc="tech-pack" href="services/tech-pack.html">Start →</a>
+            <span class="px-hint">Card 01</span>
+          </div>
+        </article>
+
+        <article class="px-card" data-step="2" data-side="Side 01" data-side-tag="01" data-svc="3d-virtual-sampling">
+          <span class="px-wm">02</span>
+          <div class="px-top"><span class="px-num">02<span class="of"> / 05</span></span><span class="px-side">Fashion dev.</span></div>
+          <div class="px-body">
+            <h3>3D Virtual Sampling.</h3>
+            <p class="px-desc">Photoreal garment samples, made and reviewed before a stitch is cut.</p>
+            <ul>
+              <li><span class="li-n">01</span><span>We create realistic 3D garment samples before physical production.</span></li>
+              <li><span class="li-n">02</span><span>This helps visualize fit, silhouette, fabric fall, and design details.</span></li>
+              <li><span class="li-n">03</span><span>Brands can review and improve designs faster.</span></li>
+              <li><span class="li-n">04</span><span>It saves sampling cost, time, and material waste.</span></li>
+            </ul>
+          </div>
+          <div class="px-foot">
+            <a class="px-cta start-cta" data-svc="3d-virtual-sampling" href="services/3d-virtual-sampling.html">Start →</a>
+            <span class="px-hint">Card 02</span>
+          </div>
+        </article>
+
+        <article class="px-card" data-step="3" data-side="Side 01" data-side-tag="01" data-svc="seamless-pattern">
+          <span class="px-wm">03</span>
+          <div class="px-top"><span class="px-num">03<span class="of"> / 05</span></span><span class="px-side">Fashion dev.</span></div>
+          <div class="px-body">
+            <h3>Seamless Pattern.</h3>
+            <p class="px-desc">Repeat prints that tile flawlessly across any fabric or surface.</p>
+            <ul>
+              <li><span class="li-n">01</span><span>We design seamless repeat patterns for fabrics, prints, and textiles.</span></li>
+              <li><span class="li-n">02</span><span>Each pattern is made to repeat smoothly without visible breaks.</span></li>
+              <li><span class="li-n">03</span><span>Suitable for apparel, home textiles, accessories, and digital printing.</span></li>
+              <li><span class="li-n">04</span><span>This helps create unique and production-ready fabric designs.</span></li>
+            </ul>
+          </div>
+          <div class="px-foot">
+            <a class="px-cta start-cta" data-svc="seamless-pattern" href="services/seamless-pattern.html">Start →</a>
+            <span class="px-hint">Card 03</span>
+          </div>
+        </article>
+
+        <article class="px-card" data-step="4" data-side="Side 01" data-side-tag="01" data-svc="pattern-cad">
+          <span class="px-wm">04</span>
+          <div class="px-top"><span class="px-num">04<span class="of"> / 05</span></span><span class="px-side">Fashion dev.</span></div>
+          <div class="px-body">
+            <h3>Pattern CAD.</h3>
+            <p class="px-desc">Precise digital patterns, graded and ready for sampling to production.</p>
+            <ul>
+              <li><span class="li-n">01</span><span>We create accurate digital garment patterns using CAD software.</span></li>
+              <li><span class="li-n">02</span><span>Patterns are developed with proper measurements, fit, and construction logic.</span></li>
+              <li><span class="li-n">03</span><span>They can be used for sampling, grading, and production.</span></li>
+              <li><span class="li-n">04</span><span>This improves accuracy and speeds up the manufacturing process.</span></li>
+            </ul>
+          </div>
+          <div class="px-foot">
+            <a class="px-cta start-cta" data-svc="pattern-cad" href="services/pattern-cad.html">Start →</a>
+            <span class="px-hint">Card 04</span>
+          </div>
+        </article>
+
+        <article class="px-card" data-step="5" data-side="Side 01" data-side-tag="01" data-svc="dobby-jacquard">
+          <span class="px-wm">05</span>
+          <div class="px-top"><span class="px-num">05<span class="of"> / 05</span></span><span class="px-side">Fashion dev.</span></div>
+          <div class="px-body">
+            <h3>Dobby &amp; Jacquard.</h3>
+            <p class="px-desc">Custom woven textile designs with a premium, high-end finish.</p>
+            <ul>
+              <li><span class="li-n">01</span><span>We create detailed dobby and jacquard textile designs for woven fabrics.</span></li>
+              <li><span class="li-n">02</span><span>Designs are developed with structure, repeat, texture, and production feasibility in mind.</span></li>
+              <li><span class="li-n">03</span><span>Suitable for fashion, furnishing, ethnic wear, and premium fabric development.</span></li>
+              <li><span class="li-n">04</span><span>This helps brands create custom woven designs with a high-end finish.</span></li>
+            </ul>
+          </div>
+          <div class="px-foot">
+            <a class="px-cta start-cta" data-svc="dobby-jacquard" href="services/dobby-jacquard.html">Start →</a>
+            <span class="px-hint">Card 05</span>
+          </div>
+        </article>
+
+      </div>
+
+      <div class="px-cockpit">
+        <div class="pc-num"><span class="now" id="pc-now-s1">01</span><span style="color:var(--ink-5);"> / 05</span></div>
+        <div class="pc-track" id="pc-track-cockpit-s1" style="--p:20%;"></div>
+        <div class="pc-side" id="pc-side-s1">Side 01</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ SIDE 02 ONLY — same px-block mechanism ============================ -->
+<section id="side-02" class="px-block">
+  <div class="px-pin" id="px-pin-s2">
+    <div class="px-viewport">
+      <div class="wrap px-head-wrap">
+        <div class="px-head">
+          <div>
+            <h2 class="display md">AI, website <span class="it">&amp; digital production.</span></h2>
+          </div>
+          <div class="index">
+            Website development, AI agents, AI photography, e-commerce listings and graphic design.<br>
+            <span style="color:var(--ink-7);">Five services · launch &amp; sell ready.</span>
+          </div>
+        </div>
+      </div>
+      <div class="px-track" id="px-track-s2">
+
+        <article class="px-card" data-step="1" data-side="Side 02" data-side-tag="02" data-svc="website">
+          <span class="px-wm">01</span>
+          <div class="px-top"><span class="px-num">01<span class="of"> / 05</span></span><span class="px-side">Digital prod.</span></div>
+          <div class="px-body">
+            <h3>Website Development.</h3>
+            <p class="px-desc">Modern, mobile-ready sites that turn visitors into customers.</p>
+            <ul>
+              <li><span class="li-n">01</span><span>We design and develop modern websites for brands and businesses.</span></li>
+              <li><span class="li-n">02</span><span>Each website is built to look professional, clear, and easy to use.</span></li>
+              <li><span class="li-n">03</span><span>We focus on design, content flow, mobile experience, and business goals.</span></li>
+              <li><span class="li-n">04</span><span>This helps brands build trust and convert visitors into customers.</span></li>
+            </ul>
+          </div>
+          <div class="px-foot">
+            <a class="px-cta start-cta" data-svc="website" href="services/website.html">Start →</a>
+            <span class="px-hint">Card 01</span>
+          </div>
+        </article>
+
+        <article class="px-card" data-step="2" data-side="Side 02" data-side-tag="02" data-svc="ai-agent">
+          <span class="px-wm">02</span>
+          <div class="px-top"><span class="px-num">02<span class="of"> / 05</span></span><span class="px-side">Digital prod.</span></div>
+          <div class="px-body">
+            <h3>AI Agent.</h3>
+            <p class="px-desc">Always-on assistants that answer, guide, and capture leads 24/7.</p>
+            <ul>
+              <li><span class="li-n">01</span><span>We build AI agents that can support customer service, lead generation, and business automation.</span></li>
+              <li><span class="li-n">02</span><span>They can answer questions, guide users, collect enquiries, and reduce manual work.</span></li>
+              <li><span class="li-n">03</span><span>AI agents work 24/7 across websites and digital platforms.</span></li>
+              <li><span class="li-n">04</span><span>This helps businesses respond faster and operate more efficiently.</span></li>
+            </ul>
+          </div>
+          <div class="px-foot">
+            <a class="px-cta start-cta" data-svc="ai-agent" href="services/ai-agent.html">Start →</a>
+            <span class="px-hint">Card 02</span>
+          </div>
+        </article>
+
+        <article class="px-card" data-step="3" data-side="Side 02" data-side-tag="02" data-svc="ai-photography">
+          <span class="px-wm">03</span>
+          <div class="px-top"><span class="px-num">03<span class="of"> / 05</span></span><span class="px-side">Digital prod.</span></div>
+          <div class="px-body">
+            <h3>AI Photography.</h3>
+            <p class="px-desc">Campaign-grade model and product visuals, made without a shoot.</p>
+            <ul>
+              <li><span class="li-n">01</span><span>We create AI-powered model, product, and lifestyle photography.</span></li>
+              <li><span class="li-n">02</span><span>This helps brands produce campaign-style visuals without a studio or shoot.</span></li>
+              <li><span class="li-n">03</span><span>Ideal for fashion, e-commerce, product launches, and social media.</span></li>
+              <li><span class="li-n">04</span><span>It saves time, cost, and gives brands unlimited creative flexibility.</span></li>
+            </ul>
+          </div>
+          <div class="px-foot">
+            <a class="px-cta start-cta" data-svc="ai-photography" href="services/ai-photography.html">Start →</a>
+            <span class="px-hint">Card 03</span>
+          </div>
+        </article>
+
+        <article class="px-card" data-step="4" data-side="Side 02" data-side-tag="02" data-svc="ecom-listing">
+          <span class="px-wm">04</span>
+          <div class="px-top"><span class="px-num">04<span class="of"> / 05</span></span><span class="px-side">Digital prod.</span></div>
+          <div class="px-body">
+            <h3>E-Commerce Listing.</h3>
+            <p class="px-desc">Optimised listings that turn browsers into faster buying decisions.</p>
+            <ul>
+              <li><span class="li-n">01</span><span>We create optimized product listings for online stores and marketplaces.</span></li>
+              <li><span class="li-n">02</span><span>This includes product titles, descriptions, images, specifications, and listing structure.</span></li>
+              <li><span class="li-n">03</span><span>Each listing is designed to improve clarity and buyer confidence.</span></li>
+              <li><span class="li-n">04</span><span>It helps customers understand the product and make faster purchase decisions.</span></li>
+            </ul>
+          </div>
+          <div class="px-foot">
+            <a class="px-cta start-cta" data-svc="ecom-listing" href="services/ecom-listing.html">Start →</a>
+            <span class="px-hint">Card 04</span>
+          </div>
+        </article>
+
+        <article class="px-card" data-step="5" data-side="Side 02" data-side-tag="02" data-svc="graphic-design">
+          <span class="px-wm">05</span>
+          <div class="px-top"><span class="px-num">05<span class="of"> / 05</span></span><span class="px-side">Digital prod.</span></div>
+          <div class="px-body">
+            <h3>Graphic Design.</h3>
+            <p class="px-desc">Polished creatives and brand assets for every channel, print or digital.</p>
+            <ul>
+              <li><span class="li-n">01</span><span>We create professional graphic designs for digital and print communication.</span></li>
+              <li><span class="li-n">02</span><span>This includes social media creatives, brochures, banners, branding assets, and marketing materials.</span></li>
+              <li><span class="li-n">03</span><span>Each design is made to look clean, consistent, and brand-focused.</span></li>
+              <li><span class="li-n">04</span><span>This helps businesses present themselves more professionally.</span></li>
+            </ul>
+          </div>
+          <div class="px-foot">
+            <a class="px-cta start-cta" data-svc="graphic-design" href="services/graphic-design.html">Start →</a>
+            <span class="px-hint">Card 05</span>
+          </div>
+        </article>
+
+      </div>
+
+      <div class="px-cockpit">
+        <div class="pc-num"><span class="now" id="pc-now-s2">01</span><span style="color:var(--ink-5);"> / 05</span></div>
+        <div class="pc-track" id="pc-track-cockpit-s2" style="--p:20%;"></div>
+        <div class="pc-side" id="pc-side-s2">Side 02</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PROCESS ============================ -->
+<section id="process" class="process">
+  <div class="process-pin" id="process-pin">
+   <div class="wrap">
+    <div class="process-head">
+      <div>
+        <span class="mono with-rule">How a project runs</span>
+        <h2 class="display md">Four moves. <span class="it">No surprises.</span></h2>
+      </div>
+      <p class="body-lg">
+        Every project is sized the same way — so you know when files arrive,
+        when revisions happen, and when the last invoice clears.
+      </p>
+    </div>
+
+    <div class="process-grid">
+      <div class="process-cell">
+        <div class="n">01. Brief</div>
+        <h3>You send a reference.</h3>
+        <p>Sketch, sample, screenshot or a paragraph. We come back with scope, price and a delivery date inside 24 hours.</p>
+      </div>
+      <div class="process-cell">
+        <div class="n">02. Setup</div>
+        <h3>One channel, one lead.</h3>
+        <p>A shared workspace is opened. One person owns your project end to end. NDAs signed before any reference moves.</p>
+      </div>
+      <div class="process-cell">
+        <div class="n">03. Build</div>
+        <h3>Drafts. Reviews. Revisions.</h3>
+        <p>You see work as it's made - not at the end. Two revision rounds are baked into every package.</p>
+      </div>
+      <div class="process-cell">
+        <div class="n">04. Handover</div>
+        <h3>Files you can use.</h3>
+        <p>Factory-ready PDFs, plot-ready DXFs, channel-ready listings, deployed sites. Plus a 14-day touch-up window.</p>
+      </div>
+    </div>
+   </div>
+  </div>
+</section>
+
+<!-- ============================ FAQ ============================ -->
+<section id="faq" class="faq">
+  <div class="wrap">
+    <div class="faq-head">
+      <div>
+        <span class="mono with-rule">FAQ</span>
+        <h2 class="display md rv" style="margin-top:14px;">The usual <span class="it">questions.</span></h2>
+      </div>
+      <p class="body-lg rv">If yours isn't here, drop it on the form below — replies within 24 hours.</p>
+    </div>
+
+    <div class="faq-list rv">
+      <div class="faq-row">
+        <div class="faq-q">How do you price a project?<span class="plus">+</span></div>
+        <div class="faq-a"><div class="faq-a-inner">
+          We scope each service against your brief. You always get a fixed price and a fixed date before any work starts -
+          never an hourly meter. For multi-service projects, the bundle gets a friendlier number than buying each piece on its own.
+        </div></div>
+      </div>
+      <div class="faq-row">
+        <div class="faq-q">Can I hire you for just one service?<span class="plus">+</span></div>
+        <div class="faq-a"><div class="faq-a-inner">
+          Yes. Every one of our 10 services can be booked stand-alone. Most brands start with one -
+          a tech pack, a CLO3D sample, an AI shoot - and add more once the first delivery lands.
+        </div></div>
+      </div>
+      <div class="faq-row">
+        <div class="faq-q">Do you sign NDAs?<span class="plus">+</span></div>
+        <div class="faq-a"><div class="faq-a-inner">
+          Always. NDAs are signed before any reference moves. We use a mutual NDA by default; happy to sign yours instead.
+        </div></div>
+      </div>
+      <div class="faq-row">
+        <div class="faq-q">Who owns the files at the end?<span class="plus">+</span></div>
+        <div class="faq-a"><div class="faq-a-inner">
+          You do - fully and exclusively, on final payment. Working source files (PSD, AI, DXF, CLO project, repo) are part of the handover.
+        </div></div>
+      </div>
+      <div class="faq-row">
+        <div class="faq-q">How fast can you turn a project around?<span class="plus">+</span></div>
+        <div class="faq-a"><div class="faq-a-inner">
+          Single-service work usually lands in 2–7 days from approval. Websites and AI agents run 2–6 weeks depending on scope.
+          Tight deadline? Tell us on the brief - we'll say yes or no honestly.
+        </div></div>
+      </div>
+      <div class="faq-row">
+        <div class="faq-q">Do you work outside India?<span class="plus">+</span></div>
+        <div class="faq-a"><div class="faq-a-inner">
+          Yes. We work with brands across the US, EU, UK, GCC, and India. Async by default; calls in your time zone when needed.
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ CONTACT ============================ -->
+<section id="contact" class="contact">
+  <div class="wrap">
+    <div class="lead-block">
+      <span class="mono with-rule">Start a project</span>
+      <h2 class="display md rv">Tell us about <span class="it">the work.</span></h2>
+      <p class="body-lg rv">
+        A real person replies within 24 hours. Drop in a brief, a deck, a link - anything that gives us a head start.
+      </p>
+    </div>
+
+    <div class="contact-grid">
+      <form id="ff-contact-form" class="contact-form" autocomplete="on">
+        <div class="row2">
+          <label><span class="label">Your name<span class="req" aria-hidden="true">*</span></span><input class="input" type="text" name="name" required placeholder="First &amp; last"></label>
+          <label><span class="label">Your email<span class="req" aria-hidden="true">*</span></span><input class="input" type="email" name="email" required placeholder="you@brand.com"></label>
+        </div>
+        <label><span class="label">Company / brand</span><input class="input" type="text" name="company" placeholder="Optional"></label>
+        <label>
+          <span class="label">What do you need</span>
+          <select class="input" name="service">
+            <option value="">Pick what's closest (or 'a bit of everything')</option>
+            <optgroup label="Fashion design &amp; development">
+              <option value="tech-pack">Tech Pack</option>
+              <option value="3d-virtual-sampling">3D Virtual Sampling</option>
+              <option value="seamless-pattern">Seamless Pattern</option>
+              <option value="pattern-cad">Pattern CAD</option>
+              <option value="dobby-jacquard">Dobby &amp; Jacquard Design</option>
+            </optgroup>
+            <optgroup label="AI, website &amp; digital production">
+              <option value="website">Website Development</option>
+              <option value="ai-agent">AI Agent</option>
+              <option value="ai-photography">AI Photography</option>
+              <option value="ecom-listing">E-Commerce Product Listing</option>
+              <option value="graphic-design">Graphic Design</option>
+            </optgroup>
+            <option value="multiple">A bit of everything — full project</option>
+          </select>
+        </label>
+        <label>
+          <span class="label">Tell us about it<span class="req" aria-hidden="true">*</span></span>
+          <textarea class="input" name="message" rows="5" required placeholder="What are you making? When do you need it by? Anything we should know up front?"></textarea>
+        </label>
+        <button type="submit" class="btn btn-ink" style="justify-self:start;margin-top:6px;">Send it</button>
+      </form>
+
+      <aside class="promise-block">
+        <span class="mono with-rule label">Our promise</span>
+        <h3>What you get back from us.</h3>
+        <ul>
+          <li>A real reply from a person inside 24 hours — usually faster.</li>
+          <li>A fixed price and a fixed delivery date before any work starts.</li>
+          <li>Two revision rounds baked into every package, not extra.</li>
+          <li>A mutual NDA, signed before any reference file moves.</li>
+          <li>Source files and full ownership handed over on final payment.</li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- Project's standard site footer mount -->
+<div id="site-footer"></div>
+
+<!-- Project site.js mounts the nav + footer into the divs above.
+     We still load it, but the rest of this page does NOT use its CSS tokens. -->
+<script src="../assets/site.js"></script>
+
+<script>
+  /* ============================================================
+     PAGE MECHANISMS
+     - GSAP fade-up on every .rv element
+     - Hero strip image-zoom-out on enter
+     - Marquee animates via pure CSS
+     - FAQ accordion
+     - "Start this service" pre-fills contact form
+     - Form lead capture (localStorage 'ff_leads')
+     - Live clock
+     ============================================================ */
+  (function () {
+
+    function ready(fn) {
+      if (window.api && window.UI) return fn();
+      if (window.onFFReady) return window.onFFReady(fn);
+      if (document.readyState !== 'loading') return fn();
+      document.addEventListener('DOMContentLoaded', fn);
+    }
+
+    ready(() => {
+
+      // H4 — respect the user's reduced-motion preference. When true we add the
+      // hero's reveal class synchronously and skip all scroll-driven / GSAP motion.
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // ---------- Light / dark theme toggle ----------
+      // Toggles for the current view only — NOT persisted. Every page load
+      // starts in dark (the default); reloading resets to dark.
+      (function () {
+        const btn = document.getElementById('theme-toggle');
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+          const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+          if (isLight) document.documentElement.removeAttribute('data-theme');
+          else document.documentElement.setAttribute('data-theme', 'light');
+          if (window.ScrollTrigger) ScrollTrigger.refresh();
+        });
+      })();
+
+      // Native smooth scroll for in-page anchors (no Lenis to avoid scroll hijack)
+      document.documentElement.style.scrollBehavior = 'smooth';
+
+      // ---------- HERO (type-only): trigger entrance animations ----------
+      const heroT = document.querySelector('.hero-t');
+      if (reduce) {
+        // Reveal the hero immediately — no staggered entrance for reduced-motion.
+        heroT && heroT.classList.add('in');
+      } else {
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            heroT && heroT.classList.add('in');
+          }, 150);
+        });
+      }
+
+      // Measure the sticky top-nav so the hero fills exactly the space below it
+      // (prevents the next section bleeding into the bottom of the first viewport).
+      const setNavH = () => {
+        const nav = document.querySelector('.topnav');
+        if (nav) document.documentElement.style.setProperty('--nav-h', nav.offsetHeight + 'px');
+      };
+      requestAnimationFrame(setNavH);
+      window.addEventListener('resize', setNavH);
+
+      // Drift background ghost-words on scroll (cheap parallax)
+      const bgws = document.querySelectorAll('.bgw');
+      let bgwTicking = false;
+      function paintBgw() {
+        const y = window.scrollY;
+        bgws.forEach((el, i) => {
+          const speed = (i + 1) * 0.12;
+          el.style.transform = 'translate3d(0,' + (-y * speed).toFixed(1) + 'px,0)';
+        });
+        bgwTicking = false;
+      }
+      if (!reduce) {
+        window.addEventListener('scroll', () => {
+          if (!bgwTicking) { requestAnimationFrame(paintBgw); bgwTicking = true; }
+        }, { passive: true });
+      }
+
+      // ---------- HERO: auto-cycling card carousel ----------
+      // The 3 cards rotate active → next → waiting on a 3.5s loop.
+      // Hovering the stack pauses the cycle. Dots and direct clicks jump.
+      const stackCards = document.querySelectorAll('#hero-stack .stack-card');
+      const stackDots = document.querySelectorAll('#stack-dots button');
+      if (stackCards.length === 3) {
+        let activeIdx = 0;
+        let paused = false;
+        const CYCLE_MS = 3500;
+
+        function setActive(idx) {
+          activeIdx = ((idx % 3) + 3) % 3;
+          stackCards.forEach((c, i) => {
+            c.classList.remove('is-active', 'is-next');
+            if (i === activeIdx) c.classList.add('is-active');
+            else if (i === (activeIdx + 1) % 3) c.classList.add('is-next');
+          });
+          stackDots.forEach((d, i) => d.classList.toggle('is-active', i === activeIdx));
+        }
+        setActive(0);
+
+        let cycleTimer = setInterval(() => {
+          if (!paused) setActive(activeIdx + 1);
+        }, CYCLE_MS);
+
+        const stackEl = document.getElementById('hero-stack');
+        if (stackEl) {
+          stackEl.addEventListener('mouseenter', () => { paused = true; });
+          stackEl.addEventListener('mouseleave', () => { paused = false; });
+        }
+
+        // Click any card or dot to jump
+        stackCards.forEach((c, i) => {
+          c.addEventListener('click', () => setActive(i));
+        });
+        stackDots.forEach((d) => {
+          d.addEventListener('click', () => {
+            const jumpTo = parseInt(d.getAttribute('data-jump'), 10) - 1;
+            setActive(jumpTo);
+          });
+        });
+      }
+
+      // ---------- HERO: parallax depth layer drifts on scroll ----------
+      const parallaxMarks = document.querySelectorAll('.parallax-mark');
+      let lastScrollY = window.scrollY;
+      let ticking = false;
+      function updateParallax() {
+        const y = window.scrollY;
+        parallaxMarks.forEach((mark, i) => {
+          const speed = (i + 1) * 0.15;
+          mark.style.transform = 'translate3d(0, ' + (-y * speed) + 'px, 0)';
+        });
+        ticking = false;
+      }
+      if (!reduce) {
+        window.addEventListener('scroll', () => {
+          lastScrollY = window.scrollY;
+          if (!ticking) {
+            window.requestAnimationFrame(updateParallax);
+            ticking = true;
+          }
+        }, { passive: true });
+      }
+
+      // ---------- GSAP scroll animations (all screen sizes) ----------
+      if (!reduce && window.gsap && window.ScrollTrigger) {
+        gsap.registerPlugin(ScrollTrigger);
+        document.querySelectorAll('.rv').forEach((el, i) => {
+          gsap.to(el, {
+            opacity: 1, y: 0,
+            duration: 1.05,
+            ease: 'power3.out',
+            delay: 0.04 * (i % 3),
+            scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' }
+          });
+        });
+        ScrollTrigger.create({
+          trigger: '#hero-strip', start: 'top 80%',
+          onEnter: () => document.getElementById('hero-strip').classList.add('in')
+        });
+      } else {
+        // GSAP unavailable: reveal instantly
+        document.querySelectorAll('.rv').forEach(el => { el.style.opacity = 1; el.style.transform = 'none'; });
+        const strip = document.getElementById('hero-strip');
+        if (strip) strip.classList.add('in');
+      }
+
+      // ---------- Horizontal parallax cards (reusable for all .px-block sections) ----------
+      function wireParallaxBlock(opts) {
+        if (reduce) return; // no horizontal scroll-scrub for reduced-motion
+        const pxPin = document.getElementById(opts.pinId);
+        const pxTrack = document.getElementById(opts.trackId);
+        if (!pxPin || !pxTrack) return;
+        if (!window.gsap || !window.ScrollTrigger) return;
+        if (window.innerWidth <= 720) return; // vertical stack on mobile - skip GSAP
+
+        const cards = pxTrack.querySelectorAll('.px-card');
+        const wms = pxTrack.querySelectorAll('.px-wm');
+        const pcNow = opts.numId ? document.getElementById(opts.numId) : null;
+        const pcSide = opts.sideId ? document.getElementById(opts.sideId) : null;
+        const pcTrackEl = opts.trackBarId ? document.getElementById(opts.trackBarId) : null;
+        const total = opts.total || cards.length;
+        const offset = opts.numOffset || 0;
+
+        function getTravel() {
+          // Compute from actual card dimensions so GSAP's fixed/constrained
+          // containing block never causes scrollWidth to read as 0 or viewport width.
+          if (!cards.length) return 0;
+          const cardW = cards[0].offsetWidth;
+          const trackStyle = getComputedStyle(pxTrack);
+          const gap = parseFloat(trackStyle.columnGap || trackStyle.gap) || 32;
+          const padL = parseFloat(trackStyle.paddingLeft) || 0;
+          const padR = parseFloat(trackStyle.paddingRight) || 0;
+          const total = padL + cards.length * cardW + (cards.length - 1) * gap + padR;
+          return Math.max(0, total - window.innerWidth);
+        }
+
+        // Two viewports + travel: one viewport to enter/exit, one to hold the final
+        // card in view after horizontal scroll ends, before the next section appears.
+        function sizePin() {
+          pxPin.style.height = (2 * window.innerHeight + getTravel()) + 'px';
+        }
+        sizePin();
+        window.addEventListener('resize', () => { sizePin(); ScrollTrigger.refresh(); });
+
+        ScrollTrigger.create({
+          trigger: pxPin,
+          start: 'top top',
+          end: () => '+=' + getTravel(),
+          scrub: 1,
+          invalidateOnRefresh: true,
+          onRefresh: () => sizePin(),
+          onUpdate: (self) => {
+            const travel = getTravel();
+            pxTrack.style.transform = 'translate3d(' + (-travel * self.progress) + 'px, 0, 0)';
+            wms.forEach(wm => {
+              wm.style.setProperty('--wm-shift', (travel * 0.25 * self.progress) + 'px');
+            });
+            // Highlight by scroll PROGRESS mapped across all cards, so the FIRST
+            // card is active at the start and the LAST at the end. (The old
+            // "closest to viewport centre" logic skipped card 1 and the last card,
+            // because they never reach the exact centre at the scroll extremes.)
+            const n = cards.length;
+            const activeIdx = Math.min(n - 1, Math.max(0, Math.floor(self.progress * n + 1e-6)));
+            const bestCard = cards[activeIdx];
+            if (bestCard) {
+              cards.forEach((c, i) => c.classList.toggle('is-active', i === activeIdx));
+
+              const step = parseInt(bestCard.getAttribute('data-step'), 10);
+              const side = bestCard.getAttribute('data-side');
+              const display = step + offset;
+              if (pcNow) pcNow.textContent = String(display).padStart(2, '0');
+              if (pcSide) pcSide.textContent = side;
+              if (pcTrackEl) pcTrackEl.style.setProperty('--p', (self.progress * 100) + '%');
+            }
+          }
+        });
+      }
+
+      wireParallaxBlock({
+        pinId: 'px-pin-s1', trackId: 'px-track-s1',
+        numId: 'pc-now-s1', sideId: 'pc-side-s1', trackBarId: 'pc-track-cockpit-s1',
+        total: 5, numOffset: 0,
+      });
+      wireParallaxBlock({
+        pinId: 'px-pin-s2', trackId: 'px-track-s2',
+        numId: 'pc-now-s2', sideId: 'pc-side-s2', trackBarId: 'pc-track-cockpit-s2',
+        total: 6, numOffset: 0,
+      });
+
+      // ---------- Mobile IntersectionObserver for focus ----------
+      if (window.innerWidth <= 860) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-active');
+            } else {
+              entry.target.classList.remove('is-active');
+            }
+          });
+        }, {
+          root: null,
+          rootMargin: '-30% 0px -30% 0px',
+          threshold: 0
+        });
+        document.querySelectorAll('.px-card').forEach(card => observer.observe(card));
+      }
+
+      // ---------- Process: the section SLIDES UP and COVERS the card section above it
+      // (the card section stays pinned/sticky beneath; this rises over it like a vertical
+      // cover), then it pins full-viewport and lights up each of the 4 steps in turn. ----------
+      (function wireProcess() {
+        if (reduce) return; // no slide-up/pin scrub for reduced-motion
+        const pin = document.getElementById('process-pin');
+        const sec = document.getElementById('process');
+        if (!pin || !sec || !window.gsap || !window.ScrollTrigger) return;
+        if (!window.matchMedia('(min-width: 721px)').matches) return;
+        const cells = Array.from(pin.querySelectorAll('.process-cell'));
+        if (!cells.length) return;
+
+        const setActive = (idx) => cells.forEach((c, i) => c.classList.toggle('is-active', i === idx));
+        setActive(0);
+
+        // Reset any transform left over from previous GSAP runs.
+        gsap.set(pin, { yPercent: 0, y: 0 });
+
+        const vh = () => window.innerHeight;
+        // PIN — lock full-viewport and light up the 4 steps one-by-one.
+        ScrollTrigger.create({
+          trigger: sec,
+          start: 'top top',
+          end: () => '+=' + Math.round(vh() * 1.2),
+          pin: pin,
+          pinSpacing: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            const idx = Math.min(cells.length - 1, Math.floor(self.progress * cells.length));
+            setActive(idx);
+          },
+        });
+      })();
+
+      if (window.ScrollTrigger) {
+        // Refresh after load AND after a short settle so every trigger position
+        // (including the .rv reveals below the pinned card sections) is recalculated
+        // once the pin runways have set their final heights.
+        window.addEventListener('load', () => {
+          ScrollTrigger.refresh();
+          setTimeout(() => ScrollTrigger.refresh(), 300);
+
+
+
+
+
+
+        });
+      }
+
+
+      // ---------- FAQ accordion ----------
+      document.querySelectorAll('.faq-row').forEach(row => {
+        const q = row.querySelector('.faq-q');
+        q.addEventListener('click', () => {
+          const wasOpen = row.classList.contains('open');
+          document.querySelectorAll('.faq-row.open').forEach(o => o.classList.remove('open'));
+          if (!wasOpen) row.classList.add('open');
+        });
+      });
+
+
+      // ---------- Pre-fill from ?svc= param (arriving from service landing page) ----------
+      (function () {
+        const params = new URLSearchParams(location.search);
+        const svcParam = params.get('svc');
+        if (!svcParam) return;
+        const tryFill = () => {
+          const sel = document.querySelector('#ff-contact-form select[name="service"]');
+          if (sel) {
+            sel.value = svcParam;
+            const form = document.getElementById('ff-contact-form');
+            if (form) {
+              form.style.transition = 'box-shadow .5s';
+              form.style.boxShadow = '0 0 0 3px rgba(178,84,55,.18)';
+              setTimeout(() => { form.style.boxShadow = ''; }, 1100);
+            }
+          }
+        };
+        tryFill();
+        setTimeout(tryFill, 600);
+      })();
+
+      // ---------- Lead capture ----------
+      const form = document.getElementById('ff-contact-form');
+      if (!form) return;
+      const submit = form.querySelector('button[type="submit"]');
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(form).entries());
+        if (!data.name || !data.email || !data.message) {
+          window.UI && UI.toast && UI.toast('Please fill in name, email and message.', { kind: 'warn' });
+          return;
+        }
+        submit.disabled = true;
+        const originalHTML = submit.innerHTML;
+        submit.innerHTML = 'Sending…';
+        const lead = { ...data, receivedAt: new Date().toISOString(), source: 'studio-page' };
+        try {
+          const existing = JSON.parse(localStorage.getItem('ff_leads') || '[]');
+          existing.push(lead);
+          localStorage.setItem('ff_leads', JSON.stringify(existing));
+        } catch (_) {}
+        const container = form.parentElement;
+        const sent = document.createElement('div');
+        sent.className = 'sent-card';
+        sent.innerHTML =
+          '<div class="ok">✓</div>' +
+          '<h3 style="font-family:var(--serif);font-size:28px;letter-spacing:-0.02em;margin:14px 0 8px;">Got it, ' + (data.name||'').split(' ')[0] + '.</h3>' +
+          '<p style="margin:0;color:var(--ink-5);">A studio lead will reply within 24 hours at <strong style="color:var(--ink);">' + data.email + '</strong>.</p>';
+        container.replaceChild(sent, form);
+        window.UI && UI.toast && UI.toast("Brief received — we'll reply within 24 hours.", { kind: 'success', duration: 5000 });
+      });
+    });
+  })();
+</script>
+
+<script>
+/* Feel pack — scroll progress, stat count-up, cursor spotlight.
+   Dependency-free; honours prefers-reduced-motion. */
+(function () {
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var prog = document.getElementById('ff-progress');
+  if (prog && !reduced) {
+    var pt = false;
+    var onS = function () {
+      if (pt) return;
+      pt = true;
+      requestAnimationFrame(function () {
+        var h = document.documentElement;
+        var max = h.scrollHeight - h.clientHeight;
+        prog.style.transform = 'scaleX(' + (max > 0 ? h.scrollTop / max : 0) + ')';
+        pt = false;
+      });
+    };
+    window.addEventListener('scroll', onS, { passive: true });
+    onS();
+  }
+
+  var counters = document.querySelectorAll('.intro-stats [data-count]');
+  function countUp(el) {
+    var target = parseInt(el.getAttribute('data-count'), 10);
+    var t0 = null, dur = 1200;
+    function stepFn(ts) {
+      if (!t0) t0 = ts;
+      var pr = Math.min((ts - t0) / dur, 1);
+      el.textContent = Math.round((1 - Math.pow(1 - pr, 3)) * target);
+      if (pr < 1) requestAnimationFrame(stepFn);
+    }
+    requestAnimationFrame(stepFn);
+  }
+  if ('IntersectionObserver' in window && !reduced) {
+    var cio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { countUp(e.target); cio.unobserve(e.target); }
+      });
+    }, { threshold: 0.6 });
+    counters.forEach(function (el) { cio.observe(el); });
+  } else {
+    counters.forEach(function (el) { el.textContent = el.getAttribute('data-count'); });
+  }
+
+  if (!reduced && window.matchMedia('(hover: hover)').matches) {
+    document.addEventListener('pointermove', function (e) {
+      var card = e.target.closest('.intro-stats .cell, .px-card');
+      if (!card) return;
+      var r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    }, { passive: true });
+  }
+})();
+</script>
+
+<script>
+/* GLASS SKIN — cursor glow (desktop, motion allowed only) */
+(function () {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!window.matchMedia('(hover: hover)').matches) return;
+  var glow = document.getElementById('ff-glow');
+  if (!glow) return;
+  window.addEventListener('mousemove', function (e) {
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+  }, { passive: true });
+})();
+</script>
+</body>
+</html>
