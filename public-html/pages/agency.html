@@ -285,6 +285,24 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
 .svc:nth-child(5n+3) { --acc: var(--lg-green); }
 .svc:nth-child(5n+4) { --acc: var(--lg-yellow); }
 .svc:nth-child(5n+5) { --acc: var(--lg-coral); }
+/* divider between the two sides */
+.side-divider { padding: calc(var(--u) * 9) 0; }
+.side-divider .sd-row { display: flex; align-items: center; gap: 18px; }
+.side-divider .sd-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent); }
+.side-divider .sd-chip {
+  flex: none; padding: 10px 22px; border-radius: 999px;
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--lg-sky);
+}
+/* per-side identity: Side 01 warm, Side 02 cool */
+#services .kicker { color: var(--lg-orange); }
+#side-02 .kicker { color: var(--lg-sky); }
+#services .rail-fill { background: linear-gradient(90deg, var(--lg-orange), var(--lg-coral)); }
+#side-02 .rail-fill { background: linear-gradient(90deg, var(--lg-sky), #8B5CF6); }
+#side-02 .rail-pin {
+  background: radial-gradient(900px 500px at 80% 20%, rgba(74,168,240,.07), transparent 65%);
+}
+
 /* rail cockpit */
 .rail-foot { display: flex; align-items: center; gap: 18px; margin-top: calc(var(--u) * 4); }
 .rail-count { font-family: var(--mono); font-size: 12px; letter-spacing: .16em; color: var(--ink-4); flex: none; }
@@ -547,6 +565,17 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
       </div>
     </div>
   </section>
+
+  <!-- ============================ SIDE DIVIDER ============================ -->
+  <div class="side-divider" aria-hidden="true">
+    <div class="wrap">
+      <div class="sd-row">
+        <span class="sd-line"></span>
+        <span class="sd-chip glass-p">Next · Side 02</span>
+        <span class="sd-line"></span>
+      </div>
+    </div>
+  </div>
 
   <!-- ============================ SERVICES RAIL — Side 02 · AI, website &amp; digital production ============================ -->
   <section class="rail-sec" id="side-02" aria-label="Side 02 · AI, website &amp; digital production">
