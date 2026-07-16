@@ -108,6 +108,10 @@
   //  Update header to reflect signed-in user
   // -----------------------------------------------------
   function applySessionToHeader() {
+    /* HIDDEN FOR LAUNCH: no auth in the launch header — the services site has
+       a single "Start a project" CTA. Remove this early return when the
+       marketplace (logins, profiles) ships. */
+    return;
     if (!root.api) return;
     const session = root.api.users.sessionSync();
     const cta = document.querySelector('.topnav-cta');

@@ -12,8 +12,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
 <link rel="stylesheet" href="../../assets/styles.css">
 
@@ -57,13 +56,19 @@
 </script>
 
 <style>
+/* metric-matched fallbacks — the font swap no longer moves layout (CLS) */
+@font-face { font-family: 'Inter-fb'; src: local('Arial'); size-adjust: 107%; ascent-override: 90%; descent-override: 22.5%; line-gap-override: 0%; }
+@font-face { font-family: 'PJS-fb'; src: local('Arial'); size-adjust: 105%; ascent-override: 96%; descent-override: 24%; line-gap-override: 0%; }
+/* reserve the injected nav's space — kills the layout shift (CLS) */
+#site-nav { min-height: 92px; }
+@media (max-width: 720px) { #site-nav { min-height: 90px; } }
 /* ============================================================
    NIGHT GLASS — 3D Virtual Sampling. Single accent: SKY #F1543F.
    ============================================================ */
 :root {
   --u: 8px;
-  --sans: 'Inter', system-ui, sans-serif;
-  --disp: 'Plus Jakarta Sans', var(--sans);
+  --sans: 'Inter', 'Inter-fb', system-ui, sans-serif;
+  --disp: 'Plus Jakarta Sans', 'PJS-fb', var(--sans);
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
   --paper:   #0C0A1C;
   --paper-2: #131024;
@@ -108,12 +113,12 @@ body {
 
 /* ---- Scene ---- */
 .scene { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-.blob { position: absolute; border-radius: 50%; filter: blur(95px); will-change: transform; }
+.blob { position: absolute; border-radius: 50%; filter: blur(95px); will-change: transform; transform: translateZ(0); backface-visibility: hidden; }
 .b1 { width: 520px; height: 520px; background: var(--acc); top: -170px; left: -120px; opacity: .2; animation: drift-a 24s ease-in-out infinite; }
 .b2 { width: 420px; height: 420px; background: #A02A1A; top: 36%; right: -150px; opacity: .16; animation: drift-b 28s ease-in-out infinite; }
 .b3 { width: 380px; height: 380px; background: var(--acc-l); bottom: -140px; left: 20%; opacity: .1; animation: drift-a 30s ease-in-out infinite reverse; }
-@keyframes drift-a { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(60px,40px) scale(1.1); } }
-@keyframes drift-b { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-70px,50px) scale(.92); } }
+@keyframes drift-a { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(60px,40px,0) scale(1.1); } }
+@keyframes drift-b { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(-70px,50px,0) scale(.92); } }
 .grain {
   position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .04;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -539,6 +544,15 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .fmt:hover { border-color: var(--acc-30); transform: translateY(-2px); }
 .fmt.hot { border-color: var(--acc-30); background: rgba(241,84,63,.08); color: var(--acc-l); }
 
+
+/* mobile performance: lighter effect cost, lazy below-fold rendering — same visuals */
+@media (max-width: 720px) {
+  .blob { filter: blur(60px); }
+  .b4, .b5 { display: none; }
+  .glass-p { -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px); }
+  .topnav { -webkit-backdrop-filter: saturate(160%) blur(12px) !important; backdrop-filter: saturate(160%) blur(12px) !important; }
+  .rv { transition-duration: .45s; }
+}
 </style>
 </head>
 <body>
@@ -858,8 +872,11 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       entries.forEach(function (e) {
         if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
       });
-    }, { threshold: 0.01, rootMargin: '0px 0px -8% 0px' });
-    rvs.forEach(function (el) { io.observe(el); });
+    }, { threshold: 0.01, rootMargin: '0px 0px 22% 0px' });
+    rvs.forEach(function (el) {
+      if (el.getBoundingClientRect().top < window.innerHeight) { el.classList.add('in'); return; }
+      io.observe(el);
+    });
   } else {
     rvs.forEach(function (el) { el.classList.add('in'); });
   }

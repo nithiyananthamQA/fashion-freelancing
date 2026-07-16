@@ -13,6 +13,10 @@
 
   // Expose path resolver for pages that need it
   window.FF_ROOT = ROOT;
+
+  // LAUNCH: no logins on the services site — clear any stale marketplace test
+  // session so nothing (cached or future code) can render auth UI in the header.
+  try { localStorage.removeItem('ff_session'); } catch (e) {}
   window.FF_R = r;
 
   // -- Auto-load shared modules in order: store → api → ui --
@@ -58,8 +62,11 @@
     .catch(e => console.error('Chat widget failed to load:', e && e.message ? e.message : e));
   HIDDEN FOR LAUNCH */
   // Launch quote bot — night-glass widget, flow dedicated to the current services.
-  loadScript(r('assets/quote-bot.js'))
+  // Loaded at idle so it never competes with first paint on mobile.
+  const bootQuoteBot = () => loadScript(r('assets/quote-bot.js'))
     .catch(e => console.error('Quote bot failed to load:', e && e.message ? e.message : e));
+  if ('requestIdleCallback' in window) requestIdleCallback(bootQuoteBot, { timeout: 4000 });
+  else setTimeout(bootQuoteBot, 1500);
 
   if (!window.api) {
     loadScript(r('assets/store.js'))
@@ -128,7 +135,7 @@
       HIDDEN FOR LAUNCH -->
 
       <nav class="topnav-links" aria-label="Primary">
-        <a href="${r("index.html")}" class="${current==='agency'?'active':''}">Our services</a>
+        <a href="${r("index.html")}" id="nav-svc-trigger" class="nav-svc-trigger ${current==='agency'?'active':''}" aria-haspopup="true" aria-expanded="false" aria-controls="nav-svc-panel">Our services<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a>
         <a href="${r("pages/about.html")}">About</a>
         <a href="${r("pages/help.html")}">Help</a>
         <!-- HIDDEN FOR LAUNCH: marketplace links
@@ -169,6 +176,19 @@
         <a href="${r("index.html")}">Our services</a>
         <a href="${r("pages/about.html")}">About</a>
         <a href="${r("pages/help.html")}">Help</a>
+        <span class="tm-label" aria-hidden="true">Services</span>
+        <div class="tm-svcs">
+          <a class="sub" href="${r("pages/services/tech-pack.html")}">Tech packs</a>
+          <a class="sub" href="${r("pages/services/3d-virtual-sampling.html")}">3D sampling</a>
+          <a class="sub" href="${r("pages/services/seamless-pattern.html")}">Seamless patterns</a>
+          <a class="sub" href="${r("pages/services/pattern-cad.html")}">Pattern (CAD)</a>
+          <a class="sub" href="${r("pages/services/dobby-jacquard.html")}">Dobby &amp; jacquard</a>
+          <a class="sub" href="${r("pages/services/website.html")}">Websites</a>
+          <a class="sub" href="${r("pages/services/ai-agent.html")}">AI agent</a>
+          <a class="sub" href="${r("pages/services/ai-photography.html")}">AI photography</a>
+          <a class="sub" href="${r("pages/services/ecom-listing.html")}">E-com listings</a>
+          <a class="sub" href="${r("pages/services/graphic-design.html")}">Graphic design</a>
+        </div>
         <!-- HIDDEN FOR LAUNCH: marketplace links
         <a href="${r("pages/marketplace.html")}">Find a freelancer</a>
         <a href="${r("pages/marketplace.html")}#jobs">Find a job</a>
@@ -184,6 +204,26 @@
         <a href="${r("pages/signup.html")}" class="btn btn-primary w-full">Join free</a>
         HIDDEN FOR LAUNCH -->
       </div>
+    </div>
+  </div>
+
+  <!-- Desktop services dropdown — sibling of the pill (its overflow:hidden would clip a child) -->
+  <div class="nav-svc-panel" id="nav-svc-panel" role="menu" aria-label="All services">
+    <div class="nsp-col">
+      <h6>Design &amp; development</h6>
+      <a role="menuitem" href="${r("pages/services/tech-pack.html")}">Tech packs</a>
+      <a role="menuitem" href="${r("pages/services/3d-virtual-sampling.html")}">3D virtual sampling</a>
+      <a role="menuitem" href="${r("pages/services/seamless-pattern.html")}">Seamless patterns</a>
+      <a role="menuitem" href="${r("pages/services/pattern-cad.html")}">Pattern making (CAD)</a>
+      <a role="menuitem" href="${r("pages/services/dobby-jacquard.html")}">Dobby &amp; jacquard</a>
+    </div>
+    <div class="nsp-col">
+      <h6>AI &amp; digital</h6>
+      <a role="menuitem" href="${r("pages/services/website.html")}">Website development</a>
+      <a role="menuitem" href="${r("pages/services/ai-agent.html")}">AI customer agent</a>
+      <a role="menuitem" href="${r("pages/services/ai-photography.html")}">AI photography</a>
+      <a role="menuitem" href="${r("pages/services/ecom-listing.html")}">E-commerce listings</a>
+      <a role="menuitem" href="${r("pages/services/graphic-design.html")}">Graphic design</a>
     </div>
   </div>`;
 
@@ -256,6 +296,68 @@
     if (navMount) navMount.outerHTML = navHTML(navMount.dataset.current || '');
     const footerMount = document.getElementById('site-footer');
     if (footerMount) footerMount.outerHTML = footerHTML;
+
+    // Services dropdown + drawer styles (component-scoped, night-glass)
+    if (!document.getElementById('ff-nav-style')) {
+      const st = document.createElement('style');
+      st.id = 'ff-nav-style';
+      st.textContent = [
+        '.nav-svc-trigger svg{margin-left:5px;vertical-align:1px;transition:transform .25s ease;}',
+        '.nav-svc-trigger[aria-expanded="true"] svg{transform:rotate(180deg);}',
+        '.nav-svc-panel{position:fixed;left:50%;top:104px;transform:translateX(-50%) translateY(-8px);z-index:70;',
+        'display:grid;grid-template-columns:1fr 1fr;gap:6px 34px;padding:22px 28px;width:min(560px,calc(100vw - 32px));',
+        'background:rgba(16,13,32,.94);border:1px solid rgba(255,255,255,.14);border-radius:20px;',
+        '-webkit-backdrop-filter:saturate(160%) blur(22px);backdrop-filter:saturate(160%) blur(22px);',
+        'box-shadow:0 30px 80px -20px rgba(0,0,0,.75);opacity:0;visibility:hidden;pointer-events:none;',
+        'transition:opacity .25s cubic-bezier(.22,1,.36,1),transform .25s cubic-bezier(.22,1,.36,1),visibility .25s;}',
+        '.nav-svc-panel.open{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0);}',
+        '.nsp-col h6{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;',
+        'color:#A78BFA;margin:0 0 10px;font-weight:500;}',
+        '.nsp-col a{display:block;padding:8px 10px;margin:0 -10px;border-radius:10px;text-decoration:none;',
+        'font-family:Inter,sans-serif;font-size:14px;font-weight:500;color:rgba(244,242,250,.72);',
+        'transition:background .2s ease,color .2s ease;}',
+        '.nsp-col a:hover{background:rgba(255,255,255,.07);color:#fff;}',
+        '@media (max-width:720px){.nav-svc-panel{display:none;}.nav-svc-trigger svg{display:none;}}',
+        '.tm-label{display:block;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.2em;',
+        'text-transform:uppercase;color:#A78BFA;padding:22px 4px 10px;}',
+        '.tm-svcs{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;width:100%;}',
+        '.topnav-mobile-links .tm-svcs a.sub{font-family:Inter,sans-serif !important;font-size:15px !important;',
+        'font-weight:500 !important;color:rgba(244,242,250,.66) !important;padding:10px 4px !important;',
+        'border-bottom:0 !important;letter-spacing:0;}',
+        '.topnav-mobile-links .tm-svcs a.sub:active{color:#fff !important;}',
+      ].join('');
+      document.head.appendChild(st);
+    }
+
+    // Dropdown behavior: hover-open on desktop, closes on leave/Escape/outside click
+    const svcTrigger = document.getElementById('nav-svc-trigger');
+    const svcPanel = document.getElementById('nav-svc-panel');
+    if (svcTrigger && svcPanel) {
+      let closeTimer = null;
+      const isDesktop = () => window.innerWidth >= 721 && window.matchMedia('(hover: hover)').matches;
+      const openP = () => {
+        if (!isDesktop()) return;
+        clearTimeout(closeTimer);
+        svcPanel.classList.add('open');
+        svcTrigger.setAttribute('aria-expanded', 'true');
+      };
+      const closeP = (now) => {
+        clearTimeout(closeTimer);
+        closeTimer = setTimeout(() => {
+          svcPanel.classList.remove('open');
+          svcTrigger.setAttribute('aria-expanded', 'false');
+        }, now ? 0 : 160);
+      };
+      svcTrigger.addEventListener('mouseenter', openP);
+      svcTrigger.addEventListener('mouseleave', () => closeP());
+      svcPanel.addEventListener('mouseenter', openP);
+      svcPanel.addEventListener('mouseleave', () => closeP());
+      svcTrigger.addEventListener('focus', openP);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeP(true); });
+      document.addEventListener('click', (e) => {
+        if (!svcPanel.contains(e.target) && !svcTrigger.contains(e.target)) closeP(true);
+      });
+    }
 
     // Footer accordion: always open on desktop, toggle on mobile
     function syncFooterAccordion() {
