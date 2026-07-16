@@ -9,6 +9,7 @@
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.UI = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
+  var root = (typeof self !== 'undefined') ? self : (typeof window !== 'undefined' ? window : {});
 
   // -----------------------------------------------------
   //  TOASTS — small bottom-right notifications

@@ -104,7 +104,7 @@
   <div class="topnav">
     <div class="container topnav-inner">
       <!-- LAUNCH: logo points at the services page (current homepage) -->
-      <a href="${r("pages/agency.html")}" class="logo" aria-label="Fashion Freelancing home">
+      <a href="${r("index.html")}" class="logo" aria-label="Fashion Freelancing home">
         <img class="logo-img" src="${r("assets/logo.png")}" alt="Fashion Freelancing" />
       </a>
 
@@ -120,7 +120,7 @@
       HIDDEN FOR LAUNCH -->
 
       <nav class="topnav-links" aria-label="Primary">
-        <a href="${r("pages/agency.html")}" class="${current==='agency'?'active':''}">Our services</a>
+        <a href="${r("index.html")}" class="${current==='agency'?'active':''}">Our services</a>
         <a href="${r("pages/about.html")}">About</a>
         <a href="${r("pages/help.html")}">Help</a>
         <!-- HIDDEN FOR LAUNCH: marketplace links
@@ -133,7 +133,7 @@
 
       <div class="topnav-cta">
         <!-- LAUNCH: single CTA to the brief form -->
-        <a href="${r("pages/agency.html")}#contact" class="btn btn-primary btn-sm">Start a project</a>
+        <a href="${r("index.html")}#contact" class="btn btn-primary btn-sm">Start a project</a>
         <!-- HIDDEN FOR LAUNCH: auth
         <a href="${r("pages/login.html")}" class="topnav-signin">Sign in</a>
         <a href="${r("pages/signup.html")}" class="btn btn-primary btn-sm">Join free</a>
@@ -158,7 +158,7 @@
       </form>
       HIDDEN FOR LAUNCH -->
       <nav class="topnav-mobile-links" aria-label="Mobile primary">
-        <a href="${r("pages/agency.html")}">Our services</a>
+        <a href="${r("index.html")}">Our services</a>
         <a href="${r("pages/about.html")}">About</a>
         <a href="${r("pages/help.html")}">Help</a>
         <!-- HIDDEN FOR LAUNCH: marketplace links
@@ -170,7 +170,7 @@
       </nav>
       <div class="topnav-mobile-cta">
         <!-- LAUNCH: single CTA to the brief form -->
-        <a href="${r("pages/agency.html")}#contact" class="btn btn-primary w-full">Start a project</a>
+        <a href="${r("index.html")}#contact" class="btn btn-primary w-full">Start a project</a>
         <!-- HIDDEN FOR LAUNCH: auth
         <a href="${r("pages/login.html")}" class="btn btn-ghost w-full">Sign in</a>
         <a href="${r("pages/signup.html")}" class="btn btn-primary w-full">Join free</a>
@@ -185,77 +185,49 @@
     <div class="container">
       <div class="footer-grid">
         <div>
-          <!-- LAUNCH: logo points at the services page (current homepage) -->
-          <a href="${r("pages/agency.html")}" class="logo">
+          <a href="${r("index.html")}" class="logo">
             <img class="logo-img" src="${r("assets/logo.png")}" alt="Fashion Freelancing" style="height:36px;" />
           </a>
-          <!-- LAUNCH: services positioning (original tagline kept below) -->
-          <p style="color:var(--ink-5);font-size:14px;max-width:320px;margin-top:14px;line-height:1.55;">
-            Every service a fashion business needs — one brief in, one delivery out.
+          <p style="color:var(--ink-5);font-size:14px;max-width:340px;margin-top:14px;line-height:1.55;">
+            Fashion Freelancing is a fashion design and production-services studio — factory-ready
+            tech packs, 3D virtual samples, digital patterns, seamless prints, woven designs,
+            AI product photography, marketplace listings, websites and brand design.
           </p>
-          <!-- HIDDEN FOR LAUNCH: marketplace tagline
-          <p style="color:var(--ink-5);font-size:14px;max-width:320px;margin-top:14px;line-height:1.55;">
-            Hire fashion freelancers, or get hired as one. Pay safely. Get paid safely. That's it.
+          <p style="color:var(--ink-5);font-size:13px;max-width:340px;margin-top:10px;line-height:1.55;">
+            Every quote is fixed before work starts. Two revision rounds included in every package.
+            Full ownership transfers to you on final payment.
           </p>
-          HIDDEN FOR LAUNCH -->
-          <div style="margin-top:20px;display:flex;gap:10px;">
-            <a href="#" class="chip" style="width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22 5.92a8.2 8.2 0 0 1-2.36.65 4.12 4.12 0 0 0 1.8-2.27 8.23 8.23 0 0 1-2.6 1A4.1 4.1 0 0 0 11.8 9.3 11.65 11.65 0 0 1 3.4 4.86a4.1 4.1 0 0 0 1.27 5.47 4.1 4.1 0 0 1-1.86-.51v.05a4.1 4.1 0 0 0 3.29 4.02 4.12 4.12 0 0 1-1.85.07 4.1 4.1 0 0 0 3.83 2.85A8.23 8.23 0 0 1 2 18.4a11.62 11.62 0 0 0 6.29 1.84c7.55 0 11.68-6.26 11.68-11.68v-.53A8.35 8.35 0 0 0 22 5.92z"/></svg>
-            </a>
-            <a href="#" class="chip" style="width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16zm0 1.94c-3.14 0-3.51.01-4.75.07-1.07.05-1.65.23-2.04.38-.51.2-.88.44-1.27.83-.39.39-.63.76-.83 1.27-.15.39-.33.97-.38 2.04C2.67 8.49 2.66 8.86 2.66 12s.01 3.51.07 4.75c.05 1.07.23 1.65.38 2.04.2.51.44.88.83 1.27.39.39.76.63 1.27.83.39.15.97.33 2.04.38 1.24.06 1.61.07 4.75.07s3.51-.01 4.75-.07c1.07-.05 1.65-.23 2.04-.38.51-.2.88-.44 1.27-.83.39-.39.63-.76.83-1.27.15-.39.33-.97.38-2.04.06-1.24.07-1.61.07-4.75s-.01-3.51-.07-4.75c-.05-1.07-.23-1.65-.38-2.04-.2-.51-.44-.88-.83-1.27-.39-.39-.76-.63-1.27-.83-.39-.15-.97-.33-2.04-.38C15.51 4.11 15.14 4.1 12 4.1zm0 3.3a4.6 4.6 0 1 1 0 9.2 4.6 4.6 0 0 1 0-9.2zm0 7.6a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm5.88-7.78a1.08 1.08 0 1 1-2.15 0 1.08 1.08 0 0 1 2.15 0z"/></svg>
-            </a>
-            <a href="#" class="chip" style="width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-            </a>
-          </div>
         </div>
 
         <details class="footer-acc">
-          <summary class="footer-acc-head"><h5>For companies</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
+          <summary class="footer-acc-head"><h5>Design &amp; development</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
           <ul>
-            <li><a href="${r("pages/agency.html")}">Our services</a></li>
-            <li><a href="${r("pages/agency.html")}#contact">Start a project</a></li>
-            <li><a href="${r("pages/agency.html")}#contact">Book a discovery call</a></li>
-            <!-- HIDDEN FOR LAUNCH: marketplace links
-            <li><a href="${r("pages/start.html")}?audience=brand">Start a project</a></li>
-            <li><a href="${r("pages/marketplace.html")}">Browse all freelancers</a></li>
-            <li><a href="${r("pages/how-it-works.html")}">How it works</a></li>
-            HIDDEN FOR LAUNCH -->
+            <li><a href="${r("pages/services/tech-pack.html")}">Tech packs</a></li>
+            <li><a href="${r("pages/services/3d-virtual-sampling.html")}">3D virtual sampling</a></li>
+            <li><a href="${r("pages/services/seamless-pattern.html")}">Seamless patterns</a></li>
+            <li><a href="${r("pages/services/pattern-cad.html")}">Pattern making (CAD)</a></li>
+            <li><a href="${r("pages/services/dobby-jacquard.html")}">Dobby &amp; jacquard</a></li>
           </ul>
         </details>
 
         <details class="footer-acc">
-          <summary class="footer-acc-head"><h5>Get hired</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
+          <summary class="footer-acc-head"><h5>AI &amp; digital</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
           <ul>
-            <li><a href="${r("pages/marketplace.html")}#jobs">Find a job</a></li>
-            <li><a href="${r("pages/signup.html")}">Create a profile</a></li>
-            <li><a href="${r("pages/how-it-works.html")}">How it works</a></li>
-            <li><a href="${r("pages/pricing.html")}">Pricing</a></li>
+            <li><a href="${r("pages/services/website.html")}">Website development</a></li>
+            <li><a href="${r("pages/services/ai-agent.html")}">AI customer agent</a></li>
+            <li><a href="${r("pages/services/ai-photography.html")}">AI photography</a></li>
+            <li><a href="${r("pages/services/ecom-listing.html")}">E-commerce listings</a></li>
+            <li><a href="${r("pages/services/graphic-design.html")}">Graphic design</a></li>
           </ul>
         </details>
 
         <details class="footer-acc">
-          <summary class="footer-acc-head"><h5>Help</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
+          <summary class="footer-acc-head"><h5>Company</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
           <ul>
-            <li><a href="${r("pages/help.html")}">Help center</a></li>
-            <li><a href="${r("pages/help.html")}#contact">Contact us</a></li>
-            <!-- HIDDEN FOR LAUNCH: auth
-            <li><a href="${r("pages/login.html")}">Sign in</a></li>
-            <li><a href="${r("pages/signup.html")}">Sign up</a></li>
-            HIDDEN FOR LAUNCH -->
-          </ul>
-        </details>
-
-        <details class="footer-acc">
-          <summary class="footer-acc-head"><h5>About us</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
-          <ul>
-            <li><a href="${r("pages/about.html")}">About</a></li>
-            <!-- HIDDEN FOR LAUNCH: not ready yet
-            <li><a href="${r("pages/blog.html")}">Stories</a></li>
-            <li><a href="${r("pages/community.html")}">Community</a></li>
-            <li><a href="#">Careers</a></li>
-            HIDDEN FOR LAUNCH -->
+            <li><a href="${r("index.html")}">Our services</a></li>
+            <li><a href="${r("pages/about.html")}">About us</a></li>
+            <li><a href="${r("pages/help.html")}">Help &amp; FAQ</a></li>
+            <li><a href="${r("index.html")}#contact">Start a project</a></li>
           </ul>
         </details>
       </div>
@@ -265,10 +237,6 @@
         <div style="display:flex;gap:20px;">
           <a href="${r("pages/privacy.html")}">Privacy</a>
           <a href="${r("pages/terms.html")}">Terms</a>
-          <a href="${r("pages/cookies.html")}">Cookies</a>
-          <!-- HIDDEN FOR LAUNCH: placeholder link
-          <a href="#">Accessibility</a>
-          HIDDEN FOR LAUNCH -->
         </div>
       </div>
     </div>

@@ -41,7 +41,7 @@ const SEO = new Function('return ' + seoMatch[1])();
    NEVER overwrite these. 'website' has its own conversion-focused redesign;
    '3d-virtual-sampling' has an interactive 3D-model landing page;
    'tech-pack' has the spec-sheet landing page. */
-const CUSTOM = new Set(['website', '3d-virtual-sampling', 'tech-pack']);
+const CUSTOM = new Set(['website', '3d-virtual-sampling', 'tech-pack', 'seamless-pattern', 'pattern-cad', 'dobby-jacquard', 'ai-agent', 'ai-photography', 'ecom-listing', 'graphic-design']);
 const slugs = Object.keys(SEO).filter((s) => !CUSTOM.has(s));
 
 const escAttr = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');

@@ -1,88 +1,204 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<!-- LEGAL PAGE — Terms and Conditions of Service, night-glass doc style.
+     Highlighted [placeholders] must be completed and the document reviewed
+     by a qualified lawyer before launch marketing begins. -->
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Terms of service · Fashion Freelancing</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media=&apos;all&apos;" />
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" /></noscript>
-<link rel="stylesheet" href="../assets/styles.css" />
+<title>Terms and Conditions - Fashion Freelancing</title>
+<meta name="description" content="The terms that govern Fashion Freelancing projects: fixed written quotes, two revision rounds, full ownership transfer on final payment, confidentiality and dispute resolution." />
+<meta name="robots" content="noindex" /><!-- remove noindex after legal review -->
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF0055'/%3E%3Cstop offset='1' stop-color='%236E56F0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='19' font-weight='600' fill='%23fff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link rel="stylesheet" href="../assets/styles.css">
+
 <style>
-  .doc { max-width: 760px; margin: 0 auto; }
-  .doc h2 { font-family: var(--font-display); font-size: 28px; font-weight: 480; letter-spacing: -0.025em; margin-top: 48px; }
-  .doc h3 { font-size: 17px; margin-top: 24px; margin-bottom: 6px; }
-  .doc p { color: var(--ink-3); line-height: 1.7; margin: 8px 0; }
-  .doc ul { color: var(--ink-3); line-height: 1.8; }
-  .doc-toc { position: sticky; top: 88px; }
-  .doc-toc a { display:block; padding: 6px 0; color: var(--ink-5); font-size: 13px; }
-  .doc-toc a:hover { color: var(--ink); }
+:root {
+  --sans: 'Inter', system-ui, sans-serif;
+  --disp: 'Plus Jakarta Sans', var(--sans);
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --paper: #0C0A1C; --ink: #F4F2FA;
+  --ink-3: rgba(244,242,250,.84); --ink-4: rgba(244,242,250,.62); --ink-5: rgba(244,242,250,.46);
+  --line: rgba(255,255,255,.10); --glass: rgba(255,255,255,.055); --glass-border: rgba(255,255,255,.14);
+  --acc: #A78BFA; --grad-hot: linear-gradient(90deg, #8B5CF6, #FF4FA0);
+  --easing: cubic-bezier(.22,1,.36,1);
+}
+html { color-scheme: dark; scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: clip; }
+/* pill nav chrome */
+.topnav { position: sticky; top: 12px !important; width: min(1180px, calc(100% - 28px)); margin: 12px auto 0; border-radius: 999px;
+  background: rgba(16,13,32,.62) !important; backdrop-filter: saturate(160%) blur(20px) !important; -webkit-backdrop-filter: saturate(160%) blur(20px) !important;
+  border: 1px solid rgba(255,255,255,.12) !important; box-shadow: 0 12px 44px -12px rgba(0,0,0,.55) !important; overflow: hidden; }
+.topnav .container, .topnav .topnav-inner { padding-left: 20px; padding-right: 12px; }
+.topnav.is-scrolled { border-radius: 999px; }
+.topnav-links a { color: rgba(244,242,250,.66) !important; }
+.topnav-links a:hover, .topnav-links a.active { color: #fff !important; }
+.topnav-burger span { background: #F4F2FA !important; }
+.topnav .btn-primary, .topnav-mobile .btn-primary { background: var(--grad-hot) !important; color: #fff !important; border-radius: 999px !important; border: 0 !important; box-shadow: 0 8px 26px rgba(139,92,246,.4) !important; }
+.topnav-mobile { background: rgba(12,10,28,.92) !important; top: 88px !important; border-radius: 22px; left: 12px !important; right: 12px !important; border: 1px solid rgba(255,255,255,.12); }
+.topnav-mobile-links a { color: rgba(244,242,250,.8) !important; }
+.topnav .logo-img, .footer .logo-img {
+  background: transparent;
+  /* fully transparent artwork — no white stroke; card-style violet/pink light only */
+  filter: drop-shadow(0 4px 16px rgba(139,92,246,.55)) drop-shadow(0 0 28px rgba(255,79,160,.32));
+  transition: filter .35s ease;
+}
+.topnav .logo:hover .logo-img, .footer .logo:hover .logo-img {
+  filter: drop-shadow(0 4px 20px rgba(139,92,246,.75)) drop-shadow(0 0 38px rgba(255,79,160,.5));
+}
+.footer { background: rgba(255,255,255,.03) !important; border-top: 1px solid var(--line) !important; }
+#site-footer * { background-color: transparent; }
+/* document layout */
+.doc-wrap { width: 100%; margin: 0 auto; padding: 64px 10vw 96px; display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: clamp(48px, 5vw, 90px); }
+.doc-toc { position: sticky; top: 110px; align-self: start; font-size: 13px; max-height: calc(100vh - 140px); overflow-y: auto; }
+.doc-toc .k { font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--acc); margin-bottom: 12px; }
+.doc-toc a { display: block; padding: 5px 0; color: var(--ink-5); text-decoration: none; }
+.doc-toc a:hover { color: var(--ink); }
+.doc h1 { font-family: var(--disp); font-weight: 800; letter-spacing: -.03em; font-size: clamp(34px, 4.6vw, 58px); line-height: 1.06; margin: 0 0 10px; }
+.doc .date { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-5); }
+.doc h2 { font-family: var(--disp); font-weight: 700; letter-spacing: -.02em; font-size: clamp(22px, 2vw, 28px); margin: 48px 0 12px; }
+.doc h3 { font-family: var(--disp); font-weight: 700; font-size: 16.5px; margin: 22px 0 6px; }
+.doc p { color: var(--ink-4); line-height: 1.75; margin: 9px 0; font-size: 15.5px; max-width: 88ch; }
+.doc ul { color: var(--ink-4); line-height: 1.75; font-size: 15.5px; padding-left: 22px; margin: 9px 0 14px; max-width: 88ch; }
+.doc li { margin: 5px 0; }
+.doc strong { color: var(--ink-3); }
+.doc .box { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 18px; padding: 24px 28px; margin: 22px 0; }
+.doc mark { background: rgba(239,216,74,.18); color: #F6E97E; border-radius: 4px; padding: 0 5px; font-style: normal; }
+.doc .end { text-align: center; color: var(--ink-5); font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; margin-top: 56px; }
+a { color: var(--acc); }
+@media (max-width: 860px) { .doc-wrap { grid-template-columns: 1fr; padding: 48px 20px 80px; } .doc-toc { position: static; max-height: none; } }
 </style>
 </head>
 <body>
 
 <div id="site-nav"></div>
 
-<section style="padding: 64px 0 96px;">
-  <div class="container" style="max-width: 1100px; display:grid; grid-template-columns: 200px 1fr; gap: 48px;">
+<main>
+<div class="doc-wrap">
 
-    <aside class="doc-toc" style="font-size:13px;">
-      <div class="eyebrow" style="margin-bottom:12px;">Contents</div>
-      <a href="#acceptance">1. Acceptance</a>
-      <a href="#account">2. Your account</a>
-      <a href="#use">3. Acceptable use</a>
-      <a href="#payments">4. Payments &amp; escrow</a>
-      <a href="#content">5. Content</a>
-      <a href="#disputes">6. Disputes</a>
-      <a href="#termination">7. Termination</a>
-      <a href="#liability">8. Liability</a>
-      <a href="#changes">9. Changes</a>
-      <a href="#contact">10. Contact</a>
-    </aside>
+  <aside class="doc-toc" aria-label="Contents">
+    <div class="k">Contents</div>
+    <a href="#who">1. Who we are</a>
+    <a href="#quotes">2. Quotes &amp; scope</a>
+    <a href="#revisions">3. Revisions</a>
+    <a href="#materials">4. Client materials</a>
+    <a href="#ownership">5. Ownership &amp; portfolio</a>
+    <a href="#ai">6. AI-assisted services</a>
+    <a href="#payment">7. Payment</a>
+    <a href="#cancel">8. Cancellation &amp; refunds</a>
+    <a href="#confidentiality">9. Confidentiality</a>
+    <a href="#timelines">10. Timelines</a>
+    <a href="#use">11. Acceptable use</a>
+    <a href="#ip">12. Site IP</a>
+    <a href="#disclaimers">13. Disclaimers</a>
+    <a href="#liability">14. Liability</a>
+    <a href="#indemnity">15. Indemnification</a>
+    <a href="#disputes">16. Law &amp; disputes</a>
+    <a href="#general">17. General</a>
+    <a href="#contact">18. Contact</a>
+  </aside>
 
-    <article class="doc">
-      <div class="eyebrow">Legal</div>
-      <h1 class="h-display mt-4" style="font-size: clamp(40px, 5vw, 64px);">Terms of service.</h1>
-      <p class="lead mt-3">Last updated 8 May 2026.</p>
+  <article class="doc">
+    <h1>Terms and Conditions of Service</h1>
+    <p class="date">Effective: <mark>[date]</mark> · Last updated: <mark>[date]</mark></p>
 
-      <h2 id="acceptance">1. Acceptance</h2>
-      <p>By creating an account or using Fashion Freelancing ("the Service"), you agree to these Terms. If you don't agree, don't use the Service.</p>
+    <div class="box">
+      <p><strong>Please read carefully.</strong> These Terms and Conditions ("Terms") are a legally binding agreement between you and Fashion Freelancing. They cover how projects are quoted, delivered and revised, who owns the work, payment, confidentiality, AI-assisted deliverables, limits of liability and dispute resolution. By requesting a quote, accepting a quote, or using fashionfreelancing.com (the "Site"), you accept these Terms.</p>
+    </div>
 
-      <h2 id="account">2. Your account</h2>
-      <p>You're responsible for keeping your credentials secure. You must be 18 or older to create an account. One person, one account.</p>
+    <h2 id="who">1. Who We Are</h2>
+    <p>Fashion Freelancing ("we", "us", "our") is a fashion design and production-services studio providing tech pack creation, 3D virtual sampling, pattern making (CAD), seamless print design, dobby and jacquard weave design, AI product photography, AI customer agents, e-commerce listing creation, website development and graphic design (each a "Service"). The Site and Services are operated by <mark>[Legal Entity Name]</mark>, registered in <mark>[Jurisdiction]</mark>, with its principal place of business at <mark>[Registered Address]</mark>.</p>
 
-      <h2 id="use">3. Acceptable use</h2>
-      <ul>
-        <li>Don't post fake portfolios, stolen work or misrepresent identity.</li>
-        <li>Don't try to circumvent escrow or take payments off-platform.</li>
-        <li>Don't harass other members or send spam.</li>
-        <li>Respect IP — only upload work you own or have rights to.</li>
-      </ul>
+    <h2 id="quotes">2. Quotes, Scope and Engagement</h2>
+    <ul>
+      <li><strong>Fixed written quote.</strong> After you send a brief, we aim to reply with a fixed written quote within 24 hours (business days). The quote states the scope, deliverables, price and delivery date, and is valid for 14 days unless stated otherwise.</li>
+      <li><strong>No work starts without acceptance.</strong> A project begins only when you accept the quote in writing (email is sufficient) and any agreed advance payment is received.</li>
+      <li><strong>Scope changes.</strong> Work outside the quoted scope — a new garment, a new concept, additional deliverables — is quoted separately before we do it. We do not bill surprise extras.</li>
+    </ul>
 
-      <h2 id="payments">4. Payments &amp; escrow</h2>
-      <p>Project payments are held by Stripe in escrow until milestones are signed off. We charge no commission on project earnings. Subscription fees are billed monthly or annually depending on your plan.</p>
+    <h2 id="revisions">3. Revisions</h2>
+    <p>Every package includes <strong>two structured revision rounds</strong>. A revision round is a consolidated set of change requests against the delivered work within the quoted scope. A new concept, garment, artwork direction or platform is a new brief, not a revision, and is quoted honestly in advance. Additional rounds beyond the included two are available and quoted before we start them.</p>
 
-      <h2 id="content">5. Content</h2>
-      <p>You retain all rights to the work you upload. You grant Fashion Freelancing a limited license to display it for the purposes of the Service (search, discovery, profile pages).</p>
+    <h2 id="materials">4. Client Materials and Responsibilities</h2>
+    <ul>
+      <li>You confirm you own, or are licensed to use, all materials you send us (sketches, references, logos, photos, measurements, size charts, product data), and that our use of them for your project does not infringe any third-party right.</li>
+      <li>Deliverable accuracy depends on input accuracy. Measurements, fabric specifications and platform requirements you provide are relied upon as correct; errors originating in supplied information are corrected as a revision or, where substantial, re-quoted.</li>
+      <li>You are responsible for final approval before production use. We strongly recommend appropriate physical checks — for example, a physical proto before bulk production, or a strike-off before a full print run.</li>
+    </ul>
 
-      <h2 id="disputes">6. Disputes</h2>
-      <p>If a project goes wrong, raise a dispute from the project page. Our team aims to resolve within 48 hours. We may release, refund or split escrow based on evidence.</p>
+    <h2 id="ownership">5. Deliverables, Ownership and Portfolio</h2>
+    <ul>
+      <li><strong>Ownership transfers to you on final payment.</strong> Upon receipt of full payment, all rights in the commissioned deliverables — including source files where quoted — transfer to you. Until final payment, all work remains our property.</li>
+      <li><strong>Exclusivity.</strong> Commissioned designs (prints, weaves, patterns, tech packs, brand assets) are never resold, re-coloured or reused for another client.</li>
+      <li><strong>Portfolio.</strong> We do not display client work publicly without your written permission. If you grant it, you may withdraw it at any time for future use.</li>
+      <li><strong>Our pre-existing tools.</strong> Generic techniques, templates, code libraries and know-how we owned before the project remain ours; you receive a perpetual licence to use them as embedded in your deliverables.</li>
+    </ul>
 
-      <h2 id="termination">7. Termination</h2>
-      <p>You can close your account at any time from settings. We may suspend or terminate accounts that violate these Terms.</p>
+    <h2 id="ai">6. AI-Assisted Services — Specific Terms</h2>
+    <ul>
+      <li><strong>AI Photography.</strong> Generated on-model imagery is produced from your product photos and human-checked against the physical garment before delivery. Synthetic models only — no real person's likeness is used without documented consent. Marketplace and advertising platforms may require AI-generated imagery to be disclosed; we advise on current platform rules at delivery, but compliance with a platform's policies at the time of your publication is your responsibility.</li>
+      <li><strong>AI Customer Agent.</strong> The agent answers only from content you approve, and you review sample conversations before launch. You remain responsible for the accuracy of policies, prices and product information supplied to the agent, and for legal requirements applying to automated communications in your market.</li>
+      <li><strong>3D Virtual Sampling.</strong> Renders and simulations are design-review tools based on the specifications you provide. They are not a guarantee of physical production outcomes; we recommend a physical proto before bulk.</li>
+    </ul>
 
-      <h2 id="liability">8. Liability</h2>
-      <p>The Service is provided "as is." We don't guarantee any specific outcome. Our total liability is limited to the fees you've paid us in the 12 months before the claim.</p>
+    <h2 id="payment">7. Payment</h2>
+    <ul>
+      <li>Payment terms (including any advance) are stated in each quote. Unless the quote says otherwise, the balance is due on delivery, before source-file handover and ownership transfer.</li>
+      <li>Late payments may pause active work and delivery timelines.</li>
+      <li>Taxes (including GST where applicable) are charged in addition to the quoted price where required by law.</li>
+    </ul>
 
-      <h2 id="changes">9. Changes</h2>
-      <p>We may update these Terms. We'll email significant changes 30 days before they take effect.</p>
+    <h2 id="cancel">8. Cancellation and Refunds</h2>
+    <ul>
+      <li>You may cancel a project in writing at any time. Work completed up to the cancellation date is billable proportionally against the quote; any unearned advance beyond that is refunded.</li>
+      <li>If we fail to deliver the quoted scope and cannot remedy it within a reasonable cure period, you are entitled to a refund of amounts paid for the undelivered portion.</li>
+      <li>Completed and delivered work is non-refundable once approved.</li>
+    </ul>
 
-      <h2 id="contact">10. Contact</h2>
-      <p>Questions? <a href="./help.html#contact" class="ulink" style="color:var(--ink);">Get in touch</a> or email <strong>legal@fashionos.app</strong>.</p>
-    </article>
-  </div>
-</section>
+    <h2 id="confidentiality">9. Confidentiality</h2>
+    <p>Your briefs, tech packs, unreleased designs, business information and customer data are treated as confidential. We do not share them except with team members working on your project under equivalent obligations. A mutual NDA is available on request and, where requested, is signed before any sensitive reference files move.</p>
+
+    <h2 id="timelines">10. Timelines</h2>
+    <p>Delivery dates are stated in the quote and assume timely receipt of your materials, feedback and approvals. Delays on the client side extend timelines correspondingly. Where a delay originates with us, we will tell you promptly and propose a corrected date.</p>
+
+    <h2 id="use">11. Acceptable Use of the Site</h2>
+    <p>You agree not to misuse the Site: no unlawful use, no attempts to breach security, no scraping beyond a compliant crawler, no false briefs or impersonation, and no interfering with the Site's operation.</p>
+
+    <h2 id="ip">12. Intellectual Property of the Site</h2>
+    <p>The Site — its design, text, graphics, logo and code — is owned by <mark>[Legal Entity Name]</mark> or its licensors. "Fashion Freelancing" and our logo are our marks; do not use them without written consent.</p>
+
+    <h2 id="disclaimers">13. Disclaimers</h2>
+    <p>THE SITE IS PROVIDED "AS IS". Excluding the express commitments in a written quote, and to the fullest extent permitted by law, we disclaim implied warranties including merchantability, fitness for a particular purpose and non-infringement. We do not warrant business outcomes — including sales performance, search rankings, marketplace approval or production results — of any deliverable.</p>
+
+    <h2 id="liability">14. Limitation of Liability</h2>
+    <p>TO THE FULLEST EXTENT PERMITTED BY LAW, we are not liable for indirect, incidental, special, consequential or punitive damages, or loss of profits, revenue or goodwill. Our total cumulative liability for claims arising out of a project will not exceed the amount you paid us for that project. Nothing in these Terms excludes liability that cannot be excluded by law.</p>
+
+    <h2 id="indemnity">15. Indemnification</h2>
+    <p>You agree to indemnify us against claims arising from materials you supplied, your breach of these Terms, or your use of deliverables in violation of law or third-party rights.</p>
+
+    <h2 id="disputes">16. Governing Law and Disputes</h2>
+    <ul>
+      <li>These Terms are governed by the laws of <mark>[Jurisdiction — e.g., India]</mark>.</li>
+      <li><strong>Talk first.</strong> Before any formal claim, contact <mark>[legal@ email]</mark> with the dispute and the remedy you seek; both parties get 60 days to resolve it informally.</li>
+      <li>Unresolved disputes are subject to the exclusive jurisdiction of the courts of <mark>[City, Jurisdiction]</mark>, or arbitration under <mark>[e.g., the Arbitration and Conciliation Act, 1996]</mark> if both parties agree in the quote.</li>
+    </ul>
+
+    <h2 id="general">17. General</h2>
+    <p>We may update these Terms with reasonable notice for material changes; continued use after the effective date is acceptance. If a provision is unenforceable, the rest stands. Our failure to enforce a right is not a waiver. You may not assign these Terms without consent; we may assign them in a merger or asset sale on notice. Neither party is liable for delay caused by events beyond reasonable control.</p>
+
+    <h2 id="contact">18. Contact</h2>
+    <p>Questions about these Terms: <mark>[legal@ email]</mark> · Projects and support: <a href="mailto:hello@fashionos.app">hello@fashionos.app</a> · Postal: <mark>[Legal Entity Name], [Registered Address]</mark></p>
+
+    <p class="end">— End of Terms and Conditions —</p>
+  </article>
+
+</div>
+</main>
 
 <div id="site-footer"></div>
 <script src="../assets/site.js"></script>

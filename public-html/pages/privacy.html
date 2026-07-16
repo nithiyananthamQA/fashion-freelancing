@@ -1,80 +1,175 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<!-- LEGAL PAGE — Privacy Policy, night-glass doc style.
+     Highlighted [placeholders] must be completed and the document reviewed
+     by a qualified lawyer before launch marketing begins. -->
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Privacy policy · Fashion Freelancing</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media=&apos;all&apos;" />
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" /></noscript>
-<link rel="stylesheet" href="../assets/styles.css" />
+<title>Privacy Policy - Fashion Freelancing</title>
+<meta name="description" content="How Fashion Freelancing handles your information: quote enquiries, confidential project files, no data selling, no ad cookies — and your rights under DPDPA and GDPR." />
+<meta name="robots" content="noindex" /><!-- remove noindex after legal review -->
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF0055'/%3E%3Cstop offset='1' stop-color='%236E56F0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='19' font-weight='600' fill='%23fff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link rel="stylesheet" href="../assets/styles.css">
+
 <style>
-  .doc { max-width: 760px; margin: 0 auto; }
-  .doc h2 { font-family: var(--font-display); font-size: 28px; font-weight: 480; letter-spacing: -0.025em; margin-top: 48px; }
-  .doc h3 { font-size: 17px; margin-top: 24px; margin-bottom: 6px; }
-  .doc p, .doc ul { color: var(--ink-3); line-height: 1.7; margin: 8px 0; }
-  .doc-toc { position: sticky; top: 88px; }
-  .doc-toc a { display:block; padding: 6px 0; color: var(--ink-5); font-size: 13px; }
-  .doc-toc a:hover { color: var(--ink); }
+:root {
+  --sans: 'Inter', system-ui, sans-serif;
+  --disp: 'Plus Jakarta Sans', var(--sans);
+  --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --paper: #0C0A1C; --ink: #F4F2FA;
+  --ink-3: rgba(244,242,250,.84); --ink-4: rgba(244,242,250,.62); --ink-5: rgba(244,242,250,.46);
+  --line: rgba(255,255,255,.10); --glass: rgba(255,255,255,.055); --glass-border: rgba(255,255,255,.14);
+  --acc: #A78BFA; --grad-hot: linear-gradient(90deg, #8B5CF6, #FF4FA0);
+  --easing: cubic-bezier(.22,1,.36,1);
+}
+html { color-scheme: dark; scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: clip; }
+/* pill nav chrome */
+.topnav { position: sticky; top: 12px !important; width: min(1180px, calc(100% - 28px)); margin: 12px auto 0; border-radius: 999px;
+  background: rgba(16,13,32,.62) !important; backdrop-filter: saturate(160%) blur(20px) !important; -webkit-backdrop-filter: saturate(160%) blur(20px) !important;
+  border: 1px solid rgba(255,255,255,.12) !important; box-shadow: 0 12px 44px -12px rgba(0,0,0,.55) !important; overflow: hidden; }
+.topnav .container, .topnav .topnav-inner { padding-left: 20px; padding-right: 12px; }
+.topnav.is-scrolled { border-radius: 999px; }
+.topnav-links a { color: rgba(244,242,250,.66) !important; }
+.topnav-links a:hover, .topnav-links a.active { color: #fff !important; }
+.topnav-burger span { background: #F4F2FA !important; }
+.topnav .btn-primary, .topnav-mobile .btn-primary { background: var(--grad-hot) !important; color: #fff !important; border-radius: 999px !important; border: 0 !important; box-shadow: 0 8px 26px rgba(139,92,246,.4) !important; }
+.topnav-mobile { background: rgba(12,10,28,.92) !important; top: 88px !important; border-radius: 22px; left: 12px !important; right: 12px !important; border: 1px solid rgba(255,255,255,.12); }
+.topnav-mobile-links a { color: rgba(244,242,250,.8) !important; }
+.topnav .logo-img, .footer .logo-img {
+  background: transparent;
+  /* fully transparent artwork — no white stroke; card-style violet/pink light only */
+  filter: drop-shadow(0 4px 16px rgba(139,92,246,.55)) drop-shadow(0 0 28px rgba(255,79,160,.32));
+  transition: filter .35s ease;
+}
+.topnav .logo:hover .logo-img, .footer .logo:hover .logo-img {
+  filter: drop-shadow(0 4px 20px rgba(139,92,246,.75)) drop-shadow(0 0 38px rgba(255,79,160,.5));
+}
+.footer { background: rgba(255,255,255,.03) !important; border-top: 1px solid var(--line) !important; }
+#site-footer * { background-color: transparent; }
+/* document layout */
+.doc-wrap { width: 100%; margin: 0 auto; padding: 64px 10vw 96px; display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: clamp(48px, 5vw, 90px); }
+.doc-toc { position: sticky; top: 110px; align-self: start; font-size: 13px; max-height: calc(100vh - 140px); overflow-y: auto; }
+.doc-toc .k { font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--acc); margin-bottom: 12px; }
+.doc-toc a { display: block; padding: 5px 0; color: var(--ink-5); text-decoration: none; }
+.doc-toc a:hover { color: var(--ink); }
+.doc h1 { font-family: var(--disp); font-weight: 800; letter-spacing: -.03em; font-size: clamp(34px, 4.6vw, 58px); line-height: 1.06; margin: 0 0 10px; }
+.doc .date { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-5); }
+.doc h2 { font-family: var(--disp); font-weight: 700; letter-spacing: -.02em; font-size: clamp(22px, 2vw, 28px); margin: 48px 0 12px; }
+.doc h3 { font-family: var(--disp); font-weight: 700; font-size: 16.5px; margin: 22px 0 6px; }
+.doc p { color: var(--ink-4); line-height: 1.75; margin: 9px 0; font-size: 15.5px; max-width: 88ch; }
+.doc ul { color: var(--ink-4); line-height: 1.75; font-size: 15.5px; padding-left: 22px; margin: 9px 0 14px; max-width: 88ch; }
+.doc li { margin: 5px 0; }
+.doc strong { color: var(--ink-3); }
+.doc .box { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 18px; padding: 24px 28px; margin: 22px 0; }
+.doc mark { background: rgba(239,216,74,.18); color: #F6E97E; border-radius: 4px; padding: 0 5px; font-style: normal; }
+.doc .end { text-align: center; color: var(--ink-5); font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; margin-top: 56px; }
+a { color: var(--acc); }
+@media (max-width: 860px) { .doc-wrap { grid-template-columns: 1fr; padding: 48px 20px 80px; } .doc-toc { position: static; max-height: none; } }
 </style>
 </head>
 <body>
 
 <div id="site-nav"></div>
 
-<section style="padding: 64px 0 96px;">
-  <div class="container" style="max-width: 1100px; display:grid; grid-template-columns: 200px 1fr; gap: 48px;">
+<main>
+<div class="doc-wrap">
 
-    <aside class="doc-toc">
-      <div class="eyebrow" style="margin-bottom:12px;">Contents</div>
-      <a href="#what">What we collect</a>
-      <a href="#why">Why we use it</a>
-      <a href="#share">Who we share with</a>
-      <a href="#rights">Your rights</a>
-      <a href="#retention">Retention</a>
-      <a href="#security">Security</a>
-      <a href="#contact">Contact</a>
-    </aside>
+  <aside class="doc-toc" aria-label="Contents">
+    <div class="k">Contents</div>
+    <a href="#who">1. Who we are</a>
+    <a href="#collect">2. What we collect</a>
+    <a href="#use">3. How we use it</a>
+    <a href="#never">4. What we never do</a>
+    <a href="#share">5. Sharing</a>
+    <a href="#cookies">6. Cookies &amp; analytics</a>
+    <a href="#retention">7. Retention</a>
+    <a href="#security">8. Security</a>
+    <a href="#rights">9. Your rights</a>
+    <a href="#transfers">10. International transfers</a>
+    <a href="#children">11. Children</a>
+    <a href="#changes">12. Changes &amp; contact</a>
+  </aside>
 
-    <article class="doc">
-      <div class="eyebrow">Legal</div>
-      <h1 class="h-display mt-4" style="font-size: clamp(40px, 5vw, 64px);">Privacy policy.</h1>
-      <p class="lead mt-3">Last updated 8 May 2026. We follow GDPR, CCPA and the spirit of treating you like a human.</p>
+  <article class="doc">
+    <h1>Privacy Policy</h1>
+    <p class="date">Effective: <mark>[date]</mark> · Last updated: <mark>[date]</mark></p>
 
-      <h2 id="what">What we collect</h2>
-      <ul>
-        <li><strong>Account data</strong> — name, email, password (hashed), profile details you choose to share.</li>
-        <li><strong>Portfolio &amp; project data</strong> — images, files, briefs, messages and metadata you upload.</li>
-        <li><strong>Payment data</strong> — handled by Stripe; we store transaction IDs, not card numbers.</li>
-        <li><strong>Usage data</strong> — pages viewed, features used, device &amp; browser, IP address (anonymized after 30 days).</li>
-      </ul>
+    <div class="box">
+      <p>Fashion Freelancing is a design studio, not a data business. We collect the minimum needed to reply to your enquiry and deliver your project, we treat your project files as confidential business information, and we do not sell personal data or run advertising trackers. This page explains the details and your rights.</p>
+    </div>
 
-      <h2 id="why">Why we use it</h2>
-      <ul>
-        <li>Run the Service: matching, messaging, search, payments.</li>
-        <li>Improve the product (privacy-first analytics — no third-party tracking ad networks).</li>
-        <li>Send transactional emails. Marketing only with your opt-in.</li>
-        <li>Fraud detection &amp; trust &amp; safety.</li>
-      </ul>
+    <h2 id="who">1. Who We Are</h2>
+    <p>fashionfreelancing.com (the "Site") is operated by <mark>[Legal Entity Name]</mark>, <mark>[Registered Address]</mark>. For privacy questions contact <mark>[privacy@ email]</mark> or <a href="mailto:hello@fashionos.app">hello@fashionos.app</a>.</p>
 
-      <h2 id="share">Who we share with</h2>
-      <p>Only the third parties needed to run Fashion Freelancing: Stripe (payments), Resend (email), Cloudflare (CDN/security), Sentry (error monitoring), PostHog (privacy-respecting analytics). We never sell your data.</p>
+    <h2 id="collect">2. Information We Collect</h2>
+    <ul>
+      <li><strong>Enquiry details you provide.</strong> When you request a quote we collect your name, email address, company (optional), the service you select, and your project description. The Site has no user accounts. If the quote form is unavailable, briefs reach us by email at hello@fashionos.app — the same commitments apply.</li>
+      <li><strong>Project materials.</strong> If you engage us, the files you share for the project (sketches, tech packs, product photos, size charts, brand assets) are processed to deliver the work and treated as confidential business information under our Terms.</li>
+      <li><strong>Technical data.</strong> Standard server and analytics data: IP address, browser type, pages visited, referring URL, approximate (city-level) location. No precise GPS.</li>
+      <li><strong>Communications.</strong> Emails and messages you exchange with us, retained for the working relationship.</li>
+    </ul>
 
-      <h2 id="rights">Your rights</h2>
-      <p>You can access, export or delete your data at any time from <strong>Settings → Privacy</strong>. EU/UK users have additional rights under GDPR; California users under CCPA.</p>
+    <h2 id="use">3. How We Use Information</h2>
+    <ul>
+      <li>Reply to your enquiry with a quote — the purpose you gave it to us for;</li>
+      <li>Deliver contracted projects and communicate about them;</li>
+      <li>Operate, secure and improve the Site;</li>
+      <li>Send occasional service updates only if you opt in — never a purchased list, and you can unsubscribe at any time;</li>
+      <li>Meet legal, tax and accounting obligations.</li>
+    </ul>
 
-      <h2 id="retention">Retention</h2>
-      <p>We keep account data while your account is active. After deletion, project history is retained for 90 days for tax/dispute reasons, then anonymized.</p>
+    <h2 id="never">4. What We Do NOT Do</h2>
+    <ul>
+      <li>We do not sell personal information.</li>
+      <li>We do not share your project files, unreleased designs or business information with anyone outside the project team.</li>
+      <li>We do not use your commissioned work or confidential materials to advertise to others, or display them publicly without written permission.</li>
+      <li>We do not use third-party advertising cookies on the Site.</li>
+    </ul>
 
-      <h2 id="security">Security</h2>
-      <p>Encrypted in transit (TLS 1.3) and at rest (AES-256). 2FA available. SOC 2 Type II in progress.</p>
+    <h2 id="share">5. Sharing</h2>
+    <p>We share personal data only with: (a) service providers who host our infrastructure, deliver email or provide analytics — bound by contract to use it only on our instructions; (b) authorities where a binding legal demand requires it, narrowed to what the demand strictly requires; (c) a successor entity in a merger or asset sale, with prior notice to you.</p>
 
-      <h2 id="contact">Contact</h2>
-      <p>Email our DPO at <strong>privacy@fashionos.app</strong>.</p>
-    </article>
-  </div>
-</section>
+    <h2 id="cookies">6. Cookies &amp; Analytics</h2>
+    <p>We use strictly-necessary cookies for Site operation and, where deployed, privacy-respecting analytics to understand aggregate usage. Where law requires consent for non-essential cookies, we ask first. No advertising cookies, ever.</p>
+
+    <h2 id="retention">7. Retention</h2>
+    <ul>
+      <li>Enquiries that do not become projects: deleted or anonymised after <mark>[12]</mark> months.</li>
+      <li>Project files and correspondence: retained for the project and for <mark>[24]</mark> months after completion for support and warranty, then deleted on request or per schedule.</li>
+      <li>Legal and tax records: as long as law requires.</li>
+    </ul>
+
+    <h2 id="security">8. Security</h2>
+    <p>Data in transit is encrypted (TLS 1.2+). Access to client files is limited to the people working on your project. No system is perfectly secure; if a breach likely creates risk to you, we will notify you and the relevant authorities as applicable law requires.</p>
+
+    <h2 id="rights">9. Your Rights</h2>
+    <p>Depending on your location you may have rights of access, correction, deletion, portability, objection or restriction, and consent withdrawal. Email <mark>[privacy@ email]</mark> — we respond within 30 days and verify identity before acting.</p>
+    <ul>
+      <li><strong>India (DPDPA 2023):</strong> you may contact our Grievance Officer at <mark>[grievance@ email]</mark>, and you may nominate another person to exercise your rights in case of death or incapacity.</li>
+      <li><strong>EU/UK (GDPR):</strong> our legal bases are contract performance (quotes, projects), legitimate interests (security, improvement), consent (marketing, non-essential cookies) and legal obligation. You may complain to your supervisory authority; we would appreciate the chance to resolve it first.</li>
+    </ul>
+
+    <h2 id="transfers">10. International Transfers</h2>
+    <p>We work with clients globally; data may be processed in <mark>[hosting regions]</mark>. Where transfer rules apply (EEA/UK), we rely on appropriate safeguards such as Standard Contractual Clauses.</p>
+
+    <h2 id="children">11. Children</h2>
+    <p>The Site is a business service and is not directed to children under 18. We do not knowingly collect children\'s data.</p>
+
+    <h2 id="changes">12. Changes &amp; Contact</h2>
+    <p>Material changes are posted with a new date and, where appropriate, emailed. Questions: <mark>[privacy@ email]</mark> · <a href="mailto:hello@fashionos.app">hello@fashionos.app</a> · <mark>[Legal Entity Name], [Registered Address]</mark>.</p>
+
+    <p class="end">— End of Privacy Policy —</p>
+  </article>
+
+</div>
+</main>
 
 <div id="site-footer"></div>
 <script src="../assets/site.js"></script>

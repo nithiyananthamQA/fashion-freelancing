@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -566,8 +566,143 @@
 }
 .sv-sent p { margin: 0; color: var(--ink-4); font-size: 14.5px; }
 </style>
+
+<!-- ============================================================
+     NIGHT GLASS SKIN — matches the services (agency) page theme.
+     Token flip + glass surfaces + floating pill nav + scene.
+     ============================================================ -->
+<style id="sv-glass-skin">
+  :root {
+    --paper:   #0C0A1C;
+    --paper-2: #131024;
+    --paper-3: rgba(255,255,255,.055);
+    --ink:     #F4F2FA;
+    --ink-2:   #EDEAF7;
+    --ink-3:   rgba(244,242,250,.84);
+    --ink-4:   rgba(244,242,250,.62);
+    --ink-5:   rgba(244,242,250,.46);
+    --ink-6:   rgba(244,242,250,.34);
+    --ink-7:   rgba(244,242,250,.20);
+    --line:    rgba(255,255,255,.10);
+    --line-2:  rgba(255,255,255,.16);
+    --champagne: #8B5CF6; --champagne-2: #A78BFA; --champagne-3: #A78BFA;
+    --champagne-50: rgba(139,92,246,.22);
+    --shadow-1: 0 4px 18px rgba(0,0,0,.35);
+    --shadow-2: 0 18px 50px -12px rgba(0,0,0,.55);
+    --shadow-3: 0 34px 80px -20px rgba(0,0,0,.65);
+    --glass:        rgba(255,255,255,.055);
+    --glass-hover:  rgba(255,255,255,.095);
+    --glass-border: rgba(255,255,255,.14);
+    --grad-hot: linear-gradient(90deg, #8B5CF6, #FF4FA0);
+    --lg-orange:#F5A623; --lg-coral:#F1543F; --lg-green:#34C165; --lg-sky:#4AA8F0; --lg-yellow:#EFD84A;
+  }
+  html { color-scheme: dark; }
+  body { background: var(--paper); }
+  ::selection { background: #8B5CF6; color: #fff; }
+
+  /* scene: blobs + grain + cursor glow */
+  .gx-scene { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .gx-scene .blob { position: absolute; border-radius: 50%; filter: blur(95px); will-change: transform; }
+  .gx-scene .g1 { width: 520px; height: 520px; background: var(--acc, #8B5CF6); top: -160px; left: -120px; opacity: .3; animation: gx-a 24s ease-in-out infinite; }
+  .gx-scene .g2 { width: 420px; height: 420px; background: #8B5CF6; top: 34%; right: -150px; opacity: .22; animation: gx-b 28s ease-in-out infinite; }
+  .gx-scene .g3 { width: 400px; height: 400px; background: var(--acc, #FF4FA0); bottom: -140px; left: 18%; opacity: .16; animation: gx-a 30s ease-in-out infinite reverse; }
+  @keyframes gx-a { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(60px,40px) scale(1.1); } }
+  @keyframes gx-b { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-70px,50px) scale(.92); } }
+  .gx-grain {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .gx-glow {
+    position: fixed; width: 440px; height: 440px; border-radius: 50%; pointer-events: none; z-index: 2;
+    background: radial-gradient(circle, rgba(139,92,246,.13), transparent 70%);
+    transform: translate(-50%,-50%); left: -600px; top: -600px;
+    transition: left .12s linear, top .12s linear;
+  }
+  @media (prefers-reduced-motion: reduce) { .gx-scene .blob { animation: none; } .gx-glow { display: none; } }
+  #sv-main, main { position: relative; z-index: 3; }
+
+  /* floating pill nav (same as the services page) */
+  .topnav {
+    position: sticky; top: 12px !important;
+    width: min(1180px, calc(100% - 28px));
+    margin: 12px auto 0;
+    border-radius: 999px;
+    background: rgba(16,13,32,.62) !important;
+    backdrop-filter: saturate(160%) blur(20px) !important;
+    -webkit-backdrop-filter: saturate(160%) blur(20px) !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    box-shadow: 0 12px 44px -12px rgba(0,0,0,.55) !important;
+    overflow: hidden;
+  }
+  .topnav .container, .topnav .topnav-inner { padding-left: 20px; padding-right: 12px; }
+  .topnav.is-scrolled { border-radius: 999px; }
+  .topnav-links a { color: rgba(244,242,250,.66) !important; }
+  .topnav-links a:hover, .topnav-links a.active { color: #fff !important; }
+  .topnav-burger span { background: #F4F2FA !important; }
+  .topnav .btn-primary, .topnav-mobile .btn-primary {
+    background: var(--grad-hot) !important; color: #fff !important;
+    border-radius: 999px !important; border: 0 !important;
+    box-shadow: 0 8px 26px rgba(139,92,246,.4) !important;
+  }
+  .topnav-mobile { background: rgba(12,10,28,.92) !important; top: 88px !important; border-radius: 22px; left: 12px !important; right: 12px !important; border: 1px solid rgba(255,255,255,.12); }
+  .topnav-mobile-links a { color: rgba(244,242,250,.8) !important; }
+  /* logo: transparent, traced by a light stroke */
+  .topnav .logo-img, .footer .logo-img {
+    background: transparent;
+    filter:
+      drop-shadow(1px 0 0 rgba(255,255,255,.9))
+      drop-shadow(-1px 0 0 rgba(255,255,255,.9))
+      drop-shadow(0 1px 0 rgba(255,255,255,.9))
+      drop-shadow(0 -1px 0 rgba(255,255,255,.9))
+      drop-shadow(0 0 8px rgba(255,255,255,.22));
+  }
+  .footer { background: rgba(255,255,255,.03) !important; border-top: 1px solid var(--line) !important; }
+  #site-footer * { background-color: transparent; }
+
+  /* glass surfaces for the template components */
+  .sv-dl-item, .sv-gallery-item, .sv-about-aside, .sv-proc-cell,
+  .sv-cform, .sv-cpromise, .sv-sent, .sv-stat {
+    background: var(--glass) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 20px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .sv-dl-item:hover, .sv-gallery-item:hover, .sv-proc-cell:hover { background: var(--glass-hover) !important; }
+  .sv-faq-q:hover { color: var(--acc, #A78BFA); }
+  /* buttons → gradient/accent pills */
+  .ht-btn, .sv-csubmit, .btn { border-radius: 999px !important; }
+  .ht-solid {
+    background: var(--acc, #8B5CF6) !important; color: #0C0A1C !important; border: 0 !important;
+    box-shadow: 0 8px 30px color-mix(in srgb, var(--acc, #8B5CF6) 40%, transparent);
+  }
+  .ht-solid:hover { transform: translateY(-2px); }
+  .ht-ghost {
+    background: var(--glass) !important; color: var(--ink) !important;
+    border: 1px solid var(--glass-border) !important;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  .ht-ghost:hover { background: var(--glass-hover) !important; }
+  .sv-csubmit { color: #0C0A1C !important; }
+  /* form fields on glass */
+  .sv-cform .cinput {
+    background: rgba(255,255,255,.06) !important;
+    border-color: var(--glass-border) !important;
+    color: var(--ink) !important;
+  }
+  .sv-cform .cinput:focus {
+    border-color: var(--acc, #8B5CF6) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--acc, #8B5CF6) 25%, transparent) !important;
+  }
+  .sv-cform select.cinput option { background: #131024; color: var(--ink); }
+</style>
 </head>
 <body>
+
+<!-- NIGHT GLASS scene -->
+<div class="gx-scene" aria-hidden="true"><div class="blob g1"></div><div class="blob g2"></div><div class="blob g3"></div></div>
+<div class="gx-grain" aria-hidden="true"></div>
+<div class="gx-glow" id="gx-glow" aria-hidden="true"></div>
 
 <!-- Skip to main content — keyboard / screen-reader navigation -->
 <a class="skip-link" href="#sv-main">Skip to content</a>
@@ -998,16 +1133,17 @@ const main = document.getElementById('sv-main');
 /* Per-service accent — mirrors the colour each service's card uses on the
    Our Services page (the 5-colour cycle, in card order). */
 const SVC_ACCENT = {
-  'tech-pack':           { c:'#6E56F0', d:'#5A45D6' }, /* violet */
-  '3d-virtual-sampling': { c:'#2BA8E8', d:'#1E8FC9' }, /* cyan   */
-  'seamless-pattern':    { c:'#00C853', d:'#00A845' }, /* green  */
-  'pattern-cad':         { c:'#F0A93B', d:'#C9851E' }, /* amber  */
-  'dobby-jacquard':      { c:'#FF0055', d:'#D6004A' }, /* pink   */
-  'website':             { c:'#6E56F0', d:'#5A45D6' }, /* violet */
-  'ai-agent':            { c:'#2BA8E8', d:'#1E8FC9' }, /* cyan   */
-  'ai-photography':      { c:'#00C853', d:'#00A845' }, /* green  */
-  'ecom-listing':        { c:'#F0A93B', d:'#C9851E' }, /* amber  */
-  'graphic-design':      { c:'#FF0055', d:'#D6004A' }, /* pink   */
+  /* ten unique colours — one per service, no repeats (logo palette family) */
+  'tech-pack':           { c:'#F5A623', d:'#FFC163' }, /* orange     */
+  '3d-virtual-sampling': { c:'#4AA8F0', d:'#7EC2F7' }, /* sky        */
+  'seamless-pattern':    { c:'#34C165', d:'#6BD892' }, /* green      */
+  'pattern-cad':         { c:'#EFD84A', d:'#F7E67E' }, /* yellow     */
+  'dobby-jacquard':      { c:'#F1543F', d:'#F98A7B' }, /* coral      */
+  'website':             { c:'#A78BFA', d:'#C7B4FF' }, /* violet     */
+  'ai-agent':            { c:'#3EC8C0', d:'#79DED8' }, /* teal       */
+  'ai-photography':      { c:'#FF6FB3', d:'#FF9DCB' }, /* pink       */
+  'ecom-listing':        { c:'#A8D84A', d:'#C4E97E' }, /* lime       */
+  'graphic-design':      { c:'#7E9BEA', d:'#A9BDF3' }, /* periwinkle */
 };
 const ACC = SVC_ACCENT[slug] || { c:'var(--champagne)', d:'var(--champagne-2)' };
 
@@ -1040,13 +1176,6 @@ const dlHTML = svc.deliverables.map((d, i) => `
     <strong class="sv-dl-title">${d.title}</strong>
     <p class="sv-dl-desc">${d.desc}</p>
   </li>`).join('');
-
-const galleryHTML = svc.gallery.map((g, i) => `
-  <div class="sv-gallery-item rv rv-d${i+1}" role="listitem" style="--acc:${ACC.c};--acc-d:${ACC.d}">
-    <div class="sv-tile-fill"></div>
-    <span class="sv-gallery-tag">${esc(g.tag)}</span>
-    <div class="sv-gallery-caption">${esc(g.caption)}</div>
-  </div>`).join('');
 
 const procHTML = svc.process.map((p, i) => `
   <div class="sv-proc-cell rv" style="transition-delay:${i * 0.1}s">
@@ -1119,17 +1248,6 @@ main.innerHTML = `
         <h2 id="delivers-heading">Everything you receive.</h2>
       </div>
       <ul class="sv-dl-grid" aria-label="Deliverables list">${dlHTML}</ul>
-    </div>
-  </section>
-
-  <!-- GALLERY -->
-  <section class="sv-gallery" aria-labelledby="gallery-heading">
-    <div class="wrap">
-      <div class="sv-sec-head rv">
-        <span class="sv-label">Our work</span>
-        <h2 id="gallery-heading">What we deliver.</h2>
-      </div>
-      <div class="sv-gallery-grid" role="list" aria-label="Work samples">${galleryHTML}</div>
     </div>
   </section>
 
@@ -1286,5 +1404,21 @@ document.querySelectorAll('.sv-faq-q').forEach(btn => {
 </script>
 
 <script src="../assets/site.js"></script>
+<script>
+/* NIGHT GLASS — scene tint + cursor glow */
+(function () {
+  var m = document.getElementById('sv-main');
+  var scene = document.querySelector('.gx-scene');
+  if (m && scene && m.style.cssText) scene.style.cssText += ';' + m.style.cssText;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!window.matchMedia('(hover: hover)').matches) return;
+  var glow = document.getElementById('gx-glow');
+  if (!glow) return;
+  window.addEventListener('mousemove', function (e) {
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+  }, { passive: true });
+})();
+</script>
 </body>
 </html>
