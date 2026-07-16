@@ -48,10 +48,18 @@
     l.rel = 'stylesheet'; l.href = href;
     document.head.appendChild(l);
   }
+  /* HIDDEN FOR LAUNCH: marketplace intake chat widget — its flow asks
+     hire / get-hired questions that don't exist in the launch scope, and
+     its styling predates the night-glass system. Re-enable (or rebuild as
+     an on-brand quote bot) when the marketplace ships.
   loadStylesheet(r('shared/intake.css'));
   loadScript(r('shared/intake.js'))
     .then(() => loadScript(r('assets/ff-chat.js')))
     .catch(e => console.error('Chat widget failed to load:', e && e.message ? e.message : e));
+  HIDDEN FOR LAUNCH */
+  // Launch quote bot — night-glass widget, flow dedicated to the current services.
+  loadScript(r('assets/quote-bot.js'))
+    .catch(e => console.error('Quote bot failed to load:', e && e.message ? e.message : e));
 
   if (!window.api) {
     loadScript(r('assets/store.js'))
@@ -251,7 +259,7 @@
 
     // Footer accordion: always open on desktop, toggle on mobile
     function syncFooterAccordion() {
-      const desktop = window.innerWidth >= 481;
+      const desktop = window.innerWidth >= 721; // match the site-wide mobile breakpoint
       document.querySelectorAll('.footer-acc').forEach(d => {
         if (desktop) d.setAttribute('open', '');
         else if (!d.dataset.userOpened) d.removeAttribute('open');

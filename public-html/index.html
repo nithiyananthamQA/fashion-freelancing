@@ -149,6 +149,20 @@ main { position: relative; z-index: 3; }
 }
 .topnav-mobile { background: rgba(12,10,28,.92) !important; }
 .topnav-mobile-links a { color: rgba(244,242,250,.8) !important; }
+/* mobile drawer — glass card in the design system */
+.topnav-mobile { bottom: 12px !important; border: 1px solid rgba(255,255,255,.14) !important; box-shadow: 0 24px 70px -24px rgba(0,0,0,.75); }
+.topnav-mobile-inner { padding: 30px 24px calc(24px + env(safe-area-inset-bottom)) !important; }
+.topnav-mobile-links { flex: 0 0 auto !important; justify-content: flex-start !important; padding: 8px 0 0 !important; }
+.topnav-mobile-cta { margin-top: auto !important; }
+.topnav-mobile-links a {
+  display: block; width: 100%; text-align: left !important;
+  font-family: var(--disp) !important; font-size: 24px !important; font-weight: 700 !important;
+  letter-spacing: -.02em; padding: 18px 4px !important;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.topnav-mobile-links a:last-child { border-bottom: 0; }
+.topnav-burger { background: rgba(255,255,255,.07) !important; border: 1px solid rgba(255,255,255,.16) !important; }
+.topnav-burger.is-open span { background: #F4F2FA !important; }
 .footer { background: rgba(255,255,255,.03) !important; border-top: 1px solid var(--line) !important; }
 #site-footer * { background-color: transparent; }
 
@@ -203,6 +217,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
   padding: calc(var(--u) * 15) 0 calc(var(--u) * 10);
   text-align: center;
 }
+/* mobile: hero hugs the header — tight 32px gap */
+@media (max-width: 720px) { .hero { padding-top: calc(var(--u) * 3); } }
 .hero .pill {
   display: inline-flex; align-items: center; gap: 9px;
   padding: 9px 18px; border-radius: 999px;
@@ -224,7 +240,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
   display: flex; max-width: 780px; margin: 64px auto 0;
   padding: 26px 10px; border-radius: 24px;
 }
-.hero-stats .st { flex: 1; text-align: center; padding: 0 8px; }
+.hero-stats .st { flex: 1; text-align: center; padding: 4px 8px; }
+.hero-stats .st + .st { border-left: 1px solid var(--line); }
 .hero-stats .n {
   font-family: var(--disp); font-size: clamp(24px, 3vw, 36px); font-weight: 800; letter-spacing: -.03em;
   background: linear-gradient(90deg, var(--lg-sky), #A78BFA);
@@ -232,8 +249,11 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
 }
 .hero-stats .l { font-size: 12px; color: var(--ink-5); margin-top: 6px; line-height: 1.4; }
 @media (max-width: 640px) {
-  .hero-stats { flex-wrap: wrap; gap: 18px 0; }
-  .hero-stats .st { flex: 1 1 50%; }
+  .hero-stats { flex-wrap: wrap; gap: 0; padding: 14px 6px; }
+  .hero-stats .st { flex: 1 1 50%; padding: 14px 8px; }
+  .hero-stats .st + .st { border-left: 0; }
+  .hero-stats .st:nth-child(2n) { border-left: 1px solid var(--line); }
+  .hero-stats .st:nth-child(n+3) { border-top: 1px solid var(--line); }
 }
 
 /* ---- Service-name marquee, masked edges ---- */
@@ -394,6 +414,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
    PROCESS — three glass steps
    ============================================================ */
 .sec { position: relative; padding: calc(var(--u) * 13) 0; }
+@media (max-width: 720px) {
+  .sec { padding: calc(var(--u) * 7) 0; }
+  .sec-head { margin-bottom: 30px; }
+}
 .sec-head { max-width: 640px; margin: 0 auto 48px; text-align: center; }
 .sec-head h2 { font-size: clamp(28px, 3.8vw, 46px); margin-top: 14px; }
 .sec-head .sub { color: var(--ink-4); font-size: 15.5px; margin-top: 14px; line-height: 1.6; }
