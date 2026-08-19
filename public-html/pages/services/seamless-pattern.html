@@ -12,7 +12,11 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<!-- fonts load without blocking first paint; metric-matched fallbacks
+     (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 
@@ -236,6 +240,35 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   display: flex; align-items: center;
   padding: calc(var(--u) * 5) 0;
 }
+/* split hero — copy left, the deliverable previewed right (matches the
+   3D sampling page). Falls back to a single centred column on narrow
+   screens so the copy and CTA always lead. */
+.hero-split {
+  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+  align-items: center; gap: clamp(24px, 4vw, 56px); width: 100%; text-align: left;
+}
+.hero-copy { min-width: 0; }
+.hero-view { position: relative; min-width: 0; width: 100%; justify-self: end; }
+.hero-view > * { width: 100%; margin: 0; }
+.hero-split h1 { max-width: 15ch; font-size: clamp(36px, 4vw, 60px); margin-inline: 0; }
+.hero-split .sub { margin-left: 0; margin-right: 0; max-width: 46ch; }
+.hero-split .acts { justify-content: flex-start; }
+.hero-split .chips { justify-content: flex-start; }
+.hero-split .chips { flex-wrap: nowrap; gap: 8px; }
+.hero-split .chips span { white-space: nowrap; font-size: 9.5px; padding: 7px 12px; }
+@media (max-width: 1180px) { .hero-split .chips { flex-wrap: wrap; } }
+@media (max-width: 900px) {
+  .hero-split { grid-template-columns: 1fr; text-align: center; gap: 20px; }
+  .hero-split h1 { margin-inline: auto; }
+  .hero-split .sub { margin-left: auto; margin-right: auto; }
+  .hero-split .acts, .hero-split .chips { justify-content: center; }
+  .hero-view { justify-self: center; max-width: 420px; }
+}
+@media (max-width: 560px) {
+  /* below this the preview costs more than it adds — copy and CTA matter more */
+  .hero-view { display: none; }
+}
+
 .hero-center { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
 .sec-visual { padding-top: 0; }
 .sec-visual .vwrap { width: min(100%, 780px); margin: 0 auto; }
@@ -362,6 +395,24 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .week:hover .wn { color: var(--acc); }
 .week h3 { font-family: var(--disp); font-weight: 700; font-size: 16.5px; letter-spacing: -.014em; color: var(--ink); margin: 0 0 4px; }
 .week p { font-size: 13.5px; line-height: 1.55; color: var(--ink-4); margin: 0; max-width: 42ch; }
+
+/* How it works — steps stagger in as the list scrolls into view.
+   Hidden state is applied by JS (.rv-steps.armed) so the steps stay visible
+   if scripting or the observer ever fails — content must never depend on
+   an animation succeeding. */
+.weeks.rv-steps.armed .week {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity .55s var(--easing), transform .55s var(--easing);
+}
+.weeks.rv-steps.armed.in .week { opacity: 1; transform: none; }
+.weeks.rv-steps.armed.in .week:nth-child(1) { transition-delay: .10s; }
+.weeks.rv-steps.armed.in .week:nth-child(2) { transition-delay: .28s; }
+.weeks.rv-steps.armed.in .week:nth-child(3) { transition-delay: .46s; }
+.weeks.rv-steps.armed.in .week:nth-child(4) { transition-delay: .64s; }
+.weeks.rv-steps.armed.in .week:nth-child(5) { transition-delay: .82s; }
+@media (prefers-reduced-motion: reduce) {
+  .weeks.rv-steps.armed .week { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
 @media (max-width: 980px) { .chat-wrap { grid-template-columns: 1fr; } .chat { max-width: 100%; } }
 @media (prefers-reduced-motion: reduce) { .msg, .chat .done { opacity: 1 !important; transform: none !important; transition: none !important; } }
 
@@ -559,8 +610,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
   <!-- ============ 1. HERO — the repeat demonstrates itself ============ -->
   <section class="hero" aria-label="Seamless pattern service — overview">
-    <div class="wrap hero-center">
-      <div>
+    <div class="wrap hero-split">
+      <div class="hero-copy">
         <span class="kicker rv in">Seamless patterns — done for you</span>
         <h1 class="h-display rv in" style="margin-top:14px;">Prints that stay seamless <span class="acc-t">in production.</span></h1>
         <p class="sub rv in">
@@ -577,44 +628,18 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
           <span>You own it exclusively</span>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- ============ THE VISUAL — its own section ============ -->
-  <section class="sec sec-visual" aria-label="See it tiling">
-    <div class="wrap">
-      <div class="sec-head" style="margin-bottom:30px;">
-        <span class="kicker rv">See it tiling</span>
-        <h2 class="h-display rv">A live repeat — no seam, <span class="acc-t">no break.</span></h2>
-      </div>
-      <div class="vwrap rv">
-        <div class="tile-demo glass-p" aria-hidden="true">
-          <div class="td-canvas"></div>
-          <div class="td-grid"></div>
-          <span class="td-chip">Seam check · passed</span>
-        </div>
-        <p class="td-cap">A live repeat, tiling right now — no seam, no break. That's the deliverable.</p>
+      <!-- right: the deliverable, previewed in the hero -->
+      <div class="hero-view rv in" aria-hidden="true">
+    <div class="tile-demo glass-p" aria-hidden="true">
+      <div class="td-canvas"></div>
+      <div class="td-grid"></div>
+      <span class="td-chip">Seam check · passed</span>
+    </div>
       </div>
     </div>
   </section>
 
-  <!-- ============ 2. THE THREE WAYS A PRINT DIES ============ -->
-  <section class="sec" aria-labelledby="pd-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv">Why it matters</span>
-        <h2 class="h-display rv" id="pd-h">Three ways a print dies between <span class="acc-t">screen and fabric.</span></h2>
-      </div>
-      <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>The seam you see at 300 metres</h3><p>A repeat off by one pixel prints as a visible line running through every metre of fabric. It only shows after the run.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">02</span><h3>Colours that separate wrong</h3><p>The mill needs indexed separations and Pantone references — a pretty RGB file isn't a printable file.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">03</span><h3>Your "exclusive" print, elsewhere</h3><p>Licensed stock artwork can end up on a competitor's rack. Exclusivity has to be structural, not a promise.</p></div>
-      </div>
-      <p class="cmp-note rv">Our process exists to kill all three.</p>
-    </div>
-  </section>
-
-  <!-- ============ 3. DELIVERABLES ============ -->
   <section class="sec" id="kit" aria-labelledby="kit-h">
     <div class="wrap">
       <div class="sec-head">
@@ -635,7 +660,40 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 4. REPEAT TYPES ============ -->
+  <section class="sec sec-visual" aria-label="See it tiling">
+    <div class="wrap">
+      <div class="sec-head" style="margin-bottom:30px;">
+        <span class="kicker rv">See it tiling</span>
+        <h2 class="h-display rv">A live repeat — no seam, <span class="acc-t">no break.</span></h2>
+      </div>
+      <div class="vwrap rv">
+        <div class="tile-demo glass-p" aria-hidden="true">
+          <div class="td-canvas"></div>
+          <div class="td-grid"></div>
+          <span class="td-chip">Seam check · passed</span>
+        </div>
+        <p class="td-cap">A live repeat, tiling right now — no seam, no break. That's the deliverable.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="how" aria-labelledby="how-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker rv">How it works</span>
+        <h2 class="h-display rv" id="how-h">Brief today. <span class="acc-t">Quote tomorrow.</span></h2>
+      </div>
+      <div class="chat-wrap" style="grid-template-columns:1fr;max-width:860px;margin:0 auto;">
+        <div class="weeks rv-steps">
+          <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3>Brief</h3><p>Send references, your palette, the fabric and the garment — moodboards welcome.</p></div></div>
+          <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3>Fixed quote in 24h</h3><p>One number, no surprises. It covers artwork, colorways, separations and the spec sheet.</p></div></div>
+          <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3>Design + colorways</h3><p>Original artwork in repeat, your palette applied — two structured revision rounds included.</p></div></div>
+          <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3>Mill-ready handoff</h3><p>Tile-tested repeat, separations, spec sheet — and full ownership transferred to you.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="sec" aria-labelledby="rt-h">
     <div class="wrap">
       <div class="sec-head">
@@ -660,7 +718,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 5. OWNERSHIP ============ -->
   <section class="sec" aria-labelledby="own-h">
     <div class="wrap">
       <div class="acc-honest">
@@ -672,41 +729,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 6. PROCESS ============ -->
-  <section class="sec" id="how" aria-labelledby="how-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv">How it works</span>
-        <h2 class="h-display rv" id="how-h">Brief today. <span class="acc-t">Quote tomorrow.</span></h2>
-      </div>
-      <div class="chat-wrap" style="grid-template-columns:1fr;max-width:860px;margin:0 auto;">
-        <div class="weeks rv">
-          <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3>Brief</h3><p>Send references, your palette, the fabric and the garment — moodboards welcome.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3>Fixed quote in 24h</h3><p>One number, no surprises. It covers artwork, colorways, separations and the spec sheet.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3>Design + colorways</h3><p>Original artwork in repeat, your palette applied — two structured revision rounds included.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3>Mill-ready handoff</h3><p>Tile-tested repeat, separations, spec sheet — and full ownership transferred to you.</p></div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 7. FABRIC APPLICATIONS ============ -->
-  <section class="sec" aria-labelledby="fab-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv">Fabric literacy</span>
-        <h2 class="h-display rv" id="fab-h">Designed for the fabric, <span class="acc-t">not just the screen.</span></h2>
-      </div>
-      <div class="kit k4">
-        <div class="kit-c glass-p rv"><h3>Swim &amp; active</h3><p>Stretch distortion accounted for — the print survives the pull.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><h3>Dresses &amp; resort</h3><p>Drape-scale prints that read beautifully in motion.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><h3>Kids &amp; sleep</h3><p>Tossed repeats and high colour counts that hide wear.</p></div>
-        <div class="kit-c glass-p rv rv-d3"><h3>Accessories &amp; linings</h3><p>Placement-plus-repeat combinations for small panels.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 8. PROOF — studio samples ============ -->
   <section class="sec" aria-labelledby="pr-h">
     <div class="wrap">
       <div class="sec-head">
@@ -723,7 +745,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 8. FAQ ============ -->
   <section class="sec" id="faq" aria-labelledby="faq-h">
     <div class="wrap">
       <div class="sec-head">
@@ -759,7 +780,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 9. CONTACT ============ -->
   <section class="sec" id="contact" aria-labelledby="contact-h">
     <div class="wrap">
       <div class="contact-panel glass-p">
@@ -839,8 +859,17 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     }, { passive: true });
   }
 
+  /* Arm the how-it-works step stagger only when we can actually run it.
+     Until 'armed' lands the steps are plain visible content, so a blocked
+     script or a missed observer can never leave the section blank. */
+  if (!reduced) {
+    document.querySelectorAll('.weeks.rv-steps').forEach(function (el) {
+      el.classList.add('armed');
+    });
+  }
+
   /* reveals — fire as the top edge approaches */
-  var rvs = document.querySelectorAll('.rv:not(.in)');
+  var rvs = document.querySelectorAll('.rv:not(.in), .rv-steps:not(.in)');
   if ('IntersectionObserver' in window && !reduced) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
@@ -856,7 +885,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   }
   /* safety net — a janitor that also covers tab panels and IO misses */
   var rvJanitor = setInterval(function () {
-    var left = document.querySelectorAll('.rv:not(.in)');
+    var left = document.querySelectorAll('.rv:not(.in), .rv-steps:not(.in)');
     if (!left.length) { clearInterval(rvJanitor); return; }
     left.forEach(function (el) {
       var r = el.getBoundingClientRect();

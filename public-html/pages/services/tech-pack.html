@@ -14,7 +14,11 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<!-- fonts load without blocking first paint; metric-matched fallbacks
+     (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 
@@ -248,6 +252,35 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   padding: calc(var(--u) * 5) 0;
 }
 @media (max-width: 900px) { .hero { min-height: 0; padding: calc(var(--u) * 10) 0 calc(var(--u) * 6); } }
+/* split hero — copy left, the deliverable previewed right (matches the
+   3D sampling page). Falls back to a single centred column on narrow
+   screens so the copy and CTA always lead. */
+.hero-split {
+  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+  align-items: center; gap: clamp(24px, 4vw, 56px); width: 100%; text-align: left;
+}
+.hero-copy { min-width: 0; }
+.hero-view { position: relative; min-width: 0; width: 100%; justify-self: end; }
+.hero-view > * { width: 100%; margin: 0; }
+.hero-split h1 { max-width: 15ch; font-size: clamp(36px, 4vw, 60px); margin-inline: 0; }
+.hero-split .sub { margin-left: 0; margin-right: 0; max-width: 46ch; }
+.hero-split .acts { justify-content: flex-start; }
+.hero-split .chips { justify-content: flex-start; }
+.hero-split .chips { flex-wrap: nowrap; gap: 8px; }
+.hero-split .chips span { white-space: nowrap; font-size: 9.5px; padding: 7px 12px; }
+@media (max-width: 1180px) { .hero-split .chips { flex-wrap: wrap; } }
+@media (max-width: 900px) {
+  .hero-split { grid-template-columns: 1fr; text-align: center; gap: 20px; }
+  .hero-split h1 { margin-inline: auto; }
+  .hero-split .sub { margin-left: auto; margin-right: auto; }
+  .hero-split .acts, .hero-split .chips { justify-content: center; }
+  .hero-view { justify-self: center; max-width: 420px; }
+}
+@media (max-width: 560px) {
+  /* below this the preview costs more than it adds — copy and CTA matter more */
+  .hero-view { display: none; }
+}
+
 .hero-center { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
 .sec-visual { padding-top: 0; }
 .sec-visual .vwrap { width: min(100%, 780px); margin: 0 auto; }
@@ -600,8 +633,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
   <!-- ============ 1. HERO ============ -->
   <section class="hero" aria-label="Tech pack service — overview">
-    <div class="wrap hero-center">
-      <div>
+    <div class="wrap hero-split">
+      <div class="hero-copy">
         <span class="kicker rv in">Tech packs — done for you</span>
         <h1 class="h-display rv in" style="margin-top:14px;">The document that makes factories <span class="acc-t">take you seriously.</span></h1>
         <p class="sub rv in">
@@ -618,10 +651,27 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
           <span>Factory-ready PDF + source</span>
         </div>
       </div>
+
+      <!-- right: the deliverable, previewed in the hero -->
+      <div class="hero-view rv in" aria-hidden="true">
+    <div class="spec" aria-hidden="true">
+      <div class="head"><span class="doc">TECH PACK — STYLE FF-201</span><span class="rev">REV 02</span></div>
+      <div class="stage">
+        <div class="flat"><i class="body"></i><i class="sl l"></i><i class="sl r"></i><i class="collar"></i><i class="zip"></i></div>
+        <span class="dim dim-1"><i></i><b>CHEST 58</b></span>
+        <span class="dim dim-2"><i></i><b>HEM 54</b></span>
+        <span class="dim dim-3"><i></i><b>SLV 64</b></span>
+      </div>
+      <div class="bom">
+        <span class="row"><b>SHELL</b><i></i><em>320gsm twill</em></span>
+        <span class="row"><b>ZIP</b><i></i><em>YKK #5</em></span>
+        <span class="row"><b>STITCH</b><i></i><em>SPI 10–12</em></span>
+      </div>
+    </div>
+      </div>
     </div>
   </section>
 
-  <!-- ============ THE VISUAL — its own section ============ -->
   <section class="sec sec-visual" aria-label="The deliverable">
     <div class="wrap">
       <div class="sec-head" style="margin-bottom:30px;">
@@ -648,23 +698,26 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 2. FEAR MIRROR ============ -->
-  <section class="sec" aria-labelledby="fear-h">
+  <section class="sec" aria-labelledby="gar-h">
     <div class="wrap">
       <div class="sec-head">
-        <span class="kicker rv">Why brands get stuck</span>
-        <h2 class="h-display rv" id="fear-h">Factories don't ignore brands. They ignore <span class="acc-t">vague ones.</span></h2>
+        <span class="kicker rv">Coverage</span>
+        <h2 class="h-display rv" id="gar-h">Any garment. Any factory. <span class="acc-t">Anywhere.</span></h2>
       </div>
-      <div class="fears">
-        <div class="fear glass-p rv"><span class="fi">01 · The silent inbox</span><h3>Ten emails. Nine silences.</h3><p>You write to ten manufacturers. Nine never reply. The tenth quotes high — to cover the unknowns in your brief.</p></div>
-        <div class="fear glass-p rv rv-d1"><span class="fi">02 · The wrong sample</span><h3>That's… not my design.</h3><p>The sample arrives and it's wrong. Another round. Another invoice. Another month of waiting.</p></div>
-        <div class="fear glass-p rv rv-d2"><span class="fi">03 · The blind quote</span><h3>Every price is a guess.</h3><p>Without exact specs, every factory quote is a guess — and the guess is never in your favour.</p></div>
+      <div class="garments">
+        <div class="gar glass-p rv"><h4>Streetwear</h4><p>Hoodies · tees · caps</p></div>
+        <div class="gar glass-p rv"><h4>Activewear</h4><p>Leggings · sets · stretch</p></div>
+        <div class="gar glass-p rv"><h4>Denim</h4><p>Jeans · jackets · washes</p></div>
+        <div class="gar glass-p rv"><h4>Dresses &amp; wovens</h4><p>Drape-critical pieces</p></div>
+        <div class="gar glass-p rv rv-d1"><h4>Outerwear</h4><p>Bombers · coats · parkas</p></div>
+        <div class="gar glass-p rv rv-d1"><h4>Swim &amp; lingerie</h4><p>Fit-sensitive builds</p></div>
+        <div class="gar glass-p rv rv-d1"><h4>Kidswear</h4><p>Compliance-aware specs</p></div>
+        <div class="gar glass-p rv rv-d1"><h4>Accessories</h4><p>Bags · scarves · soft goods</p></div>
       </div>
-      <p class="fear-close rv">All three have the same fix: <em>a professional tech pack.</em></p>
+      <p class="gar-strip rv">Written in <b>international factory-standard terminology</b> — understood in India, China, Turkey, Portugal and beyond, even when you don't share a language.</p>
     </div>
   </section>
 
-  <!-- ============ 3. ANATOMY ============ -->
   <section class="sec" id="anatomy" aria-labelledby="anatomy-h">
     <div class="wrap">
       <div class="sec-head">
@@ -717,28 +770,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 4. GARMENT COVERAGE ============ -->
-  <section class="sec" aria-labelledby="gar-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv">Coverage</span>
-        <h2 class="h-display rv" id="gar-h">Any garment. Any factory. <span class="acc-t">Anywhere.</span></h2>
-      </div>
-      <div class="garments">
-        <div class="gar glass-p rv"><h4>Streetwear</h4><p>Hoodies · tees · caps</p></div>
-        <div class="gar glass-p rv"><h4>Activewear</h4><p>Leggings · sets · stretch</p></div>
-        <div class="gar glass-p rv"><h4>Denim</h4><p>Jeans · jackets · washes</p></div>
-        <div class="gar glass-p rv"><h4>Dresses &amp; wovens</h4><p>Drape-critical pieces</p></div>
-        <div class="gar glass-p rv rv-d1"><h4>Outerwear</h4><p>Bombers · coats · parkas</p></div>
-        <div class="gar glass-p rv rv-d1"><h4>Swim &amp; lingerie</h4><p>Fit-sensitive builds</p></div>
-        <div class="gar glass-p rv rv-d1"><h4>Kidswear</h4><p>Compliance-aware specs</p></div>
-        <div class="gar glass-p rv rv-d1"><h4>Accessories</h4><p>Bags · scarves · soft goods</p></div>
-      </div>
-      <p class="gar-strip rv">Written in <b>international factory-standard terminology</b> — understood in India, China, Turkey, Portugal and beyond, even when you don't share a language.</p>
-    </div>
-  </section>
-
-  <!-- ============ 5. PROCESS ============ -->
   <section class="sec" id="process" aria-labelledby="process-h">
     <div class="wrap">
       <div class="sec-head">
@@ -754,52 +785,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 6. WITH / WITHOUT ============ -->
-  <section class="sec" aria-labelledby="cmp-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv">The difference</span>
-        <h2 class="h-display rv" id="cmp-h">What changes when you show up <span class="acc-t">with a tech pack.</span></h2>
-      </div>
-      <div class="cmp2">
-        <div class="col without glass-p rv">
-          <span class="tag">Without one</span>
-          <ul>
-            <li><b>Ignored enquiries</b><span>vague briefs get screened out before a human reads twice</span></li>
-            <li><b>Guess-quotes</b><span>prices padded to cover what your brief doesn't say</span></li>
-            <li><b>Sample roulette</b><span>three rounds to get close to what you meant</span></li>
-            <li><b>No paper trail</b><span>when it goes wrong, there's nothing in writing</span></li>
-          </ul>
-        </div>
-        <div class="col with glass-p rv rv-d1">
-          <span class="tag">With your pack</span>
-          <ul>
-            <li><b>Factories reply</b><span>a professional document signals a professional order</span></li>
-            <li><b>Precise quotes</b><span>they price exactly what's on the page</span></li>
-            <li><b>First sample, close</b><span>the drawing, specs and BOM leave little to guess</span></li>
-            <li><b>Your spec is the contract</b><span>every detail in writing, season after season</span></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 7. WHY DONE-FOR-YOU ============ -->
-  <section class="sec" aria-labelledby="ways-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv">Choose your route</span>
-        <h2 class="h-display rv" id="ways-h">A poor tech pack is worse than <span class="acc-t">no tech pack.</span></h2>
-      </div>
-      <div class="ways">
-        <div class="way glass-p rv"><h3>DIY template</h3><p>Weeks of your time learning specs and grading — plus the errors you can't see until the wrong sample arrives.</p></div>
-        <div class="way glass-p rv rv-d1"><h3>The $30 gig</h3><p>A generic fill-in-the-blanks file. Factories recognise them instantly — and bounce them back with questions.</p></div>
-        <div class="way us glass-p rv rv-d2"><h3>Fashion Freelancing</h3><p>Built by garment-tech specialists to production standard. Fixed quote, flat-sketch sign-off, two revision rounds — and a factory that takes you seriously.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 8. PROOF SLOTS ============ -->
   <section class="sec" aria-labelledby="proof-h">
     <div class="wrap">
       <div class="sec-head">
@@ -816,24 +801,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 9. QUOTE PHILOSOPHY ============ -->
-  <section class="sec" aria-labelledby="qp-h">
-    <div class="wrap">
-      <div class="quote-panel glass-p rv">
-        <span class="kicker">Pricing, honestly</span>
-        <h2 class="h-display" id="qp-h" style="margin-top:12px;">One fixed quote. In 24 hours. <span class="acc-t">Before you commit anything.</span></h2>
-        <p>
-          Every garment is different — a tee isn't a technical parka — so we don't publish
-          one-size-fits-nobody prices. Send your design and get one fixed number within 24 hours:
-          everything included, two revision rounds, no hourly billing. If the quote doesn't work
-          for you, you owe nothing.
-        </p>
-        <div style="margin-top:28px;"><a href="#contact" class="btn-acc">Get my fixed quote</a></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 10. FAQ ============ -->
   <section class="sec" id="faq" aria-labelledby="faq-h">
     <div class="wrap">
       <div class="sec-head">
@@ -873,7 +840,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 11. CONTACT ============ -->
   <section class="sec" id="contact" aria-labelledby="contact-h">
     <div class="wrap">
       <div class="contact-panel glass-p">

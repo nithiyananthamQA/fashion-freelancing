@@ -17,7 +17,11 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<!-- fonts load without blocking first paint; metric-matched fallbacks
+     (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="assets/styles.css">
 
@@ -597,12 +601,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
       <span><i style="color:var(--lg-orange)">·</i>Tech Pack</span><span><i style="color:var(--lg-sky)">·</i>3D Virtual Sampling</span>
       <span><i style="color:var(--lg-green)">·</i>Seamless Pattern</span><span><i style="color:var(--lg-yellow)">·</i>Pattern CAD</span>
       <span><i style="color:var(--lg-coral)">·</i>Dobby &amp; Jacquard</span><span><i style="color:var(--lg-violet)">·</i>Website Development</span>
-      <span><i style="color:var(--lg-teal)">·</i>AI Agent</span><span><i style="color:var(--lg-pink)">·</i>AI Photography</span>
+      <span><i style="color:var(--lg-teal)">·</i>AI Agent</span><span><i style="color:var(--lg-pink)">·</i>AI Video &amp; Photography</span>
       <span><i style="color:var(--lg-lime)">·</i>E-Com Listing</span><span><i style="color:var(--lg-peri)">·</i>Graphic Design</span>
       <span><i style="color:var(--lg-orange)">·</i>Tech Pack</span><span><i style="color:var(--lg-sky)">·</i>3D Virtual Sampling</span>
       <span><i style="color:var(--lg-green)">·</i>Seamless Pattern</span><span><i style="color:var(--lg-yellow)">·</i>Pattern CAD</span>
       <span><i style="color:var(--lg-coral)">·</i>Dobby &amp; Jacquard</span><span><i style="color:var(--lg-violet)">·</i>Website Development</span>
-      <span><i style="color:var(--lg-teal)">·</i>AI Agent</span><span><i style="color:var(--lg-pink)">·</i>AI Photography</span>
+      <span><i style="color:var(--lg-teal)">·</i>AI Agent</span><span><i style="color:var(--lg-pink)">·</i>AI Video &amp; Photography</span>
       <span><i style="color:var(--lg-lime)">·</i>E-Com Listing</span><span><i style="color:var(--lg-peri)">·</i>Graphic Design</span>
     </div>
   </div>
@@ -681,7 +685,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
           </a>
           <a class="svc glass-p" href="pages/services/ai-photography.html">
             <span class="top"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg></span><span class="num">08 / 10</span></span>
-            <h3>AI Photography</h3>
+            <h3>AI Video &amp; Photography</h3>
             <p>Campaign-quality model, product and lifestyle photography at brand scale — no studio, no delays.</p>
             <span class="side-tag">AI, website &amp; digital production</span>
             <span class="go">Start <span class="ar">→</span></span>
@@ -781,7 +785,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
                   <optgroup label="AI, website &amp; digital production">
                     <option value="website">Website Development</option>
                     <option value="ai-agent">AI Agent</option>
-                    <option value="ai-photography">AI Photography</option>
+                    <option value="ai-photography">AI Video &amp; Photography</option>
                     <option value="ecom-listing">E-Commerce Product Listing</option>
                     <option value="graphic-design">Graphic Design</option>
                   </optgroup>

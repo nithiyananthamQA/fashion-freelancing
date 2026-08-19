@@ -24,7 +24,7 @@
     ['dobby-jacquard', 'Dobby & jacquard'],
     ['website', 'Website'],
     ['ai-agent', 'AI agent'],
-    ['ai-photography', 'AI photography'],
+    ['ai-photography', 'AI video & photography'],
     ['ecom-listing', 'E-com listings'],
     ['graphic-design', 'Graphic design'],
     ['multiple', 'A bit of everything']

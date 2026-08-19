@@ -69,6 +69,15 @@
   else setTimeout(bootQuoteBot, 1500);
 
   if (!window.api) {
+    // The three modules must EXECUTE in order (store → api → ui), but they don't
+    // have to DOWNLOAD in order. Without this, each request only starts after the
+    // previous script finished, stacking one round-trip per module. Preloading
+    // fetches all three in parallel so the serial chain below runs from cache.
+    ['assets/store.js', 'assets/api.js', 'assets/ui.js'].forEach((p) => {
+      const l = document.createElement('link');
+      l.rel = 'preload'; l.as = 'script'; l.href = r(p);
+      document.head.appendChild(l);
+    });
     loadScript(r('assets/store.js'))
       .then(() => loadScript(r('assets/api.js')))
       .then(() => loadScript(r('assets/ui.js')))
@@ -185,7 +194,7 @@
           <a class="sub" href="${r("pages/services/dobby-jacquard.html")}">Dobby &amp; jacquard</a>
           <a class="sub" href="${r("pages/services/website.html")}">Websites</a>
           <a class="sub" href="${r("pages/services/ai-agent.html")}">AI agent</a>
-          <a class="sub" href="${r("pages/services/ai-photography.html")}">AI photography</a>
+          <a class="sub" href="${r("pages/services/ai-photography.html")}">AI video &amp; photography</a>
           <a class="sub" href="${r("pages/services/ecom-listing.html")}">E-com listings</a>
           <a class="sub" href="${r("pages/services/graphic-design.html")}">Graphic design</a>
         </div>
@@ -221,7 +230,7 @@
       <h6>AI &amp; digital</h6>
       <a role="menuitem" href="${r("pages/services/website.html")}">Website development</a>
       <a role="menuitem" href="${r("pages/services/ai-agent.html")}">AI customer agent</a>
-      <a role="menuitem" href="${r("pages/services/ai-photography.html")}">AI photography</a>
+      <a role="menuitem" href="${r("pages/services/ai-photography.html")}">AI video &amp; photography</a>
       <a role="menuitem" href="${r("pages/services/ecom-listing.html")}">E-commerce listings</a>
       <a role="menuitem" href="${r("pages/services/graphic-design.html")}">Graphic design</a>
     </div>
@@ -263,7 +272,7 @@
           <ul>
             <li><a href="${r("pages/services/website.html")}">Website development</a></li>
             <li><a href="${r("pages/services/ai-agent.html")}">AI customer agent</a></li>
-            <li><a href="${r("pages/services/ai-photography.html")}">AI photography</a></li>
+            <li><a href="${r("pages/services/ai-photography.html")}">AI video &amp; photography</a></li>
             <li><a href="${r("pages/services/ecom-listing.html")}">E-commerce listings</a></li>
             <li><a href="${r("pages/services/graphic-design.html")}">Graphic design</a></li>
           </ul>
@@ -418,8 +427,16 @@
     const topnav = document.querySelector('.topnav');
     if (topnav) {
       let ticking = false;
+      // Hysteresis: the condensed header is 20px shorter than the tall one, so a
+      // single threshold can oscillate — collapsing reflows the page, scrollY drops
+      // back under the line, it expands, and the 320ms transition reads as a shake.
+      // Separate enter/exit points give it a dead zone it can't flip inside.
+      const ENTER = 64, EXIT = 24;
       const syncHeader = () => {
-        topnav.classList.toggle('is-scrolled', window.scrollY > 12);
+        const y = window.scrollY;
+        const on = topnav.classList.contains('is-scrolled');
+        if (!on && y > ENTER) topnav.classList.add('is-scrolled');
+        else if (on && y < EXIT) topnav.classList.remove('is-scrolled');
         ticking = false;
       };
       window.addEventListener('scroll', () => {

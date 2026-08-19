@@ -14,7 +14,11 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<!-- fonts load without blocking first paint; metric-matched fallbacks
+     (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 
@@ -248,9 +252,73 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   padding: calc(var(--u) * 6) 0;
 }
 .hero-center { display: flex; flex-direction: column; align-items: center; width: 100%; }
+
+/* split hero: copy left, ambient 3D preview right */
+.hero-split {
+  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+  align-items: center; gap: clamp(24px, 4vw, 64px); width: 100%; text-align: left;
+}
+.hero-copy { min-width: 0; }
+.hero-view {
+  position: relative; min-width: 0;
+  aspect-ratio: 4 / 5; max-height: min(58vh, 560px);
+  justify-self: end; width: 100%;
+}
+.hero-view #mv-hero {
+  width: 100%; height: 100%; background: transparent;
+  --poster-color: transparent; pointer-events: none;
+}
+.hero-view .dais {
+  position: absolute; left: 50%; bottom: 12%; translate: -50% 0;
+  width: 68%; aspect-ratio: 3 / 1; border-radius: 50%;
+  background: radial-gradient(ellipse, var(--acc-30), transparent 70%);
+  filter: blur(22px); opacity: .6; pointer-events: none;
+}
+.hv-load {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  opacity: 1; transition: opacity .5s ease; pointer-events: none;
+}
+.hv-load.off { opacity: 0; }
+.hv-load .ring {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 2px solid var(--acc-16); border-top-color: var(--acc);
+  animation: spin-l 1s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) { .hv-load .ring { animation: none; } }
+
 .hero h1 { font-size: clamp(42px, 6vw, 82px); max-width: 16ch; margin-top: 22px; }
 .hero .sub { max-width: 56ch; margin: 24px auto 0; font-size: clamp(15px, 1.3vw, 18px); line-height: 1.65; color: var(--ink-4); }
 .hero .acts { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-top: 34px; }
+/* left-aligned overrides for the split layout */
+.hero-split .sub { margin-left: 0; margin-right: 0; max-width: 46ch; }
+.hero-split .acts { justify-content: flex-start; margin-top: 26px; }
+/* the copy column is narrower than the old full-width hero, so the display
+   size and rhythm are tightened to keep the whole hero inside one viewport */
+.hero-split h1 { max-width: 15ch; font-size: clamp(38px, 4.1vw, 62px); margin-top: 16px; }
+.hero-split .sub { margin-top: 18px; }
+.hero-split .hero-stats {
+  width: 100%; margin-top: 30px; padding: 16px 14px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+  justify-content: stretch;
+}
+.hero-split .hst { padding: 10px 12px; }
+.hero-split .hst + .hst { border-left: 0; }
+.hero-split .hst:nth-child(2n) { border-left: 1px solid var(--line); }
+.hero-split .hst:nth-child(n+3) { border-top: 1px solid var(--line); }
+@media (max-width: 900px) {
+  .hero-split { grid-template-columns: 1fr; text-align: center; gap: 18px; }
+  .hero-split .sub { margin-left: auto; margin-right: auto; }
+  .hero-split .acts { justify-content: center; }
+  .hero-split h1 { max-width: 16ch; margin-left: auto; margin-right: auto; font-size: clamp(34px, 8vw, 52px); }
+  /* copy leads on small screens — the preview is ambient, it must not push
+     the headline and CTA below the fold */
+  .hero-view { justify-self: center; width: min(100%, 320px); aspect-ratio: 1 / 1; max-height: 30vh; }
+  .hero-split .hero-stats { margin-top: 22px; }
+}
+@media (max-width: 560px) {
+  /* below this the preview costs more than it adds — the stat bar and CTA matter more */
+  .hero-view { display: none; }
+}
 /* wide inline stat bar — number + label on one line */
 .hero-stats {
   display: flex; flex-wrap: wrap; justify-content: center;
@@ -648,27 +716,76 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
   <!-- ============ 1. HERO — centered, conversion-first ============ -->
   <section class="hero" aria-label="3D virtual sampling — overview">
-    <div class="wrap hero-center">
-      <span class="kicker rv in">3D virtual sampling — for brands &amp; manufacturers</span>
-      <h1 class="h-display rv in">See the garment before a <span class="acc-t">single stitch</span> is cut.</h1>
-      <p class="sub rv in">
-        Send your tech pack. In days you're reviewing a production-accurate 3D sample —
-        true fabric drape, every colorway — with no couriers, no cutting, no waiting on a factory queue.
-      </p>
-      <div class="acts rv in">
-        <a href="#contact" class="btn-acc">Start your 3D sample</a>
-        <a href="#try" class="btn-glass">Spin a real sample ↓</a>
+    <div class="wrap hero-split">
+      <div class="hero-copy">
+        <span class="kicker rv in">3D virtual sampling — for brands &amp; manufacturers</span>
+        <h1 class="h-display rv in">See the garment before a <span class="acc-t">single stitch</span> is cut.</h1>
+        <p class="sub rv in">
+          Send your tech pack. In days you're reviewing a production-accurate 3D sample —
+          true fabric drape, every colorway — with no couriers, no cutting, no waiting on a factory queue.
+        </p>
+        <div class="acts rv in">
+          <a href="#contact" class="btn-acc">Start your 3D sample</a>
+          <a href="#try" class="btn-glass">Spin a real sample ↓</a>
+        </div>
+        <div class="hero-stats glass-p rv in">
+          <div class="hst"><b>24h</b><span>first render on your screen</span></div>
+          <div class="hst"><b>3–5<i> days</i></b><span>brief to full sample</span></div>
+          <div class="hst"><b>Every</b><span>colorway from one build</span></div>
+          <div class="hst"><b>2×</b><span>revision rounds included</span></div>
+        </div>
       </div>
-      <div class="hero-stats glass-p rv in">
-        <div class="hst"><b>24h</b><span>first render on your screen</span></div>
-        <div class="hst"><b>3–5<i> days</i></b><span>brief to full sample</span></div>
-        <div class="hst"><b>Every</b><span>colorway from one build</span></div>
-        <div class="hst"><b>2×</b><span>revision rounds included</span></div>
+
+      <!-- right: ambient auto-rotating preview — display only, no user camera control -->
+      <div class="hero-view rv in" aria-hidden="true">
+        <div class="dais" aria-hidden="true"></div>
+        <model-viewer id="mv-hero"
+          alt=""
+          tabindex="-1"
+          interaction-prompt="none"
+          reveal="manual"
+          loading="eager"
+          disable-zoom
+          disable-pan
+          disable-tap
+          shadow-intensity="0.75"
+          shadow-softness="0.9"
+          exposure="1.05"
+          camera-orbit="20deg 80deg 108%">
+        </model-viewer>
+        <div class="hv-load" id="hv-load"><span class="ring"></span></div>
       </div>
     </div>
   </section>
 
-  <!-- ============ 2. TRY IT — the deliverable, in your hands ============ -->
+  <!-- ============ 2. WHAT YOU GET — living bento ============ -->
+  <section class="sec" id="kit" aria-labelledby="kit-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker rv">What you get</span>
+        <h2 class="h-display rv" id="kit-h">One garment in. A complete <span class="acc-t">review kit</span> out.</h2>
+        <p class="sub rv">Everything below ships with every sample — built for factory meetings and buyer approvals.</p>
+      </div>
+      <div class="bento">
+        <div class="tile tile-lg glass-p rv">
+          <span class="ti">01</span>
+          <h3>Photoreal garment renders</h3>
+          <p>Front, side and back at photographic quality — simulated in CLO3D and Browzwear, the same engines the biggest brands develop in.</p>
+          <div class="sc sc-views" aria-hidden="true"><i></i><i></i><i></i></div>
+        </div>
+        <div class="tile glass-p rv"><span class="ti">02</span><h3>True fabric drape</h3><p>Weight, stretch and fall simulated from your material spec.</p><div class="sc sc-drape" aria-hidden="true"></div></div>
+        <div class="tile glass-p rv"><span class="ti">03</span><h3>Every colorway</h3><p>All colorways rendered from the same model — included.</p><div class="sc sc-swatch" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
+        <div class="tile glass-p rv rv-d1"><span class="ti">04</span><h3>360° turntable video</h3><p>A rotating view for buyer presentations and content.</p><div class="sc sc-turn" aria-hidden="true"><i></i></div></div>
+        <div class="tile glass-p rv rv-d1"><span class="ti">05</span><h3>First render in 24h</h3><p>The clock starts the moment your brief lands.</p><div class="sc sc-clock" aria-hidden="true"><i></i></div></div>
+        <div class="tile glass-p rv rv-d1"><span class="ti">06</span><h3>Presentation deck</h3><p>A formatted PDF ready for factories or buyers.</p><div class="sc sc-deck" aria-hidden="true"><i></i><i></i><i></i></div></div>
+        <div class="tile glass-p rv rv-d2"><span class="ti">07</span><h3>Flat-lay export</h3><p>Clean overhead flat lay for your tech pack or store.</p></div>
+        <div class="tile tile-tint glass-p rv rv-d2"><span class="ti">08</span><h3>CLO3D + Browzwear</h3><p>Industry-standard software, chosen per garment. No licence needed on your side.</p></div>
+        <div class="tile glass-p rv rv-d2"><span class="ti">09</span><h3>Two revision rounds</h3><p>Fit, colorway, fabric or camera — adjusted in hours, not weeks.</p><div class="sc sc-rounds" aria-hidden="true"><i></i></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. TRY IT — the deliverable, in your hands ============ -->
   <section class="sec" id="try" aria-label="Interactive 3D sample — try it">
     <div class="wrap">
       <div class="sec-head">
@@ -703,7 +820,39 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 3. WHY — one round, raced ============ -->
+  <!-- ============ 4. HOW — a real sampling round ============ -->
+  <section class="sec" id="how" aria-labelledby="how-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker rv">How it works</span>
+        <h2 class="h-display rv" id="how-h">Send a tech pack. Get a <span class="acc-t">sample back.</span></h2>
+        <p class="sub rv">This is what a sampling round with us actually looks like.</p>
+      </div>
+      <div class="chat-wrap">
+        <div class="chat glass-p rv" id="chat" aria-label="Example conversation with a client">
+          <span class="day">Day 1</span>
+          <div class="msg them">We've got a bomber for AW25 — tech pack's done, fabric is 320gsm cotton twill. Can we see it in 3D before the factory sample?</div>
+          <div class="msg us">Send the tech pack and fabric spec over. First render lands within 24 hours.<span class="tick" aria-hidden="true">✓✓</span></div>
+          <div class="msg us">
+            Here's your bomber — front, side, back. Thoughts?
+            <span class="mini" aria-hidden="true"><span class="mb"><i></i><i></i><i></i></span><span class="mc"><span class="a"></span><span class="b"></span><span class="c"></span></span></span>
+            <span class="cap">3D sample — render v1</span>
+          </div>
+          <div class="msg them">Collar's great. Can we see it in olive, and drop the hem 2cm?</div>
+          <div class="msg us">Done — updated renders this afternoon. Not another sample round.<span class="tick" aria-hidden="true">✓✓</span></div>
+          <span class="done">✓ Delivered — renders, turntable video and deck</span>
+        </div>
+        <div class="weeks rv rv-d1">
+          <div class="week"><span class="wn" aria-hidden="true">D1</span><div><h3>Brief</h3><p>Send a sketch or tech pack, fabric reference and fit notes — that's all we need.</p></div></div>
+          <div class="week"><span class="wn" aria-hidden="true">D2</span><div><h3>Model build</h3><p>Garment constructed in 3D, your fabric spec simulated — weight, stretch, drape.</p></div></div>
+          <div class="week"><span class="wn" aria-hidden="true">D3</span><div><h3>Review</h3><p>Fit, colorway and fabric adjustments — two revision rounds included.</p></div></div>
+          <div class="week"><span class="wn" aria-hidden="true">D4</span><div><h3>Delivery</h3><p>Final renders, turntable video and presentation deck — factory- and buyer-ready.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5b. WHY — one round, raced ============ -->
   <section class="sec" aria-labelledby="cmp-h">
     <div class="wrap">
       <div class="sec-head">
@@ -741,65 +890,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 4. REVIEW KIT — living bento ============ -->
-  <section class="sec" id="kit" aria-labelledby="kit-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv">What you get</span>
-        <h2 class="h-display rv" id="kit-h">One garment in. A complete <span class="acc-t">review kit</span> out.</h2>
-        <p class="sub rv">Everything below ships with every sample — built for factory meetings and buyer approvals.</p>
-      </div>
-      <div class="bento">
-        <div class="tile tile-lg glass-p rv">
-          <span class="ti">01</span>
-          <h3>Photoreal garment renders</h3>
-          <p>Front, side and back at photographic quality — simulated in CLO3D and Browzwear, the same engines the biggest brands develop in.</p>
-          <div class="sc sc-views" aria-hidden="true"><i></i><i></i><i></i></div>
-        </div>
-        <div class="tile glass-p rv"><span class="ti">02</span><h3>True fabric drape</h3><p>Weight, stretch and fall simulated from your material spec.</p><div class="sc sc-drape" aria-hidden="true"></div></div>
-        <div class="tile glass-p rv"><span class="ti">03</span><h3>Every colorway</h3><p>All colorways rendered from the same model — included.</p><div class="sc sc-swatch" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
-        <div class="tile glass-p rv rv-d1"><span class="ti">04</span><h3>360° turntable video</h3><p>A rotating view for buyer presentations and content.</p><div class="sc sc-turn" aria-hidden="true"><i></i></div></div>
-        <div class="tile glass-p rv rv-d1"><span class="ti">05</span><h3>First render in 24h</h3><p>The clock starts the moment your brief lands.</p><div class="sc sc-clock" aria-hidden="true"><i></i></div></div>
-        <div class="tile glass-p rv rv-d1"><span class="ti">06</span><h3>Presentation deck</h3><p>A formatted PDF ready for factories or buyers.</p><div class="sc sc-deck" aria-hidden="true"><i></i><i></i><i></i></div></div>
-        <div class="tile glass-p rv rv-d2"><span class="ti">07</span><h3>Flat-lay export</h3><p>Clean overhead flat lay for your tech pack or store.</p></div>
-        <div class="tile tile-tint glass-p rv rv-d2"><span class="ti">08</span><h3>CLO3D + Browzwear</h3><p>Industry-standard software, chosen per garment. No licence needed on your side.</p></div>
-        <div class="tile glass-p rv rv-d2"><span class="ti">09</span><h3>Two revision rounds</h3><p>Fit, colorway, fabric or camera — adjusted in hours, not weeks.</p><div class="sc sc-rounds" aria-hidden="true"><i></i></div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 5. HOW — a real sampling round ============ -->
-  <section class="sec" id="how" aria-labelledby="how-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv">How it works</span>
-        <h2 class="h-display rv" id="how-h">Send a tech pack. Get a <span class="acc-t">sample back.</span></h2>
-        <p class="sub rv">This is what a sampling round with us actually looks like.</p>
-      </div>
-      <div class="chat-wrap">
-        <div class="chat glass-p rv" id="chat" aria-label="Example conversation with a client">
-          <span class="day">Day 1</span>
-          <div class="msg them">We've got a bomber for AW25 — tech pack's done, fabric is 320gsm cotton twill. Can we see it in 3D before the factory sample?</div>
-          <div class="msg us">Send the tech pack and fabric spec over. First render lands within 24 hours.<span class="tick" aria-hidden="true">✓✓</span></div>
-          <div class="msg us">
-            Here's your bomber — front, side, back. Thoughts?
-            <span class="mini" aria-hidden="true"><span class="mb"><i></i><i></i><i></i></span><span class="mc"><span class="a"></span><span class="b"></span><span class="c"></span></span></span>
-            <span class="cap">3D sample — render v1</span>
-          </div>
-          <div class="msg them">Collar's great. Can we see it in olive, and drop the hem 2cm?</div>
-          <div class="msg us">Done — updated renders this afternoon. Not another sample round.<span class="tick" aria-hidden="true">✓✓</span></div>
-          <span class="done">✓ Delivered — renders, turntable video and deck</span>
-        </div>
-        <div class="weeks rv rv-d1">
-          <div class="week"><span class="wn" aria-hidden="true">D1</span><div><h3>Brief</h3><p>Send a sketch or tech pack, fabric reference and fit notes — that's all we need.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">D2</span><div><h3>Model build</h3><p>Garment constructed in 3D, your fabric spec simulated — weight, stretch, drape.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">D3</span><div><h3>Review</h3><p>Fit, colorway and fabric adjustments — two revision rounds included.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">D4</span><div><h3>Delivery</h3><p>Final renders, turntable video and presentation deck — factory- and buyer-ready.</p></div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ============ 6. ACCURACY, honestly ============ -->
   <section class="sec" aria-labelledby="acc-h">
     <div class="wrap">
@@ -816,8 +906,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   <section class="sec" aria-labelledby="pr-h">
     <div class="wrap">
       <div class="sec-head">
-        <span class="kicker rv">Recent samples</span>
-        <h2 class="h-display rv" id="pr-h">Judge us by <span class="acc-t">the samples.</span></h2>
+        <span class="kicker rv">Recent work</span>
+        <h2 class="h-display rv" id="pr-h">Recent <span class="acc-t">samples.</span></h2>
       </div>
       <div class="proofs">
         <!-- PROOF SLOTS: replace .ph with real render pairs when approvals land -->
@@ -980,6 +1070,50 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     });
   }, 700);
 
+  /* Both viewers use reveal="manual", so they need dismissPoster() — but that
+     method only exists once the <model-viewer> custom element has upgraded.
+     Calling it too early threw a TypeError that aborted the rest of this
+     script, which is why the sample viewer never received its src. */
+  function reveal(el) {
+    var go = function () { if (typeof el.dismissPoster === 'function') el.dismissPoster(); };
+    if (window.customElements && customElements.whenDefined) {
+      customElements.whenDefined('model-viewer').then(go).catch(go);
+    } else { go(); }
+  }
+
+  /* ---- hero preview: ambient, display-only, auto-rotates ---- */
+  var hv = document.getElementById('mv-hero');
+  var hvLoad = document.getElementById('hv-load');
+  if (hv) {
+    var hvSmall = window.matchMedia('(max-width: 720px)').matches;
+    var HV_SRC = hvSmall ? '../../assets/3d/bomber-jacket-mobile.glb' : '../../assets/3d/bomber-jacket.glb';
+    if (!reduced) {
+      hv.setAttribute('auto-rotate', '');
+      hv.setAttribute('rotation-per-second', '14deg');
+      hv.setAttribute('auto-rotate-delay', '0');
+    }
+    hv.addEventListener('load', function () {
+      if (hvLoad) { hvLoad.classList.add('off'); setTimeout(function () { hvLoad.remove(); }, 600); }
+    });
+    hv.addEventListener('error', function () {
+      if (hvLoad) hvLoad.remove();
+      hv.closest('.hero-view').style.display = 'none';
+    });
+    /* skip on save-data / 2G, and on phones where CSS hides the preview —
+       no point paying for a model nobody sees */
+    var hvConn = navigator.connection || {};
+    var hvHidden = window.matchMedia('(max-width: 560px)').matches;
+    if (hvHidden) {
+      /* CSS already hides it; just never request the model */
+    } else if (hvConn.saveData || /(^|-)2g$/.test(hvConn.effectiveType || '')) {
+      var hvWrap = hv.closest('.hero-view');
+      if (hvWrap) hvWrap.style.display = 'none';
+    } else {
+      hv.setAttribute('src', HV_SRC);
+      reveal(hv);
+    }
+  }
+
   /* ---- 3D viewer: never blocks first paint ---- */
   var mv = document.getElementById('mv');
   var mvLoad = document.getElementById('mv-load');
@@ -1020,7 +1154,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
     var startLoad = function () {
       mv.setAttribute('src', MV_SRC);
-      mv.dismissPoster();
+      reveal(mv);
     };
     var conn = navigator.connection || {};
     var slow = conn.saveData || /(^|-)2g$/.test(conn.effectiveType || '');
@@ -1035,12 +1169,39 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         startLoad();
       });
     } else {
-      var idle = function () {
-        if ('requestIdleCallback' in window) requestIdleCallback(startLoad, { timeout: 2500 });
-        else setTimeout(startLoad, 800);
-      };
-      if (document.readyState === 'complete') idle();
-      else window.addEventListener('load', idle, { once: true });
+      /* This viewer used to wait for window.load + requestIdleCallback. The hero
+         preview delays window.load until its model is done, so the wait stacked
+         and the sample often hadn't started by the time the user scrolled to it.
+         Both viewers request the SAME url, so once the hero has it the byte cost
+         here is zero — start as soon as the hero is done (or immediately if the
+         hero isn't running), and fall back to viewport proximity. */
+      var stage = mv.closest('.stage3d') || mv;
+      var started = false;
+      var once = function () { if (!started) { started = true; startLoad(); } };
+
+      /* Prefer starting the moment the hero has the file — same url, so this
+         costs nothing extra. But never DEPEND on that event: if the hero
+         finished before this ran (cache), or was skipped, the event never
+         comes. Every path below is a race to whichever fires first, and the
+         timer guarantees one of them always does. */
+      if (hv && hv.getAttribute('src') && !hv.loaded) {
+        hv.addEventListener('load', once, { once: true });
+        hv.addEventListener('error', once, { once: true });
+      }
+      if ('IntersectionObserver' in window) {
+        var mvIO = new IntersectionObserver(function (en) {
+          if (en[0].isIntersecting) { mvIO.disconnect(); once(); }
+        }, { rootMargin: '1200px 0px' });
+        mvIO.observe(stage);
+      }
+      if (!hv || hv.loaded || !hv.getAttribute('src')) {
+        /* nothing to wait on — go now, at idle */
+        if ('requestIdleCallback' in window) requestIdleCallback(once, { timeout: 1500 });
+        else setTimeout(once, 400);
+      } else {
+        /* hero is in flight: back-stop it so a stalled hero can't strand this */
+        setTimeout(once, 4000);
+      }
     }
   }
 

@@ -12,7 +12,11 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<!-- fonts load without blocking first paint; metric-matched fallbacks
+     (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 
@@ -236,6 +240,41 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   display: flex; align-items: center;
   padding: calc(var(--u) * 5) 0;
 }
+/* split hero — copy left, the deliverable previewed right (matches the
+   3D sampling page). Falls back to a single centred column on narrow
+   screens so the copy and CTA always lead. */
+.hero-split {
+  display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+  align-items: center; gap: clamp(24px, 4vw, 56px); width: 100%; text-align: left;
+}
+.hero-copy { min-width: 0; }
+.hero-view { position: relative; min-width: 0; width: 100%; justify-self: end; }
+.hero-view > * { width: 100%; margin: 0; }
+.hero-split h1 { max-width: 15ch; font-size: clamp(36px, 4vw, 60px); margin-inline: 0; }
+.hero-split .sub { margin-left: 0; margin-right: 0; max-width: 46ch; }
+.hero-split .acts { justify-content: flex-start; }
+.hero-split .chips { justify-content: flex-start; }
+/* hero preview tuning — the visual is smaller here than in its own section,
+   so give the chip room and keep the chip row on one line */
+.hero-view .draft-chip { bottom: 10px; font-size: 9px; padding: 7px 14px; }
+.hero-view .draft { padding-bottom: 44px; }
+.hero-split .chips { flex-wrap: nowrap; gap: 8px; }
+.hero-split .chips span { white-space: nowrap; font-size: 9.5px; padding: 7px 12px; }
+@media (max-width: 1180px) {
+  .hero-split .chips { flex-wrap: wrap; }
+}
+@media (max-width: 900px) {
+  .hero-split { grid-template-columns: 1fr; text-align: center; gap: 20px; }
+  .hero-split h1 { margin-inline: auto; }
+  .hero-split .sub { margin-left: auto; margin-right: auto; }
+  .hero-split .acts, .hero-split .chips { justify-content: center; }
+  .hero-view { justify-self: center; max-width: 420px; }
+}
+@media (max-width: 560px) {
+  /* below this the preview costs more than it adds — copy and CTA matter more */
+  .hero-view { display: none; }
+}
+
 .hero-center { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
 .sec-visual { padding-top: 0; }
 .sec-visual .vwrap { width: min(100%, 780px); margin: 0 auto; }
@@ -364,6 +403,24 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .week:hover .wn { color: var(--acc); }
 .week h3 { font-family: var(--disp); font-weight: 700; font-size: 16.5px; letter-spacing: -.014em; color: var(--ink); margin: 0 0 4px; }
 .week p { font-size: 13.5px; line-height: 1.55; color: var(--ink-4); margin: 0; max-width: 42ch; }
+
+/* How it works — steps stagger in as the list scrolls into view.
+   Hidden state is applied by JS (.rv-steps.armed) so the steps stay visible
+   if scripting or the observer ever fails — content must never depend on
+   an animation succeeding. */
+.weeks.rv-steps.armed .week {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity .55s var(--easing), transform .55s var(--easing);
+}
+.weeks.rv-steps.armed.in .week { opacity: 1; transform: none; }
+.weeks.rv-steps.armed.in .week:nth-child(1) { transition-delay: .10s; }
+.weeks.rv-steps.armed.in .week:nth-child(2) { transition-delay: .28s; }
+.weeks.rv-steps.armed.in .week:nth-child(3) { transition-delay: .46s; }
+.weeks.rv-steps.armed.in .week:nth-child(4) { transition-delay: .64s; }
+.weeks.rv-steps.armed.in .week:nth-child(5) { transition-delay: .82s; }
+@media (prefers-reduced-motion: reduce) {
+  .weeks.rv-steps.armed .week { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
 @media (max-width: 980px) { .chat-wrap { grid-template-columns: 1fr; } .chat { max-width: 100%; } }
 @media (prefers-reduced-motion: reduce) { .msg, .chat .done { opacity: 1 !important; transform: none !important; transition: none !important; } }
 
@@ -528,7 +585,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   padding: 16px 26px; border-radius: 14px;
   background: var(--glass); border: 1px solid var(--line-2);
   -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-  font-family: var(--mono); font-size: 13px; letter-spacing: .08em; color: var(--ink-2);
+  font-family: var(--mono); font-size: 13px; letter-spacing: .08em; color: var(--ink-3);
   transition: border-color .3s ease, transform .3s ease;
 }
 .fmt:hover { border-color: var(--acc-30); transform: translateY(-2px); }
@@ -559,8 +616,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
   <!-- ============ 1. HERO — the pattern piece, drafted ============ -->
   <section class="hero" aria-label="Pattern making CAD service — overview">
-    <div class="wrap hero-center">
-      <div>
+    <div class="wrap hero-split">
+      <div class="hero-copy">
         <span class="kicker rv in">Digital pattern making — done for you</span>
         <h1 class="h-display rv in" style="margin-top:14px;">Patterns your factory can <span class="acc-t">actually cut.</span></h1>
         <p class="sub rv in">
@@ -577,10 +634,49 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
           <span>Graded &amp; nest-ready</span>
         </div>
       </div>
+
+      <!-- right: the deliverable, previewed in the hero -->
+      <div class="hero-view rv in" aria-hidden="true">
+    <div class="draft glass-p" aria-hidden="true">
+      <svg viewBox="0 0 420 340" class="draft-svg">
+        <defs>
+          <marker id="ga-hero" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 1 L7 4 L0 7 z" fill="#EFD84A"/></marker>
+        </defs>
+        <path class="dp-cut" d="M60 300 L60 130 C60 70 140 30 210 30 C280 30 360 70 360 130 L360 300 Z"/>
+        <path class="dp-sew" d="M74 288 L74 136 C74 82 146 44 210 44 C274 44 346 82 346 136 L346 288 Z"/>
+        <path class="dp-notch" d="M60 190 L74 190 M360 190 L346 190 M210 30 L210 44"/>
+        <line class="dp-grain" x1="210" y1="90" x2="210" y2="260" marker-start="url(#ga-hero)" marker-end="url(#ga-hero)"/>
+        <text class="dp-t" x="222" y="180">GRAIN</text>
+        <text class="dp-t2" x="92" y="272">SLEEVE — 1X SELF · SA 12MM</text>
+        <line class="dp-dim" x1="60" y1="318" x2="360" y2="318"/>
+        <text class="dp-t" x="184" y="334">BICEP + EASE</text>
+      </svg>
+      <span class="draft-chip">DXF · AAMA/ASTM verified</span>
+    </div>
+      </div>
     </div>
   </section>
 
-  <!-- ============ THE VISUAL — its own section ============ -->
+  <section class="sec" id="kit" aria-labelledby="kit-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker rv">What you get</span>
+        <h2 class="h-display rv" id="kit-h">Everything a cutter checks <span class="acc-t">before they trust a pattern.</span></h2>
+      </div>
+      <div class="kit">
+        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>Base pattern — production draft</h3><p>Drafted to your spec with fabric-appropriate ease, ready for the sample room.</p></div>
+        <div class="kit-c glass-p rv"><span class="ki">02</span><h3>Graded size set</h3><p>Your full size range with consistent grade rules — nested file plus individual sizes.</p></div>
+        <div class="kit-c glass-p rv"><span class="ki">03</span><h3>Seam allowances, per seam</h3><p>Not a blanket 1cm — allowances set to your construction, seam by seam.</p></div>
+        <div class="kit-c glass-p rv rv-d1"><span class="ki">04</span><h3>Notches &amp; drill marks</h3><p>Placed for the sewing line, so panels match at the machine, not just on screen.</p></div>
+        <div class="kit-c glass-p rv rv-d1"><span class="ki">05</span><h3>Cutter's must</h3><p>Piece list, cut quantities, fabric/fusing/lining split — the sheet the cutting room asks for.</p></div>
+        <div class="kit-c glass-p rv rv-d1"><span class="ki">06</span><h3>Measurement check</h3><p>Pattern measured against your tech pack spec at base size, documented.</p></div>
+        <div class="kit-c glass-p rv rv-d2"><span class="ki">07</span><h3>Native + DXF files</h3><p>Your factory's system plus universal DXF — no conversion roulette.</p></div>
+        <div class="kit-c tint glass-p rv rv-d2"><span class="ki">08</span><h3>Your blocks, your property</h3><p>Patterns, blocks and grade rules transfer to you — take them to any factory, any time.</p></div>
+        <div class="kit-c glass-p rv rv-d2"><span class="ki">09</span><h3>Two revision rounds</h3><p>Fit corrections after your sample review — built into the price.</p></div>
+      </div>
+    </div>
+  </section>
+
   <section class="sec sec-visual" aria-label="The deliverable">
     <div class="wrap">
       <div class="sec-head" style="margin-bottom:30px;">
@@ -609,22 +705,23 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 2. WHERE PATTERNS FAIL ============ -->
-  <section class="sec" aria-labelledby="pf-h">
+  <section class="sec" id="how" aria-labelledby="how-h">
     <div class="wrap">
       <div class="sec-head">
-        <span class="kicker rv">Why it matters</span>
-        <h2 class="h-display rv" id="pf-h">The pattern is where your design <span class="acc-t">becomes a garment — or doesn't.</span></h2>
+        <span class="kicker rv">How it works</span>
+        <h2 class="h-display rv" id="how-h">Sketch to cuttable file, <span class="acc-t">in four steps.</span></h2>
       </div>
-      <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>The file the factory can't open</h3><p>A pattern in the wrong system stalls production for days. Native format isn't a nicety — it's the difference between cutting Monday and emailing all week.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">02</span><h3>The sample that fits nobody</h3><p>A base pattern drafted without ease, posture and fabric behaviour burns a sampling round — and sampling rounds are where budgets die.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">03</span><h3>The grade that drifts</h3><p>Bad grade rules make your size L a different garment than your size S. Returns follow.</p></div>
+      <div class="chat-wrap" style="grid-template-columns:1fr;max-width:860px;margin:0 auto;">
+        <div class="weeks rv-steps">
+          <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3>Brief</h3><p>Send your tech pack, sketch or a sample garment — plus your factory's CAD system if you know it.</p></div></div>
+          <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3>Fixed quote in 24h</h3><p>One number covering drafting, grading and every file format listed above.</p></div></div>
+          <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3>Draft + your sample round</h3><p>You sew the sample with your factory; we take your fit notes and correct the pattern — two rounds included.</p></div></div>
+          <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3>Graded handoff</h3><p>Full size set, cutter's must, native + DXF files — and ownership transferred to you.</p></div></div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ============ 3. FORMAT WALL ============ -->
   <section class="sec" id="formats" aria-labelledby="fw-h">
     <div class="wrap">
       <div class="sec-head">
@@ -645,89 +742,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 4. WHAT YOU GET ============ -->
-  <section class="sec" id="kit" aria-labelledby="kit-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv">What you get</span>
-        <h2 class="h-display rv" id="kit-h">Everything a cutter checks <span class="acc-t">before they trust a pattern.</span></h2>
-      </div>
-      <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>Base pattern — production draft</h3><p>Drafted to your spec with fabric-appropriate ease, ready for the sample room.</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">02</span><h3>Graded size set</h3><p>Your full size range with consistent grade rules — nested file plus individual sizes.</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">03</span><h3>Seam allowances, per seam</h3><p>Not a blanket 1cm — allowances set to your construction, seam by seam.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">04</span><h3>Notches &amp; drill marks</h3><p>Placed for the sewing line, so panels match at the machine, not just on screen.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">05</span><h3>Cutter's must</h3><p>Piece list, cut quantities, fabric/fusing/lining split — the sheet the cutting room asks for.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">06</span><h3>Measurement check</h3><p>Pattern measured against your tech pack spec at base size, documented.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">07</span><h3>Native + DXF files</h3><p>Your factory's system plus universal DXF — no conversion roulette.</p></div>
-        <div class="kit-c tint glass-p rv rv-d2"><span class="ki">08</span><h3>Your blocks, your property</h3><p>Patterns, blocks and grade rules transfer to you — take them to any factory, any time.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">09</span><h3>Two revision rounds</h3><p>Fit corrections after your sample review — built into the price.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 5. BLOCKS VS CUSTOM ============ -->
-  <section class="sec" aria-labelledby="bc-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv">Two honest starting points</span>
-        <h2 class="h-display rv" id="bc-h">From a proven block, or <span class="acc-t">from scratch.</span></h2>
-      </div>
-      <div class="cmp2">
-        <div class="cmp-col glass-p rv">
-          <h3>Start from a proven block</h3>
-          <ul>
-            <li>Faster and cheaper — the fit foundation already works</li>
-            <li>Ideal for tees, shirts, hoodies, chinos, classic dresses</li>
-            <li>Your styling applied on top of a tested base</li>
-            <li>Most first collections should start here</li>
-          </ul>
-        </div>
-        <div class="cmp-col lit glass-p rv rv-d1">
-          <h3>Draft from scratch</h3>
-          <ul>
-            <li>For silhouettes no block can reach — draped, engineered, signature cuts</li>
-            <li>Built from your measurements and muslin logic</li>
-            <li>Becomes your own block for everything after</li>
-            <li>We'll tell you honestly when you don't need this</li>
-          </ul>
-        </div>
-      </div>
-      <p class="cmp-note rv">We recommend the cheaper path when it's the right one — that's the point of the 24-hour quote.</p>
-    </div>
-  </section>
-
-  <!-- ============ 6. GRADING TRUTH ============ -->
-  <section class="sec" aria-labelledby="gr-h">
-    <div class="wrap">
-      <div class="acc-honest">
-        <span class="kicker rv">The grading truth</span>
-        <h2 class="h-display rv" id="gr-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">Grading can't fix a pattern <span class="acc-t">that doesn't fit.</span></h2>
-        <p class="rv">Grading scales a garment across sizes — it multiplies whatever the base pattern is. If the base fits, every size fits. If it doesn't, you've manufactured the same mistake five times. That's why we settle fit at the base size first, always, and why we'll say so even when it's the slower answer.</p>
-        <p class="soft rv">Sizes graded to your market's standard — US, UK, EU or your own spec — with the grade rules documented and handed over.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 7. PROCESS ============ -->
-  <section class="sec" id="how" aria-labelledby="how-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv">How it works</span>
-        <h2 class="h-display rv" id="how-h">Sketch to cuttable file, <span class="acc-t">in four steps.</span></h2>
-      </div>
-      <div class="chat-wrap" style="grid-template-columns:1fr;max-width:860px;margin:0 auto;">
-        <div class="weeks rv">
-          <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3>Brief</h3><p>Send your tech pack, sketch or a sample garment — plus your factory's CAD system if you know it.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3>Fixed quote in 24h</h3><p>One number covering drafting, grading and every file format listed above.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3>Draft + your sample round</h3><p>You sew the sample with your factory; we take your fit notes and correct the pattern — two rounds included.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3>Graded handoff</h3><p>Full size set, cutter's must, native + DXF files — and ownership transferred to you.</p></div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 8. PROOF ============ -->
   <section class="sec" aria-labelledby="pr-h">
     <div class="wrap">
       <div class="sec-head">
@@ -744,7 +758,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 8. FAQ ============ -->
   <section class="sec" id="faq" aria-labelledby="faq-h">
     <div class="wrap">
       <div class="sec-head">
@@ -780,7 +793,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 9. CONTACT ============ -->
   <section class="sec" id="contact" aria-labelledby="contact-h">
     <div class="wrap">
       <div class="contact-panel glass-p">
@@ -860,8 +872,17 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     }, { passive: true });
   }
 
+  /* Arm the how-it-works step stagger only when we can actually run it.
+     Until 'armed' lands the steps are plain visible content, so a blocked
+     script or a missed observer can never leave the section blank. */
+  if (!reduced) {
+    document.querySelectorAll('.weeks.rv-steps').forEach(function (el) {
+      el.classList.add('armed');
+    });
+  }
+
   /* reveals — fire as the top edge approaches */
-  var rvs = document.querySelectorAll('.rv:not(.in)');
+  var rvs = document.querySelectorAll('.rv:not(.in), .rv-steps:not(.in)');
   if ('IntersectionObserver' in window && !reduced) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
@@ -877,7 +898,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   }
   /* safety net — a janitor that also covers tab panels and IO misses */
   var rvJanitor = setInterval(function () {
-    var left = document.querySelectorAll('.rv:not(.in)');
+    var left = document.querySelectorAll('.rv:not(.in), .rv-steps:not(.in)');
     if (!left.length) { clearInterval(rvJanitor); return; }
     left.forEach(function (el) {
       var r = el.getBoundingClientRect();

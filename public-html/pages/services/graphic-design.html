@@ -12,7 +12,11 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<!-- fonts load without blocking first paint; metric-matched fallbacks
+     (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 
@@ -364,6 +368,24 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .week:hover .wn { color: var(--acc); }
 .week h3 { font-family: var(--disp); font-weight: 700; font-size: 16.5px; letter-spacing: -.014em; color: var(--ink); margin: 0 0 4px; }
 .week p { font-size: 13.5px; line-height: 1.55; color: var(--ink-4); margin: 0; max-width: 42ch; }
+
+/* How it works — steps stagger in as the list scrolls into view.
+   Hidden state is applied by JS (.rv-steps.armed) so the steps stay visible
+   if scripting or the observer ever fails — content must never depend on
+   an animation succeeding. */
+.weeks.rv-steps.armed .week {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity .55s var(--easing), transform .55s var(--easing);
+}
+.weeks.rv-steps.armed.in .week { opacity: 1; transform: none; }
+.weeks.rv-steps.armed.in .week:nth-child(1) { transition-delay: .10s; }
+.weeks.rv-steps.armed.in .week:nth-child(2) { transition-delay: .28s; }
+.weeks.rv-steps.armed.in .week:nth-child(3) { transition-delay: .46s; }
+.weeks.rv-steps.armed.in .week:nth-child(4) { transition-delay: .64s; }
+.weeks.rv-steps.armed.in .week:nth-child(5) { transition-delay: .82s; }
+@media (prefers-reduced-motion: reduce) {
+  .weeks.rv-steps.armed .week { opacity: 1 !important; transform: none !important; transition: none !important; }
+}
 @media (max-width: 980px) { .chat-wrap { grid-template-columns: 1fr; } .chat { max-width: 100%; } }
 @media (prefers-reduced-motion: reduce) { .msg, .chat .done { opacity: 1 !important; transform: none !important; transition: none !important; } }
 
@@ -683,7 +705,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <h2 class="h-display rv" id="how-h">Brief to on-brand, <span class="acc-t">in four steps.</span></h2>
       </div>
       <div class="chat-wrap" style="grid-template-columns:1fr;max-width:860px;margin:0 auto;">
-        <div class="weeks rv">
+        <div class="weeks rv-steps">
           <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3>Brief</h3><p>What you need, where it runs, and every brand asset you have — even the messy folder. Especially the messy folder.</p></div></div>
           <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3>Fixed quote in 24h</h3><p>One number for the work — and if you don't have a visual system yet, the quote says exactly what building one adds.</p></div></div>
           <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3>Design, on the system</h3><p>Assets built from the documented rules, reviewed in two structured rounds.</p></div></div>
@@ -842,8 +864,17 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     }, { passive: true });
   }
 
+  /* Arm the how-it-works step stagger only when we can actually run it.
+     Until 'armed' lands the steps are plain visible content, so a blocked
+     script or a missed observer can never leave the section blank. */
+  if (!reduced) {
+    document.querySelectorAll('.weeks.rv-steps').forEach(function (el) {
+      el.classList.add('armed');
+    });
+  }
+
   /* reveals — fire as the top edge approaches */
-  var rvs = document.querySelectorAll('.rv:not(.in)');
+  var rvs = document.querySelectorAll('.rv:not(.in), .rv-steps:not(.in)');
   if ('IntersectionObserver' in window && !reduced) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
@@ -859,7 +890,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   }
   /* safety net — a janitor that also covers tab panels and IO misses */
   var rvJanitor = setInterval(function () {
-    var left = document.querySelectorAll('.rv:not(.in)');
+    var left = document.querySelectorAll('.rv:not(.in), .rv-steps:not(.in)');
     if (!left.length) { clearInterval(rvJanitor); return; }
     left.forEach(function (el) {
       var r = el.getBoundingClientRect();
