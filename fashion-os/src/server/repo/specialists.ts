@@ -119,9 +119,11 @@ export function filtersToQuery(filters: DirectoryFilters, overrides: Partial<Dir
 export async function searchDirectory(
   database: D1Database,
   filters: DirectoryFilters,
+  tenant: string,
 ): Promise<{ cards: DirectoryCard[]; total: number }> {
-  const where: string[] = ["p.status = 'approved'", "u.status = 'active'"];
-  const params: unknown[] = [];
+  // Shared demo specialists plus anything this visitor created themselves.
+  const where: string[] = ["p.status = 'approved'", "u.status = 'active'", "u.tenant IN (?, 'public')"];
+  const params: unknown[] = [tenant];
 
   if (filters.serviceId) {
     where.push('EXISTS (SELECT 1 FROM specialist_service_offerings o WHERE o.profile_id = p.id AND o.service_id = ?)');
@@ -292,6 +294,7 @@ export interface PublicProfile {
 export async function loadPublicProfile(
   database: D1Database,
   handle: string,
+  tenant: string,
 ): Promise<PublicProfile | null> {
   const row = await one<{
     id: string; handle: string; name: string; headline: string | null; bio: string | null;
@@ -305,8 +308,10 @@ export async function loadPublicProfile(
             p.location, p.timezone, p.availability, p.work_location, p.rate_min, p.rate_max,
             p.rate_currency, p.rate_model, p.work_preference, p.turnaround
        FROM specialist_profiles p JOIN users u ON u.id = p.user_id
-      WHERE p.handle = ? AND p.status = 'approved' AND u.status = 'active'`,
+      WHERE p.handle = ? AND p.status = 'approved' AND u.status = 'active'
+        AND u.tenant IN (?, 'public')`,
     handle,
+    tenant,
   );
   if (!row) return null;
 
@@ -431,14 +436,16 @@ export function optionsFor(
 }
 
 /** Per-service counts, used to show which services actually have people (§14). */
-export async function serviceCounts(database: D1Database): Promise<Map<string, number>> {
+export async function serviceCounts(database: D1Database, tenant: string): Promise<Map<string, number>> {
   const rows = await all<{ service_id: string; n: number }>(
     database,
     `SELECT o.service_id, COUNT(DISTINCT o.profile_id) AS n
        FROM specialist_service_offerings o
        JOIN specialist_profiles p ON p.id = o.profile_id
-      WHERE p.status = 'approved'
+       JOIN users u ON u.id = p.user_id
+      WHERE p.status = 'approved' AND u.tenant IN (?, 'public')
       GROUP BY o.service_id`,
+    tenant,
   );
   const counts = new Map(SERVICES.map((service) => [service.id, 0]));
   for (const row of rows) counts.set(row.service_id, row.n);
@@ -500,7 +507,10 @@ export interface ReviewApplication {
  * what they wrote or seeing a single thing they made. This returns the whole
  * submission — bio, capability per service, and the portfolio itself.
  */
-export async function loadApplicationsForReview(database: D1Database): Promise<ReviewApplication[]> {
+export async function loadApplicationsForReview(
+  database: D1Database,
+  tenant: string,
+): Promise<ReviewApplication[]> {
   const profiles = await all<{
     id: string; name: string; email: string; status: string; submitted_at: string | null;
     headline: string | null; bio: string | null; years_experience: number | null;
@@ -515,8 +525,9 @@ export async function loadApplicationsForReview(database: D1Database): Promise<R
             p.work_location, p.rate_min, p.rate_max, p.rate_currency, p.rate_model,
             p.preferred_size, p.turnaround
        FROM specialist_profiles p JOIN users u ON u.id = p.user_id
-      WHERE p.status IN ('submitted','needs_changes')
+      WHERE p.status IN ('submitted','needs_changes') AND u.tenant IN (?, 'public')
       ORDER BY p.submitted_at`,
+    tenant,
   );
   if (!profiles.length) return [];
 

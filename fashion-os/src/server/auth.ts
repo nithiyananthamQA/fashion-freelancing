@@ -21,6 +21,8 @@ export interface NewAccount {
   country?: string | null;
   timezone?: string | null;
   acceptedTerms: boolean;
+  /** The visitor's private workspace — see src/server/tenant.ts. */
+  tenant: string;
 }
 
 export type SignUpResult =
@@ -34,7 +36,11 @@ export async function signUp(
   account: NewAccount,
 ): Promise<SignUpResult> {
   const email = account.email.toLowerCase();
-  const existing = await one<{ id: string }>(database, 'SELECT id FROM users WHERE email = ?', email);
+  // Email is unique per workspace, not globally: two reviewers must both be
+  // able to sign up as "test@test.com" in their own sandbox.
+  const existing = await one<{ id: string }>(
+    database, 'SELECT id FROM users WHERE email = ? AND tenant = ?', email, account.tenant,
+  );
   if (existing) {
     return {
       ok: false,
@@ -47,8 +53,8 @@ export async function signUp(
   const now = nowIso();
   await run(
     database,
-    `INSERT INTO users (id, email, password_hash, name, country, timezone, terms_accepted_at, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO users (id, email, password_hash, name, country, timezone, terms_accepted_at, tenant, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     id,
     email,
     await hashPassword(account.password),
@@ -56,6 +62,7 @@ export async function signUp(
     account.country ?? null,
     account.timezone ?? null,
     account.acceptedTerms ? now : null,
+    account.tenant,
     now,
     now,
   );
@@ -74,11 +81,15 @@ export async function signIn(
   request: Request,
   email: string,
   password: string,
+  tenant: string,
 ): Promise<SignInResult> {
+  // Scoped to the workspace so one visitor can never sign in as another's
+  // test account, even if they guess the address.
   const row = await one<{ id: string; password_hash: string; status: string }>(
     database,
-    'SELECT id, password_hash, status FROM users WHERE email = ?',
+    "SELECT id, password_hash, status FROM users WHERE email = ? AND tenant IN (?, 'public')",
     email.toLowerCase(),
+    tenant,
   );
 
   // Same message and roughly the same work whether the account exists or not,

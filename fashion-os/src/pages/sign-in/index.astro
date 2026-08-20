@@ -62,7 +62,7 @@ if (Astro.request.method === 'POST') {
         password,
         country: f.text('country', 'Country', { max: 60 }) || null,
         timezone: f.text('timezone', 'Timezone', { max: 60 }) || null,
-        acceptedTerms: true,
+        acceptedTerms: true, tenant: Astro.locals.tenant,
       });
       if (!result.ok) {
         errors[result.field] = result.message;
@@ -76,7 +76,7 @@ if (Astro.request.method === 'POST') {
       }
     }
   } else if (!Object.keys(errors).length) {
-    const result = await signIn(database, Astro.request, email, password);
+    const result = await signIn(database, Astro.request, email, password, Astro.locals.tenant);
     if (!result.ok) {
       errors.password = result.message;
     } else {

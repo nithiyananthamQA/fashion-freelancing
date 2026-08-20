@@ -25,8 +25,8 @@ const filters = readFilters(Astro.url);
 const service = getService(filters.serviceId);
 
 const [{ cards, total }, counts, skills, tools] = await Promise.all([
-  searchDirectory(database, filters),
-  serviceCounts(database),
+  searchDirectory(database, filters, Astro.locals.tenant),
+  serviceCounts(database, Astro.locals.tenant),
   optionsFor(database, 'skills', filters.serviceId),
   optionsFor(database, 'tools', filters.serviceId),
 ]);

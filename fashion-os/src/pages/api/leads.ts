@@ -18,6 +18,7 @@ import { audit } from '../../server/audit';
 import { clientKey, limited, tooManyRequests } from '../../server/rate-limit';
 import { HONEYPOT, json, parse, trapped } from '../../server/validate';
 import { SERVICES } from '../../data/taxonomy';
+import { tenantOf } from '../../server/tenant';
 
 const SERVICE_IDS = [...SERVICES.map((s) => s.id), 'multiple'];
 const SOURCES = ['contact-form', 'quote-bot'] as const;
@@ -45,11 +46,12 @@ export const POST: APIRoute = async (ctx) => {
   const id = newId();
   await run(
     database,
-    `INSERT INTO leads (id, name, email, company, service, message, timeline, source, page, ip, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO leads (id, name, email, company, service, message, timeline, source, page, ip, tenant, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     id, name, email, company || null, service, message, timeline || null, source,
     f.text('page', 'Page', { max: 200 }) || null,
     ctx.request.headers.get('cf-connecting-ip'),
+    tenantOf(ctx),
     nowIso(),
   );
   await audit(database, {

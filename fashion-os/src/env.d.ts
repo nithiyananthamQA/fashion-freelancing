@@ -31,6 +31,8 @@ declare global {
     interface Locals {
       /** Signed-in account, or null. Resolved once per request in middleware. */
       user: SessionUser | null;
+      /** This browser's private workspace id — see src/server/tenant.ts. */
+      tenant: string;
     }
   }
 }

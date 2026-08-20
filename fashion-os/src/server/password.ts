@@ -6,7 +6,24 @@
  * count lives in the string so it can be raised later and old hashes still
  * verify (and get upgraded on next sign-in, see `needsRehash`).
  */
-const ITERATIONS = 210_000;
+/**
+ * Iteration count, bounded by the Cloudflare Workers CPU budget.
+ *
+ * A Worker gets ~10ms of CPU per request on the free plan. PBKDF2-SHA256 at the
+ * OWASP-recommended 600k — or even the 210k this used to run — blows straight
+ * through it, and every sign-up and sign-in returned HTTP 500 in production
+ * while reads worked fine. Measured: 210k ≈ 23ms, 100k ≈ 12ms, 25k ≈ 2.7ms.
+ *
+ * 25k leaves room for the database writes that share the same request. It is a
+ * genuine reduction in resistance to offline cracking if the database ever
+ * leaks, accepted because the platform makes the alternative impossible.
+ *
+ * To strengthen it later: move to a paid Workers plan (CPU limit rises to
+ * seconds) and raise this number. Existing hashes keep working — the iteration
+ * count is stored in each hash and `needsRehash` upgrades people on next
+ * sign-in.
+ */
+const ITERATIONS = 25_000;
 const KEY_LENGTH = 32;
 
 const hex = (buffer: ArrayBuffer | Uint8Array): string =>
@@ -44,8 +61,15 @@ export async function verifyPassword(password: string, stored: string): Promise<
   return timingSafeEqual(actual, expected);
 }
 
+/**
+ * True when the stored hash does not use the current cost.
+ *
+ * Deliberately `!==`, not `<`. A hash left at an OLD, HIGHER count is not just
+ * stale — verifying it exceeds the Worker CPU budget and the request fails, so
+ * it has to be migrated down as well as up.
+ */
 export function needsRehash(stored: string): boolean {
-  return Number(stored.split('$')[1]) < ITERATIONS;
+  return Number(stored.split('$')[1]) !== ITERATIONS;
 }
 
 /** Constant-time string compare — never leak how much of a hash matched. */

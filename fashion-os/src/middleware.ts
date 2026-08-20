@@ -8,9 +8,12 @@
 import { defineMiddleware } from 'astro:middleware';
 import { env } from 'cloudflare:workers';
 import { loadUser } from './server/session';
+import { resolveTenant } from './server/tenant';
 
 export const onRequest = defineMiddleware(async (context, next) => {
   context.locals.user = null;
+  // Every visitor gets a private workspace; shared demo content is 'public'.
+  context.locals.tenant = resolveTenant(context);
 
   const database = (env as unknown as Env).DB;
   if (database) {

@@ -25,6 +25,7 @@ if (gate.response) return gate.response;
 const admin = gate.value;
 
 const database = db(Astro);
+const tenant = Astro.locals.tenant;
 let flash: string | null = null;
 
 if (Astro.request.method === 'POST') {
@@ -205,12 +206,22 @@ if (Astro.request.method === 'POST') {
 
 const [pending, pendingSkills, pendingTools, pendingPortfolio, leads, live, projects, mailQueue, recentAudit, counts] =
   await Promise.all([
-    loadApplicationsForReview(database),
+    loadApplicationsForReview(database, tenant),
     all<{ id: string; name: string; service_id: string | null }>(
-      database, "SELECT id, name, service_id FROM skills WHERE status = 'pending' ORDER BY created_at",
+      database,
+      `SELECT s.id, s.name, s.service_id FROM skills s
+         LEFT JOIN users u ON u.id = s.created_by
+        WHERE s.status = 'pending' AND (u.tenant IS NULL OR u.tenant IN (?, 'public'))
+        ORDER BY s.created_at`,
+      tenant,
     ),
     all<{ id: string; name: string; service_id: string | null }>(
-      database, "SELECT id, name, service_id FROM tools WHERE status = 'pending' ORDER BY created_at",
+      database,
+      `SELECT s.id, s.name, s.service_id FROM tools s
+         LEFT JOIN users u ON u.id = s.created_by
+        WHERE s.status = 'pending' AND (u.tenant IS NULL OR u.tenant IN (?, 'public'))
+        ORDER BY s.created_at`,
+      tenant,
     ),
     all<{ id: string; title: string; contribution: string; name: string; media_key: string | null; external_url: string | null }>(
       database,
@@ -218,7 +229,9 @@ const [pending, pendingSkills, pendingTools, pendingPortfolio, leads, live, proj
          FROM portfolio_items pi
          JOIN specialist_profiles p ON p.id = pi.profile_id
          JOIN users u ON u.id = p.user_id
-        WHERE pi.moderation = 'pending' ORDER BY pi.created_at LIMIT 30`,
+        WHERE pi.moderation = 'pending' AND u.tenant IN (?, 'public')
+        ORDER BY pi.created_at LIMIT 30`,
+      tenant,
     ),
     all<{
       id: string; name: string; email: string; company: string | null; service: string | null;
@@ -226,7 +239,9 @@ const [pending, pendingSkills, pendingTools, pendingPortfolio, leads, live, proj
     }>(
       database,
       `SELECT id, name, email, company, service, message, timeline, source, status, created_at
-         FROM leads ORDER BY (status = 'new') DESC, created_at DESC LIMIT 50`,
+         FROM leads WHERE tenant IN (?, 'public')
+        ORDER BY (status = 'new') DESC, created_at DESC LIMIT 50`,
+      tenant,
     ),
     all<{ id: string; handle: string | null; name: string; headline: string | null; featured: number; status: string; service_id: string | null }>(
       database,
@@ -234,33 +249,47 @@ const [pending, pendingSkills, pendingTools, pendingPortfolio, leads, live, proj
               (SELECT o.service_id FROM specialist_service_offerings o
                 WHERE o.profile_id = p.id ORDER BY o.is_primary DESC LIMIT 1) AS service_id
          FROM specialist_profiles p JOIN users u ON u.id = p.user_id
-        WHERE p.status IN ('approved','paused')
+        WHERE p.status IN ('approved','paused') AND u.tenant IN (?, 'public')
         ORDER BY p.featured DESC, u.name`,
+      tenant,
     ),
     all<{ id: string; title: string; status: string; company_name: string; service_id: string; applicants: number }>(
       database,
       `SELECT p.id, p.title, p.status, c.name AS company_name, p.service_id,
               (SELECT COUNT(*) FROM applications a WHERE a.project_id = p.id) AS applicants
          FROM projects p JOIN companies c ON c.id = p.company_id
-        WHERE p.status != 'draft' ORDER BY p.created_at DESC LIMIT 20`,
+        WHERE p.status != 'draft' AND c.tenant IN (?, 'public')
+        ORDER BY p.created_at DESC LIMIT 20`,
+      tenant,
     ),
     all<{ id: string; to_email: string; subject: string; body: string; status: string; created_at: string }>(
       database,
-      "SELECT id, to_email, subject, body, status, created_at FROM outbound_email WHERE status = 'queued' ORDER BY created_at DESC LIMIT 10",
+      `SELECT e.id, e.to_email, e.subject, e.body, e.status, e.created_at
+         FROM outbound_email e
+         LEFT JOIN users u ON u.email = e.to_email
+        WHERE e.status = 'queued' AND (u.tenant IS NULL OR u.tenant IN (?, 'public'))
+        ORDER BY e.created_at DESC LIMIT 10`,
+      tenant,
     ),
     all<{ action: string; entity_type: string; entity_id: string; created_at: string; actor: string | null }>(
       database,
       `SELECT a.action, a.entity_type, a.entity_id, a.created_at, u.name AS actor
          FROM audit_logs a LEFT JOIN users u ON u.id = a.actor_id
+        WHERE u.tenant IS NULL OR u.tenant IN (?, 'public')
         ORDER BY a.created_at DESC LIMIT 20`,
+      tenant,
     ),
     one<{ approved: number; companies: number; projects: number; engagements: number }>(
       database,
       `SELECT
-        (SELECT COUNT(*) FROM specialist_profiles WHERE status = 'approved') AS approved,
-        (SELECT COUNT(*) FROM companies) AS companies,
-        (SELECT COUNT(*) FROM projects WHERE status != 'draft') AS projects,
-        (SELECT COUNT(*) FROM engagements WHERE status = 'active') AS engagements`,
+        (SELECT COUNT(*) FROM specialist_profiles p JOIN users u ON u.id = p.user_id
+          WHERE p.status = 'approved' AND u.tenant IN (?1, 'public')) AS approved,
+        (SELECT COUNT(*) FROM companies WHERE tenant IN (?1, 'public')) AS companies,
+        (SELECT COUNT(*) FROM projects p JOIN companies c ON c.id = p.company_id
+          WHERE p.status != 'draft' AND c.tenant IN (?1, 'public')) AS projects,
+        (SELECT COUNT(*) FROM engagements e JOIN companies c ON c.id = e.company_id
+          WHERE e.status = 'active' AND c.tenant IN (?1, 'public')) AS engagements`,
+      tenant,
     ),
   ]);
 

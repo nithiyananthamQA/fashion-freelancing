@@ -48,8 +48,8 @@ if (Astro.request.method === 'POST') {
     const now = nowIso();
     await database.batch([
       database
-        .prepare('INSERT INTO companies (id, name, website, country, timezone, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
-        .bind(companyId, name, website, country || null, timezone || null, now, now),
+        .prepare('INSERT INTO companies (id, name, website, country, timezone, tenant, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+        .bind(companyId, name, website, country || null, timezone || null, Astro.locals.tenant, now, now),
       database
         .prepare("INSERT INTO company_members (company_id, user_id, role, job_title, created_at) VALUES (?, ?, 'owner', ?, ?)")
         .bind(companyId, user.id, role, now),

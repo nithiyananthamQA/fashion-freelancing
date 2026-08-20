@@ -17,7 +17,7 @@ import { AVAILABILITY, ENGAGEMENT, RATE_MODEL, WORK_LOCATION, getService } from 
 
 const { handle } = Astro.params;
 const database = db(Astro);
-const profile = handle ? await loadPublicProfile(database, handle) : null;
+const profile = handle ? await loadPublicProfile(database, handle, Astro.locals.tenant) : null;
 
 if (!profile) return new Response(null, { status: 404 });
 

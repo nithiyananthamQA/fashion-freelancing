@@ -76,7 +76,7 @@ if (Astro.request.method === 'POST') {
 
     if (!Object.keys(errors).length) {
       const result = await signUp(database, env(Astro), Astro.request, {
-        name, email, password, country: country || null, timezone: timezone || null, acceptedTerms: true,
+        name, email, password, country: country || null, timezone: timezone || null, acceptedTerms: true, tenant: Astro.locals.tenant,
       });
       if (!result.ok) errors[result.field] = result.message;
       else {

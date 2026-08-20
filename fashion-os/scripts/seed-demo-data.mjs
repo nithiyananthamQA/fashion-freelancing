@@ -48,8 +48,8 @@ const hex = (b) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, 
 async function hashPassword(password) {
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 210_000, hash: 'SHA-256' }, key, 256);
-  return `pbkdf2$210000$${hex(salt)}$${hex(bits)}`;
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 25_000, hash: 'SHA-256' }, key, 256);
+  return `pbkdf2$25000$${hex(salt)}$${hex(bits)}`;
 }
 const esc = (v) => (v === null || v === undefined ? 'NULL' : `'${String(v).replace(/'/g, "''")}'`);
 const json = (v) => esc(JSON.stringify(v));

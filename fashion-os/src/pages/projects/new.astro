@@ -119,8 +119,8 @@ if (Astro.request.method === 'POST') {
       workingCompanyId = newId();
       await database.batch([
         database
-          .prepare('INSERT INTO companies (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)')
-          .bind(workingCompanyId, companyName, now, now),
+          .prepare('INSERT INTO companies (id, name, tenant, created_at, updated_at) VALUES (?, ?, ?, ?, ?)')
+          .bind(workingCompanyId, companyName, Astro.locals.tenant, now, now),
         database
           .prepare("INSERT INTO company_members (company_id, user_id, role, job_title, created_at) VALUES (?, ?, 'owner', ?, ?)")
           .bind(workingCompanyId, user.id, companyRole, now),

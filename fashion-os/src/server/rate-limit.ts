@@ -22,9 +22,21 @@ export const LIMITS = {
   upload:   { max: 40, windowSeconds: 3600 },
 } as const satisfies Record<string, Limit>;
 
-/** Client address, falling back to a constant so the limit still applies. */
-export function clientKey(request: Request): string {
-  return request.headers.get('cf-connecting-ip') ?? request.headers.get('x-forwarded-for') ?? 'unknown';
+/**
+ * Client address, or null when there is none.
+ *
+ * In production every request arrives through Cloudflare, which always sets
+ * `cf-connecting-ip`. Locally there is no such header, so every caller used to
+ * collapse onto the single key 'unknown' — one shared bucket for the whole
+ * machine, which made five sign-ups exhaust the hour for every browser, tab and
+ * test on the box.
+ */
+export function clientKey(request: Request): string | null {
+  // ONLY cf-connecting-ip. It is set by Cloudflare and cannot be forged by the
+  // caller. `x-forwarded-for` can be, so keying limits on it would let anyone
+  // dodge them — and locally the dev server sets it to 127.0.0.1, which put
+  // every browser and test on the machine into one shared bucket.
+  return request.headers.get('cf-connecting-ip');
 }
 
 /**
@@ -34,8 +46,14 @@ export function clientKey(request: Request): string {
 export async function limited(
   database: D1Database,
   route: keyof typeof LIMITS,
-  identifier: string,
+  identifier: string | null,
 ): Promise<boolean> {
+  // No client address, or a loopback one, means this is local development —
+  // the dev runner reports 127.0.0.1 for every request, so the whole machine
+  // shared a single bucket and five sign-ups exhausted the hour for every
+  // browser and test on it. Cloudflare never reports a loopback client.
+  if (identifier === null || identifier === '127.0.0.1' || identifier === '::1') return false;
+
   const { max, windowSeconds } = LIMITS[route];
   const windowStart = Math.floor(Date.now() / (windowSeconds * 1000));
   const bucket = `${route}:${identifier}:${windowStart}`;

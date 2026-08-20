@@ -13,13 +13,13 @@
  * password given (or a generated one, printed once).
  *
  * The password hash is produced with exactly the same scheme as
- * src/server/password.ts — PBKDF2-SHA256, 210k iterations — so the app can
+ * src/server/password.ts — PBKDF2-SHA256, 25k iterations — so the app can
  * verify it. If you change the parameters there, change them here too.
  */
 import { execFileSync } from 'node:child_process';
 import { webcrypto as crypto } from 'node:crypto';
 
-const ITERATIONS = 210_000;
+const ITERATIONS = 25_000;
 const KEY_LENGTH = 32;
 
 const args = process.argv.slice(2);
