@@ -14,6 +14,7 @@
  * deliberately forges another workspace id.
  */
 import type { APIContext, AstroGlobal } from 'astro';
+import { one } from './db';
 import { newId } from './ids';
 
 type Ctx = APIContext | AstroGlobal;
@@ -53,4 +54,74 @@ export const tenantOf = (ctx: Ctx): string =>
  */
 export function tenantScope(column: string, tenant: string): { sql: string; params: string[] } {
   return { sql: `${column} IN (?, ?)`, params: [tenant, PUBLIC_TENANT] };
+}
+
+/**
+ * The workspace named by a raw Request's cookie header.
+ *
+ * `audit()` and the rate limiter only ever receive a Request, not the Astro
+ * context, so this is how they stamp the workspace without every call site
+ * having to pass it down.
+ */
+export function tenantFromRequest(request: Request | undefined): string {
+  const header = request?.headers.get('cookie');
+  if (!header) return PUBLIC_TENANT;
+  const match = header.match(/(?:^|;\s*)ff_ws=([0-9A-Z]{20,32})(?:;|$)/);
+  return match?.[1] ?? PUBLIC_TENANT;
+}
+
+/*
+ * Ownership guards.
+ *
+ * Every listing in the product is workspace-scoped, but the POST handlers that
+ * act on what those listings show took an id straight from the form. A form can
+ * be replayed with somebody else's id, so the check has to happen again on
+ * write. These return the row only when it belongs to the caller's workspace —
+ * `if (!await ownedProfile(...)) return;` is the whole pattern.
+ */
+
+/** A specialist profile, only if its owner is in this workspace. */
+export function ownedProfile<T = { id: string }>(
+  database: D1Database,
+  profileId: string,
+  tenant: string,
+  columns = 'p.id',
+): Promise<T | null> {
+  return one<T>(
+    database,
+    `SELECT ${columns} FROM specialist_profiles p
+       JOIN users u ON u.id = p.user_id
+      WHERE p.id = ? AND u.tenant IN (?, ?)`,
+    profileId, tenant, PUBLIC_TENANT,
+  );
+}
+
+/** A posted project, only if the company that posted it is in this workspace. */
+export function ownedProject<T = { id: string }>(
+  database: D1Database,
+  projectId: string,
+  tenant: string,
+  columns = 'p.id',
+): Promise<T | null> {
+  return one<T>(
+    database,
+    `SELECT ${columns} FROM projects p
+       JOIN companies c ON c.id = p.company_id
+      WHERE p.id = ? AND c.tenant IN (?, ?)`,
+    projectId, tenant, PUBLIC_TENANT,
+  );
+}
+
+/** A direct-service enquiry, only if it was submitted in this workspace. */
+export function ownedLead<T = { id: string }>(
+  database: D1Database,
+  leadId: string,
+  tenant: string,
+  columns = 'id',
+): Promise<T | null> {
+  return one<T>(
+    database,
+    `SELECT ${columns} FROM leads WHERE id = ? AND tenant IN (?, ?)`,
+    leadId, tenant, PUBLIC_TENANT,
+  );
 }

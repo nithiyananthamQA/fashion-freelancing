@@ -7,6 +7,7 @@
  * cannot be explained in one clause, it does not belong here yet.
  */
 import { all, readList } from './db';
+import { PUBLIC_TENANT } from './tenant';
 
 export interface MatchCandidate {
   profile_id: string;
@@ -151,11 +152,19 @@ function sentence(_name: string, parts: string[]): string {
 
 /**
  * Load every approved specialist offering a service, with the counts the
- * ranking needs. Deliberately one query — the candidate pool per service is
- * small enough to rank in the worker, and it keeps the reason logic in one
- * readable place rather than spread across SQL.
+ * ranking needs. Scoped to the poster's workspace: matching writes invite rows
+ * and fires notifications, so an unscoped pool would push one visitor's brief
+ * at another visitor's test specialists.
+ *
+ * Deliberately one query — the candidate pool per service is small enough to
+ * rank in the worker, and it keeps the reason logic in one readable place
+ * rather than spread across SQL.
  */
-export function loadCandidates(database: D1Database, serviceId: string): Promise<MatchCandidate[]> {
+export function loadCandidates(
+  database: D1Database,
+  serviceId: string,
+  tenant: string,
+): Promise<MatchCandidate[]> {
   return all<MatchCandidate>(
     database,
     `SELECT p.id AS profile_id, p.handle, u.name, p.headline, p.availability,
@@ -166,7 +175,8 @@ export function loadCandidates(database: D1Database, serviceId: string): Promise
        FROM specialist_profiles p
        JOIN users u ON u.id = p.user_id
        JOIN specialist_service_offerings o ON o.profile_id = p.id
-      WHERE p.status = 'approved' AND o.service_id = ?`,
-    serviceId,
+      WHERE p.status = 'approved' AND o.service_id = ?
+        AND u.tenant IN (?, ?)`,
+    serviceId, tenant, PUBLIC_TENANT,
   );
 }

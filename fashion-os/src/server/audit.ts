@@ -6,6 +6,7 @@
  */
 import { run } from './db';
 import { newId, nowIso } from './ids';
+import { tenantFromRequest } from './tenant';
 
 export type AuditAction =
   | 'user.signed_up' | 'user.signed_in' | 'user.email_verified' | 'user.password_reset'
@@ -30,10 +31,14 @@ export async function audit(
     request?: Request;
   },
 ): Promise<void> {
+  // The workspace comes off the request cookie rather than a parameter, so no
+  // call site can forget it. Rows used to be attributed by joining `users` on
+  // actor_id, which put every anonymous action (actor_id NULL) into everybody's
+  // activity log.
   await run(
     database,
-    `INSERT INTO audit_logs (id, actor_id, action, entity_type, entity_id, detail, ip, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO audit_logs (id, actor_id, action, entity_type, entity_id, detail, ip, tenant, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     newId(),
     entry.actorId,
     entry.action,
@@ -41,6 +46,7 @@ export async function audit(
     entry.entityId,
     entry.detail === undefined ? null : JSON.stringify(entry.detail),
     entry.request?.headers.get('cf-connecting-ip') ?? null,
+    tenantFromRequest(entry.request),
     nowIso(),
   );
 }

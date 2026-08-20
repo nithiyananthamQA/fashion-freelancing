@@ -13,6 +13,7 @@
 import type { APIContext, AstroGlobal } from 'astro';
 import { all, one, run } from './db';
 import { nowIso } from './ids';
+import { PUBLIC_TENANT, tenantOf } from './tenant';
 
 type Ctx = APIContext | AstroGlobal;
 
@@ -103,13 +104,16 @@ export async function mergeCookieShortlist(
   const ids = readCookieShortlist(ctx);
   if (!ids.length) return 0;
 
-  // Only approved profiles survive the merge — a profile could have been
-  // paused or rejected between shortlisting and signing in.
+  // Only approved profiles from this workspace survive the merge — a profile
+  // could have been paused or rejected between shortlisting and signing in, and
+  // the ids come from a cookie the visitor could have edited by hand.
   const rows = await all<{ id: string }>(
     database,
-    `SELECT id FROM specialist_profiles
-      WHERE status = 'approved' AND id IN (${ids.map(() => '?').join(',')})`,
-    ...ids,
+    `SELECT p.id FROM specialist_profiles p
+       JOIN users u ON u.id = p.user_id
+      WHERE p.status = 'approved' AND u.tenant IN (?, ?)
+        AND p.id IN (${ids.map(() => '?').join(',')})`,
+    tenantOf(ctx), PUBLIC_TENANT, ...ids,
   );
   if (rows.length) {
     const now = nowIso();

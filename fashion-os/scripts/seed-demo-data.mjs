@@ -10,8 +10,15 @@
  * Idempotent: every seeded account uses the @seed.local domain, and they are all
  * removed and rebuilt on each run.
  *
- * Every seeded person signs in with the password below, so you can look at the
- * site from a freelancer's side too.
+ * Seeded people cannot be signed in as. They live in the shared 'public'
+ * workspace so every visitor sees the same populated directory — which also
+ * means an account you could sign in to would be an account EVERY visitor could
+ * sign in to, and whoever did would read the hire requests other visitors had
+ * sent that specialist. They get an unusable password hash instead.
+ *
+ * To look at the site from a freelancer's side, either apply at /apply (that
+ * profile is yours alone), or set a password on a seeded account deliberately:
+ *   node scripts/make-admin.mjs maya-sen@seed.local --password '…'
  */
 import { execFileSync } from 'node:child_process';
 import { webcrypto as crypto } from 'node:crypto';
@@ -26,7 +33,6 @@ const root = join(here, '..');
 const REMOTE = process.argv.includes('--remote');
 if (REMOTE) console.log('[seed] targeting the LIVE database');
 
-const PASSWORD = 'seed-password-2026';
 const DOMAIN = '@seed.local';
 
 /* ---------- the taxonomy, so every id we write is a real one ---------- */
@@ -43,13 +49,6 @@ function newId() {
   for (let i = 9; i >= 0; i--) { time = A[ms % 32] + time; ms = Math.floor(ms / 32); }
   const rand = [...crypto.getRandomValues(new Uint8Array(16))].map((b) => A[b % 32]).join('');
   return time + rand;
-}
-const hex = (b) => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, '0')).join('');
-async function hashPassword(password) {
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 25_000, hash: 'SHA-256' }, key, 256);
-  return `pbkdf2$25000$${hex(salt)}$${hex(bits)}`;
 }
 const esc = (v) => (v === null || v === undefined ? 'NULL' : `'${String(v).replace(/'/g, "''")}'`);
 const json = (v) => esc(JSON.stringify(v));
@@ -162,7 +161,9 @@ d1(`DELETE FROM users WHERE email LIKE '%${DOMAIN}'`);
 
 /* ---------- insert ---------- */
 const now = new Date().toISOString();
-const hash = await hashPassword(PASSWORD);
+/* Not a hash: verifyPassword only accepts strings that start `pbkdf2$`, so
+   nothing a visitor can type will ever match this. See the note at the top. */
+const hash = 'disabled';
 
 for (const person of PEOPLE) {
   const service = getService(person.service);
@@ -221,5 +222,5 @@ for (const person of PEOPLE) {
 }
 
 console.log(`\n[seed] ${PEOPLE.length} approved specialists created.`);
-console.log(`[seed] sign in as any of them with:  <handle>${DOMAIN} / ${PASSWORD}`);
-console.log('[seed] e.g. maya-sen@seed.local\n');
+console.log('[seed] They are browse-only — no password, so nobody can sign in as them.');
+console.log('[seed] To take one for a spin: node scripts/make-admin.mjs maya-sen@seed.local --password "…"\n');

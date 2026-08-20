@@ -19,19 +19,24 @@ import { clearDraft, draftValue, readDraft, saveDraft } from '../../server/draft
 import { mergeCookieShortlist } from '../../server/shortlist';
 import { limited, tooManyRequests } from '../../server/rate-limit';
 import { ENGAGEMENT, WORK_LOCATION, getService, specialtyId } from '../../data/taxonomy';
+import { PUBLIC_TENANT } from '../../server/tenant';
 
 const { handle } = Astro.params;
 const database = db(Astro);
 
-/* The target must be an approved profile — a draft profile is not reachable. */
+/* The target must be an approved profile in this visitor's workspace — a draft
+   profile is not reachable, and neither is another visitor's test specialist.
+   Without the tenant predicate /specialists/<handle> 404s but /hire/<handle>
+   still rendered, and the hire request landed in the other workspace. */
 const target = await one<{ id: string; user_id: string; name: string; headline: string | null; primary_service: string | null }>(
   database,
   `SELECT p.id, p.user_id, u.name, p.headline,
           (SELECT o.service_id FROM specialist_service_offerings o
             WHERE o.profile_id = p.id ORDER BY o.is_primary DESC LIMIT 1) AS primary_service
      FROM specialist_profiles p JOIN users u ON u.id = p.user_id
-    WHERE p.handle = ? AND p.status = 'approved' AND u.status = 'active'`,
-  handle ?? '',
+    WHERE p.handle = ? AND p.status = 'approved' AND u.status = 'active'
+      AND u.tenant IN (?, ?)`,
+  handle ?? '', Astro.locals.tenant, PUBLIC_TENANT,
 );
 if (!target) return new Response(null, { status: 404 });
 

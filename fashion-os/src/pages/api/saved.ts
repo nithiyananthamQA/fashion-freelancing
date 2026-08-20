@@ -10,6 +10,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { db, one } from '../../server/db';
 import { toggleCookieShortlist, toggleSavedSpecialist } from '../../server/shortlist';
+import { PUBLIC_TENANT, tenantOf } from '../../server/tenant';
 
 export const POST: APIRoute = async (ctx) => {
   const form = await ctx.request.formData();
@@ -20,11 +21,14 @@ export const POST: APIRoute = async (ctx) => {
 
   const database = db(ctx);
 
-  // Only an approved profile can be shortlisted — never leak that a draft exists.
+  // Only an approved profile in this visitor's workspace can be shortlisted —
+  // never leak that a draft, or another visitor's specialist, exists.
   const profile = await one<{ id: string }>(
     database,
-    "SELECT id FROM specialist_profiles WHERE id = ? AND status = 'approved'",
-    profileId,
+    `SELECT p.id FROM specialist_profiles p
+       JOIN users u ON u.id = p.user_id
+      WHERE p.id = ? AND p.status = 'approved' AND u.tenant IN (?, ?)`,
+    profileId, tenantOf(ctx), PUBLIC_TENANT,
   );
   if (!profile) return new Response(null, { status: 404 });
 

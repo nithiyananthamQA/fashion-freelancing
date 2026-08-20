@@ -19,6 +19,7 @@ import { parse } from '../../server/validate';
 import { AVAILABILITY, PROJECT_SIZE, RATE_MODEL, WORK_LOCATION, getService } from '../../data/taxonomy';
 import { projectStatusForCompany, statusTone } from '../../data/labels';
 import { loadApplicationsForReview } from '../../server/repo/specialists';
+import { ownedLead, ownedProfile, ownedProject } from '../../server/tenant';
 
 const gate = await guard(Astro, () => requireAdmin(Astro));
 if (gate.response) return gate.response;
@@ -38,10 +39,10 @@ if (Astro.request.method === 'POST') {
   if (['approve', 'needs_changes', 'reject', 'pause'].includes(action)) {
     const profileId = String(form.get('profileId') ?? '');
     const notes = f.text('notes', 'Notes', { max: 2000 });
-    const profile = await one<{ id: string; user_id: string; handle: string | null; name: string }>(
-      database,
-      'SELECT p.id, p.user_id, p.handle, u.name FROM specialist_profiles p JOIN users u ON u.id = p.user_id WHERE p.id = ?',
-      profileId,
+    // Scoped on write, not just on read. The review list is workspace-scoped
+    // already, but a form carries the id and a form can be replayed.
+    const profile = await ownedProfile<{ id: string; user_id: string; handle: string | null; name: string }>(
+      database, profileId, tenant, 'p.id, p.user_id, p.handle, u.name',
     );
 
     if (profile) {
@@ -103,7 +104,7 @@ if (Astro.request.method === 'POST') {
   if (action === 'lead_status') {
     const leadId = String(form.get('leadId') ?? '');
     const next = String(form.get('status') ?? 'contacted');
-    if (['new', 'contacted', 'quoted', 'won', 'lost'].includes(next)) {
+    if (['new', 'contacted', 'quoted', 'won', 'lost'].includes(next) && await ownedLead(database, leadId, tenant)) {
       await run(database, 'UPDATE leads SET status = ? WHERE id = ?', next, leadId);
       flash = `Enquiry marked ${next}.`;
     }
@@ -112,6 +113,7 @@ if (Astro.request.method === 'POST') {
   // ---------- feature or pause an already-approved specialist (§10) ----------
   if (action === 'feature' || action === 'unfeature' || action === 'pause_live' || action === 'relist') {
     const profileId = String(form.get('profileId') ?? '');
+    if (!(await ownedProfile(database, profileId, tenant))) return Astro.redirect('/workspace/admin');
     if (action === 'feature' || action === 'unfeature') {
       await run(database, 'UPDATE specialist_profiles SET featured = ?, updated_at = ? WHERE id = ?',
         action === 'feature' ? 1 : 0, now, profileId);
@@ -130,6 +132,7 @@ if (Astro.request.method === 'POST') {
   // ---------- moderate a live project (§10) ----------
   if (action === 'close_project') {
     const projectId = String(form.get('projectId') ?? '');
+    if (!(await ownedProject(database, projectId, tenant))) return Astro.redirect('/workspace/admin');
     await run(database, "UPDATE projects SET status = 'closed', updated_at = ? WHERE id = ?", now, projectId);
     await audit(database, {
       actorId: admin.id, action: 'project.closed', entityType: 'project', entityId: projectId,
@@ -142,12 +145,15 @@ if (Astro.request.method === 'POST') {
   if (action === 'recommend') {
     const projectId = String(form.get('projectId') ?? '');
     const profileId = String(form.get('profileId') ?? '');
-    const project = await one<{ id: string; title: string; service_id: string }>(
-      database, 'SELECT id, title, service_id FROM projects WHERE id = ?', projectId,
+    // Both sides scoped: recommending writes an invite row and notifies, so a
+    // replayed form must not be able to introduce two other workspaces to
+    // each other.
+    const project = await ownedProject<{ id: string; title: string; service_id: string }>(
+      database, projectId, tenant, 'p.id, p.title, p.service_id',
     );
-    const owner = await one<{ user_id: string }>(
-      database, "SELECT user_id FROM specialist_profiles WHERE id = ? AND status = 'approved'", profileId,
-    );
+    const owner = await ownedProfile<{ user_id: string }>(
+      database, profileId, tenant, "p.user_id, p.status",
+    ).then((row) => (row && (row as { status?: string }).status === 'approved' ? row : null));
     if (project && owner) {
       await run(
         database,
@@ -192,6 +198,15 @@ if (Astro.request.method === 'POST') {
   // ---------- portfolio moderation ----------
   if (action === 'portfolio_approve' || action === 'portfolio_reject') {
     const itemId = String(form.get('itemId') ?? '');
+    const item = await one<{ id: string }>(
+      database,
+      `SELECT pi.id FROM portfolio_items pi
+         JOIN specialist_profiles p ON p.id = pi.profile_id
+         JOIN users u ON u.id = p.user_id
+        WHERE pi.id = ? AND u.tenant IN (?, 'public')`,
+      itemId, tenant,
+    );
+    if (!item) return Astro.redirect('/workspace/admin');
     await run(
       database, 'UPDATE portfolio_items SET moderation = ? WHERE id = ?',
       action === 'portfolio_approve' ? 'approved' : 'rejected', itemId,
@@ -256,18 +271,20 @@ const [pending, pendingSkills, pendingTools, pendingPortfolio, leads, live, proj
     all<{ id: string; title: string; status: string; company_name: string; service_id: string; applicants: number }>(
       database,
       `SELECT p.id, p.title, p.status, c.name AS company_name, p.service_id,
-              (SELECT COUNT(*) FROM applications a WHERE a.project_id = p.id) AS applicants
+              (SELECT COUNT(*) FROM applications a
+                 JOIN specialist_profiles ap ON ap.id = a.profile_id
+                 JOIN users au ON au.id = ap.user_id
+                WHERE a.project_id = p.id AND au.tenant IN (?, 'public')) AS applicants
          FROM projects p JOIN companies c ON c.id = p.company_id
         WHERE p.status != 'draft' AND c.tenant IN (?, 'public')
         ORDER BY p.created_at DESC LIMIT 20`,
-      tenant,
+      tenant, tenant,
     ),
     all<{ id: string; to_email: string; subject: string; body: string; status: string; created_at: string }>(
       database,
       `SELECT e.id, e.to_email, e.subject, e.body, e.status, e.created_at
          FROM outbound_email e
-         LEFT JOIN users u ON u.email = e.to_email
-        WHERE e.status = 'queued' AND (u.tenant IS NULL OR u.tenant IN (?, 'public'))
+        WHERE e.status = 'queued' AND e.tenant IN (?, 'public')
         ORDER BY e.created_at DESC LIMIT 10`,
       tenant,
     ),
@@ -275,7 +292,7 @@ const [pending, pendingSkills, pendingTools, pendingPortfolio, leads, live, proj
       database,
       `SELECT a.action, a.entity_type, a.entity_id, a.created_at, u.name AS actor
          FROM audit_logs a LEFT JOIN users u ON u.id = a.actor_id
-        WHERE u.tenant IS NULL OR u.tenant IN (?, 'public')
+        WHERE a.tenant IN (?, 'public')
         ORDER BY a.created_at DESC LIMIT 20`,
       tenant,
     ),

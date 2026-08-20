@@ -10,6 +10,7 @@ import { isoIn, newId, newToken, nowIso, sha256 } from './ids';
 import { hashPassword, needsRehash, verifyPassword } from './password';
 import { audit } from './audit';
 import { resetPasswordMessage, sendMail, verifyEmailMessage } from './mail';
+import { PUBLIC_TENANT } from './tenant';
 
 const VERIFY_TTL_MS = 24 * 60 * 60 * 1000;
 const RESET_TTL_MS = 60 * 60 * 1000;
@@ -67,7 +68,7 @@ export async function signUp(
     now,
   );
 
-  await issueEmailVerification(database, env, id, account.name, email);
+  await issueEmailVerification(database, env, id, account.name, email, account.tenant);
   await audit(database, { actorId: id, action: 'user.signed_up', entityType: 'user', entityId: id, request });
   return { ok: true, userId: id };
 }
@@ -127,6 +128,7 @@ export async function issueEmailVerification(
   userId: string,
   name: string,
   email: string,
+  tenant: string,
 ): Promise<void> {
   const token = newToken();
   await run(
@@ -140,19 +142,25 @@ export async function issueEmailVerification(
     nowIso(),
   );
   const message = verifyEmailMessage(env.SITE_URL, name, token);
-  await sendMail(database, env, { to: email, ...message });
+  await sendMail(database, env, { to: email, tenant, ...message });
 }
 
 export async function issuePasswordReset(
   database: D1Database,
   env: Env,
   email: string,
+  tenant: string,
 ): Promise<void> {
+  // Scoped like signIn. An address is only unique per workspace, so an unscoped
+  // lookup would mint a reset token against whichever workspace's account
+  // SQLite happened to return — letting one visitor take over another's.
   const user = await one<{ id: string; name: string }>(
     database,
-    'SELECT id, name FROM users WHERE email = ? AND status = ?',
+    "SELECT id, name FROM users WHERE email = ? AND status = ? AND tenant IN (?, ?)",
     email.toLowerCase(),
     'active',
+    tenant,
+    PUBLIC_TENANT,
   );
   // Return silently for an unknown address — the caller always shows the same
   // "check your email" screen, so this route reveals nothing either.
@@ -170,7 +178,7 @@ export async function issuePasswordReset(
     nowIso(),
   );
   const message = resetPasswordMessage(env.SITE_URL, user.name, token);
-  await sendMail(database, env, { to: email.toLowerCase(), ...message });
+  await sendMail(database, env, { to: email.toLowerCase(), tenant, ...message });
 }
 
 /** Consume a one-time token. Returns the user id, or null if it is invalid. */

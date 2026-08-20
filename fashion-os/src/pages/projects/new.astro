@@ -18,6 +18,7 @@ import { parse } from '../../server/validate';
 import { clearDraft, draftValue, draftValues, readDraft, saveDraft } from '../../server/draft';
 import { mergeCookieShortlist } from '../../server/shortlist';
 import { loadCandidates, rank } from '../../server/matching';
+import { PUBLIC_TENANT } from '../../server/tenant';
 import { optionsFor, specialtyLookup, stackLookup } from '../../server/repo/specialists';
 import {
   ENGAGEMENT, EXPERIENCE_BANDS, SERVICES, WORK_LOCATION, getService, specialtyId,
@@ -157,7 +158,7 @@ if (Astro.request.method === 'POST') {
        explicitly chosen to hide the brief from. */
     const matches = visibility === 'private' ? [] : await (async () => {
     const [candidates, specialtyNames, stackNames] = await Promise.all([
-      loadCandidates(database, chosen.id),
+      loadCandidates(database, chosen.id, Astro.locals.tenant),
       specialtyLookup(database),
       stackLookup(database),
     ]);
@@ -187,9 +188,12 @@ if (Astro.request.method === 'POST') {
       // the project becomes visible — nothing about it is public.
       const profileOwners = await database
         .prepare(
-          `SELECT id, user_id FROM specialist_profiles WHERE id IN (${matches.map(() => '?').join(',')})`,
+          `SELECT p.id, p.user_id FROM specialist_profiles p
+             JOIN users u ON u.id = p.user_id
+            WHERE p.id IN (${matches.map(() => '?').join(',')})
+              AND u.tenant IN (?, ?)`,
         )
-        .bind(...matches.map((m) => m.profileId))
+        .bind(...matches.map((m) => m.profileId), Astro.locals.tenant, PUBLIC_TENANT)
         .all<{ id: string; user_id: string }>();
       for (const owner of profileOwners.results ?? []) {
         await notify(database, {

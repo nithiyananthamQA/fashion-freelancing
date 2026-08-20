@@ -13,18 +13,26 @@ export interface Mail {
   to: string;
   subject: string;
   body: string;
+  /**
+   * The workspace this message belongs to. Stamped on the row because an email
+   * address is only unique per workspace — the operations view used to find the
+   * recipient by joining on the address, which showed one visitor's
+   * verification and reset links to every other visitor using the same address.
+   */
+  tenant: string;
 }
 
 export async function sendMail(database: D1Database, env: Env, mail: Mail): Promise<void> {
   const id = newId();
   await run(
     database,
-    'INSERT INTO outbound_email (id, to_email, subject, body, status, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+    'INSERT INTO outbound_email (id, to_email, subject, body, status, tenant, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
     id,
     mail.to,
     mail.subject,
     mail.body,
     'queued',
+    mail.tenant,
     nowIso(),
   );
 
@@ -57,7 +65,7 @@ export async function sendMail(database: D1Database, env: Env, mail: Mail): Prom
   }
 }
 
-export const verifyEmailMessage = (siteUrl: string, name: string, token: string): Omit<Mail, 'to'> => ({
+export const verifyEmailMessage = (siteUrl: string, name: string, token: string): Omit<Mail, 'to' | 'tenant'> => ({
   subject: 'Confirm your email — Fashion Freelancing',
   body:
     `Hi ${name},\n\n` +
@@ -66,7 +74,7 @@ export const verifyEmailMessage = (siteUrl: string, name: string, token: string)
     `This link expires in 24 hours. If you did not create an account, ignore this message.\n`,
 });
 
-export const resetPasswordMessage = (siteUrl: string, name: string, token: string): Omit<Mail, 'to'> => ({
+export const resetPasswordMessage = (siteUrl: string, name: string, token: string): Omit<Mail, 'to' | 'tenant'> => ({
   subject: 'Reset your password — Fashion Freelancing',
   body:
     `Hi ${name},\n\n` +

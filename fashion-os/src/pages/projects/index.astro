@@ -16,6 +16,7 @@ import { notify } from '../../server/audit';
 import { parse } from '../../server/validate';
 import { getService } from '../../data/taxonomy';
 import { engagementLabel, workLocationLabel } from '../../data/labels';
+import { PUBLIC_TENANT } from '../../server/tenant';
 
 const gate = await guard(Astro, () => requireApprovedSpecialist(Astro));
 if (gate.response) return gate.response;
@@ -38,7 +39,9 @@ if (Astro.request.method === 'POST') {
   const visible = await one<{ id: string; title: string; company_id: string; created_by: string }>(
     database,
     `SELECT p.id, p.title, p.company_id, p.created_by FROM projects p
+       JOIN companies c ON c.id = p.company_id
       WHERE p.id = ?
+        AND c.tenant IN (?, ?)
         AND p.status IN ('published','responding','shortlisted')
         AND (
           EXISTS (SELECT 1 FROM project_invites i WHERE i.project_id = p.id AND i.profile_id = ?)
@@ -46,7 +49,7 @@ if (Astro.request.method === 'POST') {
               AND EXISTS (SELECT 1 FROM specialist_service_offerings o
                            WHERE o.profile_id = ? AND o.service_id = p.service_id))
         )`,
-    projectId, profileId, profileId,
+    projectId, Astro.locals.tenant, PUBLIC_TENANT, profileId, profileId,
   );
 
   if (!visible) errors.pitch = 'That project is no longer open.';
@@ -104,6 +107,7 @@ const projects = await all<Row>(
      LEFT JOIN applications a ON a.project_id = p.id AND a.profile_id = ?1
      LEFT JOIN project_requirements r ON r.project_id = p.id
     WHERE p.status IN ('published','responding','shortlisted')
+      AND c.tenant IN (?2, ?3)
       AND (
         i.id IS NOT NULL
         OR (p.visibility = 'matched'
@@ -112,7 +116,7 @@ const projects = await all<Row>(
       )
     ORDER BY p.published_at DESC
     LIMIT 40`,
-  profileId,
+  profileId, Astro.locals.tenant, PUBLIC_TENANT,
 );
 
 /* Mark invitations as seen so the company can tell read from unread (§9). */
