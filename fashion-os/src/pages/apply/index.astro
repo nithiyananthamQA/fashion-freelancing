@@ -1,0 +1,1235 @@
+---
+/**
+ * /apply — the freelancer application wizard (plan §8).
+ *
+ * Seven steps with a visible count, per-step save (so it autosaves by design),
+ * validation, and save-and-return. Only relevant questions are shown: a Pattern
+ * CAD applicant never sees Website Development stack fields, because the field
+ * set is derived from the services chosen in step 2.
+ *
+ * No bank or tax details are collected here — payout setup is separate and
+ * happens after approval (§8).
+ */
+export const prerender = false;
+
+import Night from '../../layouts/Night.astro';
+import { all, db, env, readList, run } from '../../server/db';
+import { signUp } from '../../server/auth';
+import { createSession, setSessionCookie } from '../../server/session';
+import { passwordProblem } from '../../server/password';
+import { HONEYPOT, parse, trapped } from '../../server/validate';
+import { clientKey, limited, tooManyRequests } from '../../server/rate-limit';
+import { newId, nowIso } from '../../server/ids';
+import { audit } from '../../server/audit';
+import { checkUpload, objectKey, putObject } from '../../server/storage';
+import {
+  countPortfolio, createDraftProfile, loadOfferings, loadProfile, proposeCustomTag,
+  appendSkills, rebuildSearch, saveCapability, saveRole, saveServices, saveSpecialties, setStep, updateProfile,
+} from '../../server/repo/profile';
+import { optionsFor } from '../../server/repo/specialists';
+import {
+  APPLICATION_STEPS, AVAILABILITY, MAX_CUSTOM_TAGS_PER_SERVICE, MAX_SECONDARY_SERVICES,
+  MIN_PORTFOLIO_ITEMS, PROJECT_SIZE, RATE_MODEL, SERVICES, STACK_GROUP_LABEL, TOTAL_APPLICATION_STEPS,
+  WORK_LOCATION, ENGAGEMENT, getService, specialtyId, stackForRole,
+} from '../../data/taxonomy';
+
+const database = db(Astro);
+let user = Astro.locals.user;
+let errors: Record<string, string> = {};
+let flash: string | null = null;
+
+/**
+ * The body of a submission that failed validation. Every field below reads
+ * through `v()` / `vs()` so a rejected step comes back exactly as it was typed
+ * — losing someone's work because one field was wrong is not acceptable.
+ */
+let submitted: FormData | null = null;
+
+/* Which step to render. Signed-out applicants always start at the account step. */
+const requested = Number(Astro.url.searchParams.get('step')) || 0;
+let profile = user ? await loadProfile(database, user.id) : null;
+
+// ---------------------------------------------------------------------------
+// POST — each step saves on its own, then advances
+// ---------------------------------------------------------------------------
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  submitted = form;
+  const step = Number(form.get('step')) || 1;
+  const { f, errors: found } = parse(form);
+  errors = found;
+
+  // ---------- Step 1: account ----------
+  if (step === 1 && !user) {
+    if (trapped(form)) return Astro.redirect('/');
+    if (await limited(database, 'signUp', clientKey(Astro.request))) return tooManyRequests();
+
+    const name = f.text('name', 'Your name', { required: true, min: 2, max: 120 });
+    const email = f.email('email');
+    const password = f.text('password', 'Password', { required: true, max: 200 });
+    const country = f.text('country', 'Country', { max: 60 });
+    const timezone = f.text('timezone', 'Timezone', { max: 60 });
+    const phone = f.text('phone', 'Phone', { max: 40 });
+    const problem = passwordProblem(password);
+    if (problem) errors.password = problem;
+    f.consent('terms', 'Please accept the freelancer terms to continue.');
+
+    if (!Object.keys(errors).length) {
+      const result = await signUp(database, env(Astro), Astro.request, {
+        name, email, password, country: country || null, timezone: timezone || null, acceptedTerms: true,
+      });
+      if (!result.ok) errors[result.field] = result.message;
+      else {
+        if (phone) await run(database, 'UPDATE users SET phone = ? WHERE id = ?', phone, result.userId);
+        const token = await createSession(database, result.userId, Astro.request.headers.get('user-agent'));
+        setSessionCookie(Astro, token);
+        const profileId = await createDraftProfile(database, result.userId);
+        await audit(database, {
+          actorId: result.userId, action: 'profile.created', entityType: 'specialist_profile',
+          entityId: profileId, request: Astro.request,
+        });
+        return Astro.redirect('/apply?step=2', 303);
+      }
+    }
+  }
+
+  // Everything past step 1 needs an account and a draft profile.
+  if (step > 1) {
+    if (!user) return Astro.redirect(`/sign-in?next=${encodeURIComponent('/apply')}`, 303);
+    if (!profile) {
+      const profileId = await createDraftProfile(database, user.id);
+      profile = await loadProfile(database, user.id);
+      await audit(database, {
+        actorId: user.id, action: 'profile.created', entityType: 'specialist_profile',
+        entityId: profileId, request: Astro.request,
+      });
+    }
+  }
+
+  if (profile && user) {
+    /* ---------- Step 2a: which services ----------
+       Deliberately its own screen. Asking "what do you do?" and "which parts
+       of it?" at once meant rendering the specialties of all ten services to
+       someone who works in one — the exact overwhelm progressive disclosure
+       exists to prevent. Now the second screen only ever shows the services
+       actually picked here. */
+    if (step === 2 && form.get('stage') !== 'specialties') {
+      const primary = f.choice('primary_service', 'Primary service', SERVICES.map((s) => s.id), { required: true });
+      const secondary = f.choices('secondary_service', SERVICES.map((s) => s.id), MAX_SECONDARY_SERVICES + 1)
+        .filter((id) => id !== primary);
+
+      if (secondary.length > MAX_SECONDARY_SERVICES) {
+        errors.secondary_service = `Choose at most ${MAX_SECONDARY_SERVICES} extra services.`;
+      }
+
+      if (!Object.keys(errors).length && primary) {
+        await saveServices(database, profile.id, primary, secondary);
+        await rebuildSearch(database, profile.id);
+        // Nothing distinct to ask on 2b? Then do not show an empty screen.
+        const asksSpecialty = [primary, ...secondary]
+          .map((id) => getService(id))
+          .some((svc) => svc && !svc.specialtyFromRole);
+        if (!asksSpecialty) {
+          await setStep(database, profile.id, 3);
+          return Astro.redirect('/apply?step=3', 303);
+        }
+        return Astro.redirect('/apply?step=2&stage=specialties', 303);
+      }
+    }
+
+    // ---------- Step 2b: specialties, for the chosen services only ----------
+    if (step === 2 && form.get('stage') === 'specialties') {
+      const chosenOfferings = await loadOfferings(database, profile.id);
+      if (!chosenOfferings.length) return Astro.redirect('/apply?step=2', 303);
+
+      const specialtiesByService: Record<string, string[]> = {};
+      const customSkillsByService: Record<string, string[]> = {};
+      for (const offering of chosenOfferings) {
+        const service = getService(offering.service_id);
+        // A service whose specialty IS its role is answered on the role screen.
+        if (!service || service.specialtyFromRole) continue;
+        const allowed = service.specialties.map((name) => specialtyId(service.id, name));
+        const chosen = f.choices(`specialty_${service.id}`, allowed);
+        // Anything they typed themselves becomes a pending skill on the same
+        // service AND is attached to their offering. Creating the tag without
+        // attaching it left it orphaned: approved by an admin, but belonging to
+        // nobody, so the person could never be found by it.
+        const custom = f.customTags(`custom_specialty_${service.id}`, MAX_CUSTOM_TAGS_PER_SERVICE);
+        const customIds: string[] = [];
+        for (const name of custom) {
+          customIds.push(await proposeCustomTag(database, 'skills', service.id, name, user.id));
+        }
+        if (customIds.length) customSkillsByService[service.id] = customIds;
+        if (!chosen.length && !custom.length) {
+          errors[`specialty_${service.id}`] = `Choose at least one thing you do in ${service.name}, or add your own.`;
+        }
+        specialtiesByService[service.id] = chosen;
+      }
+
+      if (!Object.keys(errors).length) {
+        await saveSpecialties(database, profile.id, specialtiesByService);
+        for (const [serviceId, ids] of Object.entries(customSkillsByService)) {
+          await appendSkills(database, profile.id, serviceId, ids);
+        }
+        await setStep(database, profile.id, 3);
+        await rebuildSearch(database, profile.id);
+        return Astro.redirect('/apply?step=3', 303);
+      }
+    }
+
+    /* ---------- Step 3a: role, for services that have one ----------
+       Only Website Development declares roles today. The role decides which
+       stack groups exist, so asking it first means the next screen shows a
+       backend developer nothing about Tailwind. */
+    if (step === 3 && form.get('stage') === 'role') {
+      const offerings = await loadOfferings(database, profile.id);
+      for (const offering of offerings) {
+        const service = getService(offering.service_id);
+        if (!service?.roles) continue;
+        const roleKey = f.choice(
+          `role_${service.id}`, `${service.name} role`, service.roles.map((r) => r.id), { required: true },
+        );
+        if (!roleKey) continue;
+        await saveRole(database, profile.id, service.id, roleKey);
+        // For these services the role and the specialty are one answer, so the
+        // specialty is written here rather than asked again on its own screen.
+        if (service.specialtyFromRole) {
+          const roleName = service.roles.find((r) => r.id === roleKey)!.name;
+          await saveSpecialties(database, profile.id, { [service.id]: [specialtyId(service.id, roleName)] });
+        }
+      }
+      if (!Object.keys(errors).length) return Astro.redirect('/apply?step=3', 303);
+    }
+
+    // ---------- Step 3b: skills, tools, stack ----------
+    if (step === 3 && form.get('stage') !== 'role') {
+      const offerings = await loadOfferings(database, profile.id);
+      for (const offering of offerings) {
+        const service = getService(offering.service_id);
+        if (!service) continue;
+
+        const [skillOptions, toolOptions] = await Promise.all([
+          optionsFor(database, 'skills', service.id),
+          optionsFor(database, 'tools', service.id),
+        ]);
+
+        const roleKey = offering.role_key;
+
+        const skillIds = f.choices(`skill_${service.id}`, skillOptions.map((s) => s.id));
+        const toolIds = f.choices(`tool_${service.id}`, toolOptions.map((t) => t.id));
+
+        /* Keep anything already on the offering that is NOT one of the offered
+           checkboxes. Those are the custom values they typed on an earlier step
+           and an admin has not normalised yet — saving this step used to
+           overwrite skill_ids wholesale and silently delete them. */
+        const offeredSkills = new Set(skillOptions.map((s) => s.id));
+        const offeredTools = new Set(toolOptions.map((t) => t.id));
+        for (const id of readList(offering.skill_ids)) if (!offeredSkills.has(id)) skillIds.push(id);
+        for (const id of readList(offering.tool_ids)) if (!offeredTools.has(id)) toolIds.push(id);
+
+        const allowedStack = roleKey && service.stack
+          ? Object.values(stackForRole(service, roleKey)).flat().map((option) => option.id)
+          : [];
+        const stackIds = f.choices(`stack_${service.id}`, allowedStack);
+
+        // Custom values go in as pending, and are attached straight away (§5).
+        for (const custom of f.customTags(`custom_skill_${service.id}`, MAX_CUSTOM_TAGS_PER_SERVICE)) {
+          skillIds.push(await proposeCustomTag(database, 'skills', service.id, custom, user.id));
+        }
+        for (const custom of f.customTags(`custom_tool_${service.id}`, MAX_CUSTOM_TAGS_PER_SERVICE)) {
+          toolIds.push(await proposeCustomTag(database, 'tools', service.id, custom, user.id));
+        }
+
+        // Website Development carries its competencies in the stack, so that is
+        // what must be answered; every other service answers Skills.
+        if (service.stack) {
+          if (!stackIds.length) errors[`stack_${service.id}`] = `Choose at least one thing you work with in ${service.name}.`;
+        } else if (!skillIds.length) {
+          errors[`skill_${service.id}`] = `Choose at least one ${service.name} skill.`;
+        }
+
+        if (!errors[`skill_${service.id}`] && !errors[`stack_${service.id}`]) {
+          await saveCapability(database, profile.id, service.id, { roleKey, skillIds, toolIds, stackIds });
+        }
+      }
+
+      if (!Object.keys(errors).length) {
+        await setStep(database, profile.id, 4);
+        await rebuildSearch(database, profile.id);
+        return Astro.redirect('/apply?step=4', 303);
+      }
+    }
+
+    // ---------- Step 4: professional profile ----------
+    if (step === 4) {
+      const headline = f.text('headline', 'Professional headline', { required: true, min: 10, max: 120 });
+      const bio = f.text('bio', 'Biography', { required: true, min: 80, max: 3000 });
+      const years = f.int('years', 'Years of experience', { required: true, min: 0, max: 60 });
+      const languages = f.text('languages', 'Languages', { required: true, max: 200 });
+      const location = f.text('location', 'Location', { required: true, max: 120 });
+      const timezone = f.text('timezone', 'Timezone', { max: 60 });
+      const availability = f.choice('availability', 'Availability', AVAILABILITY.map((a) => a.id), { required: true });
+      const capacity = f.text('capacity', 'Capacity', { max: 120 });
+      const turnaround = f.text('turnaround', 'Turnaround', { max: 120 });
+      if (!Object.keys(errors).length) {
+        await updateProfile(database, profile.id, {
+          headline, bio, years_experience: years,
+          languages: JSON.stringify(languages.split(',').map((l) => l.trim()).filter(Boolean)),
+          location, timezone: timezone || null, availability, capacity: capacity || null,
+          turnaround: turnaround || null,
+        });
+        await setStep(database, profile.id, 5);
+        await rebuildSearch(database, profile.id);
+        return Astro.redirect('/apply?step=5', 303);
+      }
+    }
+
+    // ---------- Step 5: portfolio ----------
+    if (step === 5) {
+      if (form.get('intent') === 'add') {
+        if (await limited(database, 'upload', user.id)) return tooManyRequests();
+
+        const offerings = await loadOfferings(database, profile.id);
+        const title = f.text('item_title', 'Project title', { required: true, min: 3, max: 140 });
+        const contribution = f.text('contribution', 'Your contribution', { required: true, min: 20, max: 1500 });
+        const serviceId = f.choice('item_service', 'Service', offerings.map((o) => o.service_id), { required: true });
+        const externalUrl = f.url('external_url', 'Project link');
+        const clientName = f.text('client_name', 'Client name', { max: 120 });
+        const hasPermission = f.consent('permission', 'Confirm you have permission to show this work.');
+
+        const bucket = env(Astro).MEDIA;
+        const file = form.get('media');
+        let mediaKey: string | null = null;
+        let contentType: string | null = null;
+
+        if (bucket && file instanceof File && file.size > 0) {
+          const problem = await checkUpload(file);
+          if (problem) errors.media = problem.message;
+          else {
+            contentType = file.type;
+            mediaKey = objectKey(user.id, 'portfolio', file.type);
+            await putObject(bucket, mediaKey, file);
+          }
+        } else if (!externalUrl) {
+          errors.external_url = bucket
+            ? 'Add a file or a link so the work can actually be seen.'
+            : 'Add a link so the work can actually be seen.';
+        }
+
+        if (!Object.keys(errors).length) {
+          const count = await countPortfolio(database, profile.id);
+          await run(
+            database,
+            `INSERT INTO portfolio_items
+               (id, profile_id, title, service_id, contribution, media_key, media_type, external_url,
+                client_name, has_permission, moderation, position, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`,
+            newId(), profile.id, title, serviceId, contribution, mediaKey, contentType, externalUrl,
+            clientName || null, hasPermission ? 1 : 0, count, nowIso(),
+          );
+          flash = 'Added. We check each piece separately, so it appears once both your profile and this piece are approved.';
+        }
+      } else if (form.get('intent') === 'remove') {
+        await run(
+          database, 'DELETE FROM portfolio_items WHERE id = ? AND profile_id = ?',
+          String(form.get('itemId') ?? ''), profile.id,
+        );
+        flash = 'Removed.';
+      } else {
+        const count = await countPortfolio(database, profile.id);
+        if (count < MIN_PORTFOLIO_ITEMS) {
+          errors.portfolio = `Add at least ${MIN_PORTFOLIO_ITEMS} pieces of work before continuing.`;
+        } else {
+          await setStep(database, profile.id, 6);
+          return Astro.redirect('/apply?step=6', 303);
+        }
+      }
+    }
+
+    // ---------- Step 6: rates and preferences ----------
+    if (step === 6) {
+      const rateMin = f.int('rate_min', 'Starting rate', { required: true, min: 0 });
+      const rateMax = f.int('rate_max', 'Upper rate', { min: 0 });
+      const currency = f.text('currency', 'Currency', { max: 3 }) || 'USD';
+      const rateModel = f.choices('rate_model', RATE_MODEL.map((r) => r.id));
+      const preferredSize = f.choice('preferred_size', 'Project size', PROJECT_SIZE.map((x) => x.id));
+      const workLocation = f.choice('work_location', 'Work location', WORK_LOCATION.map((w) => w.id), { required: true });
+      const regions = f.text('regions', 'Regions', { max: 200 });
+
+      if (!rateModel.length) errors.rate_model = 'Choose at least one way you charge.';
+      if (rateMin !== null && rateMax !== null && rateMin > rateMax) {
+        errors.rate_max = 'The upper rate must be at least the starting rate.';
+      }
+
+      if (!Object.keys(errors).length) {
+        await updateProfile(database, profile.id, {
+          rate_min: rateMin, rate_max: rateMax, rate_currency: currency,
+          // rate_model is the single answer to "how do you work and charge" —
+          // the profile shows it, so work_preference mirrors it rather than
+          // asking the same question twice.
+          rate_model: JSON.stringify(rateModel), work_preference: JSON.stringify(rateModel),
+          preferred_size: preferredSize || null,
+          work_location: workLocation,
+          regions: JSON.stringify(regions.split(',').map((r) => r.trim()).filter(Boolean)),
+        });
+        await setStep(database, profile.id, 7);
+        return Astro.redirect('/apply?step=7', 303);
+      }
+    }
+
+    // ---------- Step 7: submit ----------
+    if (step === 7) {
+      const count = await countPortfolio(database, profile.id);
+      const offerings = await loadOfferings(database, profile.id);
+      if (count < MIN_PORTFOLIO_ITEMS) errors.submit = `Add at least ${MIN_PORTFOLIO_ITEMS} portfolio pieces first.`;
+      else if (!offerings.length) errors.submit = 'Choose your services before submitting.';
+      else if (!profile.headline) errors.submit = 'Finish your professional profile before submitting.';
+
+      if (!Object.keys(errors).length) {
+        const now = nowIso();
+        await run(
+          database,
+          "UPDATE specialist_profiles SET status = 'submitted', submitted_at = ?, updated_at = ? WHERE id = ?",
+          now, now, profile.id,
+        );
+        await rebuildSearch(database, profile.id);
+        await audit(database, {
+          actorId: user.id, action: 'profile.submitted', entityType: 'specialist_profile',
+          entityId: profile.id, request: Astro.request,
+        });
+        return Astro.redirect('/workspace/freelancer', 303);
+      }
+    }
+  }
+
+  /* Re-read so the re-rendered step shows what was actually stored. */
+  user = Astro.locals.user;
+  if (user) profile = await loadProfile(database, user.id);
+}
+
+// ---------------------------------------------------------------------------
+// GET — render the requested step, clamped to what has been reached
+// ---------------------------------------------------------------------------
+/* `wizard_step` only advances when a step saves cleanly, so it is the furthest
+   point actually reached. Jumping back is free; jumping ahead of unsaved work
+   is not, which is what makes the wizard progressive rather than a form pile. */
+const reached = profile?.wizard_step ?? 1;
+const step = !user
+  ? 1
+  : Math.min(Math.max(requested || reached, 1), reached, TOTAL_APPLICATION_STEPS);
+
+const offerings = profile ? await loadOfferings(database, profile.id) : [];
+const stepMeta = APPLICATION_STEPS.find((s) => s.step === step)!;
+
+/** Single value: what was just typed wins over what is stored. */
+const v = (name: string, stored: string | number | null | undefined = ''): string => {
+  const sent = submitted?.get(name);
+  if (typeof sent === 'string') return sent;
+  return stored === null || stored === undefined ? '' : String(stored);
+};
+/** Multi value, for checkbox groups. */
+const vs = (name: string, stored: string[] = []): string[] => {
+  if (!submitted) return stored;
+  return submitted.getAll(name).filter((x): x is string => typeof x === 'string');
+};
+
+/* Step 2 is two screens: choose services, then choose the specialties of the
+   services chosen. `chosenServices` is what the second screen renders — never
+   the full catalogue. */
+const stage = Astro.url.searchParams.get('stage');
+const chosenServices = offerings
+  .map((offering) => getService(offering.service_id))
+  .filter((service): service is NonNullable<typeof service> => Boolean(service));
+
+/* Website Development's specialties ARE its roles, so it is answered on the
+   role screen instead. Only services that still have a distinct specialty
+   question appear on 2b — and if none do, 2b is skipped entirely. */
+const specialtyServices = chosenServices.filter((service) => !service.specialtyFromRole);
+
+/* Options for every service this applicant offers — nothing else is loaded, so
+   the page only ever asks the questions their services actually need (§8). */
+const capability = await Promise.all(
+  offerings.map(async (offering) => {
+    const service = getService(offering.service_id)!;
+    const [skills, tools] = await Promise.all([
+      optionsFor(database, 'skills', service.id),
+      optionsFor(database, 'tools', service.id),
+    ]);
+    return {
+      offering, service, skills, tools,
+      chosenSkills: readList(offering.skill_ids),
+      chosenTools: readList(offering.tool_ids),
+      chosenStack: readList(offering.stack_ids),
+      /* Only the stack groups this role actually uses — a backend developer is
+         never shown a styling question (§5.2). */
+      stackGroups: service.roles && offering.role_key ? stackForRole(service, offering.role_key) : {},
+      roleName: service.roles?.find((r) => r.id === offering.role_key)?.name ?? null,
+    };
+  }),
+);
+
+/* Any service that declares roles but has none chosen yet sends step 3 to its
+   role screen first. */
+const needsRole = capability.filter((c) => c.service.roles && !c.offering.role_key);
+const roleStage = step === 3 && (needsRole.length > 0 || Astro.url.searchParams.get('stage') === 'role');
+
+/* File uploads need an R2 bucket. Without one the wizard asks for a link
+   instead of showing a file field that could never work. */
+const uploadsEnabled = Boolean(env(Astro).MEDIA);
+
+const portfolio = profile
+  ? await all<{ id: string; title: string; contribution: string; service_id: string | null; media_key: string | null; external_url: string | null }>(
+      database,
+      'SELECT id, title, contribution, service_id, media_key, external_url FROM portfolio_items WHERE profile_id = ? ORDER BY position',
+      profile.id,
+    )
+  : [];
+
+const primaryOffering = offerings.find((o) => o.is_primary === 1);
+const secondaryIds = offerings.filter((o) => o.is_primary === 0).map((o) => o.service_id);
+const languages = readList(profile?.languages ?? null).join(', ');
+const regions = readList(profile?.regions ?? null).join(', ');
+const workPreference = readList(profile?.work_preference ?? null);
+const rateModel = readList(profile?.rate_model ?? null);
+---
+
+<Night title={`Join as a freelancer — step ${step} of ${TOTAL_APPLICATION_STEPS}`} noindex current="" quoteBot={false}>
+  <section class="net-hero">
+    <div class="wrap">
+      <div class="flow">
+
+        <div class="flow-head">
+          <span class="kicker">Join as a freelancer</span>
+          <h1 style="margin-top:14px;">
+            {step === 2 ? (stage === 'specialties' ? 'Your specialties' : 'Your service') : stepMeta.title}.
+          </h1>
+          <div class="flow-steps" aria-hidden="true">
+            {APPLICATION_STEPS.map((item) => (
+              <i class={item.step < step ? 'done' : item.step === step ? 'now' : ''}></i>
+            ))}
+          </div>
+          <p class="flow-count">Step {step} of {TOTAL_APPLICATION_STEPS}</p>
+        </div>
+
+        {flash && <div class="notice ok">{flash}</div>}
+
+        <div class="flow-panel glass-p">
+          {Object.keys(errors).length > 0 && (
+            <p class="notice bad" role="alert" style="margin-bottom:22px;">
+              Nothing was lost — check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
+            </p>
+          )}
+
+          <!-- ==================== STEP 1 — ACCOUNT ==================== -->
+          {step === 1 && (
+            user ? (
+              <>
+                <h2>You are signed in.</h2>
+                <p class="lead">Carry on to choose the services you work in.</p>
+                <form method="post">
+                  <input type="hidden" name="step" value="1" />
+                  <a class="btn-hot" href="/apply?step=2">Continue</a>
+                </form>
+              </>
+            ) : (
+              <>
+                <h2>Create your account.</h2>
+                <p class="lead">
+                  This saves your progress, so you can leave and come back to finish. We ask for
+                  no payment details at any point in this application.
+                </p>
+                <form method="post" class="cform" novalidate>
+                  <input type="hidden" name="step" value="1" />
+                  <input type="text" name={HONEYPOT} tabindex="-1" autocomplete="off" class="visually-hidden" aria-hidden="true" />
+
+                  <label>
+                    <span class="fl">Your name<span class="rq" aria-hidden="true">*</span></span>
+                    <input class="fi" id="f-name" type="text" name="name" required minlength="2" maxlength="120" autocomplete="name"
+                           value={v('name')} aria-invalid={errors.name ? 'true' : undefined} />
+                    {errors.name && <span class="cform-err" role="alert">{errors.name}</span>}
+                  </label>
+
+                  <label>
+                    <span class="fl">Email<span class="rq" aria-hidden="true">*</span></span>
+                    <input class="fi" id="f-email" type="email" name="email" required autocomplete="email"
+                           value={v('email')} aria-invalid={errors.email ? 'true' : undefined} />
+                    {errors.email && <span class="cform-err" role="alert">{errors.email}</span>}
+                  </label>
+
+                  <label>
+                    <span class="fl">Password<span class="rq" aria-hidden="true">*</span></span>
+                    <input class="fi" id="f-password" type="password" name="password" required minlength="10" autocomplete="new-password"
+                           aria-invalid={errors.password ? 'true' : undefined} />
+                    {errors.password
+                      ? <span class="cform-err" role="alert">{errors.password} Please type it again — passwords are never sent back to the page.</span>
+                      : <span class="fh">At least 10 characters.</span>}
+                  </label>
+
+                  <div class="row2">
+                    <label>
+                      <span class="fl">Country</span>
+                      <input class="fi" type="text" name="country" autocomplete="country-name" value={v('country')} />
+                    </label>
+                    <label>
+                      <span class="fl">Timezone</span>
+                      <input class="fi" id="f-timezone" type="text" name="timezone" placeholder="Detected automatically" value={v('timezone')} />
+                    </label>
+                  </div>
+
+                  <label>
+                    <span class="fl">Phone</span>
+                    <input class="fi" type="tel" name="phone" autocomplete="tel" value={v('phone')} />
+                    <span class="fh">So we can reach you about your application. Never shown on your profile.</span>
+                  </label>
+
+                  <label class="opt" id="f-terms" style="width:100%;">
+                    <input type="checkbox" name="terms" value="on" required checked={v('terms') === 'on'} />
+                    <span>I accept the <a href="/pages/terms.html" target="_blank" rel="noopener" style="color:var(--champagne-2);">freelancer terms</a>{' '}
+                      and <a href="/pages/privacy.html" target="_blank" rel="noopener" style="color:var(--champagne-2);">privacy policy</a>.</span>
+                  </label>
+                  {errors.terms && <span class="cform-err" role="alert">{errors.terms}</span>}
+
+                  <button type="submit" class="btn-hot" style="width:100%;" data-busy="Creating your account…">Create account and continue</button>
+                </form>
+
+                <p class="fh" style="text-align:center;margin-top:18px;">
+                  Already applied? <a href="/sign-in?next=/apply" class="link-t">Sign in to continue</a>
+                </p>
+              </>
+            )
+          )}
+
+          <!-- ============ STEP 2a — WHICH SERVICES ============ -->
+          {step === 2 && stage !== 'specialties' && (
+            <>
+              <h2>What do you do?</h2>
+              <p class="lead">
+                Pick the one service you want to be found for. You will only ever be asked
+                questions about the services you choose here.
+              </p>
+
+              <form method="post" class="cform" novalidate>
+                <input type="hidden" name="step" value="2" />
+
+                <fieldset class="fieldset">
+                  <legend>Your main service<span class="rq" aria-hidden="true">*</span></legend>
+                  <div class="picks" id="f-primary_service">
+                    {SERVICES.map((service) => (
+                      <label class="pick">
+                        <input type="radio" name="primary_service" value={service.id} required
+                               checked={primaryOffering?.service_id === service.id} />
+                        <span class="t">
+                          <b>{service.name}</b>
+                          <small>{service.blurb}</small>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                  {errors.primary_service && <span class="cform-err" role="alert">{errors.primary_service}</span>}
+                </fieldset>
+
+                <details class="net-more" open={secondaryIds.length > 0}>
+                  <summary>Do you also work in something else?</summary>
+                  <p class="hint" style="margin:14px 0 12px;">
+                    Optional. Up to {MAX_SECONDARY_SERVICES} more. Most people leave this alone —
+                    a focused profile gets matched more often than a broad one.
+                  </p>
+                  <div class="opts" id="f-secondary_service">
+                    {SERVICES.map((service) => (
+                      <label class="opt">
+                        <input type="checkbox" name="secondary_service" value={service.id}
+                               checked={secondaryIds.includes(service.id)} />
+                        {service.name}
+                      </label>
+                    ))}
+                  </div>
+                  {errors.secondary_service && <span class="cform-err" role="alert">{errors.secondary_service}</span>}
+                </details>
+
+                <div class="flow-actions">
+                  <a class="btn-glass" href="/workspace/freelancer">Save &amp; finish later</a>
+                  <button type="submit" class="btn-hot">Continue</button>
+                </div>
+              </form>
+            </>
+          )}
+
+          <!-- ============ STEP 2b — SPECIALTIES FOR THOSE SERVICES ONLY ============ -->
+          {step === 2 && stage === 'specialties' && (
+            specialtyServices.length === 0 ? (
+              <>
+                <h2>Nothing more to pick here.</h2>
+                <p class="lead">Your service asks about this on the next screen instead.</p>
+                <a class="btn-hot" href="/apply?step=3">Continue</a>
+              </>
+            ) : (
+              <>
+                <h2>Which parts do you do?</h2>
+                <p class="lead">
+                  Companies filter on these, so tick what you genuinely take on — not everything
+                  you have touched once.
+                </p>
+
+                <div class="chosen">
+                  <p>
+                    {chosenServices.length > 1 ? 'Your services' : 'Your service'}:{' '}
+                    <b>{chosenServices.map((service) => service.name).join(', ')}</b>
+                  </p>
+                  <a class="btn-glass btn-sm" href="/apply?step=2">Change</a>
+                </div>
+
+                <form method="post" class="cform" novalidate>
+                  <input type="hidden" name="step" value="2" />
+                  <input type="hidden" name="stage" value="specialties" />
+
+                  {specialtyServices.map((service) => {
+                    const offering = offerings.find((o) => o.service_id === service.id);
+                    const picked = offering ? readList(offering.specialties) : [];
+                    return (
+                      <div class="svc-group" id={`f-specialty_${service.id}`}>
+                        <header>
+                          <h3>{service.name}</h3>
+                          {offering?.is_primary === 1 && <span class="pill-status info">Main</span>}
+                        </header>
+                        <div class="opts">
+                          {service.specialties.map((name) => {
+                            const id = specialtyId(service.id, name);
+                            return (
+                              <label class="opt">
+                                <input type="checkbox" name={`specialty_${service.id}`} value={id}
+                                       checked={picked.includes(id)} />
+                                {name}
+                              </label>
+                            );
+                          })}
+                        </div>
+                        {errors[`specialty_${service.id}`] && (
+                          <span class="cform-err" role="alert" style="display:block;margin-top:10px;">{errors[`specialty_${service.id}`]}</span>
+                        )}
+
+                        <details class="net-more">
+                          <summary>Do something that is not listed?</summary>
+                          <label style="display:block;margin-top:14px;">
+                            <span class="fl">Add your own</span>
+                            <input class="fi" type="text" name={`custom_specialty_${service.id}`}
+                                   value={v(`custom_specialty_${service.id}`)}
+                                   placeholder="Separate with commas — e.g. Bridalwear, Corsetry" />
+                            <span class="fh">The list covers the common ones. We check anything new before it shows on your profile.</span>
+                          </label>
+                        </details>
+                      </div>
+                    );
+                  })}
+
+                  <div class="flow-actions">
+                    <a class="btn-glass" href="/apply?step=2">Back</a>
+                    <span class="spacer"></span>
+                    <button type="submit" class="btn-hot">Continue</button>
+                  </div>
+                </form>
+              </>
+            )
+          )}
+
+          <!-- ============ STEP 3a — ROLE (only services that have one) ============ -->
+          {step === 3 && roleStage && (
+            <>
+              <h2>Which kind of developer are you?</h2>
+              <p class="lead">
+                This is your specialty <em>and</em> it decides what we ask next — a backend developer
+                never gets asked about styling, and a full-stack one is asked once, not twice.
+              </p>
+
+              <form method="post" class="cform" novalidate>
+                <input type="hidden" name="step" value="3" />
+                <input type="hidden" name="stage" value="role" />
+
+                {capability.filter((c) => c.service.roles).map(({ service, offering }) => (
+                  <fieldset class="fieldset" id={`f-role_${service.id}`}>
+                    <legend>{service.name} — your role<span class="rq" aria-hidden="true">*</span></legend>
+                    <div class="picks">
+                      {service.roles!.map((role) => (
+                        <label class="pick">
+                          <input type="radio" name={`role_${service.id}`} value={role.id} required
+                                 checked={offering.role_key === role.id} />
+                          <span class="t"><b>{role.name}</b></span>
+                        </label>
+                      ))}
+                    </div>
+                    {errors[`role_${service.id}`] && <span class="cform-err" role="alert">{errors[`role_${service.id}`]}</span>}
+                  </fieldset>
+                ))}
+
+                <div class="flow-actions">
+                  <a class="btn-glass" href="/apply?step=2&stage=specialties">Back</a>
+                  <span class="spacer"></span>
+                  <button type="submit" class="btn-hot">Continue</button>
+                </div>
+              </form>
+            </>
+          )}
+
+          <!-- ============ STEP 3b — SKILLS, TOOLS, ROLE-SCOPED STACK ============ -->
+          {step === 3 && !roleStage && (
+            capability.length === 0 ? (
+              <>
+                <h2>Choose your service first.</h2>
+                <p class="lead">This step asks only about the service you selected.</p>
+                <a class="btn-hot" href="/apply?step=2">Back to services</a>
+              </>
+            ) : (
+              <>
+                <h2>What do you actually work with?</h2>
+                <p class="lead">
+                  This is what companies search on, so be specific. Anything missing can be added —
+                  we check it before it shows on your profile.
+                </p>
+
+                <form method="post" class="cform" novalidate>
+                  <input type="hidden" name="step" value="3" />
+
+                  {capability.map(({ service, skills, tools, offering, chosenSkills, chosenTools, chosenStack, stackGroups, roleName }) => (
+                    <div class="svc-group" style="margin-bottom:18px;">
+                      <header>
+                        <h3>{service.name}</h3>
+                        {offering.is_primary === 1 && <span class="pill-status info">Main</span>}
+                      </header>
+
+                      {roleName && (
+                        <div class="chosen" style="margin-bottom:18px;">
+                          <p>Your role: <b>{roleName}</b></p>
+                          <a class="btn-glass btn-sm" href="/apply?step=3&stage=role">Change</a>
+                        </div>
+                      )}
+
+                      {skills.length > 0 && (
+                        <fieldset class="fieldset" id={`f-skill_${service.id}`}>
+                          <legend>Skills<span class="rq" aria-hidden="true">*</span></legend>
+                          <div class="opts">
+                            {skills.map((skill) => (
+                              <label class="opt">
+                                <input type="checkbox" name={`skill_${service.id}`} value={skill.id}
+                                       checked={chosenSkills.includes(skill.id)} />
+                                {skill.name}
+                              </label>
+                            ))}
+                          </div>
+                          {errors[`skill_${service.id}`] && (
+                            <span class="cform-err" role="alert" style="display:block;margin-top:10px;">{errors[`skill_${service.id}`]}</span>
+                          )}
+                        </fieldset>
+                      )}
+
+                      <fieldset class="fieldset">
+                        <legend>Tools &amp; software</legend>
+                        <div class="opts">
+                          {tools.map((tool) => (
+                            <label class="opt">
+                              <input type="checkbox" name={`tool_${service.id}`} value={tool.id}
+                                     checked={chosenTools.includes(tool.id)} />
+                              {tool.name}
+                            </label>
+                          ))}
+                        </div>
+                      </fieldset>
+
+                      {/* Stack groups are already narrowed to the chosen role, so
+                          nothing irrelevant is ever rendered here. */}
+                      {Object.keys(stackGroups).length > 0 && (
+                        <fieldset class="fieldset" id={`f-stack_${service.id}`}>
+                          <legend>Your stack<span class="rq" aria-hidden="true">*</span></legend>
+                          <p class="hint">Only what {roleName ?? 'this role'} actually covers.</p>
+                          {Object.entries(stackGroups).map(([group, options]) => (
+                            <div style="margin-bottom:16px;">
+                              <h4 style="font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-5);margin:0 0 9px;">
+                                {STACK_GROUP_LABEL[group as keyof typeof STACK_GROUP_LABEL]}
+                              </h4>
+                              <div class="opts">
+                                {options.map((option) => (
+                                  <label class="opt">
+                                    <input type="checkbox" name={`stack_${service.id}`} value={option.id}
+                                           checked={chosenStack.includes(option.id)} />
+                                    {option.name}
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                          {errors[`stack_${service.id}`] && (
+                            <span class="cform-err" role="alert" style="display:block;margin-top:4px;">{errors[`stack_${service.id}`]}</span>
+                          )}
+                        </fieldset>
+                      )}
+
+                      <details class="net-more">
+                        <summary>Something missing?</summary>
+                        <div class="cform" style="margin-top:14px;">
+                          {skills.length > 0 && (
+                            <label>
+                              <span class="fl">Add a skill</span>
+                              <input class="fi" type="text" name={`custom_skill_${service.id}`}
+                                     placeholder="Separate with commas" />
+                            </label>
+                          )}
+                          <label>
+                            <span class="fl">Add a tool</span>
+                            <input class="fi" type="text" name={`custom_tool_${service.id}`} placeholder="Separate with commas" />
+                          </label>
+                        </div>
+                      </details>
+                    </div>
+                  ))}
+
+                  <div class="flow-actions">
+                    <a class="btn-glass" href="/apply?step=2&stage=specialties">Back</a>
+                    <span class="spacer"></span>
+                    <button type="submit" class="btn-hot">Continue</button>
+                  </div>
+                </form>
+              </>
+            )
+          )}
+
+          <!-- ==================== STEP 4 — PROFILE ==================== -->
+          {step === 4 && (
+            <>
+              <h2>Your professional profile.</h2>
+              <p class="lead">This is what a company reads first, so write it for them, not for a search engine.</p>
+
+              <form method="post" class="cform" novalidate>
+                <input type="hidden" name="step" value="4" />
+
+                <label>
+                  <span class="fl">Professional headline<span class="rq" aria-hidden="true">*</span></span>
+                  <input class="fi" id="f-headline" type="text" name="headline" required minlength="10" maxlength="120"
+                         value={v('headline', profile?.headline)}
+                         placeholder="e.g. Technical designer for premium womenswear"
+                         aria-invalid={errors.headline ? 'true' : undefined} />
+                  {errors.headline && <span class="cform-err" role="alert">{errors.headline}</span>}
+                </label>
+
+                <label>
+                  <span class="fl">Introduction<span class="rq" aria-hidden="true">*</span></span>
+                  <textarea class="fi" id="f-bio" name="bio" required minlength="80" rows="6"
+                            placeholder="What you do, who you do it for, and what makes your work reliable."
+                            aria-invalid={errors.bio ? 'true' : undefined}>{v('bio', profile?.bio)}</textarea>
+                  {errors.bio && <span class="cform-err" role="alert">{errors.bio}</span>}
+                </label>
+
+                <div class="row2">
+                  <label>
+                    <span class="fl">Years of experience<span class="rq" aria-hidden="true">*</span></span>
+                    <input class="fi" id="f-years" type="number" name="years" min="0" max="60" required
+                           value={v('years', profile?.years_experience)} />
+                  </label>
+                  <label>
+                    <span class="fl">Languages<span class="rq" aria-hidden="true">*</span></span>
+                    <input class="fi" id="f-languages" type="text" name="languages" required maxlength="200" value={v('languages', languages)}
+                           placeholder="English, Italian" />
+                  </label>
+                </div>
+
+                <div class="row2">
+                  <label>
+                    <span class="fl">Location<span class="rq" aria-hidden="true">*</span></span>
+                    <input class="fi" id="f-location" type="text" name="location" required maxlength="120"
+                           value={v('location', profile?.location)} placeholder="Milan, Italy" />
+                  </label>
+                  <label>
+                    <span class="fl">Timezone</span>
+                    <input class="fi" id="f-timezone" type="text" name="timezone" value={v('timezone', profile?.timezone)} />
+                  </label>
+                </div>
+
+                <label>
+                  <span class="fl">Availability<span class="rq" aria-hidden="true">*</span></span>
+                  <select class="fi" id="f-availability" name="availability" required>
+                    <option value="">Choose one</option>
+                    {AVAILABILITY.map((item) => (
+                      <option value={item.id} selected={v('availability', profile?.availability) === item.id}>{item.name}</option>
+                    ))}
+                  </select>
+                  <span class="fh">Keeping this current is the single biggest factor in being matched.</span>
+                </label>
+
+                <div class="row2">
+                  <label>
+                    <span class="fl">Capacity</span>
+                    <input class="fi" type="text" name="capacity" value={v('capacity', profile?.capacity)}
+                           placeholder="e.g. 2 projects at a time" />
+                  </label>
+                  <label>
+                    <span class="fl">Typical turnaround</span>
+                    <input class="fi" type="text" name="turnaround" value={v('turnaround', profile?.turnaround)}
+                           placeholder="e.g. 5–7 working days" />
+                  </label>
+                </div>
+
+                <div class="flow-actions">
+                  <a class="btn-glass" href="/apply?step=3">Back</a>
+                  <span class="spacer"></span>
+                  <button type="submit" class="btn-hot">Continue</button>
+                </div>
+              </form>
+            </>
+          )}
+
+          <!-- ==================== STEP 5 — PORTFOLIO ==================== -->
+          {step === 5 && (
+            <>
+              <h2>Show the work.</h2>
+              <p class="lead">
+                {MIN_PORTFOLIO_ITEMS === 1
+                  ? 'One strong piece is enough to start.'
+                  : `At least ${MIN_PORTFOLIO_ITEMS} pieces.`} What matters is what <em>you</em> contributed —
+                not the brand on the label.
+              </p>
+
+              {portfolio.length > 0 && (
+                <div class="ws-list" style="margin-bottom:26px;">
+                  {portfolio.map((item) => (
+                    <div class="ws-row" style="border:1px solid var(--line);border-radius:16px;">
+                      <div>
+                        <h3>{item.title}</h3>
+                        <div class="line">
+                          <span>{getService(item.service_id ?? '')?.name}</span>
+                          {item.media_key && <span>File attached</span>}
+                          {item.external_url && <span>Link</span>}
+                        </div>
+                        <p style="margin:8px 0 0;color:var(--ink-5);font-size:13px;line-height:1.55;">{item.contribution}</p>
+                      </div>
+                      <form method="post">
+                        <input type="hidden" name="step" value="5" />
+                        <input type="hidden" name="intent" value="remove" />
+                        <input type="hidden" name="itemId" value={item.id} />
+                        <button class="btn-glass btn-sm" formnovalidate>Remove</button>
+                      </form>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <form method="post" class="cform" enctype="multipart/form-data" novalidate>
+                <input type="hidden" name="step" value="5" />
+                <input type="hidden" name="intent" value="add" />
+
+                <label>
+                  <span class="fl">Project title<span class="rq" aria-hidden="true">*</span></span>
+                  <input class="fi" id="f-item_title" type="text" name="item_title" required minlength="3" maxlength="140"
+                         aria-invalid={errors.item_title ? 'true' : undefined} />
+                  {errors.item_title && <span class="cform-err" role="alert">{errors.item_title}</span>}
+                </label>
+
+                <label>
+                  <span class="fl">Which service<span class="rq" aria-hidden="true">*</span></span>
+                  <select class="fi" id="f-item_service" name="item_service" required>
+                    <option value="">Choose one</option>
+                    {offerings.map((offering) => (
+                      <option value={offering.service_id}>{getService(offering.service_id)?.name}</option>
+                    ))}
+                  </select>
+                </label>
+
+                <label>
+                  <span class="fl">What you contributed<span class="rq" aria-hidden="true">*</span></span>
+                  <textarea class="fi" id="f-contribution" name="contribution" required minlength="20" rows="3"
+                            placeholder="Your specific part in it — the decisions and the files you produced."
+                            aria-invalid={errors.contribution ? 'true' : undefined}></textarea>
+                  {errors.contribution && <span class="cform-err" role="alert">{errors.contribution}</span>}
+                </label>
+
+                {uploadsEnabled && (
+                  <label>
+                    <span class="fl">File</span>
+                    <input class="fi" id="f-media" type="file" name="media"
+                           accept="image/jpeg,image/png,image/webp,image/avif,application/pdf,video/mp4" />
+                    <span class="fh">JPG, PNG, WebP, AVIF, PDF or MP4. Up to 25 MB.</span>
+                    {errors.media && <span class="cform-err" role="alert">{errors.media}</span>}
+                  </label>
+                )}
+
+                <label>
+                  <span class="fl">{uploadsEnabled ? 'Or a link' : 'Link to the work'}<span class="rq" aria-hidden="true">*</span></span>
+                  <input class="fi" id="f-external_url" type="text" name="external_url" required={!uploadsEnabled}
+                         value={v('external_url')}
+                         placeholder="Behance, Figma, Google Drive, a live site…" />
+                  <span class="fh">Anywhere we can open it. Make sure the link is public.</span>
+                  {errors.external_url && <span class="cform-err" role="alert">{errors.external_url}</span>}
+                </label>
+
+                <label>
+                  <span class="fl">Client name</span>
+                  <input class="fi" type="text" name="client_name" placeholder="Only if you are allowed to say" />
+                </label>
+
+                <label class="opt" id="f-permission" style="width:100%;">
+                  <input type="checkbox" name="permission" value="on" required />
+                  I have permission to show this work publicly.
+                </label>
+                {errors.permission && <span class="cform-err" role="alert">{errors.permission}</span>}
+
+                <button type="submit" class="btn-glass" style="justify-self:start;" data-busy="Adding…">Add this piece</button>
+              </form>
+
+              <form method="post" style="margin-top:26px;">
+                <input type="hidden" name="step" value="5" />
+                {errors.portfolio && <p class="cform-err" role="alert" id="f-portfolio">{errors.portfolio}</p>}
+                <div class="flow-actions">
+                  <a class="btn-glass" href="/apply?step=4">Back</a>
+                  <span class="spacer"></span>
+                  <button type="submit" class="btn-hot">
+                    Continue ({portfolio.length}/{MIN_PORTFOLIO_ITEMS})
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
+
+          <!-- ==================== STEP 6 — RATES ==================== -->
+          {step === 6 && (
+            <>
+              <h2>Rates and preferences.</h2>
+              <p class="lead">
+                A starting figure, not a fixed price. It is shown on your public profile and companies
+                filter by it, so pick a number you are happy for anyone to see. We ask for no bank or
+                tax details here.
+              </p>
+
+              <form method="post" class="cform" novalidate>
+                <input type="hidden" name="step" value="6" />
+
+                <div class="row2">
+                  <label>
+                    <span class="fl">Starting rate<span class="rq" aria-hidden="true">*</span></span>
+                    <input class="fi" id="f-rate_min" type="number" name="rate_min" min="0" step="1" required
+                           value={v('rate_min', profile?.rate_min)} aria-invalid={errors.rate_min ? 'true' : undefined} />
+                  </label>
+                  <label>
+                    <span class="fl">Upper rate</span>
+                    <input class="fi" id="f-rate_max" type="number" name="rate_max" min="0" step="1"
+                           value={v('rate_max', profile?.rate_max)} aria-invalid={errors.rate_max ? 'true' : undefined} />
+                    {errors.rate_max && <span class="cform-err" role="alert">{errors.rate_max}</span>}
+                  </label>
+                </div>
+
+                <label>
+                  <span class="fl">Currency</span>
+                  <select class="fi" name="currency">
+                    {['USD', 'EUR', 'GBP', 'INR', 'AED'].map((code) => (
+                      <option value={code} selected={v('currency', profile?.rate_currency ?? 'USD') === code}>{code}</option>
+                    ))}
+                  </select>
+                </label>
+
+                <fieldset class="fieldset" id="f-rate_model">
+                  <legend>How you work and charge<span class="rq" aria-hidden="true">*</span></legend>
+                  <p class="hint">Pick every arrangement you accept. This is the only place we ask.</p>
+                  <div class="opts">
+                    {RATE_MODEL.map((item) => (
+                      <label class="opt">
+                        <input type="checkbox" name="rate_model" value={item.id} checked={vs('rate_model', rateModel).includes(item.id)} />
+                        {item.name}
+                      </label>
+                    ))}
+                  </div>
+                  {errors.rate_model && <span class="cform-err" role="alert">{errors.rate_model}</span>}
+                </fieldset>
+
+                <label>
+                  <span class="fl">Project size you prefer</span>
+                  <select class="fi" name="preferred_size">
+                    <option value="">No preference</option>
+                    {PROJECT_SIZE.map((item) => (
+                      <option value={item.id} selected={v('preferred_size', profile?.preferred_size) === item.id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <fieldset class="fieldset" id="f-work_location">
+                  <legend>Work location<span class="rq" aria-hidden="true">*</span></legend>
+                  <div class="opts">
+                    {WORK_LOCATION.map((item) => (
+                      <label class="opt">
+                        <input type="radio" name="work_location" value={item.id} required
+                               checked={v('work_location', profile?.work_location ?? 'remote') === item.id} />
+                        {item.name}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <label>
+                  <span class="fl">Regions and timezones you cover</span>
+                  <input class="fi" type="text" name="regions" value={v('regions', regions)} placeholder="Europe, North America" />
+                </label>
+
+                <div class="flow-actions">
+                  <a class="btn-glass" href="/apply?step=5">Back</a>
+                  <span class="spacer"></span>
+                  <button type="submit" class="btn-hot">Continue</button>
+                </div>
+              </form>
+            </>
+          )}
+
+          <!-- ==================== STEP 7 — SUBMIT ==================== -->
+          {step === 7 && (
+            <>
+              <h2>Ready for review.</h2>
+              <p class="lead">
+                We read every application by hand. You will hear back within a few working days, and
+                we tell you exactly what to change if something is missing.
+              </p>
+
+              <dl class="facts" style="margin-bottom:24px;">
+                <div><dt>Services</dt><dd>{offerings.map((o) => getService(o.service_id)?.name).join(', ') || '—'}</dd></div>
+                <div><dt>Headline</dt><dd>{profile?.headline ?? '—'}</dd></div>
+                <div><dt>Experience</dt><dd>{profile?.years_experience ?? '—'} years</dd></div>
+                <div><dt>Portfolio</dt><dd>{portfolio.length} pieces</dd></div>
+                <div><dt>Starting rate</dt><dd>{profile?.rate_min ? `${profile.rate_currency ?? 'USD'} ${profile.rate_min}` : '—'}</dd></div>
+              </dl>
+
+              <div class="notice">
+                <strong>What happens when we approve you</strong>
+                <p style="margin:8px 0 0;color:inherit;">
+                  Your profile becomes a public page that anyone can find and read — your name,
+                  photo, headline, skills and the work you added. Your email, phone and address stay
+                  private and are never shown. You can pause the profile at any time.
+                </p>
+                <p style="margin:8px 0 0;color:inherit;">
+                  Joining is free. We ask for bank details only later, before your first paid job.
+                </p>
+              </div>
+
+              <form method="post" style="margin-top:22px;">
+                <input type="hidden" name="step" value="7" />
+                {errors.submit && <p class="cform-err" role="alert" id="f-submit" style="margin-bottom:12px;">{errors.submit}</p>}
+                <div class="flow-actions">
+                  <a class="btn-glass" href="/apply?step=6">Back</a>
+                  <span class="spacer"></span>
+                  <button type="submit" class="btn-hot" data-busy="Sending for review…">Submit for review</button>
+                </div>
+              </form>
+            </>
+          )}
+        </div>
+
+        {step > 1 && (
+          <p class="fh" style="text-align:center;margin-top:20px;">
+            Progress is saved at each step — <a href="/workspace/freelancer" style="color:var(--champagne-2);">leave and come back</a> whenever.
+          </p>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    (function () {
+      var field = document.getElementById('f-timezone');
+      if (!field || field.value) return;
+      try { field.value = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    })();
+  </script>
+</Night>

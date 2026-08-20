@@ -1,0 +1,37 @@
+---
+/** /sign-in/verify?token=… — consumes an email verification link. */
+export const prerender = false;
+
+import Night from '../../layouts/Night.astro';
+import { db } from '../../server/db';
+import { consumeToken, markEmailVerified } from '../../server/auth';
+
+const database = db(Astro);
+const token = Astro.url.searchParams.get('token');
+const userId = token ? await consumeToken(database, 'verify_email', token) : null;
+if (userId) await markEmailVerified(database, userId, Astro.request);
+---
+<Night title="Email confirmed — Fashion Freelancing" noindex current="" quoteBot={false}>
+  <section class="net-hero">
+    <div class="wrap">
+      <div class="flow" style="max-width:520px;">
+        <div class="flow-panel glass-p sent-ok">
+          {userId ? (
+            <>
+              <div class="ok" aria-hidden="true">✓</div>
+              <h3>Email confirmed.</h3>
+              <p>Your account is verified. You can carry on where you left off.</p>
+              <a class="btn-hot" href="/specialists" style="margin-top:24px;">Browse specialists</a>
+            </>
+          ) : (
+            <>
+              <h3>That link has expired.</h3>
+              <p>Verification links last 24 hours and can only be used once. Sign in and we will send a fresh one.</p>
+              <a class="btn-hot" href="/sign-in" style="margin-top:24px;">Sign in</a>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+</Night>

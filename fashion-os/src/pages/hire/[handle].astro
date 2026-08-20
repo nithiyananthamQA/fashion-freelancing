@@ -1,0 +1,354 @@
+---
+/**
+ * /hire/[handle] — send a private request to one specialist (plan §6.4).
+ *
+ * Browsing is anonymous; this is where an account becomes necessary. A visitor
+ * who fills the form out first does not lose it: the body is parked in a draft
+ * cookie, they sign in, and the form comes back filled (§6.1).
+ *
+ * The request is private to the chosen specialist and is never published.
+ */
+export const prerender = false;
+
+import Night from '../../layouts/Night.astro';
+import { db, one, run } from '../../server/db';
+import { newId, nowIso } from '../../server/ids';
+import { audit, notify } from '../../server/audit';
+import { parse } from '../../server/validate';
+import { clearDraft, draftValue, readDraft, saveDraft } from '../../server/draft';
+import { mergeCookieShortlist } from '../../server/shortlist';
+import { limited, tooManyRequests } from '../../server/rate-limit';
+import { ENGAGEMENT, WORK_LOCATION, getService, specialtyId } from '../../data/taxonomy';
+
+const { handle } = Astro.params;
+const database = db(Astro);
+
+/* The target must be an approved profile — a draft profile is not reachable. */
+const target = await one<{ id: string; user_id: string; name: string; headline: string | null; primary_service: string | null }>(
+  database,
+  `SELECT p.id, p.user_id, u.name, p.headline,
+          (SELECT o.service_id FROM specialist_service_offerings o
+            WHERE o.profile_id = p.id ORDER BY o.is_primary DESC LIMIT 1) AS primary_service
+     FROM specialist_profiles p JOIN users u ON u.id = p.user_id
+    WHERE p.handle = ? AND p.status = 'approved' AND u.status = 'active'`,
+  handle ?? '',
+);
+if (!target) return new Response(null, { status: 404 });
+
+const DRAFT_KIND = `hire_${handle}`;
+const user = Astro.locals.user;
+
+let errors: Record<string, string> = {};
+let sent = false;
+let draft = readDraft(Astro, DRAFT_KIND);
+/** Body of a submission that failed validation, so nothing typed is lost. */
+let submitted: FormData | null = null;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  submitted = form;
+
+  // Not signed in yet? Park the brief and come straight back to it.
+  if (!user) {
+    saveDraft(Astro, DRAFT_KIND, form);
+    return Astro.redirect(
+      `/sign-in?note=hire&next=${encodeURIComponent(`/hire/${handle}`)}`,
+      303,
+    );
+  }
+  if (await limited(database, 'hire', user.id)) return tooManyRequests();
+
+  const { f, errors: found } = parse(form);
+  errors = found;
+
+  /* No company yet? Ask for the two things we actually need right here, rather
+     than throwing them onto a separate setup page mid-brief. */
+  let companyId = user.companyIds[0] ?? null;
+  const companyName = companyId ? '' : f.text('company_name', 'Company or brand name', { required: true, min: 2, max: 120 });
+  const companyRole = companyId ? '' : f.text('company_role', 'Your role', { required: true, max: 80 });
+
+  const serviceId = f.choice('service', 'Service', [target.primary_service ?? ''].filter(Boolean) as string[], { required: true })
+    ?? target.primary_service ?? '';
+  const service = getService(serviceId);
+  const allowedSpecialties = (service?.specialties ?? []).map((name) => specialtyId(service!.id, name));
+
+  const title = f.text('title', 'Project title', { required: true, min: 3, max: 140 });
+  const specialty = f.choice('specialty', 'Specialty', allowedSpecialties);
+  const brief = f.text('brief', 'Brief', { required: true, min: 30, max: 5000 });
+  const deliverables = f.text('deliverables', 'Deliverables', { max: 2000 });
+  const startDate = f.date('start_date', 'Start date');
+  const deadline = f.date('deadline', 'Deadline');
+  const engagement = f.choice('engagement', 'Engagement type', ENGAGEMENT.map((e) => e.id), { required: true });
+  const budgetMin = f.int('budget_min', 'Minimum budget', { min: 0 });
+  const budgetMax = f.int('budget_max', 'Maximum budget', { min: 0 });
+  const currency = f.text('currency', 'Currency', { max: 3 }) || 'USD';
+  const ndaRequired = f.bool('nda');
+  const workLocation = f.choice('work_location', 'Work location', WORK_LOCATION.map((w) => w.id), { required: true });
+
+  if (budgetMin !== null && budgetMax !== null && budgetMin > budgetMax) {
+    errors.budget_max = 'The maximum budget must be at least the minimum.';
+  }
+  if (startDate && deadline && deadline < startDate) {
+    errors.deadline = 'The deadline cannot be before the start date.';
+  }
+
+  if (!Object.keys(errors).length) {
+    const id = newId();
+    const now = nowIso();
+
+    // First request doubles as company setup — one submit, not two screens.
+    if (!companyId) {
+      companyId = newId();
+      await database.batch([
+        database
+          .prepare('INSERT INTO companies (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)')
+          .bind(companyId, companyName, now, now),
+        database
+          .prepare("INSERT INTO company_members (company_id, user_id, role, job_title, created_at) VALUES (?, ?, 'owner', ?, ?)")
+          .bind(companyId, user.id, companyRole, now),
+      ]);
+      await audit(database, {
+        actorId: user.id, action: 'company.created', entityType: 'company', entityId: companyId, request: Astro.request,
+      });
+      await mergeCookieShortlist(Astro, database, companyId, user.id);
+    }
+
+    await run(
+      database,
+      `INSERT INTO hire_requests
+         (id, company_id, created_by, profile_id, title, service_id, specialty_id, brief, deliverables,
+          start_date, deadline, engagement, budget_min, budget_max, currency, nda_required, work_location,
+          visibility, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'private', 'sent', ?, ?)`,
+      id, companyId, user.id, target.id, title, serviceId, specialty, brief, deliverables || null,
+      startDate, deadline, engagement, budgetMin, budgetMax, currency, ndaRequired ? 1 : 0, workLocation,
+      now, now,
+    );
+
+    await notify(database, {
+      userId: target.user_id,
+      kind: 'hire_request',
+      title: `New request: ${title}`,
+      body: 'A company has asked to work with you. Open it to accept, decline, or ask a question.',
+      link: '/workspace/freelancer',
+    });
+    await audit(database, {
+      actorId: user.id, action: 'hire_request.sent', entityType: 'hire_request', entityId: id, request: Astro.request,
+    });
+
+    clearDraft(Astro, DRAFT_KIND);
+    draft = {};
+    sent = true;
+  }
+}
+
+const service = getService(target.primary_service);
+/* Shown only when we do not know their company yet — asked once, inline,
+   instead of bouncing them to a separate setup page mid-brief. */
+const needsCompany = Boolean(Astro.locals.user) && !Astro.locals.user?.companyIds[0];
+/* Order matters: what they just typed beats the parked draft, which beats
+   empty. Without the first term a rejected submit came back blank. */
+const d = (key: string, fallback = ''): string => {
+  const sent = submitted?.get(key);
+  if (typeof sent === 'string') return sent;
+  return draftValue(draft, key) || fallback;
+};
+const restored = !sent && Object.keys(draft).length > 0;
+---
+
+<Night title={`Request to hire ${target.name} — Fashion Freelancing`} noindex current="specialists" quoteBot={false}>
+  <section class="net-hero">
+    <div class="wrap">
+      <div class="flow">
+        <a class="net-back" href={`/specialists/${handle}`}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+          Back to {target.name}
+        </a>
+
+        {sent ? (
+          <div class="flow-panel glass-p sent-ok">
+            <div class="ok" aria-hidden="true">✓</div>
+            <h3>Request sent to {target.name}.</h3>
+            <p>
+              {target.name} has been told. They can accept, decline, or ask you a question — and you
+              can talk it through on this request in your workspace. Most people reply within two
+              working days. Nothing about this request is public.
+            </p>
+            <div class="row-sm" style="justify-content:center;margin-top:24px;">
+              <a class="btn-hot" href="/workspace/company">Open my workspace</a>
+              <a class="btn-glass" href="/specialists">Keep browsing</a>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div class="flow-head">
+              <span class="kicker">Request to hire</span>
+              <h1 style="margin-top:14px;">Brief {target.name}.</h1>
+              <p class="sub" style="margin-top:12px;">
+                Private to {target.name}. It is not published, and no other specialist sees it.
+              </p>
+            </div>
+
+            {restored && <div class="notice ok">Your brief was saved while you signed in. Everything is still here.</div>}
+
+            <div class="flow-panel glass-p">
+              {Object.keys(errors).length > 0 && (
+                <p class="notice bad" role="alert" style="margin-bottom:22px;">
+                  Nothing was lost — check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
+                </p>
+              )}
+
+              <form method="post" class="cform" novalidate>
+                {needsCompany && (
+                  <fieldset class="fieldset" style="margin-bottom:26px;">
+                    <legend>About you</legend>
+                    <p class="hint">
+                      {target.name} sees who is asking. We only need this once.
+                    </p>
+                    <div class="row2">
+                      <label>
+                        <span class="fl">Company or brand<span class="rq" aria-hidden="true">*</span></span>
+                        <input class="fi" id="f-company_name" type="text" name="company_name" required
+                               minlength="2" maxlength="120" autocomplete="organization"
+                               value={d('company_name')} aria-invalid={errors.company_name ? 'true' : undefined} />
+                        {errors.company_name && <span class="cform-err" role="alert">{errors.company_name}</span>}
+                      </label>
+                      <label>
+                        <span class="fl">Your role<span class="rq" aria-hidden="true">*</span></span>
+                        <input class="fi" id="f-company_role" type="text" name="company_role" required
+                               maxlength="80" autocomplete="organization-title" placeholder="e.g. Founder"
+                               value={d('company_role')} aria-invalid={errors.company_role ? 'true' : undefined} />
+                        {errors.company_role && <span class="cform-err" role="alert">{errors.company_role}</span>}
+                      </label>
+                    </div>
+                  </fieldset>
+                )}
+
+                <label>
+                  <span class="fl">Project title<span class="rq" aria-hidden="true">*</span></span>
+                  <input class="fi" id="f-title" type="text" name="title" required minlength="3" maxlength="140"
+                         value={d('title')} placeholder="e.g. AW26 outerwear tech pack set"
+                         aria-invalid={errors.title ? 'true' : undefined} />
+                  {errors.title && <span class="cform-err" role="alert">{errors.title}</span>}
+                </label>
+
+                <div class="row2">
+                  <label>
+                    <span class="fl">Service<span class="rq" aria-hidden="true">*</span></span>
+                    <select class="fi" id="f-service" name="service" required>
+                      <option value={service?.id}>{service?.name}</option>
+                    </select>
+                    <span class="fh">The service {target.name} is approved for.</span>
+                  </label>
+
+                  <label>
+                    <span class="fl">Specialty</span>
+                    <select class="fi" id="f-specialty" name="specialty">
+                      <option value="">Not sure yet</option>
+                      {service?.specialties.map((name) => {
+                        const id = specialtyId(service.id, name);
+                        return <option value={id} selected={d('specialty') === id}>{name}</option>;
+                      })}
+                    </select>
+                  </label>
+                </div>
+
+                <label>
+                  <span class="fl">The brief<span class="rq" aria-hidden="true">*</span></span>
+                  <textarea class="fi" id="f-brief" name="brief" required minlength="30" rows="6"
+                            placeholder="What are you making, what stage are you at, and what does done look like?"
+                            aria-invalid={errors.brief ? 'true' : undefined}>{d('brief')}</textarea>
+                  {errors.brief ? <span class="cform-err" role="alert">{errors.brief}</span>
+                                : <span class="fh">At least a couple of sentences — enough to quote against.</span>}
+                </label>
+
+                <label>
+                  <span class="fl">Deliverables you expect</span>
+                  <textarea class="fi" id="f-deliverables" name="deliverables" rows="3"
+                            placeholder="e.g. Illustrator source, graded DXF, PDF spec sheet">{d('deliverables')}</textarea>
+                </label>
+
+                <div class="row2">
+                  <label>
+                    <span class="fl">Ideal start date</span>
+                    <input class="fi" id="f-start_date" type="date" name="start_date" value={d('start_date')} />
+                  </label>
+                  <label>
+                    <span class="fl">Deadline</span>
+                    <input class="fi" id="f-deadline" type="date" name="deadline" value={d('deadline')}
+                           aria-invalid={errors.deadline ? 'true' : undefined} />
+                    {errors.deadline && <span class="cform-err" role="alert">{errors.deadline}</span>}
+                  </label>
+                </div>
+
+                <fieldset class="fieldset" style="margin-bottom:0;">
+                  <legend>How do you want to pay?<span class="rq" aria-hidden="true">*</span></legend>
+                  <div class="opts" id="f-engagement">
+                    {ENGAGEMENT.map((item) => (
+                      <label class="opt">
+                        <input type="radio" name="engagement" value={item.id}
+                               checked={d('engagement') === item.id} required />
+                        {item.name}
+                      </label>
+                    ))}
+                  </div>
+                  {errors.engagement && <span class="cform-err" role="alert">{errors.engagement}</span>}
+                </fieldset>
+
+                <div class="row2">
+                  <label>
+                    <span class="fl">Budget from</span>
+                    <input class="fi" id="f-budget_min" type="number" name="budget_min" min="0" step="1" value={d('budget_min')} />
+                  </label>
+                  <label>
+                    <span class="fl">Budget up to</span>
+                    <input class="fi" id="f-budget_max" type="number" name="budget_max" min="0" step="1" value={d('budget_max')}
+                           aria-invalid={errors.budget_max ? 'true' : undefined} />
+                    {errors.budget_max && <span class="cform-err" role="alert">{errors.budget_max}</span>}
+                  </label>
+                </div>
+
+                <label>
+                  <span class="fl">Currency</span>
+                  <select class="fi" name="currency">
+                    {['USD', 'EUR', 'GBP', 'INR', 'AED'].map((code) => (
+                      <option value={code} selected={d('currency', 'USD') === code}>{code}</option>
+                    ))}
+                  </select>
+                </label>
+
+                <fieldset class="fieldset" style="margin-bottom:0;">
+                  <legend>Work location<span class="rq" aria-hidden="true">*</span></legend>
+                  <div class="opts" id="f-work_location">
+                    {WORK_LOCATION.map((item) => (
+                      <label class="opt">
+                        <input type="radio" name="work_location" value={item.id}
+                               checked={d('work_location', 'remote') === item.id} required />
+                        {item.name}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <label class="opt" style="width:100%;">
+                  <input type="checkbox" name="nda" value="on" checked={d('nda') === 'on'} />
+                  This project needs a mutual NDA before files are shared.
+                </label>
+
+                <p class="fh" style="margin:0;">
+                  Free to send. No payment is taken through this site — you agree the fee directly with
+                  {target.name}. Do not attach files yet; share them once they accept.
+                </p>
+
+                <button type="submit" class="btn-hot" style="width:100%;margin-top:6px;" data-busy="Sending…">
+                  {user ? 'Send request' : 'Continue — you will sign in next'}
+                </button>
+              </form>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  </section>
+</Night>

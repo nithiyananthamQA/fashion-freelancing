@@ -1,0 +1,307 @@
+---
+/**
+ * /specialists — the public directory (plan §3, §4).
+ *
+ * Anyone can browse and filter without an account; sign-in is only required at
+ * the point of value (§6.1). Filtering is server-side and works with JavaScript
+ * disabled: the rail is one GET form, so every result set has a shareable URL
+ * and the back button behaves.
+ */
+export const prerender = false;
+
+import Night from '../../layouts/Night.astro';
+import SpecialistCard from '../../components/SpecialistCard.astro';
+import { db } from '../../server/db';
+import { currentShortlist } from '../../server/shortlist';
+import {
+  PAGE_SIZE, filtersToQuery, optionsFor, readFilters, searchDirectory, serviceCounts,
+} from '../../server/repo/specialists';
+import {
+  AVAILABILITY, EXPERIENCE_BANDS, SERVICES, WORK_LOCATION, getService,
+} from '../../data/taxonomy';
+
+const database = db(Astro);
+const filters = readFilters(Astro.url);
+const service = getService(filters.serviceId);
+
+const [{ cards, total }, counts, skills, tools] = await Promise.all([
+  searchDirectory(database, filters),
+  serviceCounts(database),
+  optionsFor(database, 'skills', filters.serviceId),
+  optionsFor(database, 'tools', filters.serviceId),
+]);
+
+/* A service whose competencies live in its stack (Website Development) has no
+   skills list, so the rail offers the stack instead — otherwise its most
+   useful filters would be missing. */
+const stackOptions = service?.stack ?? [];
+
+/* The shortlist works signed out too — cookie now, company list once they
+   sign in — so the card can always show the right state. */
+const user = Astro.locals.user;
+const savedIds = await currentShortlist(Astro, database, user?.companyIds[0] ?? null);
+
+const lastPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
+const title = service
+  ? `Find a ${service.name} specialist — Fashion Freelancing`
+  : 'Find a specialist — Fashion Freelancing';
+const heading = service ? `Find a ${service.name} specialist.` : 'Find a specialist.';
+---
+
+<Night title={title} current="specialists" wide
+  description="Browse approved fashion specialists by service, specialty, skills and tools. No account needed to look.">
+
+  <section class="net-hero">
+    <div class="wrap">
+      {service && (
+        <a class="net-back" href={service.page}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+          Back to {service.name}
+        </a>
+      )}
+      <span class="kicker">For brands &amp; companies</span>
+      <h1 class="h-display" style="margin-top:14px;">{heading}</h1>
+      <p class="sub">
+        {service
+          ? `Approved ${service.name.toLowerCase()} professionals, filtered by the specialties, skills and tools that matter to your project.`
+          : 'Approved professionals across our ten services. Filter by what the work actually needs, then request to hire the person who fits.'}
+      </p>
+      <p class="fh" style="margin-top:16px;">
+        Free to browse, save and contact. No payment is taken through this site — you agree the fee
+        directly with the specialist.
+      </p>
+      <div class="acts">
+        <a class="btn-glass" href="/projects/new">Post a project and get matched</a>
+        <a class="btn-glass" href="/#contact">Or have our own team do it</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:0;">
+    <div class="wrap">
+      <div class="net-split">
+
+        <!-- ---------- filter rail ---------- -->
+        <form class="net-rail glass-p" method="get" action="/specialists">
+          <h2>Filters</h2>
+
+          <div class="cform">
+            <label>
+              <span class="fl">Search</span>
+              <input class="fi" type="search" name="q" value={filters.q}
+                     placeholder="e.g. Pattern CAD Gerber" />
+              <span class="fh">Matches services, specialties, skills, tools and stack — not just the biography.</span>
+            </label>
+
+            <label>
+              <span class="fl">Service</span>
+              <select class="fi" name="service">
+                <option value="">All ten services</option>
+                {SERVICES.map((item) => (
+                  <option value={item.id} selected={filters.serviceId === item.id}>
+                    {item.name} ({counts.get(item.id) ?? 0})
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              <span class="fl">Specialty</span>
+              <select class="fi" name="specialty" disabled={!service}>
+                <option value="">{service ? 'Any specialty' : 'Pick a service first'}</option>
+                {service?.specialties.map((name) => {
+                  const id = `${service.id}--${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`;
+                  return <option value={id} selected={filters.specialtyId === id}>{name}</option>;
+                })}
+              </select>
+            </label>
+
+            <label>
+              <span class="fl">Availability</span>
+              <select class="fi" name="availability">
+                <option value="">Any</option>
+                {AVAILABILITY.map((item) => (
+                  <option value={item.id} selected={filters.availability === item.id}>{item.name}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <details class="net-more" open={
+            filters.skillIds.length > 0 || filters.toolIds.length > 0 || filters.minExperience !== null ||
+            Boolean(filters.location) || Boolean(filters.language) || filters.budgetMax !== null ||
+            Boolean(filters.workLocation) || filters.verifiedOnly
+          }>
+            <summary>More filters</summary>
+
+            <div class="cform">
+              {skills.length > 0 && (
+                <fieldset class="fieldset" style="margin-bottom:0;">
+                  <legend>Skills</legend>
+                  <div class="opts">
+                    {skills.map((skill) => (
+                      <label class="opt">
+                        <input type="checkbox" name="skill" value={skill.id}
+                               checked={filters.skillIds.includes(skill.id)} />
+                        {skill.name}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              )}
+
+              {tools.length > 0 && (
+                <fieldset class="fieldset" style="margin-bottom:0;">
+                  <legend>Tools &amp; software</legend>
+                  <div class="opts">
+                    {tools.map((tool) => (
+                      <label class="opt">
+                        <input type="checkbox" name="tool" value={tool.id}
+                               checked={filters.toolIds.includes(tool.id)} />
+                        {tool.name}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              )}
+
+              {stackOptions.length > 0 && (
+                <fieldset class="fieldset" style="margin-bottom:0;">
+                  <legend>Technology stack</legend>
+                  <div class="opts">
+                    {stackOptions.map((option) => (
+                      <label class="opt">
+                        <input type="checkbox" name="stack" value={option.id}
+                               checked={filters.stackIds.includes(option.id)} />
+                        {option.name}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+              )}
+
+              {!service && (
+                <p class="fh" style="margin:0;">Choose a service to filter by its skills, tools and technology stack.</p>
+              )}
+
+              <label>
+                <span class="fl">Experience</span>
+                <select class="fi" name="experience">
+                  <option value="">Any</option>
+                  {EXPERIENCE_BANDS.map((band) => (
+                    <option value={band.id} selected={String(filters.minExperience ?? '') === band.id}>{band.name}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                <span class="fl">Location or timezone</span>
+                <input class="fi" type="text" name="location" value={filters.location ?? ''} placeholder="e.g. Portugal, or UTC+1" />
+              </label>
+
+              <label>
+                <span class="fl">Language</span>
+                <input class="fi" type="text" name="language" value={filters.language ?? ''} placeholder="e.g. Italian" />
+              </label>
+
+              <label>
+                <span class="fl">Budget up to</span>
+                <input class="fi" type="number" name="budget" min="1" step="1"
+                       value={filters.budgetMax ?? ''} placeholder="e.g. 400" />
+                <span class="fh">Only show people whose starting price is at or below this.</span>
+              </label>
+
+              <label>
+                <span class="fl">Work location</span>
+                <select class="fi" name="work">
+                  <option value="">Any</option>
+                  {WORK_LOCATION.map((item) => (
+                    <option value={item.id} selected={filters.workLocation === item.id}>{item.name}</option>
+                  ))}
+                </select>
+              </label>
+
+              <p class="fh" style="margin:0;">
+                Everyone listed here has been checked and approved by our team — there is nothing
+                unreviewed to filter out.
+              </p>
+            </div>
+          </details>
+
+          <div class="net-rail-actions">
+            <button type="submit" class="btn-hot btn-sm">Apply filters</button>
+            <a class="btn-glass btn-sm" href="/specialists">Clear all</a>
+          </div>
+        </form>
+
+        <!-- ---------- results ---------- -->
+        <div>
+          {savedIds.size > 0 && (
+            <p class="notice" style="margin-bottom:18px;">
+              <b>{savedIds.size} saved.</b>{' '}
+              {user?.companyIds[0]
+                ? <>Saved to your company — see them in your <a href="/workspace/company" style="color:inherit;text-decoration:underline;">workspace</a>.</>
+                : <>Kept on this device for now. They move to your account the moment you sign in — nothing is lost.</>}
+            </p>
+          )}
+
+          <div class="net-results-head">
+            <p class="net-count" aria-live="polite">
+              {total === 0 ? 'No matches' : `${total} specialist${total === 1 ? '' : 's'}`}
+              {service ? ` in ${service.name}` : ''}
+            </p>
+            {total > PAGE_SIZE && <p class="net-count">Page {filters.page} of {lastPage}</p>}
+          </div>
+
+          {cards.length > 0 ? (
+            <div class="net-results">
+              {cards.map((spec) => <SpecialistCard spec={spec} saved={savedIds.has(spec.id)} />)}
+            </div>
+          ) : (
+            <div class="net-empty glass-p">
+              <h3>No one matches that yet.</h3>
+              <p>
+                The network is curated, so some combinations have no approved specialist yet.
+                Widen the filters, or post the project and we will match it by hand.
+              </p>
+              <div class="row-sm" style="justify-content:center;">
+                <a class="btn-hot" href="/projects/new">Post a project</a>
+                <a class="btn-glass" href="/#contact">Start it with our team</a>
+              </div>
+            </div>
+          )}
+
+          {lastPage > 1 && (
+            <nav class="pager" aria-label="Pagination">
+              {filters.page > 1 && (
+                <a class="btn-glass btn-sm" href={`/specialists${filtersToQuery(filters, { page: filters.page - 1 })}`}>Previous</a>
+              )}
+              <span>{filters.page} / {lastPage}</span>
+              {filters.page < lastPage && (
+                <a class="btn-glass btn-sm" href={`/specialists${filtersToQuery(filters, { page: filters.page + 1 })}`}>Next</a>
+              )}
+            </nav>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    /* Progressive enhancement only: changing the service reloads the rail so
+       the specialty, skill and tool lists match it. Without JavaScript the
+       "Apply filters" button does exactly the same thing. */
+    (function () {
+      var form = document.querySelector('.net-rail');
+      if (!form) return;
+      var service = form.querySelector('select[name="service"]');
+      if (service) service.addEventListener('change', function () {
+        form.querySelectorAll('input[name="skill"],input[name="tool"],input[name="stack"]').forEach(function (input) { input.checked = false; });
+        var specialty = form.querySelector('select[name="specialty"]');
+        if (specialty) specialty.value = '';
+        form.submit();
+      });
+    })();
+  </script>
+</Night>

@@ -1,5 +1,12 @@
 User-agent: *
 Allow: /
-Disallow: /admin/
+
+# Signed-in and operational areas — never indexed.
+Disallow: /workspace/
+Disallow: /company/
+Disallow: /projects/
+Disallow: /hire/
+Disallow: /sign-in
+Disallow: /api/
 
 Sitemap: /sitemap.xml

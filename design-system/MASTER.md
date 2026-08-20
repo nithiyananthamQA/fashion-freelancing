@@ -28,7 +28,7 @@ Canonical token source: `fashion-os/public/assets/styles.css` (`:root`). Source-
 Each service card carries a unique `--local-accent`, cycled every 5 (`nth-child(5n+N)`):
 1. Violet `#6E56F0` · 2. Cyan `#2BA8E8` · 3. Green `#00C853` · 4. Yellow/Orange `#F0A93B` · 5. Pink `#FF0055`
 
-**User's plan:** each of the 11 service landing pages (`service.html?svc=…`) should adopt ITS card's accent color for a unique, creative per-service hero.
+**User's plan:** each of the ten service landing pages (`pages/services/<slug>.html`) should adopt ITS card's accent color for a unique, creative per-service hero.
 
 ## Typography
 - Display/headings: **Plus Jakarta Sans** (500–800)

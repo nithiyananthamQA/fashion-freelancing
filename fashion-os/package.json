@@ -1,32 +1,31 @@
 {
   "name": "fashion-os",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "rm -rf node_modules/.vite && node scripts/sync-public.mjs && astro dev",
+    "dev:clean": "rm -rf node_modules/.vite .astro dist && node scripts/sync-public.mjs && astro dev",
     "sync": "node scripts/sync-public.mjs",
     "build": "node scripts/sync-public.mjs && astro build",
-    "preview": "astro preview",
+    "preview": "npm run build && wrangler dev --config dist/server/wrangler.json",
+    "deploy": "echo \"Deploy is disabled. Nothing is provisioned on Cloudflare \u2014 see DEPLOY.md when you are ready.\" && exit 1",
+    "check": "astro check",
+    "make-admin": "node scripts/make-admin.mjs",
+    "db:migrate:local": "wrangler d1 migrations apply fashion_os --local",
+    "db:seed:local": "node scripts/seed-demo-data.mjs",
+    "db:migrate": "echo \"Remote migrations are disabled. Use db:migrate:local \u2014 see DEPLOY.md.\" && exit 1",
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/react": "^4.2.0",
-    "@astrojs/tailwind": "^5.1.4",
-    "astro": "^5.1.1",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.468.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "tailwind-merge": "^2.5.5",
-    "tailwindcss": "^3.4.17"
+    "@astrojs/cloudflare": "^14.2.2",
+    "astro": "^7.2.3"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@cloudflare/workers-types": "^5.20260815.1",
     "@types/node": "^25.6.2",
-    "@types/react": "^19.0.2",
-    "@types/react-dom": "^19.0.2",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.49",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "wrangler": "^4.83.0"
   }
 }

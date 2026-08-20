@@ -1,0 +1,78 @@
+---
+/** /sign-in/reset?token=… — choose a new password. */
+export const prerender = false;
+
+import Night from '../../layouts/Night.astro';
+import { db } from '../../server/db';
+import { consumeToken, setPassword } from '../../server/auth';
+import { passwordProblem } from '../../server/password';
+import { parse } from '../../server/validate';
+
+const database = db(Astro);
+let errors: Record<string, string> = {};
+let done = false;
+
+/* The token is only consumed on submit — opening the page must not burn it. */
+const token = Astro.url.searchParams.get('token') ?? '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const { f, errors: found } = parse(form);
+  errors = found;
+
+  const password = f.text('password', 'Password', { required: true, max: 200 });
+  const confirm = f.text('confirm', 'Confirmation', { required: true, max: 200 });
+  const problem = passwordProblem(password);
+  if (problem) errors.password = problem;
+  else if (password !== confirm) errors.confirm = 'Those two passwords do not match.';
+
+  if (!Object.keys(errors).length) {
+    const submitted = String(form.get('token') ?? '');
+    const userId = await consumeToken(database, 'reset_password', submitted);
+    if (!userId) errors.password = 'That reset link has expired. Request a new one.';
+    else {
+      await setPassword(database, userId, password, Astro.request);
+      done = true;
+    }
+  }
+}
+---
+<Night title="Choose a new password — Fashion Freelancing" noindex current="" quoteBot={false}>
+  <section class="net-hero">
+    <div class="wrap">
+      <div class="flow" style="max-width:520px;">
+        <div class="flow-panel glass-p">
+          {done ? (
+            <div class="sent-ok">
+              <div class="ok" aria-hidden="true">✓</div>
+              <h3>Password updated.</h3>
+              <p>Every other session has been signed out. Sign in with your new password.</p>
+              <a class="btn-hot" href="/sign-in" style="margin-top:24px;">Sign in</a>
+            </div>
+          ) : (
+            <>
+              <h2>Choose a new password.</h2>
+              <form method="post" class="cform" novalidate>
+                <input type="hidden" name="token" value={token} />
+                <label>
+                  <span class="fl">New password<span class="rq" aria-hidden="true">*</span></span>
+                  <input class="fi" id="f-password" type="password" name="password" required autocomplete="new-password"
+                         aria-invalid={errors.password ? 'true' : undefined} />
+                  {errors.password ? <span class="cform-err" role="alert">{errors.password}</span>
+                                   : <span class="fh">At least 10 characters.</span>}
+                </label>
+                <label>
+                  <span class="fl">Confirm password<span class="rq" aria-hidden="true">*</span></span>
+                  <input class="fi" id="f-confirm" type="password" name="confirm" required autocomplete="new-password"
+                         aria-invalid={errors.confirm ? 'true' : undefined} />
+                  {errors.confirm && <span class="cform-err" role="alert">{errors.confirm}</span>}
+                </label>
+                <button type="submit" class="btn-hot" style="width:100%;">Update password</button>
+              </form>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+</Night>

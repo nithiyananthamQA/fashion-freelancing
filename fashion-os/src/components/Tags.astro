@@ -1,0 +1,16 @@
+---
+interface Props {
+  values: string[];
+  limit?: number;
+  plain?: boolean;
+}
+const { values, limit = 99, plain = false } = Astro.props;
+const shown = values.slice(0, limit);
+const extra = values.length - shown.length;
+---
+{shown.length > 0 && (
+  <div class="tags">
+    {shown.map((value) => <span class={plain ? 'tag plain' : 'tag'}>{value}</span>)}
+    {extra > 0 && <span class="tag plain">+{extra} more</span>}
+  </div>
+)}

@@ -1,11 +1,11 @@
 <!doctype html>
-<!-- LAUNCH: the Our Services page IS the homepage — served at the domain root.
-     Source of truth: this file. pages/agency.html now just redirects here.
-     The old marketplace homepage is archived in backups/index-marketplace-home-2026-07-16.html -->
+<!-- The Our Services page IS the homepage — served at the domain root.
+     Source of truth: this file. Old marketplace URLs are retired via
+     fashion-os/public/_redirects; the previous homepage is in git history. -->
 <!-- OUR SERVICES — full glass redesign (July 2026). Complete rebuild: compact
      professional dark-glassmorphism, logo-colour service cards, pinned
-     horizontal rail. Previous design: backups/agency-pre-rebuild-2026-07-13.html
-     and git history. Dependency-free (no GSAP). -->
+     horizontal rail. Previous designs are in git history.
+     Dependency-free (no GSAP). -->
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8" />
@@ -24,6 +24,8 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/night.css">
+<link rel="stylesheet" href="assets/network.css">
 
 <style>
 /* metric-matched fallbacks — the font swap no longer moves layout (CLS) */
@@ -497,7 +499,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
   background: rgba(255,255,255,.06);
   border: 1px solid var(--glass-border); border-radius: 13px;
   padding: 13px 15px;
-  font-family: var(--sans); font-size: 15px; color: var(--ink);
+  /* 16px is the floor: iOS auto-zooms the page on focus below it. */
+  font-family: var(--sans); font-size: 16px; color: var(--ink);
   transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
 }
 .cform .fi::placeholder { color: var(--ink-5); }
@@ -712,6 +715,42 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
           <span class="rail-count"><b class="rail-now">01</b> / 10</span>
           <div class="rail-bar"><div class="rail-fill"></div></div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ SPECIALIST NETWORK ============================ -->
+  <!-- Two doors into the curated network. The hero CTA above stays the single
+       dominant action on the page — these are a deliberate second tier. -->
+  <section class="sec" id="network" aria-labelledby="net-h" style="padding-top:calc(var(--u) * 6);">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker rv">The specialist network</span>
+        <h2 class="h-display rv" id="net-h">Need a specialist <span class="grad">for your project?</span></h2>
+        <p class="sub rv" style="margin-top:14px;">
+          Browse approved professionals across our ten services, or join the network
+          and receive relevant work opportunities.
+        </p>
+      </div>
+
+      <div class="doors">
+        <a class="door glass-p rv" href="/specialists">
+          <span class="who">For brands &amp; companies</span>
+          <h3>Find a specialist</h3>
+          <p>Browse approved professionals for a specific project. Filter by service, specialty, skills and tools — no account needed to look.</p>
+          <span class="go">Browse the directory
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span>
+        </a>
+
+        <a class="door glass-p rv rv-d1" href="/apply">
+          <span class="who">For independent professionals</span>
+          <h3>Join as a freelancer</h3>
+          <p>Show your work and get considered for suitable projects. Build a service-specific profile, submit your portfolio, and receive matched invitations.</p>
+          <span class="go">Start an application
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span>
+        </a>
       </div>
     </div>
   </section>
@@ -942,7 +981,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
     });
   }
 
-  /* ---- Lead capture — same store as before ('ff_leads') ---- */
+  /* ---- Lead capture — posts to /api/leads ---- */
   var form = document.getElementById('ff-contact-form');
   if (form) {
     var errBox = document.getElementById('cform-err');
@@ -975,15 +1014,21 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
       var submit = form.querySelector('button[type="submit"]');
       submit.disabled = true;
       submit.textContent = 'Sending…';
-      var lead = Object.assign({}, data, {
-        receivedAt: new Date().toISOString(),
-        source: 'studio-page'
-      });
-      try {
-        var existing = JSON.parse(localStorage.getItem('ff_leads') || '[]');
-        existing.push(lead);
-        localStorage.setItem('ff_leads', JSON.stringify(existing));
-      } catch (_) {}
+      /* Send the enquiry to the server. It used to be written to localStorage,
+         which meant it never left this browser and nobody ever received it. */
+      var body = new FormData(form);
+      body.set('source', 'contact-form');
+      body.set('page', location.pathname);
+      fetch('/api/leads', { method: 'POST', body: body })
+        .then(function (r) { if (!r.ok) throw new Error('lead ' + r.status); })
+        .catch(function () {
+          /* Never lose the enquiry to a network blip — show the address so the
+             person can still reach us, rather than a dead end. */
+          errBox.textContent = 'That did not send. Please email hello@fashionos.app and we will pick it up.';
+          errBox.hidden = false;
+          submit.disabled = false;
+          submit.textContent = 'Send it';
+        });
       var sent = document.createElement('div');
       sent.className = 'sent-ok';
       sent.setAttribute('tabindex', '-1');

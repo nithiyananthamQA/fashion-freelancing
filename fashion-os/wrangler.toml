@@ -1,0 +1,50 @@
+# NOTHING HERE IS PROVISIONED. Every id below is a placeholder, so no command
+# in this repo can touch a real Cloudflare account by accident. Development runs
+# entirely on local files under .wrangler/state — no cloud, no billing.
+#
+# @astrojs/cloudflare v14 builds a WORKER with static assets, not a Pages
+# project. `astro build` merges this file into dist/server/wrangler.json, which
+# is the config wrangler runs and deploys:
+#
+#   npm run preview   -> wrangler dev    --config dist/server/wrangler.json
+#   npm run deploy    -> wrangler deploy --config dist/server/wrangler.json
+#
+# Do not add `pages_build_output_dir` — it makes wrangler treat this as a Pages
+# project, and Pages rejects the adapter's reserved ASSETS binding.
+name = "fashion-freelancing"
+compatibility_date = "2026-08-01"
+compatibility_flags = ["nodejs_compat"]
+
+# --- Relational database: every table in the plan's core data areas (§11) ---
+[[d1_databases]]
+binding = "DB"
+database_name = "fashion_os"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
+# --- Object storage: NOT ENABLED ---
+# R2 needs billing details on the Cloudflare account, so it is deliberately
+# left out. Portfolio pieces are added as links (Behance, Figma, a live site,
+# Drive) instead of uploads, and the app checks for the binding before offering
+# a file field — see src/server/storage.ts.
+#
+# To turn uploads on later: create the bucket, then uncomment this block.
+# [[r2_buckets]]
+# binding = "MEDIA"
+# bucket_name = "fashion-os-media"
+
+# Astro's session store. The adapter wires this automatically and provisions it
+# on first deploy; it is unrelated to our own sign-in sessions, which live in D1.
+[[kv_namespaces]]
+binding = "SESSION"
+id = "REPLACE_WITH_SESSION_KV_ID"
+
+[vars]
+SITE_URL = "https://fashionfreelancing.com"
+# Outbound mail: leave unset to queue verification / notification mail in the
+# outbound_email table instead of sending it (see src/server/mail.ts).
+# MAIL_FROM = "no-reply@fashionfreelancing.com"
+
+# Secrets — set with `wrangler pages secret put <NAME>`, never committed:
+#   SESSION_SECRET   required, signs session cookies
+#   RESEND_API_KEY   optional, enables real outbound email

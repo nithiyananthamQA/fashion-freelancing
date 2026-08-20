@@ -1,53 +1,122 @@
-# Deploying to Cloudflare Pages
+# Deploying to Cloudflare Workers
 
-This is the **Fashion Freelancing** site. It's a fully static build — no server,
-no database — so it drops straight onto Cloudflare Pages.
+The site is one Cloudflare **Worker** serving two things from one origin:
 
-## How the project fits together
+- the **services website**, static files straight from the CDN
+- the **specialist network**, server-rendered by the worker, backed by
+  D1 (database) and R2 (portfolio and attachment storage)
+
+> @astrojs/cloudflare v14 builds a Worker with static assets, **not** a Pages
+> project. Cloudflare Pages rejects it: *the name 'ASSETS' is reserved in Pages
+> projects*. Deploy with `npm run deploy`, which runs
+> `wrangler deploy --config dist/server/wrangler.json`.
+
+One build produces both.
+
+## How the build fits together
 
 ```
-FashionFreelancing/          ← git repo root
-├── public-html/             ← the plain HTML public site (source of truth)
-├── shared/                  ← shared JS modules: schema, store, api, ui
-└── fashion-os/              ← the Astro app (dashboards) + the build
-    ├── scripts/sync-public.mjs   copies public-html/ + shared/ into public/
-    ├── public/_headers           Cloudflare caching + security headers
-    ├── public/_redirects         clean-URL redirects
-    └── dist/                     ← BUILD OUTPUT (what Cloudflare serves)
+FashionFreelancing/                 ← git repo root
+├── public-html/                    ← the static services site (source of truth)
+└── fashion-os/                     ← the Astro app + the build
+    ├── scripts/sync-public.mjs         copies public-html/ into public/
+    ├── migrations/                     D1 schema + generated taxonomy seed
+    ├── public/_headers                 caching + security headers
+    ├── public/_redirects               clean URLs + legacy retirement map
+    └── dist/                       ← BUILD OUTPUT (what Cloudflare serves)
 ```
 
-`pnpm build` runs `sync-public.mjs` first (pulls the public site + shared
-modules into `fashion-os/public/`), then `astro build` produces `dist/`.
-One build = the whole site.
+`npm run build` runs `sync-public.mjs` (pulling the services site into
+`fashion-os/public/`), then `astro build`.
+
+`dist/`, `node_modules/` and the synced copies under `fashion-os/public/` are
+git-ignored — Cloudflare regenerates them on every build.
+
+## One-time infrastructure
+
+Create the two bindings before the first deploy, then put the real ids into
+`fashion-os/wrangler.toml`.
+
+```bash
+cd fashion-os
+
+# 1. Database — copy the printed database_id into wrangler.toml,
+#    replacing REPLACE_WITH_D1_DATABASE_ID
+npx wrangler d1 create fashion_os
+
+# 2. Object storage for portfolio evidence and project attachments
+npx wrangler r2 bucket create fashion-os-media
+
+# 3. Apply the schema and seed the taxonomy
+npm run db:migrate
+```
+
+The bucket must stay **private**. Files are only ever read back through
+`/api/files/[...key]`, which re-checks authorization per request.
+
+## Secrets
+
+```bash
+npx wrangler pages secret put RESEND_API_KEY    # optional, enables real email
+```
+
+And set `MAIL_FROM` (e.g. `no-reply@fashionfreelancing.com`) in the Pages
+environment variables, alongside `SITE_URL`.
+
+Without a mail provider the app still works: verification and reset messages are
+recorded in the `outbound_email` table and shown in `/workspace/admin`, so no
+flow dead-ends. Set both variables before real sign-ups.
 
 ## Cloudflare Pages settings
-
-When you create the Pages project (connect the GitHub repo), use **exactly** these:
 
 | Setting | Value |
 |---|---|
 | **Production branch** | `main` |
-| **Framework preset** | `Astro` (or `None`) |
-| **Build command** | `pnpm build` |
+| **Framework preset** | `Astro` |
+| **Build command** | `npm install && npm run build` |
 | **Build output directory** | `dist` |
 | **Root directory** | `fashion-os` |
-| **Node version** | `20` (or newer) — set env var `NODE_VERSION` = `20` |
+| **Node version** | env var `NODE_VERSION` = `22` |
 
-> The **Root directory must be `fashion-os`** — the build runs there, and
-> `sync-public.mjs` reaches up to `../public-html` and `../shared`.
+> The **root directory must be `fashion-os`** — the build runs there, and
+> `sync-public.mjs` reaches up to `../public-html`.
 
-If Cloudflare doesn't detect `pnpm`, add an environment variable
-`PNPM_VERSION` = `9` (or leave the build command as `npm install && npm run build`).
+## Making the first admin
 
-## After deploy
+`/workspace/admin` returns 404 to everyone who is not an admin, so there is no
+self-service bootstrap screen by design — the first admin is made from outside
+the app:
 
-Cloudflare gives you a `https://<project>.pages.dev` URL.
-Every push to `main` rebuilds and redeploys automatically.
+```bash
+# promotes the account if it exists, creates it if it does not
+npm run make-admin -- you@fashionfreelancing.com --remote
 
-## Notes
+# optionally set the password at the same time
+npm run make-admin -- you@fashionfreelancing.com --password 'a long passphrase' --remote
+```
 
-- This deploys as a **working demo**: the dashboard uses mock data in the
-  browser's localStorage and auto-signs-in a demo user. There is no real
-  backend or payments yet — data is per-browser and resets when cleared.
-- `dist/`, `node_modules/`, and the synced copies under `fashion-os/public/`
-  are git-ignored — Cloudflare regenerates them on every build.
+Drop `--remote` to do the same against the local database. The script clears that
+user's existing sessions, so sign in again for the role to take effect.
+
+## Before going live
+
+- [ ] `database_id` in `wrangler.toml` is the real one, not the placeholder
+- [ ] `npm run db:migrate` has run against the remote database
+- [ ] `MAIL_FROM` and `RESEND_API_KEY` are set, and a test sign-up delivers mail
+- [ ] At least one admin exists
+- [ ] Enough approved specialists per visible service, or a manual-match
+      fallback is in place (plan §14, Phase 6)
+- [ ] Spot-check the retirement redirects in `public/_redirects` — old
+      marketplace URLs should land on `/specialists`, `/sign-in` or `/`
+
+## Local development
+
+```bash
+cd fashion-os
+npm install
+npm run db:migrate:local
+npm run dev            # http://localhost:4321
+```
+
+The local D1 and R2 live under `.wrangler/state/`. `npm run preview` builds and
+serves through `wrangler pages dev`, which is the closest match to production.

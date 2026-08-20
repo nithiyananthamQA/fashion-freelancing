@@ -1,0 +1,150 @@
+---
+/**
+ * /company/setup — finish the company profile (plan §6.2).
+ *
+ * Collects only what is needed to begin. It is reached the first time a
+ * signed-in account tries to save, hire or post, and `next` carries them back
+ * to that action the moment setup is done — the draft is never lost (§6.1).
+ */
+export const prerender = false;
+
+import Night from '../../layouts/Night.astro';
+import { db } from '../../server/db';
+import { guard, requireUser } from '../../server/guards';
+import { newId, nowIso } from '../../server/ids';
+import { audit } from '../../server/audit';
+import { parse } from '../../server/validate';
+import { mergeCookieShortlist } from '../../server/shortlist';
+
+const gate = await guard(Astro, () => requireUser(Astro));
+if (gate.response) return gate.response;
+const user = gate.value;
+
+const database = db(Astro);
+const rawNext = Astro.url.searchParams.get('next');
+const next = rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/workspace/company';
+
+/* Already set up — nothing to collect twice. */
+if (user.companyIds.length) return Astro.redirect(next);
+
+let errors: Record<string, string> = {};
+let values = { name: '', role: '', website: '', country: '', timezone: '' };
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const { f, errors: found } = parse(form);
+  errors = found;
+
+  const name = f.text('name', 'Company or brand name', { required: true, min: 2, max: 120 });
+  const role = f.text('role', 'Your role', { required: true, max: 80 });
+  const website = f.url('website', 'Website');
+  const country = f.text('country', 'Country', { max: 60 });
+  const timezone = f.text('timezone', 'Timezone', { max: 60 });
+  f.consent('terms', 'Please accept the terms and privacy policy to continue.');
+  values = { name, role, website: website ?? '', country, timezone };
+
+  if (!Object.keys(errors).length) {
+    const companyId = newId();
+    const now = nowIso();
+    await database.batch([
+      database
+        .prepare('INSERT INTO companies (id, name, website, country, timezone, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+        .bind(companyId, name, website, country || null, timezone || null, now, now),
+      database
+        .prepare("INSERT INTO company_members (company_id, user_id, role, job_title, created_at) VALUES (?, ?, 'owner', ?, ?)")
+        .bind(companyId, user.id, role, now),
+    ]);
+    await audit(database, {
+      actorId: user.id, action: 'company.created', entityType: 'company', entityId: companyId, request: Astro.request,
+    });
+    await mergeCookieShortlist(Astro, database, companyId, user.id);
+    return Astro.redirect(next);
+  }
+}
+
+/* Show what the visitor was in the middle of, so the detour makes sense. */
+const heading = next.startsWith('/hire/')
+  ? 'One step before your request goes out.'
+  : next.startsWith('/projects/new')
+    ? 'One step before you post the project.'
+    : 'Tell us about your company.';
+---
+
+<Night title="Company setup — Fashion Freelancing" noindex current="" quoteBot={false}>
+  <section class="net-hero">
+    <div class="wrap">
+      <div class="flow" style="max-width:600px;">
+        <div class="flow-head">
+          <span class="kicker">Company setup</span>
+          <h1 style="margin-top:14px;">{heading}</h1>
+          <p class="sub" style="margin-top:12px;">
+            Specialists see your company name and role so they know who is asking. Nothing else is shared.
+          </p>
+        </div>
+
+        <div class="flow-panel glass-p">
+          {Object.keys(errors).length > 0 && (
+            <p class="notice bad" role="alert" style="margin-bottom:22px;">
+              Nothing was lost — check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
+            </p>
+          )}
+
+          <form method="post" class="cform" novalidate>
+            <label>
+              <span class="fl">Company / brand name<span class="rq" aria-hidden="true">*</span></span>
+              <input class="fi" id="f-name" type="text" name="name" required minlength="2" maxlength="120" value={values.name}
+                     autocomplete="organization" aria-invalid={errors.name ? 'true' : undefined} />
+              {errors.name && <span class="cform-err" role="alert">{errors.name}</span>}
+            </label>
+
+            <label>
+              <span class="fl">Your role there<span class="rq" aria-hidden="true">*</span></span>
+              <input class="fi" id="f-role" type="text" name="role" required maxlength="80" value={values.role}
+                     placeholder="e.g. Founder, Product Manager, Head of Design"
+                     autocomplete="organization-title" aria-invalid={errors.role ? 'true' : undefined} />
+              {errors.role && <span class="cform-err" role="alert">{errors.role}</span>}
+            </label>
+
+            <label>
+              <span class="fl">Website</span>
+              <input class="fi" id="f-website" type="text" name="website" value={values.website}
+                     placeholder="Optional" autocomplete="url" aria-invalid={errors.website ? 'true' : undefined} />
+              {errors.website && <span class="cform-err" role="alert">{errors.website}</span>}
+            </label>
+
+            <div class="row2">
+              <label>
+                <span class="fl">Country</span>
+                <input class="fi" type="text" name="country" value={values.country} autocomplete="country-name" />
+              </label>
+              <label>
+                <span class="fl">Timezone</span>
+                <input class="fi" id="f-timezone" type="text" name="timezone" value={values.timezone}
+                       placeholder="Detected automatically" />
+              </label>
+            </div>
+
+            <label class="opt" id="f-terms" style="width:100%;">
+              <input type="checkbox" name="terms" value="on" required />
+              <span>I accept the <a href="/pages/terms.html" target="_blank" rel="noopener" style="color:var(--champagne-2);">terms</a>{' '}
+                and <a href="/pages/privacy.html" target="_blank" rel="noopener" style="color:var(--champagne-2);">privacy policy</a>.</span>
+            </label>
+            {errors.terms && <span class="cform-err" role="alert">{errors.terms}</span>}
+
+            <button type="submit" class="btn-hot" style="width:100%;margin-top:6px;">
+              {next.startsWith('/hire/') ? 'Save and continue to the request' : 'Save and continue'}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    (function () {
+      var field = document.getElementById('f-timezone');
+      if (!field || field.value) return;
+      try { field.value = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    })();
+  </script>
+</Night>

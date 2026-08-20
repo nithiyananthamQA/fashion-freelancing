@@ -1,0 +1,66 @@
+---
+/**
+ * /sign-in/forgot — request a password reset link.
+ * The confirmation is identical whether or not the address exists, so this
+ * page cannot be used to discover which emails are registered.
+ */
+export const prerender = false;
+
+import Night from '../../layouts/Night.astro';
+import { db, env } from '../../server/db';
+import { issuePasswordReset } from '../../server/auth';
+import { parse, trapped, HONEYPOT } from '../../server/validate';
+import { clientKey, limited, tooManyRequests } from '../../server/rate-limit';
+
+const database = db(Astro);
+let sent = false;
+let errors: Record<string, string> = {};
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  if (trapped(form)) return Astro.redirect('/sign-in');
+  if (await limited(database, 'signIn', clientKey(Astro.request))) return tooManyRequests();
+
+  const { f, errors: found } = parse(form);
+  errors = found;
+  const email = f.email('email');
+  if (!Object.keys(errors).length) {
+    await issuePasswordReset(database, env(Astro), email);
+    sent = true;
+  }
+}
+---
+<Night title="Reset your password — Fashion Freelancing" noindex current="" quoteBot={false}>
+  <section class="net-hero">
+    <div class="wrap">
+      <div class="flow" style="max-width:520px;">
+        <div class="flow-head">
+          <h1>Reset your password.</h1>
+        </div>
+        <div class="flow-panel glass-p">
+          {sent ? (
+            <div class="sent-ok">
+              <div class="ok" aria-hidden="true">✓</div>
+              <h3>Check your email.</h3>
+              <p>If that address has an account, a reset link is on its way. It expires in one hour.</p>
+            </div>
+          ) : (
+            <form method="post" class="cform" novalidate>
+              <input type="text" name={HONEYPOT} tabindex="-1" autocomplete="off" class="visually-hidden" aria-hidden="true" />
+              <label>
+                <span class="fl">Work email<span class="rq" aria-hidden="true">*</span></span>
+                <input class="fi" id="f-email" type="email" name="email" required autocomplete="email"
+                       aria-invalid={errors.email ? 'true' : undefined} />
+                {errors.email && <span class="cform-err" role="alert">{errors.email}</span>}
+              </label>
+              <button type="submit" class="btn-hot" style="width:100%;">Send reset link</button>
+            </form>
+          )}
+          <p class="fh" style="text-align:center;margin-top:18px;">
+            <a href="/sign-in" style="color:var(--champagne-2);">Back to sign in</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Night>

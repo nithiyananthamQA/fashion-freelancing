@@ -66,7 +66,7 @@ Stores **one** canonical product per SKU. Each variant captures size,
 colour, dimensions, materials (pulled from the tech-pack BOM), care
 instructions, and base imagery.
 
-Mapping to the Prisma schema (see `01-prisma-schema.md`):
+Mapping to the database schema (see `fashion-os/migrations/0001_init.sql`):
 
 - `Product` — name, brand-id, category, variant template
 - `ProductVariant` — sku, size, colour, hex, materials, weight

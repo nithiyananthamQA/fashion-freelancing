@@ -1,0 +1,230 @@
+---
+/**
+ * /projects — the projects an approved specialist may see (plan §11).
+ *
+ * Visibility is enforced in the query, not the template: a specialist sees a
+ * project only when they were invited to it, or when it is published to the
+ * matched group for a service they offer. Confidential projects never appear.
+ */
+export const prerender = false;
+
+import Night from '../../layouts/Night.astro';
+import { all, db, one, run } from '../../server/db';
+import { guard, requireApprovedSpecialist } from '../../server/guards';
+import { newId, nowIso } from '../../server/ids';
+import { notify } from '../../server/audit';
+import { parse } from '../../server/validate';
+import { getService } from '../../data/taxonomy';
+import { engagementLabel, workLocationLabel } from '../../data/labels';
+
+const gate = await guard(Astro, () => requireApprovedSpecialist(Astro));
+if (gate.response) return gate.response;
+const { user, profileId } = gate.value;
+
+const database = db(Astro);
+let applied: string | null = null;
+let errors: Record<string, string> = {};
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const projectId = String(form.get('projectId') ?? '');
+  const { f, errors: found } = parse(form);
+  errors = found;
+  const pitch = f.text('pitch', 'Your message', { required: true, min: 30, max: 3000 });
+  const price = f.int('price', 'Your price', { min: 0 });
+  const timeline = f.text('timeline', 'Timeline', { max: 200 });
+
+  // Re-check visibility on write, exactly as on read — a form can be replayed.
+  const visible = await one<{ id: string; title: string; company_id: string; created_by: string }>(
+    database,
+    `SELECT p.id, p.title, p.company_id, p.created_by FROM projects p
+      WHERE p.id = ?
+        AND p.status IN ('published','responding','shortlisted')
+        AND (
+          EXISTS (SELECT 1 FROM project_invites i WHERE i.project_id = p.id AND i.profile_id = ?)
+          OR (p.visibility = 'matched'
+              AND EXISTS (SELECT 1 FROM specialist_service_offerings o
+                           WHERE o.profile_id = ? AND o.service_id = p.service_id))
+        )`,
+    projectId, profileId, profileId,
+  );
+
+  if (!visible) errors.pitch = 'That project is no longer open.';
+
+  if (!Object.keys(errors).length && visible) {
+    const now = nowIso();
+    await run(
+      database,
+      `INSERT INTO applications (id, project_id, profile_id, pitch, price, timeline, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, 'submitted', ?, ?)
+       ON CONFLICT (project_id, profile_id)
+       DO UPDATE SET pitch = excluded.pitch, price = excluded.price,
+                     timeline = excluded.timeline, status = 'submitted', updated_at = excluded.updated_at`,
+      newId(), visible.id, profileId, pitch, price, timeline || null, now, now,
+    );
+    await run(
+      database,
+      "UPDATE project_invites SET status = 'applied' WHERE project_id = ? AND profile_id = ?",
+      visible.id, profileId,
+    );
+    await run(
+      database,
+      "UPDATE projects SET status = 'responding', updated_at = ? WHERE id = ? AND status = 'published'",
+      now, visible.id,
+    );
+    await notify(database, {
+      userId: visible.created_by,
+      kind: 'application',
+      title: `New application: ${visible.title}`,
+      body: `${user.name} applied to your project.`,
+      link: '/workspace/company',
+    });
+    applied = visible.title;
+  }
+}
+
+interface Row {
+  id: string; title: string; service_id: string; brief: string; deliverables: string | null;
+  engagement: string | null; budget_min: number | null; budget_max: number | null; currency: string | null;
+  deadline: string | null; work_location: string | null; nda_required: number; company_name: string;
+  invite_reason: string | null; applied_status: string | null; specialties: string | null;
+}
+
+const projects = await all<Row>(
+  database,
+  `SELECT p.id, p.title, p.service_id, p.brief, p.deliverables, p.engagement,
+          p.budget_min, p.budget_max, p.currency, p.deadline, p.work_location, p.nda_required,
+          c.name AS company_name,
+          i.reason AS invite_reason,
+          a.status AS applied_status,
+          r.specialties
+     FROM projects p
+     JOIN companies c ON c.id = p.company_id
+     LEFT JOIN project_invites i ON i.project_id = p.id AND i.profile_id = ?1
+     LEFT JOIN applications a ON a.project_id = p.id AND a.profile_id = ?1
+     LEFT JOIN project_requirements r ON r.project_id = p.id
+    WHERE p.status IN ('published','responding','shortlisted')
+      AND (
+        i.id IS NOT NULL
+        OR (p.visibility = 'matched'
+            AND EXISTS (SELECT 1 FROM specialist_service_offerings o
+                         WHERE o.profile_id = ?1 AND o.service_id = p.service_id))
+      )
+    ORDER BY p.published_at DESC
+    LIMIT 40`,
+  profileId,
+);
+
+/* Mark invitations as seen so the company can tell read from unread (§9). */
+await run(
+  database,
+  "UPDATE project_invites SET status = 'viewed' WHERE profile_id = ? AND status = 'sent'",
+  profileId,
+);
+
+const money = (row: Row): string | null => {
+  if (row.budget_min === null && row.budget_max === null) return null;
+  const currency = row.currency ?? 'USD';
+  if (row.budget_min !== null && row.budget_max !== null) return `${currency} ${row.budget_min}–${row.budget_max}`;
+  return `${currency} ${row.budget_min ?? row.budget_max}`;
+};
+---
+
+<Night title="Projects — Fashion Freelancing" noindex current="" quoteBot={false}>
+  <section class="net-hero" style="padding-bottom:calc(var(--u) * 3);">
+    <div class="wrap">
+      <div class="ws-head">
+        <div>
+          <span class="kicker">Your matches</span>
+          <h1 style="margin-top:12px;">Projects for you.</h1>
+        </div>
+        <div class="ws-tabs" style="margin:0;">
+          <a href="/workspace/freelancer">Workspace</a>
+          <a href="/projects" aria-current="page">Projects</a>
+        </div>
+      </div>
+      <p class="sub" style="max-width:60ch;">
+        Only work that matches the services on your approved profile, or that a company invited you to.
+      </p>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:0;">
+    <div class="wrap">
+      {applied && <div class="notice ok" style="margin-bottom:20px;">Your reply to “{applied}” is with the company.</div>}
+
+      {projects.length === 0 ? (
+        <div class="net-empty glass-p">
+          <h3>Nothing matching right now.</h3>
+          <p>
+            You will see projects here as soon as a company posts work in one of your services,
+            or invites you directly. Keeping your availability current helps you rank higher.
+          </p>
+          <a class="btn-glass" href="/workspace/freelancer">Update my profile</a>
+        </div>
+      ) : (
+        <div class="ws-list">
+          {projects.map((project) => {
+            const service = getService(project.service_id);
+            const budget = money(project);
+            return (
+              <article class="ws-row glass-p" style="display:block;">
+                <div class="row-sm" style="justify-content:space-between;align-items:flex-start;">
+                  <div>
+                    <p class="spec-service">{service?.name} · {project.company_name}</p>
+                    <h3 style="font-size:19px;margin-top:6px;">{project.title}</h3>
+                  </div>
+                  {project.applied_status
+                    ? <span class="pill-status ok">{project.applied_status === 'shortlisted' ? 'Shortlisted' : 'Replied'}</span>
+                    : project.invite_reason && <span class="pill-status info">Invited</span>}
+                </div>
+
+                <p style="margin:12px 0 0;color:var(--ink-4);font-size:14px;line-height:1.6;white-space:pre-wrap;">{project.brief}</p>
+                {project.deliverables && (
+                  <p style="margin:10px 0 0;color:var(--ink-5);font-size:13px;line-height:1.55;">
+                    <b style="color:var(--ink-3);">Deliverables:</b> {project.deliverables}
+                  </p>
+                )}
+
+                <div class="line" style="margin-top:14px;">
+                  {budget && <span>Budget {budget}</span>}
+                  {project.engagement && <span>{engagementLabel(project.engagement)}</span>}
+                  {project.deadline && <span>Due {project.deadline}</span>}
+                  {project.work_location && <span>{workLocationLabel(project.work_location)}</span>}
+                  {project.nda_required === 1 && <span>NDA required</span>}
+                </div>
+
+                {project.invite_reason && <p class="why">{project.invite_reason}</p>}
+
+                {!project.applied_status && (
+                  <details style="margin-top:16px;">
+                    <summary class="btn-hot btn-sm" style="display:inline-flex;list-style:none;">Reply to this project</summary>
+                    <form method="post" class="cform" style="margin-top:16px;" novalidate>
+                      <input type="hidden" name="projectId" value={project.id} />
+                      <label>
+                        <span class="fl">Why you, for this brief<span class="rq" aria-hidden="true">*</span></span>
+                        <textarea class="fi" name="pitch" required minlength="30" rows="4"
+                                  placeholder="What in your experience maps directly onto this work?"></textarea>
+                      </label>
+                      <div class="row2">
+                        <label>
+                          <span class="fl">Your price ({project.currency ?? 'USD'})</span>
+                          <input class="fi" type="number" name="price" min="0" step="1" />
+                        </label>
+                        <label>
+                          <span class="fl">Timeline you can commit to</span>
+                          <input class="fi" type="text" name="timeline" placeholder="e.g. 10 working days" />
+                        </label>
+                      </div>
+                      <button type="submit" class="btn-hot btn-sm" style="justify-self:start;">Send reply</button>
+                    </form>
+                  </details>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </section>
+</Night>

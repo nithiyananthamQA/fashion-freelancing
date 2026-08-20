@@ -1,6 +1,6 @@
 <!doctype html>
 <!-- CUSTOM PAGE — AI Agent service, night-glass system, TEAL accent only.
-     Research-backed content (commerce support patterns, channel priorities, handoff design). NOT generated from service.html. -->
+     Research-backed content (commerce support patterns, channel priorities, handoff design). Hand-built and hand-maintained. -->
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8" />
@@ -19,6 +19,8 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
+<link rel="stylesheet" href="../../assets/night.css">
+<link rel="stylesheet" href="../../assets/network.css">
 
 <!-- SEO bootstrap — canonical, OG, JSON-LD (Service + FAQPage) -->
 <script>
@@ -441,7 +443,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .cform .fi {
   width: 100%; background: rgba(255,255,255,.06);
   border: 1px solid var(--glass-border); border-radius: 13px;
-  padding: 13px 15px; font-family: var(--sans); font-size: 15px; color: var(--ink);
+  /* 16px is the floor: iOS auto-zooms the page on focus below it. */
+  padding: 13px 15px; font-family: var(--sans); font-size: 16px; color: var(--ink);
   transition: border-color .25s ease, box-shadow .25s ease;
 }
 .cform .fi::placeholder { color: var(--ink-5); }
@@ -794,6 +797,22 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   </section>
 
   <!-- ============ 9. CONTACT ============ -->
+  <!-- ============================ SPECIALIST NETWORK ============================ -->
+  <!-- Secondary route: the primary action on this page stays "start this
+       project with our team", in the contact section directly below. -->
+  <section class="sec" aria-labelledby="svcnet-h" style="padding-bottom:0;">
+    <div class="wrap">
+      <div class="svc-net glass-p rv">
+        <p>
+          <strong id="svcnet-h">Would you rather hire one person?</strong>
+          Our team delivers AI Agent end to end — or you can brief an approved
+          AI Agent specialist directly from our curated network.
+        </p>
+        <a class="btn-glass btn-sm" href="/specialists?service=ai-agent">Find an AI Agent specialist</a>
+      </div>
+    </div>
+  </section>
+
   <section class="sec" id="contact" aria-labelledby="contact-h">
     <div class="wrap">
       <div class="contact-panel glass-p">
@@ -976,7 +995,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     })();
   }
 
-  /* lead capture — ff_leads */
+  /* lead capture — posts to /api/leads */
   var form = document.getElementById('td-form');
   if (form) {
     var errBox = document.getElementById('td-err');
@@ -1009,16 +1028,22 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       var submit = form.querySelector('button[type="submit"]');
       submit.disabled = true;
       submit.textContent = 'Sending…';
-      var lead = Object.assign({}, data, {
-        service: data.service || 'ai-agent',
-        receivedAt: new Date().toISOString(),
-        source: 'ai-agent-landing'
-      });
-      try {
-        var existing = JSON.parse(localStorage.getItem('ff_leads') || '[]');
-        existing.push(lead);
-        localStorage.setItem('ff_leads', JSON.stringify(existing));
-      } catch (_) {}
+      /* Send the enquiry to the server. It used to be written to localStorage,
+         which meant it never left this browser and nobody ever received it. */
+      var body = new FormData(form);
+      body.set('source', 'contact-form');
+      body.set('page', location.pathname);
+      if (!body.get('service')) body.set('service', 'ai-agent');
+      fetch('/api/leads', { method: 'POST', body: body })
+        .then(function (r) { if (!r.ok) throw new Error('lead ' + r.status); })
+        .catch(function () {
+          /* Never lose the enquiry to a network blip — show the address so the
+             person can still reach us, rather than a dead end. */
+          errBox.textContent = 'That did not send. Please email hello@fashionos.app and we will pick it up.';
+          errBox.hidden = false;
+          submit.disabled = false;
+          submit.textContent = 'Send it';
+        });
       var sent = document.createElement('div');
       sent.className = 'sent-ok';
       sent.setAttribute('tabindex', '-1');

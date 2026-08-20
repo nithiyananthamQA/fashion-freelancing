@@ -1,111 +1,58 @@
 /* Fashion Freelancing — public site shared scripts */
 
 (function () {
-  // Resolve link paths so they work under file:// (direct open), a local
-  // server, AND Cloudflare Pages — which serves /pages/signup.html at the
-  // CLEAN URL /pages/signup (no .html). So detect the /pages/ segment by
-  // path, not by file extension.
-  // Service pages live one level deeper (/pages/services/<slug>.html).
+  // Resolve nav/footer link paths.
+  //
+  // Over http(s) every path is absolute from the site root. Relative paths were
+  // wrong the moment a route had more than one segment: on /specialists/maya-sen
+  // a './assets/logo.png' resolves to /specialists/assets/logo.png, so the logo
+  // and every nav link 404'd on the profile, hire, workspace and company pages.
+  //
+  // file:// (opening a page straight off disk) has no site root, so it keeps the
+  // directory-depth calculation.
+  const isFile = location.protocol === 'file:';
   const inServicesDir = /\/pages\/services\//i.test(location.pathname);
   const inPagesDir = /\/pages\//i.test(location.pathname);
-  const ROOT = inServicesDir ? '../../' : inPagesDir ? '../' : './';
+  const ROOT = !isFile ? '/' : inServicesDir ? '../../' : inPagesDir ? '../' : './';
   const r = (p) => ROOT + p.replace(/^\/+/, '');
 
   // Expose path resolver for pages that need it
   window.FF_ROOT = ROOT;
 
-  // LAUNCH: no logins on the services site — clear any stale marketplace test
-  // session so nothing (cached or future code) can render auth UI in the header.
+  // Purge the legacy marketplace session key so no stale browser data from the
+  // old local-storage marketplace can ever be read again. Authentication for the
+  // specialist network is server-side (HttpOnly cookie) and never touches storage.
   try { localStorage.removeItem('ff_session'); } catch (e) {}
   window.FF_R = r;
 
-  // -- Auto-load shared modules in order: store → api → ui --
-  // Each script is appended only after the previous one's `load` event,
-  // so execution order is guaranteed regardless of the `async` attribute.
   function loadScript(src) {
     return new Promise((resolve, reject) => {
-      // already on the page? (matched by exact filename, anchored)
       const file = src.split('/').pop();
-      const existing = [...document.scripts].some(s => {
-        const sf = (s.src || '').split('/').pop().split('?')[0];
+      const existing = [...document.scripts].some(sc => {
+        const sf = (sc.src || '').split('/').pop().split('?')[0];
         return sf === file;
       });
       if (existing) return resolve();
-      const s = document.createElement('script');
-      s.src = src;
-      s.async = false;
-      s.onload = () => resolve();
-      s.onerror = () => reject(new Error('Could not load ' + src));
-      document.head.appendChild(s);
+      const sc = document.createElement('script');
+      sc.src = src;
+      sc.async = false;
+      sc.onload = () => resolve();
+      sc.onerror = () => reject(new Error('Could not load ' + src));
+      document.head.appendChild(sc);
     });
   }
-  // Tracks readiness so late listeners still fire.
-  window.FF_READY = window.FF_READY || false;
 
-  // Floating AI chat widget — loaded on every page that boots site.js.
-  // intake.js (renderer) → ff-chat.js (launcher + panel). Independent
-  // chain from the api/store/ui chain so the widget appears even before
-  // those finish loading.
-  function loadStylesheet(href) {
-    if (document.querySelector(`link[href$="${href.split('/').pop()}"]`)) return;
-    const l = document.createElement('link');
-    l.rel = 'stylesheet'; l.href = href;
-    document.head.appendChild(l);
-  }
-  /* HIDDEN FOR LAUNCH: marketplace intake chat widget — its flow asks
-     hire / get-hired questions that don't exist in the launch scope, and
-     its styling predates the night-glass system. Re-enable (or rebuild as
-     an on-brand quote bot) when the marketplace ships.
-  loadStylesheet(r('shared/intake.css'));
-  loadScript(r('shared/intake.js'))
-    .then(() => loadScript(r('assets/ff-chat.js')))
-    .catch(e => console.error('Chat widget failed to load:', e && e.message ? e.message : e));
-  HIDDEN FOR LAUNCH */
-  // Launch quote bot — night-glass widget, flow dedicated to the current services.
+  // Quote bot — night-glass widget for the direct-service journey.
   // Loaded at idle so it never competes with first paint on mobile.
-  const bootQuoteBot = () => loadScript(r('assets/quote-bot.js'))
+  // Pages that set FF_NO_QUOTE_BOT (the signed-in application and workspace
+  // screens) opt out: it sells our team's services, which is the wrong offer
+  // on top of a form someone is halfway through.
+  const bootQuoteBot = () => window.FF_NO_QUOTE_BOT
+    ? Promise.resolve()
+    : loadScript(r('assets/quote-bot.js'))
     .catch(e => console.error('Quote bot failed to load:', e && e.message ? e.message : e));
   if ('requestIdleCallback' in window) requestIdleCallback(bootQuoteBot, { timeout: 4000 });
   else setTimeout(bootQuoteBot, 1500);
-
-  if (!window.api) {
-    // The three modules must EXECUTE in order (store → api → ui), but they don't
-    // have to DOWNLOAD in order. Without this, each request only starts after the
-    // previous script finished, stacking one round-trip per module. Preloading
-    // fetches all three in parallel so the serial chain below runs from cache.
-    ['assets/store.js', 'assets/api.js', 'assets/ui.js'].forEach((p) => {
-      const l = document.createElement('link');
-      l.rel = 'preload'; l.as = 'script'; l.href = r(p);
-      document.head.appendChild(l);
-    });
-    loadScript(r('assets/store.js'))
-      .then(() => loadScript(r('assets/api.js')))
-      .then(() => loadScript(r('assets/ui.js')))
-      .then(() => {
-        if (!window.api) throw new Error('api.js loaded but window.api is undefined');
-        window.FF_READY = true;
-        window.dispatchEvent(new CustomEvent('ff:ready', { detail: { api: window.api, ui: window.UI } }));
-      })
-      .catch(e => {
-        console.error('Shared modules failed to load:', e && e.message ? e.message : e);
-      });
-  } else {
-    window.FF_READY = true;
-  }
-
-  /**
-   * Run a callback once shared modules (api, UI) are loaded.
-   * Safe whether called before OR after they finish loading —
-   * fixes the race where the page's inline script attaches a
-   * listener after 'ff:ready' already fired.
-   */
-  window.onFFReady = function (cb) {
-    if (window.FF_READY && window.api) { cb(); return; }
-    window.addEventListener('ff:ready', function handler() {
-      window.removeEventListener('ff:ready', handler);
-      cb();
-    });
-  };
 
   // ---- Top navigation ----
   // Logo mark — violet→cyan gradient tile, "FF" needle motif, cyan accent dot.
@@ -132,36 +79,17 @@
         <img class="logo-img" src="${r("assets/logo.png")}" alt="Fashion Freelancing" />
       </a>
 
-      <!-- HIDDEN FOR LAUNCH: marketplace search
-      <form class="topnav-search" action="${r("pages/marketplace.html")}" role="search" aria-label="Search freelancers">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/>
-          <path d="M20 20l-3-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-        </svg>
-        <input name="q" placeholder="Search 'tech pack designer', 'photographer'…" aria-label="Search"/>
-        <kbd>⌘K</kbd>
-      </form>
-      HIDDEN FOR LAUNCH -->
 
       <nav class="topnav-links" aria-label="Primary">
         <a href="${r("index.html")}" id="nav-svc-trigger" class="nav-svc-trigger ${current==='agency'?'active':''}" aria-haspopup="true" aria-expanded="false" aria-controls="nav-svc-panel">Our services<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a>
+        <a href="/specialists" class="${current==='specialists'?'active':''}">Find a specialist</a>
         <a href="${r("pages/about.html")}">About</a>
         <a href="${r("pages/help.html")}">Help</a>
-        <!-- HIDDEN FOR LAUNCH: marketplace links
-        <a href="${r("pages/marketplace.html")}" class="${current==='talent'?'active':''}">Find a freelancer</a>
-        <a href="${r("pages/marketplace.html")}#jobs" class="${current==='work'?'active':''}">Find a job</a>
-        <a href="${r("pages/how-it-works.html")}" class="${current==='how'?'active':''}">How it works</a>
-        <a href="${r("pages/pricing.html")}" class="${current==='pricing'?'active':''}">Pricing</a>
-        HIDDEN FOR LAUNCH -->
       </nav>
 
       <div class="topnav-cta">
         <!-- LAUNCH: single CTA to the brief form -->
         <a href="${r("index.html")}#contact" class="btn btn-primary btn-sm">Start a project</a>
-        <!-- HIDDEN FOR LAUNCH: auth
-        <a href="${r("pages/login.html")}" class="topnav-signin">Sign in</a>
-        <a href="${r("pages/signup.html")}" class="btn btn-primary btn-sm">Join free</a>
-        HIDDEN FOR LAUNCH -->
       </div>
 
       <!-- Mobile hamburger -->
@@ -175,14 +103,10 @@
        on .topnav does not trap its fixed positioning -->
   <div class="topnav-mobile" id="nav-mobile" aria-hidden="true">
     <div class="topnav-mobile-inner">
-      <!-- HIDDEN FOR LAUNCH: mobile search
-      <form class="topnav-search topnav-search-mobile" action="${r("pages/marketplace.html")}" role="search">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="M20 20l-3-3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-        <input name="q" placeholder="Search…"/>
-      </form>
-      HIDDEN FOR LAUNCH -->
       <nav class="topnav-mobile-links" aria-label="Mobile primary">
         <a href="${r("index.html")}">Our services</a>
+        <a href="/specialists">Find a specialist</a>
+        <a href="/apply">Join as a freelancer</a>
         <a href="${r("pages/about.html")}">About</a>
         <a href="${r("pages/help.html")}">Help</a>
         <span class="tm-label" aria-hidden="true">Services</span>
@@ -198,20 +122,10 @@
           <a class="sub" href="${r("pages/services/ecom-listing.html")}">E-com listings</a>
           <a class="sub" href="${r("pages/services/graphic-design.html")}">Graphic design</a>
         </div>
-        <!-- HIDDEN FOR LAUNCH: marketplace links
-        <a href="${r("pages/marketplace.html")}">Find a freelancer</a>
-        <a href="${r("pages/marketplace.html")}#jobs">Find a job</a>
-        <a href="${r("pages/how-it-works.html")}">How it works</a>
-        <a href="${r("pages/pricing.html")}">Pricing</a>
-        HIDDEN FOR LAUNCH -->
       </nav>
       <div class="topnav-mobile-cta">
         <!-- LAUNCH: single CTA to the brief form -->
         <a href="${r("index.html")}#contact" class="btn btn-primary w-full">Start a project</a>
-        <!-- HIDDEN FOR LAUNCH: auth
-        <a href="${r("pages/login.html")}" class="btn btn-ghost w-full">Sign in</a>
-        <a href="${r("pages/signup.html")}" class="btn btn-primary w-full">Join free</a>
-        HIDDEN FOR LAUNCH -->
       </div>
     </div>
   </div>
@@ -285,6 +199,8 @@
             <li><a href="${r("pages/about.html")}">About us</a></li>
             <li><a href="${r("pages/help.html")}">Help &amp; FAQ</a></li>
             <li><a href="${r("index.html")}#contact">Start a project</a></li>
+            <li><a href="/specialists">Find a specialist</a></li>
+            <li><a href="/apply">Join as a freelancer</a></li>
           </ul>
         </details>
       </div>
@@ -415,13 +331,6 @@
       });
     }
 
-    // Cmd/Ctrl + K → focus search
-    document.addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        const input = document.querySelector('.topnav-search input');
-        if (input) { e.preventDefault(); input.focus(); }
-      }
-    });
 
     // ---- Header condenses once the page is scrolled ----
     const topnav = document.querySelector('.topnav');

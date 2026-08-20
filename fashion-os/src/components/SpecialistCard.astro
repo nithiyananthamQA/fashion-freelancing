@@ -1,0 +1,68 @@
+---
+/**
+ * One directory result. Shows only what a company needs to decide whether to
+ * open the full profile (plan §4) — everything else lives on the profile page.
+ */
+import Tags from './Tags.astro';
+import type { DirectoryCard } from '../server/repo/specialists';
+import { AVAILABILITY } from '../data/taxonomy';
+
+interface Props {
+  spec: DirectoryCard;
+  /** Rendered under the card when the result came from a match (§9). */
+  reason?: string | null;
+  saved?: boolean;
+}
+
+const { spec, reason = null, saved = false } = Astro.props;
+
+const initials = spec.name
+  .split(/\s+/)
+  .slice(0, 2)
+  .map((part) => part[0] ?? '')
+  .join('')
+  .toUpperCase();
+
+/* Stable tint from the handle, so a card looks the same on every visit. */
+const tint = 't' + ((spec.handle ?? spec.name).split('').reduce((n, c) => n + c.charCodeAt(0), 0) % 5 + 1);
+const availability = AVAILABILITY.find((a) => a.id === spec.availability)?.name;
+const rate = spec.rateMin ? `From ${spec.rateCurrency ?? 'USD'} ${spec.rateMin}` : null;
+---
+
+<article class="card-spec glass-p">
+  <div class={`spec-avatar ${tint}`} aria-hidden="true">{initials}</div>
+
+  <div>
+    <p class="spec-service">{spec.serviceName}{spec.specialtyName ? ` · ${spec.specialtyName}` : ''}</p>
+    <h3><a href={`/specialists/${spec.handle}`}>{spec.name}</a></h3>
+    <p class="spec-headline">{spec.headline}</p>
+
+    <Tags values={spec.topTags} limit={5} />
+
+    <div class="spec-meta">
+      {spec.yearsExperience !== null && <span><b>{spec.yearsExperience}</b> years</span>}
+      {availability && <span>{availability}</span>}
+      {rate && <span>{rate}</span>}
+      {spec.location && <span>{spec.location}</span>}
+    </div>
+
+    {spec.portfolioCount > 0 && (
+      <div class="spec-strip" aria-label={`${spec.portfolioCount} portfolio pieces`}>
+        {Array.from({ length: Math.min(spec.portfolioCount, 4) }).map(() => <span></span>)}
+      </div>
+    )}
+
+    {reason && <p class="why">{reason}</p>}
+  </div>
+
+  <div class="spec-actions">
+    <form method="post" action="/api/saved">
+      <input type="hidden" name="profileId" value={spec.id} />
+      <input type="hidden" name="next" value={Astro.url.pathname + Astro.url.search} />
+      <button type="submit" class="btn-glass btn-sm" aria-pressed={saved ? 'true' : 'false'}>
+        {saved ? '✓ Saved' : 'Save'}
+      </button>
+    </form>
+    <a class="btn-hot btn-sm" href={`/specialists/${spec.handle}`}>View profile</a>
+  </div>
+</article>

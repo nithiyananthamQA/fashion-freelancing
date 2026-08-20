@@ -1,0 +1,212 @@
+---
+/**
+ * /specialists/[handle] — public profile (plan §6.3).
+ *
+ * Shows the full skills, tools, stack, portfolio and experience. Private
+ * contact details are never rendered: the only way to reach this person is the
+ * "Request to hire" flow, which requires sign-in at that point (§6.1).
+ */
+export const prerender = false;
+
+import Night from '../../layouts/Night.astro';
+import Tags from '../../components/Tags.astro';
+import { db } from '../../server/db';
+import { loadPublicProfile } from '../../server/repo/specialists';
+import { currentShortlist } from '../../server/shortlist';
+import { AVAILABILITY, ENGAGEMENT, RATE_MODEL, WORK_LOCATION, getService } from '../../data/taxonomy';
+
+const { handle } = Astro.params;
+const database = db(Astro);
+const profile = handle ? await loadPublicProfile(database, handle) : null;
+
+if (!profile) return new Response(null, { status: 404 });
+
+const initials = profile.name.split(/\s+/).slice(0, 2).map((p) => p[0] ?? '').join('').toUpperCase();
+const tint = 't' + ((profile.handle.split('').reduce((n, c) => n + c.charCodeAt(0), 0) % 5) + 1);
+const primary = profile.offerings.find((o) => o.isPrimary) ?? profile.offerings[0];
+const availability = AVAILABILITY.find((a) => a.id === profile.availability)?.name ?? null;
+const workLocation = WORK_LOCATION.find((w) => w.id === profile.workLocation)?.name ?? null;
+const rateModels = profile.rateModel
+  .map((id) => RATE_MODEL.find((m) => m.id === id)?.name)
+  .filter(Boolean)
+  .join(', ');
+const engagement = profile.workPreference
+  .map((id) => ENGAGEMENT.find((e) => e.id === id)?.name)
+  .filter(Boolean)
+  .join(', ');
+
+const rate = profile.rateMin
+  ? profile.rateMax && profile.rateMax !== profile.rateMin
+    ? `${profile.rateCurrency} ${profile.rateMin}–${profile.rateMax}`
+    : `From ${profile.rateCurrency} ${profile.rateMin}`
+  : null;
+
+const shortlisted = (await currentShortlist(Astro, database, Astro.locals.user?.companyIds[0] ?? null)).has(profile.id);
+const backToService = primary ? getService(primary.serviceId) : undefined;
+
+/* Split ahead of the template: a `{2,}` quantifier inside a JSX expression
+   reads as an expression brace to the compiler. */
+const bioParagraphs = profile.bio.split(/\n{2,}/).filter(Boolean);
+---
+
+<Night
+  title={`${profile.name} — ${primary?.serviceName ?? 'Specialist'} | Fashion Freelancing`}
+  description={profile.headline}
+  current="specialists">
+
+  <section class="net-hero" style="padding-bottom:0;">
+    <div class="wrap">
+      <a class="net-back" href={backToService ? `/specialists?service=${backToService.id}` : '/specialists'}>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        {backToService ? `All ${backToService.name} specialists` : 'All specialists'}
+      </a>
+
+      <div class="profile-top glass-p">
+        <div class={`spec-avatar ${tint}`} aria-hidden="true">{initials}</div>
+
+        <div>
+          <p class="spec-service">
+            {primary?.serviceName}{primary?.roleName ? ` · ${primary.roleName}` : ''}
+          </p>
+          <h1>{profile.name}</h1>
+          <p class="spec-headline" style="font-size:16px;">{profile.headline}</p>
+
+          <div class="spec-meta" style="margin-top:16px;">
+            {profile.yearsExperience !== null && <span><b>{profile.yearsExperience}</b> years experience</span>}
+            {profile.location && <span>{profile.location}</span>}
+            {profile.timezone && <span>{profile.timezone}</span>}
+            {profile.languages.length > 0 && <span>{profile.languages.join(', ')}</span>}
+          </div>
+
+          {availability && (
+            <p style="margin:16px 0 0;">
+              <span class={`pill-status ${profile.availability === 'booked' ? 'warn' : 'ok'}`}>{availability}</span>
+            </p>
+          )}
+        </div>
+
+        <div class="spec-actions">
+          <a class="btn-hot" href={`/hire/${profile.handle}`}>Request to hire</a>
+          <form method="post" action="/api/saved">
+            <input type="hidden" name="profileId" value={profile.id} />
+            <input type="hidden" name="next" value={Astro.url.pathname} />
+            <button type="submit" class="btn-glass" style="width:100%;" aria-pressed={shortlisted ? 'true' : 'false'}>
+              {shortlisted ? '✓ Saved' : 'Save for later'}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:calc(var(--u) * 3);">
+    <div class="wrap">
+      <div class="profile-body">
+
+        <div>
+          {profile.bio && (
+            <div class="panel glass-p">
+              <h2>Introduction</h2>
+              {bioParagraphs.map((paragraph) => <p>{paragraph}</p>)}
+            </div>
+          )}
+
+          <div class="panel glass-p">
+            <h2>Services &amp; capability</h2>
+            {profile.offerings.map((offering) => (
+              <div class="offering">
+                <h3>
+                  {offering.serviceName}
+                  {offering.isPrimary && <span class="pill-status info" style="margin-left:10px;">Primary</span>}
+                </h3>
+                {offering.roleName && <p class="role">{offering.roleName}</p>}
+
+                {offering.specialties.length > 0 && (
+                  <div class="group">
+                    <h4>Specialties</h4>
+                    <Tags values={offering.specialties} />
+                  </div>
+                )}
+                {offering.skills.length > 0 && (
+                  <div class="group">
+                    <h4>Skills</h4>
+                    <Tags values={offering.skills} />
+                  </div>
+                )}
+                {offering.tools.length > 0 && (
+                  <div class="group">
+                    <h4>Tools &amp; software</h4>
+                    <Tags values={offering.tools} plain />
+                  </div>
+                )}
+                {offering.stack.length > 0 && (
+                  <div class="group">
+                    <h4>Technology stack</h4>
+                    <Tags values={offering.stack} plain />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {profile.portfolio.length > 0 && (
+            <div class="panel glass-p">
+              <h2>Selected work</h2>
+              <div class="work">
+                {profile.portfolio.map((item) => (
+                  <article>
+                    {item.mediaKey
+                      ? <img class="thumb" src={`/api/files/${item.mediaKey}`} alt={item.title} loading="lazy" decoding="async" />
+                      : <span class="thumb" aria-hidden="true"></span>}
+                    <div class="meta">
+                      <h3>{item.title}</h3>
+                      <p>{item.contribution}</p>
+                      {item.clientName && <p style="margin-top:6px;">Client: {item.clientName}</p>}
+                      {item.externalUrl && (
+                        <p style="margin-top:8px;">
+                          <a href={item.externalUrl} rel="noopener nofollow ugc" target="_blank"
+                             style="color:var(--champagne-2);">View project ↗</a>
+                        </p>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <aside>
+          <div class="panel glass-p">
+            <h2>Working with them</h2>
+            <dl class="facts">
+              {rate && <div><dt>Starting rate</dt><dd>{rate}</dd></div>}
+              {rateModels && <div><dt>How they charge</dt><dd>{rateModels}</dd></div>}
+              
+              {workLocation && <div><dt>Work location</dt><dd>{workLocation}</dd></div>}
+              {profile.turnaround && <div><dt>Turnaround</dt><dd>{profile.turnaround}</dd></div>}
+              {availability && <div><dt>Availability</dt><dd>{availability}</dd></div>}
+            </dl>
+
+            <a class="btn-hot" href={`/hire/${profile.handle}`} style="width:100%;margin-top:22px;">Request to hire</a>
+            <p class="fh" style="margin-top:12px;text-align:center;">
+              Free to send. Your brief goes only to this specialist, and nothing is published.
+            </p>
+          </div>
+
+          <div class="panel glass-p">
+            <h2>Prefer our team?</h2>
+            <p>
+              {primary?.serviceName} is one of our ten in-house services. If you would rather we
+              delivered it end to end, we come back with a fixed price within one working day.
+            </p>
+            <a class="btn-glass btn-sm" href={backToService?.page ?? '/'} style="width:100%;">
+              {primary?.serviceName} with our team
+            </a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+</Night>

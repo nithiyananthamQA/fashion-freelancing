@@ -1,0 +1,224 @@
+---
+/**
+ * /sign-in — one shared sign-in for companies and freelancers (plan §3).
+ *
+ * The page handles its own POST so it works without JavaScript, and `next` is
+ * carried through the whole exchange so a visitor who was part-way through a
+ * hire request lands back exactly where they were (§6.1).
+ */
+export const prerender = false;
+
+import Night from '../../layouts/Night.astro';
+import { db, env } from '../../server/db';
+import { landingFor, signIn, signUp } from '../../server/auth';
+import { createSession, setSessionCookie } from '../../server/session';
+import { mergeCookieShortlist } from '../../server/shortlist';
+import { one } from '../../server/db';
+import { passwordProblem } from '../../server/password';
+import { HONEYPOT, parse, trapped } from '../../server/validate';
+import { clientKey, limited, tooManyRequests } from '../../server/rate-limit';
+
+const database = db(Astro);
+const runtimeEnv = env(Astro);
+
+/* Already signed in? Skip straight to where they were heading. */
+if (Astro.locals.user) {
+  return Astro.redirect(landingFor(Astro.url.searchParams.get('next'), Astro.locals.user));
+}
+
+let mode = Astro.url.searchParams.get('mode') === 'create' ? 'create' : 'signin';
+let errors: Record<string, string> = {};
+let values = { name: '', email: '' };
+const note = Astro.url.searchParams.get('note');
+let next = Astro.url.searchParams.get('next');
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  mode = form.get('mode') === 'create' ? 'create' : 'signin';
+  next = typeof form.get('next') === 'string' ? (form.get('next') as string) : next;
+
+  if (trapped(form)) return Astro.redirect('/specialists');
+
+  const { f, errors: found } = parse(form);
+  errors = found;
+
+  const email = f.email('email');
+  const password = f.text('password', 'Password', { required: true, max: 200 });
+  values = { name: f.text('name', 'Your name', { required: mode === 'create', max: 120 }), email };
+
+  if (await limited(database, mode === 'create' ? 'signUp' : 'signIn', clientKey(Astro.request))) {
+    return tooManyRequests();
+  }
+
+  if (mode === 'create') {
+    const problem = passwordProblem(password);
+    if (problem) errors.password = problem;
+    f.consent('terms', 'Please accept the terms and privacy policy to continue.');
+
+    if (!Object.keys(errors).length) {
+      const result = await signUp(database, runtimeEnv, Astro.request, {
+        name: values.name,
+        email,
+        password,
+        country: f.text('country', 'Country', { max: 60 }) || null,
+        timezone: f.text('timezone', 'Timezone', { max: 60 }) || null,
+        acceptedTerms: true,
+      });
+      if (!result.ok) {
+        errors[result.field] = result.message;
+      } else {
+        const token = await createSession(database, result.userId, Astro.request.headers.get('user-agent'));
+        setSessionCookie(Astro, token);
+        // A brand-new account has no company yet, so the saved list stays in the
+        // cookie and is merged the moment one exists (company setup, or the
+        // first hire request). Nothing is dropped here.
+        return Astro.redirect(landingFor(next, { companyIds: [], profileId: null, isAdmin: false }));
+      }
+    }
+  } else if (!Object.keys(errors).length) {
+    const result = await signIn(database, Astro.request, email, password);
+    if (!result.ok) {
+      errors.password = result.message;
+    } else {
+      const token = await createSession(database, result.userId, Astro.request.headers.get('user-agent'));
+      setSessionCookie(Astro, token);
+      const roles = await loadRoles(database, result.userId);
+      // Anything shortlisted before signing in now belongs to their company.
+      if (roles.companyIds[0]) {
+        await mergeCookieShortlist(Astro, database, roles.companyIds[0], result.userId);
+      }
+      return Astro.redirect(landingFor(next, roles));
+    }
+  }
+}
+
+async function loadRoles(database: D1Database, userId: string) {
+  const company = await one<{ company_id: string }>(
+    database, 'SELECT company_id FROM company_members WHERE user_id = ? LIMIT 1', userId,
+  );
+  const profile = await one<{ id: string }>(
+    database, 'SELECT id FROM specialist_profiles WHERE user_id = ?', userId,
+  );
+  const admin = await one<{ is_admin: number }>(database, 'SELECT is_admin FROM users WHERE id = ?', userId);
+  return {
+    companyIds: company ? [company.company_id] : [],
+    profileId: profile?.id ?? null,
+    isAdmin: admin?.is_admin === 1,
+  };
+}
+
+const creating = mode === 'create';
+const otherModeUrl = `/sign-in?mode=${creating ? 'signin' : 'create'}${next ? `&next=${encodeURIComponent(next)}` : ''}`;
+---
+
+<Night title={creating ? 'Create your account — Fashion Freelancing' : 'Sign in — Fashion Freelancing'} noindex current="" quoteBot={false}>
+  <section class="net-hero" style="padding-bottom:calc(var(--u) * 8);">
+    <div class="wrap">
+      <div class="flow" style="max-width:520px;">
+
+        <div class="flow-head">
+          <span class="kicker">{creating ? 'New account' : 'Welcome back'}</span>
+          <h1 style="margin-top:14px;">{creating ? 'Create your account.' : 'Sign in.'}</h1>
+          <p class="sub" style="margin-top:12px;">
+            One account covers both sides — hire a specialist, offer your own work, or do both.
+          </p>
+        </div>
+
+        {note === 'hire' && (
+          <div class="notice">Sign in to send this request. Your brief and the specialist you picked are saved.</div>
+        )}
+        {note === 'save' && (
+          <div class="notice">Sign in to save specialists to your company's shortlist.</div>
+        )}
+
+        <div class="flow-panel glass-p">
+          {Object.keys(errors).length > 0 && (
+            <p class="notice bad" role="alert" style="margin-bottom:22px;">
+              Nothing was lost — check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
+            </p>
+          )}
+
+          <form method="post" class="cform" novalidate>
+            <input type="hidden" name="mode" value={mode} />
+            {next && <input type="hidden" name="next" value={next} />}
+            <input type="text" name={HONEYPOT} tabindex="-1" autocomplete="off" class="visually-hidden" aria-hidden="true" />
+
+            {creating && (
+              <label>
+                <span class="fl">Your name<span class="rq" aria-hidden="true">*</span></span>
+                <input class="fi" id="f-name" type="text" name="name" required minlength="2" maxlength="120" autocomplete="name"
+                       value={values.name} aria-invalid={errors.name ? 'true' : undefined} />
+                {errors.name && <span class="cform-err" role="alert">{errors.name}</span>}
+              </label>
+            )}
+
+            <label>
+              <span class="fl">Work email<span class="rq" aria-hidden="true">*</span></span>
+              <input class="fi" id="f-email" type="email" name="email" required autocomplete="email"
+                     value={values.email} aria-invalid={errors.email ? 'true' : undefined} />
+              {errors.email && <span class="cform-err" role="alert">{errors.email}</span>}
+            </label>
+
+            <label>
+              <span class="fl">Password<span class="rq" aria-hidden="true">*</span></span>
+              <input class="fi" id="f-password" type="password" name="password" required
+                     autocomplete={creating ? 'new-password' : 'current-password'}
+                     aria-invalid={errors.password ? 'true' : undefined} />
+              {errors.password
+                ? <span class="cform-err" role="alert">{errors.password}</span>
+                : creating && <span class="fh">At least 10 characters. Length matters more than symbols.</span>}
+            </label>
+
+            {creating && (
+              <>
+                <div class="row2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                  <label>
+                    <span class="fl">Country</span>
+                    <input class="fi" type="text" name="country" autocomplete="country-name" />
+                  </label>
+                  <label>
+                    <span class="fl">Timezone</span>
+                    <input class="fi" id="f-timezone" type="text" name="timezone" placeholder="Detected automatically" />
+                  </label>
+                </div>
+
+                <label class="opt" id="f-terms" style="width:100%;">
+                  <input type="checkbox" name="terms" value="on" required />
+                  <span>I accept the <a href="/pages/terms.html" target="_blank" rel="noopener" style="color:var(--champagne-2);">terms</a>{' '}
+                    and <a href="/pages/privacy.html" target="_blank" rel="noopener" style="color:var(--champagne-2);">privacy policy</a>.</span>
+                </label>
+                {errors.terms && <span class="cform-err" role="alert">{errors.terms}</span>}
+              </>
+            )}
+
+            <button type="submit" class="btn-hot" style="width:100%;margin-top:6px;">
+              {creating ? 'Create account' : 'Sign in'}
+            </button>
+          </form>
+
+          <div class="row-sm" style="justify-content:space-between;margin-top:20px;">
+            <a href={otherModeUrl} class="link-t">
+              {creating ? 'I already have an account' : 'Create an account'}
+            </a>
+            {!creating && (
+              <a href="/sign-in/forgot" class="link-t" style="color:var(--ink-5);">Forgot password?</a>
+            )}
+          </div>
+        </div>
+
+        <p class="fh" style="text-align:center;margin-top:20px;">
+          Looking to hire our team instead? <a href="/#contact" style="color:var(--champagne-2);">Start a project</a> — no account needed.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    /* Fill the timezone field from the browser so nobody has to know theirs. */
+    (function () {
+      var field = document.getElementById('f-timezone');
+      if (!field || field.value) return;
+      try { field.value = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    })();
+  </script>
+</Night>

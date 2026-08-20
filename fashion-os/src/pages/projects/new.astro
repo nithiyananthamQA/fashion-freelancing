@@ -1,0 +1,543 @@
+---
+/**
+ * /projects/new — post a project for matching specialists (plan §7).
+ *
+ * For companies that know the work but not yet the person. On publish the
+ * matcher runs and every recommendation carries the explainable reason that
+ * produced it (§9) — no hidden scoring.
+ *
+ * Projects are never indexed and never visible to unapproved users.
+ */
+export const prerender = false;
+
+import Night from '../../layouts/Night.astro';
+import { db, writeList } from '../../server/db';
+import { newId, nowIso } from '../../server/ids';
+import { audit, notify } from '../../server/audit';
+import { parse } from '../../server/validate';
+import { clearDraft, draftValue, draftValues, readDraft, saveDraft } from '../../server/draft';
+import { mergeCookieShortlist } from '../../server/shortlist';
+import { loadCandidates, rank } from '../../server/matching';
+import { optionsFor, specialtyLookup, stackLookup } from '../../server/repo/specialists';
+import {
+  ENGAGEMENT, EXPERIENCE_BANDS, SERVICES, WORK_LOCATION, getService, specialtyId,
+} from '../../data/taxonomy';
+
+const database = db(Astro);
+const DRAFT_KIND = 'project';
+
+/* Browse-and-fill first, sign in at the point of value (§6.1): the form is
+   open to anyone, and the account is only required to publish. Whatever has
+   been typed is parked in the draft cookie and restored on the way back. */
+const user = Astro.locals.user;
+const companyId = user?.companyIds[0] ?? null;
+
+let draft = readDraft(Astro, DRAFT_KIND);
+let errors: Record<string, string> = {};
+/** Body of a submission that failed validation, so nothing typed is lost. */
+let submitted: FormData | null = null;
+let published: { id: string; title: string; invited: { name: string; handle: string | null; reason: string }[] } | null = null;
+
+/* The service drives every conditional field below, so it is read first. */
+const selectedServiceId = Astro.url.searchParams.get('service') ?? draftValue(draft, 'service');
+const service = getService(selectedServiceId);
+const [skillOptions, toolOptions] = await Promise.all([
+  optionsFor(database, 'skills', service?.id ?? null),
+  optionsFor(database, 'tools', service?.id ?? null),
+]);
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  submitted = form;
+
+  /* "Show the questions for this service" — park what has been typed so far and come
+     back with the conditional groups rendered. Nothing is validated or lost. */
+  if (form.get('_reload')) {
+    saveDraft(Astro, DRAFT_KIND, form);
+    const picked = String(form.get('service') ?? '');
+    return Astro.redirect(picked ? `/projects/new?service=${encodeURIComponent(picked)}` : '/projects/new', 303);
+  }
+
+  /* Publishing is the point of value — park the brief and collect the account. */
+  if (!user) {
+    saveDraft(Astro, DRAFT_KIND, form);
+    return Astro.redirect(`/sign-in?next=${encodeURIComponent('/projects/new')}`, 303);
+  }
+  const { f, errors: found } = parse(form);
+  errors = found;
+
+  /* No company yet? Collect the two things we need here, not on a detour. */
+  let workingCompanyId = companyId;
+  const companyName = workingCompanyId ? '' : f.text('company_name', 'Company or brand name', { required: true, min: 2, max: 120 });
+  const companyRole = workingCompanyId ? '' : f.text('company_role', 'Your role', { required: true, max: 80 });
+
+  const serviceId = f.choice('service', 'Service', SERVICES.map((s) => s.id), { required: true });
+  const chosen = getService(serviceId ?? '');
+
+  /* Validate the tag selections against the SUBMITTED service, not the one the
+     page happened to render. They differ whenever the form is posted without a
+     ?service= round trip, and using the rendered service would silently drop
+     every skill and tool the company ticked. */
+  const [allowedSkills, allowedTools] = chosen
+    ? await Promise.all([optionsFor(database, 'skills', chosen.id), optionsFor(database, 'tools', chosen.id)])
+    : [[], []];
+  const allowedSpecialties = chosen ? chosen.specialties.map((name) => specialtyId(chosen.id, name)) : [];
+  const allowedStack = (chosen?.stack ?? []).map((option) => option.id);
+
+  const title = f.text('title', 'Project title', { required: true, min: 3, max: 140 });
+  const brief = f.text('brief', 'Brief', { required: true, min: 30, max: 5000 });
+  const deliverables = f.text('deliverables', 'Deliverables', { max: 2000 });
+  const startDate = f.date('start_date', 'Start date');
+  const deadline = f.date('deadline', 'Deadline');
+  const engagement = f.choice('engagement', 'Engagement type', ENGAGEMENT.map((e) => e.id), { required: true });
+  const budgetMin = f.int('budget_min', 'Minimum budget', { min: 0 });
+  const budgetMax = f.int('budget_max', 'Maximum budget', { min: 0 });
+  const currency = f.text('currency', 'Currency', { max: 3 }) || 'USD';
+  const ndaRequired = f.bool('nda');
+  const workLocation = f.choice('work_location', 'Work location', WORK_LOCATION.map((w) => w.id), { required: true });
+  const visibility = f.choice('visibility', 'Visibility', ['private', 'invited', 'matched'] as const, { required: true });
+
+  const specialties = f.choices('specialty', allowedSpecialties);
+  const skills = f.choices('skill', allowedSkills.map((s) => s.id));
+  const tools = f.choices('tool', allowedTools.map((t) => t.id));
+  const stack = f.choices('stack', allowedStack);
+  const minExperience = f.int('experience', 'Experience', { min: 0, max: 60 });
+
+  if (budgetMin !== null && budgetMax !== null && budgetMin > budgetMax) {
+    errors.budget_max = 'The maximum budget must be at least the minimum.';
+  }
+  if (startDate && deadline && deadline < startDate) {
+    errors.deadline = 'The deadline cannot be before the start date.';
+  }
+
+  if (!Object.keys(errors).length && chosen && engagement && workLocation && visibility) {
+    const id = newId();
+    const now = nowIso();
+
+    // Posting the first project doubles as company setup.
+    if (!workingCompanyId) {
+      workingCompanyId = newId();
+      await database.batch([
+        database
+          .prepare('INSERT INTO companies (id, name, created_at, updated_at) VALUES (?, ?, ?, ?)')
+          .bind(workingCompanyId, companyName, now, now),
+        database
+          .prepare("INSERT INTO company_members (company_id, user_id, role, job_title, created_at) VALUES (?, ?, 'owner', ?, ?)")
+          .bind(workingCompanyId, user.id, companyRole, now),
+      ]);
+      await audit(database, {
+        actorId: user.id, action: 'company.created', entityType: 'company', entityId: workingCompanyId, request: Astro.request,
+      });
+      await mergeCookieShortlist(Astro, database, workingCompanyId, user.id);
+    }
+
+    await database.batch([
+      database.prepare(
+        `INSERT INTO projects
+           (id, company_id, created_by, title, service_id, brief, deliverables, start_date, deadline,
+            engagement, budget_min, budget_max, currency, nda_required, work_location, visibility,
+            status, published_at, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', ?, ?, ?)`,
+      ).bind(
+        id, workingCompanyId, user.id, title, chosen.id, brief, deliverables || null, startDate, deadline,
+        engagement, budgetMin, budgetMax, currency, ndaRequired ? 1 : 0, workLocation, visibility,
+        now, now, now,
+      ),
+      database.prepare(
+        `INSERT INTO project_requirements
+           (project_id, specialties, skill_ids, tool_ids, stack_ids, languages, min_experience)
+         VALUES (?, ?, ?, ?, ?, '[]', ?)`,
+      ).bind(id, writeList(specialties), writeList(skills), writeList(tools), writeList(stack), minExperience),
+    ]);
+
+    /* --- matching (§9): explainable, and stored with the invite ---
+       A confidential project is promised to reach nobody until the company
+       invites them by hand, so the matcher must not run for it at all. It used
+       to run regardless, inviting and notifying specialists the company had
+       explicitly chosen to hide the brief from. */
+    const matches = visibility === 'private' ? [] : await (async () => {
+    const [candidates, specialtyNames, stackNames] = await Promise.all([
+      loadCandidates(database, chosen.id),
+      specialtyLookup(database),
+      stackLookup(database),
+    ]);
+    const labels: Record<string, string> = {};
+    for (const [key, value] of specialtyNames) labels[key] = value;
+    for (const [key, value] of stackNames) labels[key] = value;
+    for (const option of [...allowedSkills, ...allowedTools]) labels[option.id] = option.name;
+
+    return rank(candidates, {
+      serviceId: chosen.id,
+      serviceName: chosen.name,
+      specialties, skillIds: skills, toolIds: tools, stackIds: stack,
+      languages: [], minExperience, budgetMax, labels,
+    }, 12);
+    })();
+
+    if (matches.length) {
+      await database.batch(
+        matches.map((match) =>
+          database.prepare(
+            `INSERT INTO project_invites (id, project_id, profile_id, reason, status, created_at)
+             VALUES (?, ?, ?, ?, 'sent', ?)`,
+          ).bind(newId(), id, match.profileId, match.reason, now),
+        ),
+      );
+      // Notify each matched specialist. Their own workspace is the only place
+      // the project becomes visible — nothing about it is public.
+      const profileOwners = await database
+        .prepare(
+          `SELECT id, user_id FROM specialist_profiles WHERE id IN (${matches.map(() => '?').join(',')})`,
+        )
+        .bind(...matches.map((m) => m.profileId))
+        .all<{ id: string; user_id: string }>();
+      for (const owner of profileOwners.results ?? []) {
+        await notify(database, {
+          userId: owner.user_id,
+          kind: 'project_invite',
+          title: `New ${chosen.name} project: ${title}`,
+          body: 'A company posted work that matches your services.',
+          link: '/projects',
+        });
+      }
+    }
+
+    await audit(database, {
+      actorId: user.id, action: 'project.published', entityType: 'project', entityId: id,
+      detail: { matched: matches.length }, request: Astro.request,
+    });
+
+    clearDraft(Astro, DRAFT_KIND);
+    draft = {};
+    published = { id, title, invited: matches.map((m) => ({ name: m.name, handle: m.handle, reason: m.reason })) };
+  }
+}
+
+/* What they just typed beats the parked draft, which beats empty. */
+/* Shown only when we do not know their company yet. */
+const needsCompany = Boolean(user) && !companyId;
+const d = (key: string, fallback = ''): string => {
+  const sent = submitted?.get(key);
+  if (typeof sent === 'string') return sent;
+  return draftValue(draft, key) || fallback;
+};
+const restored = !published && Object.keys(draft).length > 0;
+const dm = (key: string): string[] => {
+  if (submitted) return submitted.getAll(key).filter((x): x is string => typeof x === 'string');
+  return draftValues(draft, key);
+};
+---
+
+<Night title="Post a project — Fashion Freelancing" noindex current="specialists">
+  <section class="net-hero">
+    <div class="wrap">
+      <div class="flow">
+
+        {published ? (
+          <div class="flow-panel glass-p">
+            <div class="sent-ok" style="padding-bottom:20px;">
+              <div class="ok" aria-hidden="true">✓</div>
+              <h3>“{published.title}” is posted.</h3>
+              <p>
+                {published.invited.length > 0
+                  ? `${published.invited.length} matching specialist${published.invited.length === 1 ? ' has' : 's have'} been invited. Their applications land in your workspace.`
+                  : 'No approved specialist matches this brief yet. Our team will match it by hand and come back to you.'}
+              </p>
+            </div>
+
+            {published.invited.length > 0 && (
+              <div style="margin-top:8px;">
+                <h2 style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--champagne-2);margin:0 0 14px;">
+                  Who was invited, and why
+                </h2>
+                <div class="ws-list">
+                  {published.invited.map((invite) => (
+                    <div class="ws-row glass-p" style="display:block;">
+                      <h3>{invite.name}</h3>
+                      <p class="why" style="margin-top:8px;">{invite.reason}</p>
+                      {invite.handle && (
+                        <a class="btn-glass btn-sm" href={`/specialists/${invite.handle}`} style="margin-top:12px;">
+                          View profile
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div class="row-sm" style="justify-content:center;margin-top:26px;">
+              <a class="btn-hot" href="/workspace/company">Open my workspace</a>
+              <a class="btn-glass" href="/projects/new">Post another</a>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div class="flow-head">
+              <span class="kicker">Post a project</span>
+              <h1 style="margin-top:14px;">Describe the work.</h1>
+              <p class="sub" style="margin-top:12px;">
+                We match it against approved specialists in that service and tell you exactly why each
+                one was recommended. Nothing you write here is public or indexed.
+              </p>
+            </div>
+
+            {restored && <div class="notice ok">Your draft was saved while you signed in. Everything is still here.</div>}
+            {!user && (
+              <div class="notice">
+                Fill this in first — we ask for an account only when you publish, and nothing you
+                type here is lost along the way.
+              </div>
+            )}
+
+            <div class="flow-panel glass-p">
+              {Object.keys(errors).length > 0 && (
+                <p class="notice bad" role="alert" style="margin-bottom:22px;">
+                  Nothing was lost — check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
+                </p>
+              )}
+
+              <form method="post" class="cform" novalidate>
+                {needsCompany && (
+                  <fieldset class="fieldset" style="margin-bottom:26px;">
+                    <legend>About you</legend>
+                    <p class="hint">Specialists see who posted the work. We only need this once.</p>
+                    <div class="row2">
+                      <label>
+                        <span class="fl">Company or brand<span class="rq" aria-hidden="true">*</span></span>
+                        <input class="fi" id="f-company_name" type="text" name="company_name" required
+                               minlength="2" maxlength="120" autocomplete="organization"
+                               value={d('company_name')} aria-invalid={errors.company_name ? 'true' : undefined} />
+                        {errors.company_name && <span class="cform-err" role="alert">{errors.company_name}</span>}
+                      </label>
+                      <label>
+                        <span class="fl">Your role<span class="rq" aria-hidden="true">*</span></span>
+                        <input class="fi" id="f-company_role" type="text" name="company_role" required
+                               maxlength="80" autocomplete="organization-title" placeholder="e.g. Founder"
+                               value={d('company_role')} aria-invalid={errors.company_role ? 'true' : undefined} />
+                        {errors.company_role && <span class="cform-err" role="alert">{errors.company_role}</span>}
+                      </label>
+                    </div>
+                  </fieldset>
+                )}
+
+                <label>
+                  <span class="fl">Service<span class="rq" aria-hidden="true">*</span></span>
+                  <select class="fi" id="f-service" name="service" required data-reload>
+                    <option value="">Choose the service this project needs</option>
+                    {SERVICES.map((item) => (
+                      <option value={item.id} selected={service?.id === item.id}>{item.name}</option>
+                    ))}
+                  </select>
+                  <span class="fh">Pick the service first, then we can ask exactly what matters for it.</span>
+                  {errors.service && <span class="cform-err" role="alert">{errors.service}</span>}
+                </label>
+
+                <button type="submit" name="_reload" value="1" formnovalidate class="btn-glass btn-sm" id="reload-fields"
+                        style="justify-self:start;">
+                  Show the questions for this service
+                </button>
+
+                <label>
+                  <span class="fl">Project title<span class="rq" aria-hidden="true">*</span></span>
+                  <input class="fi" id="f-title" type="text" name="title" required minlength="3" maxlength="140" value={d('title')}
+                         aria-invalid={errors.title ? 'true' : undefined} />
+                  {errors.title && <span class="cform-err" role="alert">{errors.title}</span>}
+                </label>
+
+                <label>
+                  <span class="fl">The brief<span class="rq" aria-hidden="true">*</span></span>
+                  <textarea class="fi" id="f-brief" name="brief" required minlength="30" rows="6"
+                            placeholder="Scope, stage, constraints — what does finished look like?"
+                            aria-invalid={errors.brief ? 'true' : undefined}>{d('brief')}</textarea>
+                  {errors.brief && <span class="cform-err" role="alert">{errors.brief}</span>}
+                </label>
+
+                <label>
+                  <span class="fl">Deliverables</span>
+                  <textarea class="fi" id="f-deliverables" name="deliverables" rows="3">{d('deliverables')}</textarea>
+                </label>
+
+                {service && (
+                  <>
+                    <fieldset class="fieldset" style="margin-bottom:0;">
+                      <legend>Specialties needed</legend>
+                      <div class="opts">
+                        {service.specialties.map((name) => {
+                          const id = specialtyId(service.id, name);
+                          return (
+                            <label class="opt">
+                              <input type="checkbox" name="specialty" value={id} checked={dm('specialty').includes(id)} />
+                              {name}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </fieldset>
+
+                    {skillOptions.length > 0 && (
+                      <fieldset class="fieldset" style="margin-bottom:0;">
+                        <legend>Required skills</legend>
+                        <div class="opts">
+                          {skillOptions.map((skill) => (
+                            <label class="opt">
+                              <input type="checkbox" name="skill" value={skill.id} checked={dm('skill').includes(skill.id)} />
+                              {skill.name}
+                            </label>
+                          ))}
+                        </div>
+                      </fieldset>
+                    )}
+
+                    {toolOptions.length > 0 && (
+                      <fieldset class="fieldset" style="margin-bottom:0;">
+                        <legend>Required tools</legend>
+                        <div class="opts">
+                          {toolOptions.map((tool) => (
+                            <label class="opt">
+                              <input type="checkbox" name="tool" value={tool.id} checked={dm('tool').includes(tool.id)} />
+                              {tool.name}
+                            </label>
+                          ))}
+                        </div>
+                      </fieldset>
+                    )}
+
+                    {service.stack && (
+                      <fieldset class="fieldset" style="margin-bottom:0;">
+                        <legend>Technology stack</legend>
+                        <p class="hint">Only relevant for Website Development. Leave blank if you have no preference.</p>
+                        <div class="opts">
+                          {service.stack.map((option) => (
+                            <label class="opt">
+                              <input type="checkbox" name="stack" value={option.id} checked={dm('stack').includes(option.id)} />
+                              {option.name}
+                            </label>
+                          ))}
+                        </div>
+                      </fieldset>
+                    )}
+                  </>
+                )}
+
+                <div class="row2">
+                  <label>
+                    <span class="fl">Ideal start date</span>
+                    <input class="fi" id="f-start_date" type="date" name="start_date" value={d('start_date')} />
+                  </label>
+                  <label>
+                    <span class="fl">Deadline</span>
+                    <input class="fi" id="f-deadline" type="date" name="deadline" value={d('deadline')}
+                           aria-invalid={errors.deadline ? 'true' : undefined} />
+                    {errors.deadline && <span class="cform-err" role="alert">{errors.deadline}</span>}
+                  </label>
+                </div>
+
+                <fieldset class="fieldset" style="margin-bottom:0;">
+                  <legend>How do you want to pay?<span class="rq" aria-hidden="true">*</span></legend>
+                  <div class="opts" id="f-engagement">
+                    {ENGAGEMENT.map((item) => (
+                      <label class="opt">
+                        <input type="radio" name="engagement" value={item.id} checked={d('engagement') === item.id} required />
+                        {item.name}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <div class="row2">
+                  <label>
+                    <span class="fl">Budget from</span>
+                    <input class="fi" id="f-budget_min" type="number" name="budget_min" min="0" step="1" value={d('budget_min')} />
+                  </label>
+                  <label>
+                    <span class="fl">Budget up to</span>
+                    <input class="fi" id="f-budget_max" type="number" name="budget_max" min="0" step="1" value={d('budget_max')}
+                           aria-invalid={errors.budget_max ? 'true' : undefined} />
+                    {errors.budget_max && <span class="cform-err" role="alert">{errors.budget_max}</span>}
+                  </label>
+                </div>
+
+                <div class="row2">
+                  <label>
+                    <span class="fl">Currency</span>
+                    <select class="fi" id="f-currency" name="currency">
+                      {['USD', 'EUR', 'GBP', 'INR', 'AED'].map((code) => (
+                        <option value={code} selected={d('currency', 'USD') === code}>{code}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    <span class="fl">Minimum experience</span>
+                    <select class="fi" id="f-experience" name="experience">
+                      <option value="">Any</option>
+                      {EXPERIENCE_BANDS.map((band) => (
+                        <option value={band.id} selected={d('experience') === band.id}>{band.name}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+
+                <fieldset class="fieldset" style="margin-bottom:0;">
+                  <legend>Work location<span class="rq" aria-hidden="true">*</span></legend>
+                  <div class="opts" id="f-work_location">
+                    {WORK_LOCATION.map((item) => (
+                      <label class="opt">
+                        <input type="radio" name="work_location" value={item.id}
+                               checked={d('work_location', 'remote') === item.id} required />
+                        {item.name}
+                      </label>
+                    ))}
+                  </div>
+                </fieldset>
+
+                <fieldset class="fieldset" style="margin-bottom:0;">
+                  <legend>Who can see this project?<span class="rq" aria-hidden="true">*</span></legend>
+                  <div class="opts col" id="f-visibility">
+                    <label class="opt">
+                      <input type="radio" name="visibility" value="matched" checked={d('visibility', 'matched') === 'matched'} required />
+                      <span><b>Anyone in this service</b> — every approved specialist who does this kind of work can see it and reply.</span>
+                    </label>
+                    <label class="opt">
+                      <input type="radio" name="visibility" value="invited" checked={d('visibility') === 'invited'} />
+                      <span><b>Invited only</b> — only the specialists we recommend are shown it.</span>
+                    </label>
+                    <label class="opt">
+                      <input type="radio" name="visibility" value="private" checked={d('visibility') === 'private'} />
+                      <span><b>Confidential</b> — nobody is told and nobody can see it until you invite them yourself.</span>
+                    </label>
+                  </div>
+                </fieldset>
+
+                <label class="opt" style="width:100%;">
+                  <input type="checkbox" name="nda" value="on" checked={d('nda') === 'on'} />
+                  A mutual NDA is required before any file is shared.
+                </label>
+
+                <button type="submit" class="btn-hot" style="width:100%;margin-top:6px;">
+                  {user ? 'Publish project' : 'Continue — you will sign in next'}
+                </button>
+              </form>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    /* Changing the service reveals its specialty, skill, tool and stack fields.
+       The round trip goes through the draft cookie, so anything already typed
+       comes back with it. Without JavaScript the button does the same job — it
+       is only hidden once we know we can click it automatically. */
+    (function () {
+      var select = document.querySelector('[data-reload]');
+      var button = document.getElementById('reload-fields');
+      if (!select || !button) return;
+      button.classList.add('hide');
+      select.addEventListener('change', function () {
+        if (select.value) button.click();
+      });
+    })();
+  </script>
+</Night>

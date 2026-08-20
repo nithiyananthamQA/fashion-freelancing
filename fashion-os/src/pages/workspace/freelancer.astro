@@ -1,0 +1,348 @@
+---
+/**
+ * /workspace/freelancer — profile status, invitations, requests and
+ * engagements (plan §3). A specialist sees only their own records (§11).
+ *
+ * This is also where a draft or rejected application picks back up, so the
+ * page has to work at every profile status, not only 'approved'.
+ */
+export const prerender = false;
+
+import Night from '../../layouts/Night.astro';
+import { all, db, one, run } from '../../server/db';
+import { guard, requireSpecialist } from '../../server/guards';
+import { newId, nowIso } from '../../server/ids';
+import { audit, notify } from '../../server/audit';
+import { parse } from '../../server/validate';
+import { APPLICATION_STEPS, TOTAL_APPLICATION_STEPS, getService } from '../../data/taxonomy';
+import {
+  applicationStatusLabel, engagementLabel, engagementStatusLabel,
+  hireStatusForSpecialist, statusTone,
+} from '../../data/labels';
+
+const gate = await guard(Astro, () => requireSpecialist(Astro));
+if (gate.response) return gate.response;
+const { user, profileId } = gate.value;
+
+const database = db(Astro);
+let flash: string | null = null;
+
+/* Answer a direct hire request: accept, decline or ask a question (§6.4). */
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const requestId = String(form.get('requestId') ?? '');
+  const action = String(form.get('action') ?? '');
+
+  const request = await one<{ id: string; title: string; company_id: string; created_by: string; status: string }>(
+    database,
+    'SELECT id, title, company_id, created_by, status FROM hire_requests WHERE id = ? AND profile_id = ?',
+    requestId, profileId,
+  );
+
+  if (request) {
+    const now = nowIso();
+    if (action === 'accept') {
+      const engagementId = newId();
+      await database.batch([
+        database.prepare("UPDATE hire_requests SET status = 'accepted', updated_at = ? WHERE id = ?").bind(now, request.id),
+        database.prepare(
+          `INSERT INTO engagements (id, company_id, profile_id, hire_request_id, title, status, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, 'active', ?, ?)`,
+        ).bind(engagementId, request.company_id, profileId, request.id, request.title, now, now),
+      ]);
+      await notify(database, {
+        userId: request.created_by, kind: 'hire_accepted',
+        title: `${user.name} accepted: ${request.title}`, link: '/workspace/company',
+      });
+      await audit(database, {
+        actorId: user.id, action: 'engagement.created', entityType: 'engagement', entityId: engagementId,
+        request: Astro.request,
+      });
+      flash = 'Accepted. The work is now in progress, and the company has been told.';
+    } else if (action === 'decline') {
+      await run(database, "UPDATE hire_requests SET status = 'declined', updated_at = ? WHERE id = ?", now, request.id);
+      await notify(database, {
+        userId: request.created_by, kind: 'hire_declined',
+        title: `${user.name} declined: ${request.title}`, link: '/workspace/company',
+      });
+      flash = 'Declined. The company has been told.';
+    } else if (action === 'question') {
+      const { f } = parse(form);
+      const body = f.text('body', 'Your question', { required: true, min: 5, max: 2000 });
+      if (body) {
+        await run(
+          database,
+          'INSERT INTO messages (id, hire_request_id, sender_id, body, created_at) VALUES (?, ?, ?, ?, ?)',
+          newId(), request.id, user.id, body, now,
+        );
+        await run(database, "UPDATE hire_requests SET status = 'question', updated_at = ? WHERE id = ?", now, request.id);
+        await notify(database, {
+          userId: request.created_by, kind: 'hire_question',
+          title: `Question about: ${request.title}`, link: '/workspace/company',
+        });
+        flash = 'Question sent.';
+      }
+    }
+  }
+}
+
+const profile = await one<{
+  status: string; handle: string | null; wizard_step: number; headline: string | null;
+  availability: string | null; submitted_at: string | null;
+}>(
+  database,
+  'SELECT status, handle, wizard_step, headline, availability, submitted_at FROM specialist_profiles WHERE id = ?',
+  profileId,
+);
+
+const [requests, invites, applications, engagements, messages, reviewNotes] = await Promise.all([
+  all<{
+    id: string; title: string; brief: string; status: string; service_id: string; company_name: string;
+    budget_min: number | null; budget_max: number | null; currency: string | null; deadline: string | null;
+    nda_required: number; engagement: string | null;
+  }>(
+    database,
+    `SELECT h.id, h.title, h.brief, h.status, h.service_id, c.name AS company_name,
+            h.budget_min, h.budget_max, h.currency, h.deadline, h.nda_required, h.engagement
+       FROM hire_requests h JOIN companies c ON c.id = h.company_id
+      WHERE h.profile_id = ? AND h.status != 'draft'
+      ORDER BY h.created_at DESC`,
+    profileId,
+  ),
+  all<{ id: string; title: string; reason: string | null; status: string }>(
+    database,
+    `SELECT i.id, p.title, i.reason, i.status
+       FROM project_invites i JOIN projects p ON p.id = i.project_id
+      WHERE i.profile_id = ? ORDER BY i.created_at DESC LIMIT 20`,
+    profileId,
+  ),
+  all<{ id: string; title: string; status: string }>(
+    database,
+    `SELECT a.id, p.title, a.status FROM applications a JOIN projects p ON p.id = a.project_id
+      WHERE a.profile_id = ? ORDER BY a.created_at DESC`,
+    profileId,
+  ),
+  all<{ id: string; title: string; status: string; company_name: string }>(
+    database,
+    `SELECT e.id, e.title, e.status, c.name AS company_name
+       FROM engagements e JOIN companies c ON c.id = e.company_id
+      WHERE e.profile_id = ? ORDER BY e.created_at DESC`,
+    profileId,
+  ),
+  all<{ id: string; hire_request_id: string; body: string; created_at: string; sender_name: string; mine: number }>(
+    database,
+    `SELECT m.id, m.hire_request_id, m.body, m.created_at, u.name AS sender_name,
+            CASE WHEN m.sender_id = ?2 THEN 1 ELSE 0 END AS mine
+       FROM messages m
+       JOIN users u ON u.id = m.sender_id
+       JOIN hire_requests h ON h.id = m.hire_request_id
+      WHERE h.profile_id = ?1
+      ORDER BY m.created_at`,
+    profileId, user.id,
+  ),
+  all<{ decision: string; notes: string | null; created_at: string }>(
+    database,
+    'SELECT decision, notes, created_at FROM verification_reviews WHERE profile_id = ? ORDER BY created_at DESC LIMIT 3',
+    profileId,
+  ),
+]);
+
+const status = profile?.status ?? 'draft';
+const approved = status === 'approved';
+const stepTitle = APPLICATION_STEPS.find((s) => s.step === (profile?.wizard_step ?? 1))?.title ?? 'Account';
+const openRequests = requests.filter((r) => ['sent', 'viewed', 'question', 'proposal'].includes(r.status));
+
+const statusCopy: Record<string, { tone: string; line: string }> = {
+  draft: { tone: 'warn', line: `Your application is a draft — you left off at step ${profile?.wizard_step ?? 1} of ${TOTAL_APPLICATION_STEPS}, ${stepTitle}.` },
+  submitted: { tone: 'info', line: 'Your application is with our review team. The decision — and anything we need changed — appears here within a few working days. Check back rather than waiting on email.' },
+  needs_changes: { tone: 'warn', line: 'We need a few changes before this can be approved. The notes are below.' },
+  approved: { tone: 'ok', line: 'Your profile is live in the directory and receiving matched work.' },
+  paused: { tone: 'warn', line: 'Your profile is paused, so it is hidden from the directory and from matching.' },
+};
+const current = statusCopy[status] ?? statusCopy.draft!;
+---
+
+<Night title="Your workspace — Fashion Freelancing" noindex current="" quoteBot={false}>
+  <section class="net-hero" style="padding-bottom:calc(var(--u) * 2);">
+    <div class="wrap">
+      <div class="ws-head">
+        <div>
+          <span class="kicker">Freelancer workspace</span>
+          <h1 style="margin-top:12px;">{user.name}.</h1>
+        </div>
+        <div class="row-sm">
+          {approved && <a class="btn-glass btn-sm" href="/projects">Browse projects</a>}
+          {approved && profile?.handle && <a class="btn-glass btn-sm" href={`/specialists/${profile.handle}`}>View public profile</a>}
+          <a class="btn-hot btn-sm" href="/apply">{approved ? 'Edit profile' : 'Continue application'}</a>
+          <form method="post" action="/api/sign-out">
+            <button type="submit" class="btn-glass btn-sm">Sign out</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:0;">
+    <div class="wrap">
+      {flash && <div class="notice ok" style="margin-bottom:22px;">{flash}</div>}
+
+      <div class="panel glass-p">
+        <h2>Profile status</h2>
+        <p style="margin-bottom:14px;">
+          <span class={`pill-status ${current.tone}`}>{status.replace('_', ' ')}</span>
+        </p>
+        <p>{current.line}</p>
+
+        {status === 'draft' && (
+          <div class="flow-steps" style="margin-top:18px;">
+            {APPLICATION_STEPS.map((step) => (
+              <i class={step.step < (profile?.wizard_step ?? 1) ? 'done' : step.step === (profile?.wizard_step ?? 1) ? 'now' : ''}></i>
+            ))}
+          </div>
+        )}
+
+        {status === 'needs_changes' && reviewNotes.length > 0 && (
+          <div class="notice" style="margin-top:16px;">
+            <strong>Review notes</strong>
+            <p style="margin:8px 0 0;color:inherit;">{reviewNotes[0]!.notes}</p>
+          </div>
+        )}
+      </div>
+
+      {approved && (
+        <div class="ws-stats" style="margin-top:22px;">
+          <div class="ws-stat glass-p"><b>{openRequests.length}</b><span>Requests to answer</span></div>
+          <div class="ws-stat glass-p"><b>{invites.length}</b><span>Project invitations</span></div>
+          <div class="ws-stat glass-p"><b>{applications.length}</b><span>Replies sent</span></div>
+          <div class="ws-stat glass-p"><b>{engagements.filter((e) => e.status === 'active').length}</b><span>Work in progress</span></div>
+        </div>
+      )}
+
+      <!-- ---------- direct requests ---------- -->
+      <div class="panel glass-p">
+        <h2>Requests to work with you</h2>
+        {requests.length === 0 ? (
+          <p>Nothing yet. Companies find you through the directory once your profile is approved.</p>
+        ) : (
+          <div class="ws-list">
+            {requests.map((request) => (
+              <article class="ws-row" style="display:block;border:1px solid var(--line);border-radius:16px;">
+                <div class="row-sm" style="justify-content:space-between;align-items:flex-start;">
+                  <div>
+                    <p class="spec-service">{getService(request.service_id)?.name} · {request.company_name}</p>
+                    <h3 style="margin-top:6px;">{request.title}</h3>
+                  </div>
+                  <span class={`pill-status ${statusTone(request.status)}`}>
+                    {hireStatusForSpecialist(request.status)}
+                  </span>
+                </div>
+
+                <p style="margin:12px 0 0;color:var(--ink-4);font-size:14px;line-height:1.6;white-space:pre-wrap;">{request.brief}</p>
+                <div class="line" style="margin-top:12px;">
+                  {(request.budget_min !== null || request.budget_max !== null) && (
+                    <span>{request.currency ?? 'USD'} {request.budget_min ?? '—'}–{request.budget_max ?? '—'}</span>
+                  )}
+                  {request.engagement && <span>{engagementLabel(request.engagement)}</span>}
+                  {request.deadline && <span>Due {request.deadline}</span>}
+                  {request.nda_required === 1 && <span>NDA required</span>}
+                </div>
+
+                {(() => {
+                  const thread = messages.filter((m) => m.hire_request_id === request.id);
+                  if (!thread.length) return null;
+                  return (
+                    <div class="thread" style="margin-top:14px;">
+                      {thread.map((m) => (
+                        <div class={`msg ${m.mine === 1 ? 'mine' : ''}`}>
+                          <p class="who">{m.sender_name}</p>
+                          <p>{m.body}</p>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+
+                {['sent', 'viewed', 'question'].includes(request.status) && (
+                  <div class="stack-sm" style="margin-top:16px;">
+                    <div class="ws-row-actions">
+                      <form method="post">
+                        <input type="hidden" name="requestId" value={request.id} />
+                        <button class="btn-hot btn-sm" name="action" value="accept">Accept</button>
+                      </form>
+                      <form method="post">
+                        <input type="hidden" name="requestId" value={request.id} />
+                        <button class="btn-glass btn-sm" name="action" value="decline">Decline</button>
+                      </form>
+                    </div>
+                    <details>
+                      <summary class="btn-glass btn-sm" style="display:inline-flex;list-style:none;">Ask a question</summary>
+                      <form method="post" class="cform" style="margin-top:12px;">
+                        <input type="hidden" name="requestId" value={request.id} />
+                        <label>
+                          <span class="fl">Your question</span>
+                          <textarea class="fi" name="body" rows="3" required minlength="5"
+                                    placeholder="What do you still need to know before you can quote?"></textarea>
+                        </label>
+                        <button class="btn-hot btn-sm" name="action" value="question" style="justify-self:start;">Send question</button>
+                      </form>
+                    </details>
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <!-- ---------- invitations ---------- -->
+      {invites.length > 0 && (
+        <div class="panel glass-p">
+          <h2>Project invitations</h2>
+          <div class="ws-list">
+            {invites.map((invite) => (
+              <div class="ws-row" style="display:block;border:1px solid var(--line);border-radius:16px;">
+                <h3>{invite.title}</h3>
+                {invite.reason && <p class="why">{invite.reason}</p>}
+                <a class="btn-glass btn-sm" href="/projects" style="margin-top:12px;">Open in projects</a>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- ---------- applications + engagements ---------- -->
+      {applications.length > 0 && (
+        <div class="panel glass-p">
+          <h2>Projects you replied to</h2>
+          <div class="ws-list">
+            {applications.map((application) => (
+              <div class="ws-row" style="border:1px solid var(--line);border-radius:16px;">
+                <div><h3>{application.title}</h3></div>
+                <span class={`pill-status ${statusTone(application.status)}`}>
+                  {applicationStatusLabel(application.status)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {engagements.length > 0 && (
+        <div class="panel glass-p">
+          <h2>Work in progress</h2>
+          <div class="ws-list">
+            {engagements.map((engagement) => (
+              <div class="ws-row" style="border:1px solid var(--line);border-radius:16px;">
+                <div>
+                  <h3>{engagement.title}</h3>
+                  <div class="line"><span>{engagement.company_name}</span></div>
+                </div>
+                <span class={`pill-status ${statusTone(engagement.status)}`}>{engagementStatusLabel(engagement.status)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+</Night>

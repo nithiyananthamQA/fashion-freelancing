@@ -2,12 +2,10 @@
  * Fashion Freelancing — Quote Bot (launch version)
  *
  * A self-contained floating chat widget in the night-glass design system.
- * Flow is dedicated to the current services setup: pick a service, describe
- * the project, timeline, name + email → lead saved to localStorage 'ff_leads'
- * (same pipeline as the page forms; swap saveLead() when the backend lands).
+ * Flow is dedicated to the direct-service journey: pick a service, describe
+ * the project, timeline, name + email.
  *
- * Replaces the marketplace intake widget (intake.js/ff-chat.js), which is
- * HIDDEN FOR LAUNCH in site.js.
+ * Leads post to /api/leads, the same endpoint the page contact forms use.
  */
 (function () {
   if (window.__ffQuoteBot) return;
@@ -72,11 +70,11 @@
     '.qb-chip:hover{background:rgba(139,92,246,.18);border-color:rgba(167,139,250,.5);transform:translateY(-1px);}',
     '.qb-foot{display:flex;gap:9px;padding:13px 14px;border-top:1px solid rgba(255,255,255,.1);flex:none;}',
     '.qb-in{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:13px;',
-    'padding:11px 14px;font-family:Inter,sans-serif;font-size:14px;color:#F4F2FA;outline:none;transition:border-color .2s ease;}',
+    'padding:11px 14px;font-family:Inter,sans-serif;font-size:16px;color:#F4F2FA;outline:none;transition:border-color .2s ease;}',
     '.qb-in::placeholder{color:rgba(244,242,250,.4);}',
     '.qb-in:focus{border-color:#A78BFA;}',
     '.qb-in[aria-invalid="true"]{border-color:#FF7AB8;}',
-    '.qb-send{width:44px;height:44px;border-radius:12px;border:0;cursor:pointer;flex:none;',
+    '.qb-send{width:44px;height:44px;min-width:44px;min-height:44px;border-radius:12px;border:0;cursor:pointer;flex:none;',
     'background:linear-gradient(135deg,#8B5CF6,#FF4FA0);color:#fff;display:grid;place-items:center;',
     'transition:transform .2s ease,opacity .2s ease;}',
     '.qb-send:hover{transform:translateY(-1px);}',
@@ -178,14 +176,19 @@
     };
   }
 
-  /* ---------- lead pipeline (same as the page forms) ---------- */
+  /* ---------- lead pipeline (same endpoint as the page forms) ---------- */
   function saveLead(lead) {
-    try {
-      var key = 'ff_leads';
-      var all = JSON.parse(localStorage.getItem(key) || '[]');
-      all.push(lead);
-      localStorage.setItem(key, JSON.stringify(all));
-    } catch (e) { /* storage unavailable — the closing message still shows the email */ }
+    var body = new FormData();
+    Object.keys(lead).forEach(function (k) {
+      if (lead[k] !== undefined && lead[k] !== null) body.set(k, String(lead[k]));
+    });
+    body.set('source', 'quote-bot');
+    return fetch('/api/leads', { method: 'POST', body: body })
+      .then(function (r) { if (!r.ok) throw new Error('lead ' + r.status); })
+      .catch(function () {
+        /* The closing message already gives the email address, so the person
+           still has a way through even if this call fails. */
+      });
   }
 
   /* ---------- the flow — dedicated to the current services setup ---------- */

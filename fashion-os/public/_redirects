@@ -1,14 +1,70 @@
 # Cloudflare Pages — redirects
 # https://developers.cloudflare.com/pages/configuration/redirects/
-# Astro routes (/dashboard, /brand, /admin, /dashboard/orders/view …) and the
-# copied static pages (/pages/*.html, /index.html) are served as built files.
-# These rules only add a few clean-URL conveniences.
+#
+# The services site is served as static files (/index.html, /pages/*.html).
+# The specialist network is served by Astro routes (/specialists, /apply, …).
+# Rules below are (a) clean URLs for the kept pages and (b) the legacy
+# marketplace retirement map from the plan, §12.5.
 
-# Clean URLs for the most common public pages
-/login        /pages/login.html        301
-/signup       /pages/signup.html       301
-/marketplace  /pages/marketplace.html  301
-/pricing      /pages/pricing.html      301
-/how-it-works /pages/how-it-works.html 301
-/about        /pages/about.html        301
-/help         /pages/help.html         301
+# --- Clean URLs for the kept public pages ---
+/about        /pages/about.html   301
+/help         /pages/help.html    301
+/terms        /pages/terms.html   301
+/privacy      /pages/privacy.html 301
+/cookies      /pages/cookies.html 301
+
+# --- Legacy marketplace, profile, gig and hire URLs -> the new directory ---
+/marketplace          /specialists 301
+/pages/marketplace    /specialists 301
+/pages/marketplace.html /specialists 301
+/pages/profile        /specialists 301
+/pages/profile.html   /specialists 301
+/pages/gig            /specialists 301
+/pages/gig.html       /specialists 301
+/pages/hire           /specialists 301
+/pages/hire.html      /specialists 301
+
+# --- Legacy sign-in, dashboard and workspace URLs -> the new shared sign-in ---
+/login                /sign-in 301
+/pages/login          /sign-in 301
+/pages/login.html     /sign-in 301
+/signup               /sign-in 301
+/pages/signup         /sign-in 301
+/pages/signup.html    /sign-in 301
+/pages/forgot-password      /sign-in 301
+/pages/forgot-password.html /sign-in 301
+/pages/reset-password       /sign-in 301
+/pages/reset-password.html  /sign-in 301
+/pages/check-email          /sign-in 301
+/pages/check-email.html     /sign-in 301
+/pages/email-verify         /sign-in 301
+/pages/email-verify.html    /sign-in 301
+/pages/onboarding           /apply   301
+/pages/onboarding.html      /apply   301
+/pages/dashboard-router      /sign-in 301
+/pages/dashboard-router.html /sign-in 301
+/dashboard/*          /sign-in 301
+/brand/*              /sign-in 301
+/admin/*              /sign-in 301
+
+# --- Legacy project/brief and content URLs with no new equivalent -> home ---
+/pages/brief          / 301
+/pages/brief.html     / 301
+/pages/start          /#contact 301
+/pages/start.html     /#contact 301
+/pages/agency         / 301
+/pages/agency.html    / 301
+/how-it-works              / 301
+/pages/how-it-works        / 301
+/pages/how-it-works.html   / 301
+/pricing              / 301
+/pages/pricing        / 301
+/pages/pricing.html   / 301
+/pages/community      / 301
+/pages/community.html / 301
+/pages/blog           / 301
+/pages/blog.html      / 301
+/pages/blog-post      / 301
+/pages/blog-post.html / 301
+/pages/service        / 301
+/pages/service.html   / 301

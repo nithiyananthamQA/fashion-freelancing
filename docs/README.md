@@ -1,25 +1,29 @@
-# Fashion Freelancing — Architect Docs
+# Fashion Freelancing — Product Documents
 
-Design documents Dinesh asked for. None of these change the live site;
-they're deliverables for the platform / backend roadmap.
+The current product direction is the service-led specialist network: the
+ten-service public website stays the main business, and a curated specialist
+network sits alongside it as an add-on for clients who need to hire one person.
 
-| File | What it answers |
+The network is built — directory, profiles, the freelancer application wizard,
+company setup, request-to-hire, project posting with explainable matching, both
+workspaces, and the admin operations view. See §14 and §16 of the plan for what
+is done and what is still open.
+
+| File | Purpose |
 |---|---|
-| [01-prisma-schema.md](./01-prisma-schema.md) | Prisma / Postgres schema for the full marketplace (Users, Freelancers, Briefs, Orders with milestones + timesheets, Reviews, Conversations, Payments, Marketplace integrations). Drop-in when migrating from the localStorage demo. |
-| [02-ai-intake-agent.md](./02-ai-intake-agent.md) | System prompt + strict JSON schema for the AI Project Intake bot. Includes the worked example session and the matching-algorithm contract. |
-| [03-hero-react-component.md](./03-hero-react-component.md) | React + Tailwind reference component for the dark hero + 3-category service filter (Design & 3D / AI & Software / Production & QC). |
-| [04-marketplace-integration-architecture.md](./04-marketplace-integration-architecture.md) | System architecture for syncing brand catalogs to Amazon / Flipkart / Myntra / Tata CLiQ. Covers inventory drift, asset compliance, AI lifestyle imagery, and Cloudflare-native deployment. |
+| [05-service-led-specialist-network-plan.md](./05-service-led-specialist-network-plan.md) | **Source of truth.** Product scope, service taxonomy, UX contract, legacy removal, technical foundation, permissions, and rollout. |
+| [06-remaining-work.md](./06-remaining-work.md) | Live checklist: where every kind of data is stored, what is still to build, and why D1 rather than Firestore. |
+| [04-marketplace-integration-architecture.md](./04-marketplace-integration-architecture.md) | Technical reference for the E-Commerce Listing service — Amazon, Myntra and Flipkart catalogue integrations. Unrelated to the specialist network. |
+| [HERO_MARQUEE_LOCK.md](./HERO_MARQUEE_LOCK.md) | The CSS contract that pins the homepage hero marquee to the bottom of the viewport. Read before touching the hero. |
+| Fashion-Freelancing-Content-Package.html / .pdf | Content package for the services website. |
 
-## What's actually shipping on the live site
+Implementation lives in the repo, not in a document:
 
-Separately from these docs, the live site is getting Dinesh's
-strategic improvisations as **additive enhancements** (no teardown of
-the v8 nebula theme):
+- Canonical taxonomy — `fashion-os/src/data/taxonomy.ts`
+- Database schema — `fashion-os/migrations/0001_init.sql`
+- Design system — `public-html/assets/night.css`
 
-- Dual-audience second row on the hero (Brand · Exporter · Factory · Tech)
-- 3-category macro filter (Design / AI / Production-QC) on the marketplace
-- Hourly vs Fixed-milestone toggle on the hire page
-- Industrial service additions (Tukatech, Browzwear, Screen Color Separation)
-- AI Intake **wizard styled as chat** at `/pages/start.html` —
-  deterministic 5-question flow that emits the same JSON shape as the
-  spec in `02-ai-intake-agent.md`, so the LLM swap is one-line later
+Removed in the legacy clear-out (recoverable from git history, tag
+`pre-network-removal-2026-08-19`): the Prisma schema for the old localStorage
+marketplace, the marketplace intake-agent spec, and the React/Tailwind hero
+reference. All three described flows and dependencies that no longer exist.

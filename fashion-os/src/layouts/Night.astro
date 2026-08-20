@@ -1,0 +1,97 @@
+---
+/**
+ * The shell every specialist-network page renders into.
+ *
+ * It loads the SAME stylesheets and the SAME nav/footer script as the services
+ * website, so the network is visually continuous with it rather than a second
+ * design (plan §4). assets/site.js fills #site-nav and #site-footer, wires the
+ * mobile drawer, the services dropdown, scroll reveal and the cursor glow.
+ */
+interface Props {
+  title: string;
+  description?: string;
+  /** Marks the active primary nav item. */
+  current?: string;
+  /** Signed-in and confidential pages must never be indexed (§7, §13). */
+  noindex?: boolean;
+  /** Wide pages (the directory) drop the narrow reading measure. */
+  wide?: boolean;
+  /**
+   * The floating quote bot sells the in-house services. It belongs on public
+   * pages, not on top of a form someone is part-way through filling in.
+   */
+  quoteBot?: boolean;
+}
+
+const {
+  title,
+  description = 'Browse approved fashion specialists across our ten services, or join the network and receive relevant work.',
+  current = 'specialists',
+  noindex = false,
+  quoteBot = true,
+} = Astro.props;
+
+const FONTS =
+  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap';
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  {noindex && <meta name="robots" content="noindex, nofollow" />}
+  <link rel="icon" href="/favicon.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- fonts load without blocking first paint; the metric-matched fallbacks in
+       night.css render immediately so the swap causes no layout shift -->
+  <link rel="preload" as="style" href={FONTS} />
+  <link rel="stylesheet" href={FONTS} media="print" onload="this.media='all';this.onload=null" />
+  <noscript><link rel="stylesheet" href={FONTS} /></noscript>
+
+  <link rel="stylesheet" href="/assets/styles.css" />
+  <link rel="stylesheet" href="/assets/night.css" />
+  <link rel="stylesheet" href="/assets/network.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  {!quoteBot && <script is:inline>window.FF_NO_QUOTE_BOT = true;</script>}
+
+  <div class="scene" aria-hidden="true">
+    <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+    <div class="blob b4"></div><div class="blob b5"></div>
+  </div>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="glow" id="glow" aria-hidden="true"></div>
+
+  <div id="site-nav" data-current={current}></div>
+
+  <main id="main">
+    <slot />
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script is:inline src="/assets/site.js"></script>
+  <script is:inline src="/assets/net-forms.js" defer></script>
+  <script is:inline>
+    /* Cursor glow — the same behaviour the services pages use. Skipped for
+       reduced-motion and on touch, where there is no pointer to follow. */
+    (function () {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      if (!matchMedia('(hover: hover)').matches) return;
+      var glow = document.getElementById('glow');
+      if (!glow) return;
+      window.addEventListener('mousemove', function (e) {
+        glow.style.left = e.clientX + 'px';
+        glow.style.top = e.clientY + 'px';
+      }, { passive: true });
+    })();
+  </script>
+</body>
+</html>
