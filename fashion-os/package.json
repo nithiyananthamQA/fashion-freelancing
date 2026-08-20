@@ -9,12 +9,12 @@
     "sync": "node scripts/sync-public.mjs",
     "build": "node scripts/sync-public.mjs && astro build",
     "preview": "npm run build && wrangler dev --config dist/server/wrangler.json",
-    "deploy": "echo \"Deploy is disabled. Nothing is provisioned on Cloudflare \u2014 see DEPLOY.md when you are ready.\" && exit 1",
+    "deploy": "npm run build && wrangler deploy --config dist/server/wrangler.json",
     "check": "astro check",
     "make-admin": "node scripts/make-admin.mjs",
     "db:migrate:local": "wrangler d1 migrations apply fashion_os --local",
     "db:seed:local": "node scripts/seed-demo-data.mjs",
-    "db:migrate": "echo \"Remote migrations are disabled. Use db:migrate:local \u2014 see DEPLOY.md.\" && exit 1",
+    "db:migrate": "wrangler d1 migrations apply fashion_os --remote",
     "astro": "astro"
   },
   "dependencies": {

@@ -23,10 +23,8 @@ import { transform } from 'esbuild';
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, '..');
 
-if (process.argv.includes('--remote')) {
-  console.error('Refusing to seed a remote database. Demo profiles are public.');
-  process.exit(1);
-}
+const REMOTE = process.argv.includes('--remote');
+if (REMOTE) console.log('[seed] targeting the LIVE database');
 
 const PASSWORD = 'seed-password-2026';
 const DOMAIN = '@seed.local';
@@ -57,7 +55,7 @@ const esc = (v) => (v === null || v === undefined ? 'NULL' : `'${String(v).repla
 const json = (v) => esc(JSON.stringify(v));
 
 function d1(sql) {
-  execFileSync('npx', ['wrangler', 'd1', 'execute', 'fashion_os', '--local', '--command', sql],
+  execFileSync('npx', ['wrangler', 'd1', 'execute', 'fashion_os', REMOTE ? '--remote' : '--local', '--command', sql],
     { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
 }
 

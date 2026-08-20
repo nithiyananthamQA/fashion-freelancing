@@ -46,11 +46,17 @@ const rate = spec.rateMin ? `From ${spec.rateCurrency ?? 'USD'} ${spec.rateMin}`
       {spec.location && <span>{spec.location}</span>}
     </div>
 
-    {spec.portfolioCount > 0 && (
-      <div class="spec-strip" aria-label={`${spec.portfolioCount} portfolio pieces`}>
-        {Array.from({ length: Math.min(spec.portfolioCount, 4) }).map(() => <span></span>)}
+    {/* Thumbnails only when there is something to show. Empty grey boxes for
+        link-only work read as a broken image, not as a preview. */}
+    {spec.portfolioImages > 0 ? (
+      <div class="spec-strip" aria-label={`${spec.portfolioCount} pieces of work`}>
+        {Array.from({ length: Math.min(spec.portfolioImages, 4) }).map(() => <span></span>)}
       </div>
-    )}
+    ) : spec.portfolioCount > 0 ? (
+      <p class="spec-work-count">
+        {spec.portfolioCount} {spec.portfolioCount === 1 ? 'piece' : 'pieces'} of work
+      </p>
+    ) : null}
 
     {reason && <p class="why">{reason}</p>}
   </div>

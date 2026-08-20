@@ -41,6 +41,8 @@ export interface DirectoryCard {
   rateCurrency: string | null;
   location: string | null;
   portfolioCount: number;
+  /** How many have an actual image — the rest are links. */
+  portfolioImages: number;
 }
 
 interface CardRow {
@@ -59,6 +61,7 @@ interface CardRow {
   primary_skills: string | null;
   primary_tools: string | null;
   portfolio_count: number;
+  portfolio_images: number;
 }
 
 /** Read a directory query string into a validated filter object. */
@@ -195,7 +198,10 @@ export async function searchDirectory(
             o.service_id AS primary_service, o.specialties AS primary_specialties,
             o.skill_ids AS primary_skills, o.tool_ids AS primary_tools,
             (SELECT COUNT(*) FROM portfolio_items pi
-              WHERE pi.profile_id = p.id AND pi.moderation = 'approved') AS portfolio_count
+              WHERE pi.profile_id = p.id AND pi.moderation = 'approved') AS portfolio_count,
+            (SELECT COUNT(*) FROM portfolio_items pi
+              WHERE pi.profile_id = p.id AND pi.moderation = 'approved'
+                AND pi.media_key IS NOT NULL) AS portfolio_images
        FROM specialist_profiles p
        JOIN users u ON u.id = p.user_id
        LEFT JOIN specialist_service_offerings o ON o.profile_id = p.id AND o.is_primary = 1
@@ -230,6 +236,7 @@ export async function searchDirectory(
       rateCurrency: row.rate_currency,
       location: row.location,
       portfolioCount: row.portfolio_count,
+      portfolioImages: row.portfolio_images,
     };
   });
 

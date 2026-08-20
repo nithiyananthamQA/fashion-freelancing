@@ -12,6 +12,13 @@ import cloudflare from '@astrojs/cloudflare';
  */
 export default defineConfig({
   output: 'static',
+  /**
+   * Astro's own session store is switched off. It would otherwise make the
+   * Cloudflare adapter demand a KV namespace we never use — our sign-in
+   * sessions live in D1 (see src/server/session.ts). One less binding to
+   * provision, and the session runtime is dropped from the bundle.
+   */
+  session: false,
   adapter: cloudflare({
     imageService: 'passthrough',
   }),

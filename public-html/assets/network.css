@@ -255,6 +255,9 @@
 
 /* Compact portfolio strip on the card (§4). */
 .spec-strip { display: flex; gap: 6px; margin-top: 13px; }
+.spec-work-count {
+  margin: 12px 0 0; font-size: 12.5px; color: var(--ink-5);
+}
 .spec-strip span {
   width: 46px; height: 34px; border-radius: 8px; flex: none;
   background: rgba(255,255,255,.06); border: 1px solid var(--line);
@@ -319,7 +322,9 @@
 .work { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
 .work article { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: rgba(255,255,255,.035); }
 .work .thumb { aspect-ratio: 4 / 3; background: rgba(255,255,255,.05); display: block; object-fit: cover; width: 100%; }
-.work .meta { padding: 14px 15px 16px; }
+.work .meta { padding: 16px 16px 18px; }
+/* A piece with no image still needs presence, so the text block carries it. */
+.work article:not(:has(.thumb)) .meta { padding: 18px; }
 .work h3 { font-family: var(--disp); font-size: 15px; font-weight: 700; letter-spacing: -.015em; margin: 0 0 5px; }
 .work p { font-size: 12.5px; color: var(--ink-5); line-height: 1.55; margin: 0; }
 

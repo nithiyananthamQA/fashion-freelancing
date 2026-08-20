@@ -156,9 +156,11 @@ const bioParagraphs = profile.bio.split(/\n{2,}/).filter(Boolean);
               <div class="work">
                 {profile.portfolio.map((item) => (
                   <article>
-                    {item.mediaKey
-                      ? <img class="thumb" src={`/api/files/${item.mediaKey}`} alt={item.title} loading="lazy" decoding="async" />
-                      : <span class="thumb" aria-hidden="true"></span>}
+                    {/* No empty placeholder when the piece is a link — a blank
+                        grey box reads as a failed image. */}
+                    {item.mediaKey && (
+                      <img class="thumb" src={`/api/files/${item.mediaKey}`} alt={item.title} loading="lazy" decoding="async" />
+                    )}
                     <div class="meta">
                       <h3>{item.title}</h3>
                       <p>{item.contribution}</p>
