@@ -1,4 +1,8 @@
-# Push to main -> the live site updates.
+# Manual deploy. Run it from the Actions tab -> Deploy -> Run workflow.
+#
+# It does NOT run on push, because that would fail on every commit until the
+# token below exists. Add the secret and change `on:` to include
+# `push: {branches: [main]}` whenever you want pushes to deploy themselves.
 #
 # Before this can run, one secret must exist in
 # GitHub → Settings → Secrets and variables → Actions:
@@ -11,9 +15,7 @@
 name: Deploy
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:      # lets you deploy by hand from the Actions tab
+  workflow_dispatch:      # run it by hand from the Actions tab
 
 concurrency:
   # A newer push supersedes an in-flight deploy; never race two of them.
