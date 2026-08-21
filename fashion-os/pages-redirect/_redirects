@@ -1,0 +1,8 @@
+# fashion-freelancing.pages.dev forwards to the app.
+#
+# The app is a Worker — @astrojs/cloudflare emits `_worker.js` plus an ASSETS
+# binding, and Pages rejects ASSETS as reserved, which is what every failed
+# build here was. Rather than keep a second copy of the site (and a second set
+# of bindings) in sync, this project just forwards. One deployment stays the
+# source of truth and this hostname keeps working.
+/*  https://fashion-freelancing.nathianand10.workers.dev/:splat  302

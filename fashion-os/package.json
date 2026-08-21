@@ -15,7 +15,8 @@
     "db:migrate:local": "wrangler d1 migrations apply fashion_os --local",
     "db:seed:local": "node scripts/seed-demo-data.mjs",
     "db:migrate": "wrangler d1 migrations apply fashion_os --remote",
-    "astro": "astro"
+    "astro": "astro",
+    "deploy:pages-redirect": "wrangler pages deploy pages-redirect --project-name fashion-freelancing --branch main"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.2.2",
