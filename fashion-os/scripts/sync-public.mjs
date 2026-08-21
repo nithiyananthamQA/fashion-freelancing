@@ -96,4 +96,8 @@ if (existsSync(src404)) {
   writeFileSync(join(dest, '404.html'), html);
 }
 
+// 5. Stamp asset URLs with a content hash so a deploy actually reaches
+//    browsers that already cached the previous copy.
+await import('./version-assets.mjs');
+
 console.log('[sync-public] done.');

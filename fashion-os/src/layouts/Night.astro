@@ -33,6 +33,19 @@ const {
 
 const FONTS =
   'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap';
+
+/**
+ * Shared assets are stamped with a hash of their contents so a deploy reaches
+ * browsers that already cached the previous copy. scripts/version-assets.mjs
+ * writes the manifest during sync; if it has not run yet the paths degrade to
+ * unversioned, which is exactly the old behaviour rather than a build error.
+ */
+let assetVersions: Record<string, string> = {};
+try {
+  assetVersions = (await import('../../public/asset-versions.json')).default as Record<string, string>;
+} catch { /* not synced yet — fall back to bare paths */ }
+const asset = (name: string) =>
+  assetVersions[name] ? `/assets/${name}?v=${assetVersions[name]}` : `/assets/${name}`;
 ---
 
 <!doctype html>
@@ -61,9 +74,9 @@ if('IntersectionObserver' in window)d.className+=' rv-on';})();</script>
   <link rel="stylesheet" href={FONTS} media="print" onload="this.media='all';this.onload=null" />
   <noscript><link rel="stylesheet" href={FONTS} /></noscript>
 
-  <link rel="stylesheet" href="/assets/styles.css" />
-  <link rel="stylesheet" href="/assets/night.css" />
-  <link rel="stylesheet" href="/assets/network.css" />
+  <link rel="stylesheet" href={asset("styles.css")} />
+  <link rel="stylesheet" href={asset("night.css")} />
+  <link rel="stylesheet" href={asset("network.css")} />
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -85,8 +98,8 @@ if('IntersectionObserver' in window)d.className+=' rv-on';})();</script>
 
   <div id="site-footer"></div>
 
-  <script is:inline src="/assets/site.js"></script>
-  <script is:inline src="/assets/net-forms.js" defer></script>
+  <script is:inline src={asset("site.js")}></script>
+  <script is:inline src={asset("net-forms.js")} defer></script>
   <script is:inline>
     /* Cursor glow — the same behaviour the services pages use. Skipped for
        reduced-motion and on touch, where there is no pointer to follow. */
