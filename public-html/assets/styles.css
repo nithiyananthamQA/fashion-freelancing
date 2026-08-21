@@ -14,8 +14,9 @@
   --ink:     #14132B;   /* near-black, cool                */
   --ink-2:   #26253F;
   --ink-3:   #3B3A57;
-  --ink-4:   #5C5A7E;   /* body / lead text — AAA contrast */
-  --ink-5:   #82809E;   /* muted                           */
+  --ink-4:   #4F4D6B;   /* body / lead text — darkened so it still clears AA
+                          on the tinted panels and the footer, not just on --paper */
+  --ink-5:   #565571;   /* muted — clears AA on the tinted panels too, not just --paper */
   --ink-6:   #9B99B4;   /* faint                           */
   --ink-7:   #C7C5D8;
   --ink-8:   #E4E3EF;

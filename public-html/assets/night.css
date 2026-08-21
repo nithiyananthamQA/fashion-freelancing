@@ -16,32 +16,44 @@
    assets/network.css and declare no tokens of their own.
    ============================================================ */
 
+/* ------------------------------------------------------------
+   Tokens, in three layers.
+
+   1. :root                 — everything that does not change with
+                              the theme (spacing, type, brand hues).
+   2. :root                 — the LIGHT values. styles.css already
+                              carries most of them; these are the ones
+                              the night redesign introduced and light
+                              never had.
+   3. [data-theme="dark"]   — the dark values, which is what this file
+                              used to apply unconditionally.
+
+   The channel tokens (--surface-rgb, --ink-rgb, --shadow-rgb) exist so
+   translucent overlays flip on their own. The night look is built from
+   white at low alpha over a dark ground; light needs the same shapes in
+   dark ink over a pale ground. Writing them as
+   rgba(var(--surface-rgb), .14) means one token swap re-skins every
+   hairline, glass fill and hover state instead of several hundred edits.
+   ------------------------------------------------------------ */
+
 :root {
   --u: 8px;
   --nav-h: 72px;
   --sans: 'Inter', 'Inter-fb', system-ui, sans-serif;
   --disp: 'Plus Jakarta Sans', 'PJS-fb', var(--sans);
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
-
-  --paper:   #0C0A1C;
-  --paper-2: #131024;
-  --paper-3: rgba(255,255,255,.055);
-  --ink:     #F4F2FA;
-  --ink-3:   rgba(244,242,250,.84);
-  --ink-4:   rgba(244,242,250,.62);
-  --ink-5:   rgba(244,242,250,.46);
-  --ink-7:   rgba(244,242,250,.20);
-  --line:    rgba(255,255,255,.10);
-  --line-2:  rgba(255,255,255,.16);
-  --champagne: #8B5CF6; --champagne-2: #A78BFA; --champagne-50: rgba(139,92,246,.22);
-
-  --glass:        rgba(255,255,255,.055);
-  --glass-hover:  rgba(255,255,255,.095);
-  --glass-border: rgba(255,255,255,.14);
-  --grad-hot: linear-gradient(90deg, #8B5CF6, #FF4FA0);
   --easing: cubic-bezier(.22, 1, .36, 1);
 
-  /* the logo colours — service identity and accent rotation */
+  /* Text on a saturated accent surface — hot-gradient buttons, ::selection.
+     Those surfaces keep their colour in both themes, so their label stays
+     white rather than following --ink. */
+  --on-accent: #fff;
+
+  /* the kicker hue where no service accent is in play */
+  --brand-ink: #9A6203;
+
+  /* the logo colours — service identity and accent rotation.
+     Brand marks, so they hold steady across both themes. */
   --lg-orange: #F5A623;
   --lg-coral:  #F1543F;
   --lg-green:  #34C165;
@@ -52,11 +64,131 @@
   --lg-pink:   #FF6FB3;
   --lg-lime:   #A8D84A;
   --lg-peri:   #7E9BEA;
+}
 
-  /* status tints — approval states, availability, validation */
+/* ---------- LIGHT ----------
+   styles.css supplies --paper*, --ink*, --line*, --champagne* and the
+   shadows. What follows is only what night.css added on top. */
+:root {
+  --surface-rgb: 20, 19, 43;    /* overlays are dark ink over pale ground */
+  /* The nav bar and drawers are a translucent sheet OVER the page, not a
+     shadow. They have to follow the paper, or the bar stays dark above a
+     light page and every link on it fails contrast. */
+  --scrim-rgb:   244, 244, 251;
+
+  /* Chip and label text. The pale originals were picked to sit on a dark
+     ground; on the pale one they disappear, so light gets a saturated dark
+     counterpart of the same hue. */
+  --chip-violet: #653BFF;
+  --chip-violet2: #693BFF;
+  --chip-green: #147438;
+  --chip-green2: #18733C;
+  --chip-amber: #8D5A00;
+  --chip-amber2: #706400;
+  --chip-pink: #CB005B;
+  --chip-blue: #0064C0;
+  --ink-rgb:     20, 19, 43;
+  --shadow-rgb:  40, 40, 90;
+
+  --glass:        rgba(var(--surface-rgb), .035);
+  --glass-hover:  rgba(var(--surface-rgb), .065);
+  --glass-border: rgba(var(--surface-rgb), .10);
+
+  --grad-hot: linear-gradient(90deg, #5468F5, #C8385C);
+
+  /* status tints — approval states, availability, validation.
+     Darkened from the night set so they carry on a pale ground. */
+  --ok:   #1E7A47;
+  --warn: #9A6410;
+  --bad:  #C8385C;
+}
+
+/* ---------- DARK ----------
+   Applied when the visitor has chosen dark, and by default when their
+   system asks for it and they have not chosen light. */
+:root[data-theme="dark"] {
+  --brand-ink: var(--lg-orange);
+  --paper:   #0C0A1C;
+  --paper-2: #131024;
+  --paper-3: rgba(var(--surface-rgb), .055);
+  --ink:     #F4F2FA;
+  --ink-3:   rgba(var(--ink-rgb), .84);
+  --ink-4:   rgba(var(--ink-rgb), .62);
+  --ink-5:   rgba(var(--ink-rgb), .56);
+  --ink-7:   rgba(var(--ink-rgb), .20);
+  --line:    rgba(var(--surface-rgb), .10);
+  --line-2:  rgba(var(--surface-rgb), .16);
+  --champagne: #8B5CF6; --champagne-2: #A78BFA; --champagne-50: rgba(139,92,246,.22);
+
+  --surface-rgb: 255, 255, 255;   /* overlays are white over dark ground */
+  --scrim-rgb:   16, 13, 32;
+  --chip-violet: #E9E3FF;
+  --chip-violet2: #DED4FF;
+  --chip-green: #8BE3AC;
+  --chip-green2: #C4EFD5;
+  --chip-amber: #F7CE86;
+  --chip-amber2: #F6E97E;
+  --chip-pink: #FFD0E5;
+  --chip-blue: #CFE8FF;
+  --ink-rgb:     244, 242, 250;
+  --shadow-rgb:  0, 0, 0;
+
+  --glass:        rgba(var(--surface-rgb), .055);
+  --glass-hover:  rgba(var(--surface-rgb), .095);
+  --glass-border: rgba(var(--surface-rgb), .14);
+  --grad-hot: linear-gradient(90deg, #8B5CF6, #FF4FA0);
+
   --ok:   #34C165;
   --warn: #F5A623;
   --bad:  #FF4FA0;
+
+  --shadow-1: 0 1px 2px rgba(var(--shadow-rgb), .5), 0 1px 1px rgba(var(--shadow-rgb), .4);
+  --shadow-2: 0 16px 38px -16px rgba(var(--shadow-rgb), .7);
+  --shadow-3: 0 34px 70px -24px rgba(var(--shadow-rgb), .8);
+}
+
+/* System preference, for visitors who have not picked a side. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --brand-ink: var(--lg-orange);
+    --paper:   #0C0A1C;
+    --paper-2: #131024;
+    --paper-3: rgba(var(--surface-rgb), .055);
+    --ink:     #F4F2FA;
+    --ink-3:   rgba(var(--ink-rgb), .84);
+    --ink-4:   rgba(var(--ink-rgb), .62);
+    --ink-5:   rgba(var(--ink-rgb), .56);
+    --ink-7:   rgba(var(--ink-rgb), .20);
+    --line:    rgba(var(--surface-rgb), .10);
+    --line-2:  rgba(var(--surface-rgb), .16);
+    --champagne: #8B5CF6; --champagne-2: #A78BFA; --champagne-50: rgba(139,92,246,.22);
+  
+    --surface-rgb: 255, 255, 255;   /* overlays are white over dark ground */
+    --scrim-rgb:   16, 13, 32;
+    --chip-violet: #E9E3FF;
+    --chip-violet2: #DED4FF;
+    --chip-green: #8BE3AC;
+    --chip-green2: #C4EFD5;
+    --chip-amber: #F7CE86;
+    --chip-amber2: #F6E97E;
+    --chip-pink: #FFD0E5;
+    --chip-blue: #CFE8FF;
+    --ink-rgb:     244, 242, 250;
+    --shadow-rgb:  0, 0, 0;
+  
+    --glass:        rgba(var(--surface-rgb), .055);
+    --glass-hover:  rgba(var(--surface-rgb), .095);
+    --glass-border: rgba(var(--surface-rgb), .14);
+    --grad-hot: linear-gradient(90deg, #8B5CF6, #FF4FA0);
+  
+    --ok:   #34C165;
+    --warn: #F5A623;
+    --bad:  #FF4FA0;
+  
+    --shadow-1: 0 1px 2px rgba(var(--shadow-rgb), .5), 0 1px 1px rgba(var(--shadow-rgb), .4);
+    --shadow-2: 0 16px 38px -16px rgba(var(--shadow-rgb), .7);
+    --shadow-3: 0 34px 70px -24px rgba(var(--shadow-rgb), .8);
+  }
 }
 
 /* metric-matched fallbacks — the webfont swap no longer moves layout (CLS) */
@@ -77,7 +209,7 @@ body {
 /* styles.css paints a light gradient wash behind every page — the night
    system supplies its own atmosphere via .scene, so switch that one off. */
 body::before, body::after { content: none; }
-::selection { background: #8B5CF6; color: #fff; }
+::selection { background: #8B5CF6; color: var(--on-accent); }
 
 .wrap { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 28px; }
 @media (max-width: 720px) { .wrap { padding: 0 20px; } }
@@ -88,7 +220,7 @@ body::before, body::after { content: none; }
 
 .skip-link {
   position: fixed; top: -100px; left: 20px; z-index: 10001;
-  background: #8B5CF6; color: #fff; padding: 14px 22px;
+  background: var(--champagne-3, #6D3FD4); color: var(--on-accent); padding: 14px 22px;
   font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
   border-radius: 999px; transition: top .2s ease;
 }
@@ -135,19 +267,23 @@ main { position: relative; z-index: 3; }
   width: min(1180px, calc(100% - 28px));
   margin: 12px auto 0;
   border-radius: 999px;
-  background: rgba(16,13,32,.62) !important;
+  background: rgba(var(--scrim-rgb), .62) !important;
   backdrop-filter: saturate(160%) blur(20px) !important;
   -webkit-backdrop-filter: saturate(160%) blur(20px) !important;
-  border: 1px solid rgba(255,255,255,.12) !important;
-  border-bottom: 1px solid rgba(255,255,255,.12) !important;
-  box-shadow: 0 12px 44px -12px rgba(0,0,0,.55) !important;
+  border: 1px solid rgba(var(--surface-rgb), .12) !important;
+  border-bottom: 1px solid rgba(var(--surface-rgb), .12) !important;
+  box-shadow: 0 12px 44px -12px rgba(var(--shadow-rgb), .55) !important;
   overflow: hidden;
 }
 .topnav .container, .topnav .topnav-inner { padding-left: 20px; padding-right: 12px; }
 .topnav.is-scrolled { border-radius: 999px; }
-.topnav-mobile { top: 88px !important; border-radius: 22px; left: 12px !important; right: 12px !important; border: 1px solid rgba(255,255,255,.12); }
-.topnav-links a { color: rgba(244,242,250,.66) !important; }
-.topnav-links a:hover, .topnav-links a.active { color: #fff !important; }
+.topnav-mobile { top: 88px !important; border-radius: 22px; left: 12px !important; right: 12px !important; border: 1px solid rgba(var(--surface-rgb), .12); }
+.topnav-links a { color: rgba(var(--ink-rgb), .82) !important; }
+:root[data-theme="dark"] .topnav-links a { color: rgba(var(--ink-rgb), .66) !important; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .topnav-links a { color: rgba(var(--ink-rgb), .66) !important; }
+}
+.topnav-links a:hover, .topnav-links a.active { color: var(--ink) !important; }
 .topnav-burger span { background: #F4F2FA !important; }
 /* transparent logo artwork — a violet/pink light traces its shape so the
    dark strokes stay readable on dark glass */
@@ -160,25 +296,25 @@ main { position: relative; z-index: 3; }
   filter: drop-shadow(0 4px 20px rgba(139,92,246,.75)) drop-shadow(0 0 38px rgba(255,79,160,.5));
 }
 .topnav .btn-primary, .topnav-mobile .btn-primary {
-  background: var(--grad-hot) !important; color: #fff !important;
+  background: var(--grad-hot) !important; color: var(--on-accent) !important;
   border-radius: 999px !important; border: 0 !important;
   box-shadow: 0 8px 26px rgba(139,92,246,.4) !important;
 }
-.topnav-mobile { background: rgba(12,10,28,.92) !important; bottom: 12px !important; border: 1px solid rgba(255,255,255,.14) !important; box-shadow: 0 24px 70px -24px rgba(0,0,0,.75); }
+.topnav-mobile { background: rgba(var(--scrim-rgb), .92) !important; bottom: 12px !important; border: 1px solid rgba(var(--surface-rgb), .14) !important; box-shadow: 0 24px 70px -24px rgba(var(--shadow-rgb), .75); }
 .topnav-mobile-inner { padding: 30px 24px calc(24px + env(safe-area-inset-bottom)) !important; }
 .topnav-mobile-links { flex: 0 0 auto !important; justify-content: flex-start !important; padding: 8px 0 0 !important; }
 .topnav-mobile-cta { margin-top: auto !important; }
 .topnav-mobile-links a {
   display: block; width: 100%; text-align: left !important;
-  color: rgba(244,242,250,.8) !important;
+  color: rgba(var(--ink-rgb), .8) !important;
   font-family: var(--disp) !important; font-size: 24px !important; font-weight: 700 !important;
   letter-spacing: -.02em; padding: 18px 4px !important;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(var(--surface-rgb), .08);
 }
 .topnav-mobile-links a:last-child { border-bottom: 0; }
-.topnav-burger { background: rgba(255,255,255,.07) !important; border: 1px solid rgba(255,255,255,.16) !important; }
+.topnav-burger { background: rgba(var(--surface-rgb), .07) !important; border: 1px solid rgba(var(--surface-rgb), .16) !important; }
 .topnav-burger.is-open span { background: #F4F2FA !important; }
-.footer { background: rgba(255,255,255,.03) !important; border-top: 1px solid var(--line) !important; }
+.footer { background: rgba(var(--surface-rgb), .03) !important; border-top: 1px solid var(--line) !important; }
 #site-footer * { background-color: transparent; }
 
 /* ============================================================
@@ -186,7 +322,7 @@ main { position: relative; z-index: 3; }
    ============================================================ */
 .kicker {
   font-family: var(--mono); font-size: 11px; font-weight: 500;
-  letter-spacing: .2em; text-transform: uppercase; color: var(--lg-orange);
+  letter-spacing: .2em; text-transform: uppercase; color: var(--acc, var(--brand-ink));
 }
 .h-display {
   font-family: var(--disp); font-weight: 800; letter-spacing: -.035em; line-height: 1.02;
@@ -207,7 +343,7 @@ main { position: relative; z-index: 3; }
 .btn-hot {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   padding: 15px 30px; min-height: 50px; border: 0; cursor: pointer;
-  border-radius: 999px; background: var(--grad-hot); color: #fff;
+  border-radius: 999px; background: var(--grad-hot); color: var(--on-accent);
   font-family: var(--sans); font-size: 14px; font-weight: 600; text-decoration: none;
   box-shadow: 0 8px 30px rgba(139,92,246,.35);
   transition: transform .25s var(--easing), box-shadow .25s var(--easing);
@@ -233,8 +369,13 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible,
 /* ============================================================
    Reveal-on-scroll — assets/site.js adds .in when the element enters
    ============================================================ */
-.rv { opacity: 0; transform: translateY(24px); transition: opacity .7s var(--easing), transform .7s var(--easing); }
-.rv.in { opacity: 1; transform: none; }
+/* Reveal-on-scroll. The hidden state is scoped to .rv-on, which the inline
+   head script sets only when script is running and IntersectionObserver
+   exists — so if anything goes wrong the content is simply visible rather
+   than invisible forever. */
+.rv { transition: opacity .7s var(--easing), transform .7s var(--easing); }
+.rv-on .rv { opacity: 0; transform: translateY(24px); }
+.rv-on .rv.in { opacity: 1; transform: none; }
 .rv-d1 { transition-delay: .08s; } .rv-d2 { transition-delay: .16s; } .rv-d3 { transition-delay: .24s; }
 @media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; transition: none; } }
 
@@ -264,7 +405,7 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible,
 .cform .fl .rq { color: #FF4FA0; margin-left: 3px; }
 .cform .fi {
   width: 100%;
-  background: rgba(255,255,255,.06);
+  background: rgba(var(--surface-rgb), .06);
   border: 1px solid var(--glass-border); border-radius: 13px;
   padding: 13px 15px;
   /* 16px is the floor: iOS auto-zooms the page on focus below it. */
@@ -272,11 +413,11 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible,
   transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
 }
 .cform .fi::placeholder { color: var(--ink-5); }
-.cform .fi:hover { border-color: rgba(255,255,255,.28); }
+.cform .fi:hover { border-color: rgba(var(--surface-rgb), .28); }
 .cform .fi:focus {
   outline: none; border-color: #8B5CF6;
   box-shadow: 0 0 0 3px rgba(139,92,246,.25);
-  background: rgba(255,255,255,.08);
+  background: rgba(var(--surface-rgb), .08);
 }
 .cform select.fi { -webkit-appearance: none; appearance: none; cursor: pointer;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A78BFA' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
@@ -292,12 +433,12 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible,
 .cform input[type='file'].fi::file-selector-button {
   margin-right: 12px; padding: 8px 15px;
   border: 1px solid var(--glass-border); border-radius: 999px;
-  background: rgba(255,255,255,.08); color: var(--ink);
+  background: rgba(var(--surface-rgb), .08); color: var(--ink);
   font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer;
   transition: background .2s ease, border-color .2s ease;
 }
 .cform input[type='file'].fi::file-selector-button:hover {
-  background: var(--glass-hover); border-color: rgba(255,255,255,.3);
+  background: var(--glass-hover); border-color: rgba(var(--surface-rgb), .3);
 }
 .cform .fi[aria-invalid="true"] { border-color: #FF4FA0; background: rgba(255,79,160,.08); }
 .cform .fh { display: block; margin-top: 6px; font-size: 12.5px; color: var(--ink-5); line-height: 1.5; }
@@ -308,7 +449,7 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible,
   display: inline-flex; align-items: center; min-height: 44px;
   color: var(--champagne-2); font-size: 13.5px;
 }
-.link-t:hover { color: #fff; }
+.link-t:hover { color: var(--ink); }
 .cform-err {
   display: block; margin: 6px 0 0; font-size: 13px; line-height: 1.45; color: #FF7AB8;
 }
@@ -323,11 +464,11 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible,
   position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
   /* 44px is the touch minimum, and it still clears the field's own height. */
   min-height: 44px; min-width: 44px; padding: 0 16px; border-radius: 999px;
-  background: rgba(255,255,255,.08); border: 1px solid var(--glass-border);
+  background: rgba(var(--surface-rgb), .08); border: 1px solid var(--glass-border);
   color: var(--ink-3); font-family: var(--sans); font-size: 12px; font-weight: 500;
   cursor: pointer; transition: background .2s ease, color .2s ease;
 }
-.pw-toggle:hover { background: var(--glass-hover); color: #fff; }
+.pw-toggle:hover { background: var(--glass-hover); color: var(--ink); }
 
 /* A submitting button is visibly busy and cannot be pressed again. */
 button[aria-busy='true'] { opacity: .7; cursor: progress; }
@@ -337,7 +478,7 @@ button[aria-busy='true'] { opacity: .7; cursor: progress; }
 .sent-ok { text-align: center; padding: 40px 20px; }
 .sent-ok .ok {
   width: 54px; height: 54px; margin: 0 auto; border-radius: 50%;
-  background: var(--grad-hot); color: #fff; font-size: 24px; line-height: 54px;
+  background: var(--grad-hot); color: var(--on-accent); font-size: 24px; line-height: 54px;
   box-shadow: 0 14px 30px rgba(139,92,246,.45);
 }
 .sent-ok h3 { font-family: var(--disp); font-size: 26px; font-weight: 700; margin: 16px 0 8px; }
@@ -352,4 +493,54 @@ button[aria-busy='true'] { opacity: .7; cursor: progress; }
   .glass-p { -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px); }
   .topnav { -webkit-backdrop-filter: saturate(160%) blur(12px) !important; backdrop-filter: saturate(160%) blur(12px) !important; }
   .rv { transition-duration: .45s; }
+}
+
+/* ------------------------------------------------------------
+   Theme toggle
+   ------------------------------------------------------------
+   One control, shown in the desktop nav and again in the mobile
+   drawer. It states the destination rather than the current state
+   ("Switch to light theme"), because a control labelled with where
+   you already are is ambiguous. The icon shows the destination too:
+   a sun while you are in the dark, a moon while you are in the light.
+   ------------------------------------------------------------ */
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; flex: 0 0 auto;
+  border-radius: 999px; cursor: pointer;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  color: var(--ink-3);
+  transition: background .2s var(--easing), color .2s var(--easing), border-color .2s var(--easing);
+}
+.theme-toggle:hover { background: var(--glass-hover); color: var(--ink); }
+.theme-toggle:focus-visible { outline: 2px solid var(--champagne); outline-offset: 2px; }
+
+.theme-toggle svg {
+  width: 19px; height: 19px; display: block;
+  fill: none; stroke: currentColor; stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+/* Show the destination: sun to go light, moon to go dark. */
+.theme-toggle .t-sun  { display: none; }
+.theme-toggle .t-moon { display: block; }
+:root[data-theme="dark"] .theme-toggle .t-sun  { display: block; }
+:root[data-theme="dark"] .theme-toggle .t-moon { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .t-sun  { display: block; }
+  :root:not([data-theme="light"]) .theme-toggle .t-moon { display: none; }
+}
+
+/* In the mobile drawer it sits above the CTA and takes the full width,
+   so it is a comfortable target rather than a 40px dot in a corner. */
+.theme-toggle-wide {
+  width: 100%; height: 46px; border-radius: 12px; gap: 10px;
+  margin-bottom: 10px; font: 500 15px/1 var(--sans);
+}
+.theme-toggle-wide::after {
+  content: 'Dark theme'; color: inherit;
+}
+:root[data-theme="dark"] .theme-toggle-wide::after { content: 'Light theme'; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle-wide::after { content: 'Light theme'; }
 }

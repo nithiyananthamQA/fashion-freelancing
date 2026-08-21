@@ -1,7 +1,14 @@
 <!doctype html>
 <!-- HELP PAGE — night-glass system, launch FAQ + contact pointer. -->
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
+<script>/* theme: applied before first paint to avoid a flash of the wrong one */
+(function(){var d=document.documentElement;
+try{var t=localStorage.getItem('ff-theme');if(t==='light'||t==='dark')d.setAttribute('data-theme',t);}catch(e){}
+/* Only allow the scroll-reveal to hide anything once we know script is running
+   and the browser can observe it. Without this the page ships 30-60 elements at
+   opacity:0 and a single script hiccup leaves half the page permanently blank. */
+if('IntersectionObserver' in window)d.className+=' rv-on';})();</script>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Help & FAQ - Fashion Freelancing</title>
@@ -12,6 +19,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="../assets/styles.css">
+<link rel="stylesheet" href="../assets/night.css">
+<link rel="stylesheet" href="../assets/network.css">
 
 <style>
 /* metric-matched fallbacks — the font swap no longer moves layout (CLS) */
@@ -21,18 +30,20 @@
 #site-nav { min-height: 92px; }
 @media (max-width: 720px) { #site-nav { min-height: 90px; } }
 :root {
-  --u: 8px;
-  --sans: 'Inter', 'Inter-fb', system-ui, sans-serif;
-  --disp: 'Plus Jakarta Sans', 'PJS-fb', var(--sans);
-  --mono: 'IBM Plex Mono', ui-monospace, monospace;
-  --paper: #0C0A1C; --ink: #F4F2FA;
-  --ink-3: rgba(244,242,250,.84); --ink-4: rgba(244,242,250,.62); --ink-5: rgba(244,242,250,.46);
-  --line: rgba(255,255,255,.10); --line-2: rgba(255,255,255,.16);
-  --glass: rgba(255,255,255,.055); --glass-hover: rgba(255,255,255,.095); --glass-border: rgba(255,255,255,.14);
-  --acc: #A78BFA; --acc-l: #C4B5FD; --acc-10: rgba(167,139,250,.10); --acc-16: rgba(167,139,250,.16); --acc-30: rgba(167,139,250,.30); --acc-45: rgba(167,139,250,.45);
+  /* Page-specific tokens only. The shared palette lives in
+     assets/styles.css (light) and assets/night.css (dark) so the
+     theme switch can reach it. */
+  --acc-bright: #A78BFA;
+  --acc-ink: #602AFF;
+  /* --acc follows the theme: the glowing hue on the dark ground,
+     a darkened one on the pale ground so accent text stays readable */
+  --acc: var(--acc-ink);
+  --acc-l: #C4B5FD;
+  --acc-10: rgba(167,139,250,.10);
+  --acc-16: rgba(167,139,250,.16);
+  --acc-30: rgba(167,139,250,.30);
+  --acc-45: rgba(167,139,250,.45);
   --grad-acc: linear-gradient(115deg, #C4B5FD, #A78BFA 55%, #8B5CF6);
-  --grad-hot: linear-gradient(90deg, #8B5CF6, #FF4FA0);
-  --easing: cubic-bezier(.22,1,.36,1);
 }
 html { color-scheme: dark; scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
@@ -55,18 +66,18 @@ main { position: relative; z-index: 3; }
 
 /* pill nav + footer chrome */
 .topnav { position: sticky; top: 12px !important; width: min(1180px, calc(100% - 28px)); margin: 12px auto 0; border-radius: 999px;
-  background: rgba(16,13,32,.62) !important; backdrop-filter: saturate(160%) blur(20px) !important; -webkit-backdrop-filter: saturate(160%) blur(20px) !important;
-  border: 1px solid rgba(255,255,255,.12) !important; box-shadow: 0 12px 44px -12px rgba(0,0,0,.55) !important; overflow: hidden; }
+  background: rgba(var(--scrim-rgb), .62) !important; backdrop-filter: saturate(160%) blur(20px) !important; -webkit-backdrop-filter: saturate(160%) blur(20px) !important;
+  border: 1px solid rgba(var(--surface-rgb), .12) !important; box-shadow: 0 12px 44px -12px rgba(var(--shadow-rgb), .55) !important; overflow: hidden; }
 .topnav .container, .topnav .topnav-inner { padding-left: 20px; padding-right: 12px; }
 .topnav.is-scrolled { border-radius: 999px; }
-.topnav-links a { color: rgba(244,242,250,.66) !important; }
-.topnav-links a:hover, .topnav-links a.active { color: #fff !important; }
+.topnav-links a { color: rgba(var(--ink-rgb), .66) !important; }
+.topnav-links a:hover, .topnav-links a.active { color: var(--ink) !important; }
 .topnav-burger span { background: #F4F2FA !important; }
-.topnav .btn-primary, .topnav-mobile .btn-primary { background: var(--grad-hot) !important; color: #fff !important; border-radius: 999px !important; border: 0 !important; box-shadow: 0 8px 26px rgba(139,92,246,.4) !important; }
-.topnav-mobile { background: rgba(12,10,28,.92) !important; top: 88px !important; border-radius: 22px; left: 12px !important; right: 12px !important; border: 1px solid rgba(255,255,255,.12); }
-.topnav-mobile-links a { color: rgba(244,242,250,.8) !important; }
+.topnav .btn-primary, .topnav-mobile .btn-primary { background: var(--grad-hot) !important; color: var(--on-accent) !important; border-radius: 999px !important; border: 0 !important; box-shadow: 0 8px 26px rgba(139,92,246,.4) !important; }
+.topnav-mobile { background: rgba(var(--scrim-rgb), .92) !important; top: 88px !important; border-radius: 22px; left: 12px !important; right: 12px !important; border: 1px solid rgba(var(--surface-rgb), .12); }
+.topnav-mobile-links a { color: rgba(var(--ink-rgb), .8) !important; }
 /* mobile drawer — glass card in the design system */
-.topnav-mobile { bottom: 12px !important; border: 1px solid rgba(255,255,255,.14) !important; box-shadow: 0 24px 70px -24px rgba(0,0,0,.75); }
+.topnav-mobile { bottom: 12px !important; border: 1px solid rgba(var(--surface-rgb), .14) !important; box-shadow: 0 24px 70px -24px rgba(var(--shadow-rgb), .75); }
 .topnav-mobile-inner { padding: 30px 24px calc(24px + env(safe-area-inset-bottom)) !important; }
 .topnav-mobile-links { flex: 0 0 auto !important; justify-content: flex-start !important; padding: 8px 0 0 !important; }
 .topnav-mobile-cta { margin-top: auto !important; }
@@ -74,10 +85,10 @@ main { position: relative; z-index: 3; }
   display: block; width: 100%; text-align: left !important;
   font-family: var(--disp) !important; font-size: 24px !important; font-weight: 700 !important;
   letter-spacing: -.02em; padding: 18px 4px !important;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(var(--surface-rgb), .08);
 }
 .topnav-mobile-links a:last-child { border-bottom: 0; }
-.topnav-burger { background: rgba(255,255,255,.07) !important; border: 1px solid rgba(255,255,255,.16) !important; }
+.topnav-burger { background: rgba(var(--surface-rgb), .07) !important; border: 1px solid rgba(var(--surface-rgb), .16) !important; }
 .topnav-burger.is-open span { background: #F4F2FA !important; }
 .topnav .logo-img, .footer .logo-img {
   background: transparent;
@@ -88,7 +99,7 @@ main { position: relative; z-index: 3; }
 .topnav .logo:hover .logo-img, .footer .logo:hover .logo-img {
   filter: drop-shadow(0 4px 20px rgba(139,92,246,.75)) drop-shadow(0 0 38px rgba(255,79,160,.5));
 }
-.footer { background: rgba(255,255,255,.03) !important; border-top: 1px solid var(--line) !important; }
+.footer { background: rgba(var(--surface-rgb), .03) !important; border-top: 1px solid var(--line) !important; }
 #site-footer * { background-color: transparent; }
 
 /* atoms */
@@ -101,8 +112,9 @@ main { position: relative; z-index: 3; }
   box-shadow: 0 8px 30px rgba(139,92,246,.3); transition: transform .25s var(--easing), box-shadow .25s var(--easing); }
 .btn-acc:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(139,92,246,.45); }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; }
-.rv { opacity: 0; transform: translateY(24px); transition: opacity .7s var(--easing), transform .7s var(--easing); }
-.rv.in { opacity: 1; transform: none; }
+.rv { transition: opacity .7s var(--easing), transform .7s var(--easing); }
+.rv-on .rv { opacity: 0; transform: translateY(24px); }
+.rv-on .rv.in { opacity: 1; transform: none; }
 .rv-d1 { transition-delay: .08s; } .rv-d2 { transition-delay: .16s; }
 @media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; transition: none; } }
 .sec { position: relative; padding: calc(var(--u) * 12) 0; }
@@ -180,6 +192,11 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   .glass-p { -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px); }
   .topnav { -webkit-backdrop-filter: saturate(160%) blur(12px) !important; backdrop-filter: saturate(160%) blur(12px) !important; }
   .rv { transition-duration: .45s; }
+}
+
+:root[data-theme="dark"] { --acc: var(--acc-bright); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --acc: var(--acc-bright); }
 }
 </style>
 </head>

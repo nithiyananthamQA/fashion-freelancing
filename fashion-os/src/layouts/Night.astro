@@ -36,9 +36,17 @@ const FONTS =
 ---
 
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
+  <!-- Theme, resolved before first paint. This cannot wait for site.js — that
+       is deferred, so the page would draw dark and repaint light (or the other
+       way round) in front of the visitor. No stored choice means the CSS
+       follows prefers-color-scheme on its own. -->
+  <script is:inline>/* theme: applied before first paint to avoid a flash of the wrong one */
+(function(){var d=document.documentElement;
+try{var t=localStorage.getItem('ff-theme');if(t==='light'||t==='dark')d.setAttribute('data-theme',t);}catch(e){}
+if('IntersectionObserver' in window)d.className+=' rv-on';})();</script>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>{title}</title>
   <meta name="description" content={description} />

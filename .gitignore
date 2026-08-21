@@ -34,3 +34,6 @@ fashion-os/public/sitemap.xml
 *.log
 npm-debug.log*
 pnpm-debug.log*
+
+# wrangler local cache — holds account metadata, never commit
+.wrangler/

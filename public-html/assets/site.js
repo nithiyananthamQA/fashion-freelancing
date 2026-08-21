@@ -88,6 +88,16 @@
       </nav>
 
       <div class="topnav-cta">
+        <button class="theme-toggle" type="button" data-theme-toggle
+                aria-label="Switch to light theme" title="Switch theme">
+          <svg class="t-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4.2"/>
+            <path d="M12 2.4v2.6M12 19v2.6M4.6 12H2M22 12h-2.6M5.6 5.6 7.4 7.4M16.6 16.6l1.8 1.8M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8"/>
+          </svg>
+          <svg class="t-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2Z"/>
+          </svg>
+        </button>
         <!-- LAUNCH: single CTA to the brief form -->
         <a href="${r("index.html")}#contact" class="btn btn-primary btn-sm">Start a project</a>
       </div>
@@ -124,6 +134,16 @@
         </div>
       </nav>
       <div class="topnav-mobile-cta">
+        <button class="theme-toggle theme-toggle-wide" type="button" data-theme-toggle
+                aria-label="Switch to light theme" title="Switch theme">
+          <svg class="t-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="4.2"/>
+            <path d="M12 2.4v2.6M12 19v2.6M4.6 12H2M22 12h-2.6M5.6 5.6 7.4 7.4M16.6 16.6l1.8 1.8M18.4 5.6l-1.8 1.8M7.4 16.6l-1.8 1.8"/>
+          </svg>
+          <svg class="t-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2Z"/>
+          </svg>
+        </button>
         <!-- LAUNCH: single CTA to the brief form -->
         <a href="${r("index.html")}#contact" class="btn btn-primary w-full">Start a project</a>
       </div>
@@ -219,6 +239,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     const navMount = document.getElementById('site-nav');
     if (navMount) navMount.outerHTML = navHTML(navMount.dataset.current || '');
+    wireThemeToggle();
+    revealFailsafe();
     const footerMount = document.getElementById('site-footer');
     if (footerMount) footerMount.outerHTML = footerHTML;
 
@@ -231,25 +253,25 @@
         '.nav-svc-trigger[aria-expanded="true"] svg{transform:rotate(180deg);}',
         '.nav-svc-panel{position:fixed;left:50%;top:104px;transform:translateX(-50%) translateY(-8px);z-index:70;',
         'display:grid;grid-template-columns:1fr 1fr;gap:6px 34px;padding:22px 28px;width:min(560px,calc(100vw - 32px));',
-        'background:rgba(16,13,32,.94);border:1px solid rgba(255,255,255,.14);border-radius:20px;',
+        'background:rgba(var(--scrim-rgb), .94);border:1px solid rgba(var(--surface-rgb), .14);border-radius:20px;',
         '-webkit-backdrop-filter:saturate(160%) blur(22px);backdrop-filter:saturate(160%) blur(22px);',
-        'box-shadow:0 30px 80px -20px rgba(0,0,0,.75);opacity:0;visibility:hidden;pointer-events:none;',
+        'box-shadow:0 30px 80px -20px rgba(var(--shadow-rgb), .75);opacity:0;visibility:hidden;pointer-events:none;',
         'transition:opacity .25s cubic-bezier(.22,1,.36,1),transform .25s cubic-bezier(.22,1,.36,1),visibility .25s;}',
         '.nav-svc-panel.open{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0);}',
         '.nsp-col h6{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;',
         'color:#A78BFA;margin:0 0 10px;font-weight:500;}',
         '.nsp-col a{display:block;padding:8px 10px;margin:0 -10px;border-radius:10px;text-decoration:none;',
-        'font-family:Inter,sans-serif;font-size:14px;font-weight:500;color:rgba(244,242,250,.72);',
+        'font-family:Inter,sans-serif;font-size:14px;font-weight:500;color:rgba(var(--ink-rgb), .72);',
         'transition:background .2s ease,color .2s ease;}',
-        '.nsp-col a:hover{background:rgba(255,255,255,.07);color:#fff;}',
+        '.nsp-col a:hover{background:rgba(var(--surface-rgb), .07);color:var(--ink);}',
         '@media (max-width:720px){.nav-svc-panel{display:none;}.nav-svc-trigger svg{display:none;}}',
         '.tm-label{display:block;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.2em;',
         'text-transform:uppercase;color:#A78BFA;padding:22px 4px 10px;}',
         '.tm-svcs{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;width:100%;}',
         '.topnav-mobile-links .tm-svcs a.sub{font-family:Inter,sans-serif !important;font-size:15px !important;',
-        'font-weight:500 !important;color:rgba(244,242,250,.66) !important;padding:10px 4px !important;',
+        'font-weight:500 !important;color:rgba(var(--ink-rgb), .66) !important;padding:10px 4px !important;',
         'border-bottom:0 !important;letter-spacing:0;}',
-        '.topnav-mobile-links .tm-svcs a.sub:active{color:#fff !important;}',
+        '.topnav-mobile-links .tm-svcs a.sub:active{color:var(--ink) !important;}',
       ].join('');
       document.head.appendChild(st);
     }
@@ -472,4 +494,76 @@
       document.querySelectorAll('[data-count]').forEach(el => countObs.observe(el));
     }
   });
+
+  /**
+   * Light / dark switching.
+   *
+   * The theme is already applied before first paint by the inline snippet in
+   * every <head> — without that the page renders in one theme and repaints in
+   * the other, which reads as a flash of the wrong colour. This only handles
+   * the click, the label, and remembering the choice.
+   *
+   * Three states matter: the visitor picked light, the visitor picked dark, or
+   * they picked neither and follow their system. Choosing is sticky; never
+   * choosing means the site keeps following the system if it changes.
+   */
+  /**
+   * Nothing may stay invisible.
+   *
+   * Every page ships 30-60 elements at opacity:0 waiting for a scroll observer.
+   * If one of those observers never fires — a stale cached script, an early
+   * error, a restored back/forward page — that content is gone for good and the
+   * page looks broken. This sweeps up anything still hidden shortly after load,
+   * and again once everything has loaded.
+   */
+  function revealFailsafe() {
+    const sweep = () => {
+      document.querySelectorAll('.rv:not(.in)').forEach((el) => {
+        const box = el.getBoundingClientRect();
+        // in view now, or the observer has plainly not done its job
+        if (box.top < window.innerHeight * 1.4) el.classList.add('in');
+      });
+    };
+    setTimeout(sweep, 1200);
+    window.addEventListener('load', () => setTimeout(sweep, 400));
+    // last resort: after this, show everything regardless of position
+    setTimeout(() => document.querySelectorAll('.rv:not(.in)').forEach((el) => {
+      if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('in');
+    }), 3500);
+  }
+
+  function wireThemeToggle() {
+    const root = document.documentElement;
+
+    const systemDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const current = () => root.getAttribute('data-theme') || (systemDark() ? 'dark' : 'light');
+
+    function paint() {
+      const dark = current() === 'dark';
+      document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
+        // The control announces where it takes you, not where you are.
+        const label = dark ? 'Switch to light theme' : 'Switch to dark theme';
+        btn.setAttribute('aria-label', label);
+        btn.setAttribute('title', label);
+      });
+    }
+
+    document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const next = current() === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('ff-theme', next); } catch (e) { /* private mode */ }
+        paint();
+      });
+    });
+
+    // Follow the system only while the visitor has not chosen for themselves.
+    try {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (!localStorage.getItem('ff-theme')) { root.removeAttribute('data-theme'); paint(); }
+      });
+    } catch (e) { /* older Safari */ }
+
+    paint();
+  }
 })();
