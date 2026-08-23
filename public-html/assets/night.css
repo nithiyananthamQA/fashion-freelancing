@@ -40,7 +40,7 @@
   --u: 8px;
   --nav-h: 72px;
   --sans: 'Inter', 'Inter-fb', system-ui, sans-serif;
-  --disp: 'Plus Jakarta Sans', 'PJS-fb', var(--sans);
+  --disp: 'Outfit', 'PJS-fb', var(--sans);
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
   --easing: cubic-bezier(.22, 1, .36, 1);
 
@@ -70,11 +70,11 @@
    styles.css supplies --paper*, --ink*, --line*, --champagne* and the
    shadows. What follows is only what night.css added on top. */
 :root {
-  --surface-rgb: 20, 19, 43;    /* overlays are dark ink over pale ground */
+  --surface-rgb: 10, 17, 32;    /* overlays are dark ink over pale ground */
   /* The nav bar and drawers are a translucent sheet OVER the page, not a
      shadow. They have to follow the paper, or the bar stays dark above a
      light page and every link on it fails contrast. */
-  --scrim-rgb:   244, 244, 251;
+  --scrim-rgb:   255, 255, 255;
 
   /* Chip and label text. The pale originals were picked to sit on a dark
      ground; on the pale one they disappear, so light gets a saturated dark
@@ -87,8 +87,8 @@
   --chip-amber2: #706400;
   --chip-pink: #CB005B;
   --chip-blue: #0064C0;
-  --ink-rgb:     20, 19, 43;
-  --shadow-rgb:  40, 40, 90;
+  --ink-rgb:     10, 17, 32;
+  --shadow-rgb:  16, 28, 54;
 
   --glass:        rgba(var(--surface-rgb), .035);
   --glass-hover:  rgba(var(--surface-rgb), .065);
@@ -193,7 +193,7 @@
 
 /* metric-matched fallbacks — the webfont swap no longer moves layout (CLS) */
 @font-face { font-family: 'Inter-fb'; src: local('Arial'); size-adjust: 107%; ascent-override: 90%; descent-override: 22.5%; line-gap-override: 0%; }
-@font-face { font-family: 'PJS-fb'; src: local('Arial'); size-adjust: 105%; ascent-override: 96%; descent-override: 24%; line-gap-override: 0%; }
+@font-face { font-family: 'PJS-fb'; src: local('Arial'); size-adjust: 102%; ascent-override: 98%; descent-override: 24%; line-gap-override: 0%; }
 
 html { color-scheme: dark; scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
@@ -259,6 +259,24 @@ body::before, body::after { content: none; }
 @media (prefers-reduced-motion: reduce) { .blob { animation: none; } .glow { display: none; } }
 main { position: relative; z-index: 3; }
 
+/* ------------------------------------------------------------
+   Light theme is flat.
+
+   The drifting blobs, the grain and the cursor glow are what make the
+   dark theme feel like night glass. On white they read as smudges — a
+   product site in daylight is a plain ground, and the content carries
+   the page instead. The elements stay in the markup and simply stop
+   painting, so nothing has to change per page.
+   ------------------------------------------------------------ */
+:root:not([data-theme="dark"]) .scene,
+:root:not([data-theme="dark"]) .grain,
+:root:not([data-theme="dark"]) .glow { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .scene,
+  :root:not([data-theme="light"]) .grain,
+  :root:not([data-theme="light"]) .glow { display: block; }
+}
+
 /* ============================================================
    Injected nav + footer (assets/site.js) — night skin
    ============================================================ */
@@ -285,8 +303,10 @@ main { position: relative; z-index: 3; }
 }
 .topnav-links a:hover, .topnav-links a.active { color: var(--ink) !important; }
 .topnav-burger span { background: #F4F2FA !important; }
-/* transparent logo artwork — a violet/pink light traces its shape so the
-   dark strokes stay readable on dark glass */
+/* Transparent logo artwork. On the dark ground a violet/pink light traces
+   its shape so the dark strokes stay readable; on white there is nothing to
+   rescue and the same glow reads as a smudge behind the mark, so light drops
+   it entirely. */
 .topnav .logo-img, .footer .logo-img {
   background: transparent;
   filter: drop-shadow(0 4px 16px rgba(139,92,246,.55)) drop-shadow(0 0 28px rgba(255,79,160,.32));
@@ -294,6 +314,16 @@ main { position: relative; z-index: 3; }
 }
 .topnav .logo:hover .logo-img, .footer .logo:hover .logo-img {
   filter: drop-shadow(0 4px 20px rgba(139,92,246,.75)) drop-shadow(0 0 38px rgba(255,79,160,.5));
+}
+:root:not([data-theme="dark"]) .topnav .logo-img,
+:root:not([data-theme="dark"]) .footer .logo-img,
+:root:not([data-theme="dark"]) .topnav .logo:hover .logo-img,
+:root:not([data-theme="dark"]) .footer .logo:hover .logo-img { filter: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .topnav .logo-img,
+  :root:not([data-theme="light"]) .footer .logo-img {
+    filter: drop-shadow(0 4px 16px rgba(139,92,246,.55)) drop-shadow(0 0 28px rgba(255,79,160,.32));
+  }
 }
 .topnav .btn-primary, .topnav-mobile .btn-primary {
   background: var(--grad-hot) !important; color: var(--on-accent) !important;
@@ -543,4 +573,73 @@ button[aria-busy='true'] { opacity: .7; cursor: progress; }
 :root[data-theme="dark"] .theme-toggle-wide::after { content: 'Light theme'; }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .theme-toggle-wide::after { content: 'Light theme'; }
+}
+
+/* ------------------------------------------------------------
+   Compact heroes in the light theme
+   ------------------------------------------------------------
+   Every service page opens with a hero pinned to the full viewport
+   (min-height: calc(100vh - 104px)). On the dark ground that reads as
+   an intentional full-bleed opening — there is atmosphere moving behind
+   it. On flat white it is a screen of mostly nothing before the story
+   starts, and the visitor has to scroll to learn anything.
+
+   Light sizes the hero to its content instead, with a floor so short
+   heroes keep some presence and a cap so tall ones cannot run away.
+   The page's own rule is more specific than a bare `.hero`, so this
+   override carries `!important` deliberately rather than by habit.
+   ------------------------------------------------------------ */
+:root:not([data-theme="dark"]) .hero {
+  min-height: 0 !important;
+  padding-top: calc(var(--u) * 7) !important;
+  padding-bottom: calc(var(--u) * 7) !important;
+}
+@media (min-width: 900px) {
+  :root:not([data-theme="dark"]) .hero { min-height: 520px !important; }
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hero {
+    min-height: calc(100vh - 104px) !important;
+    padding-top: calc(var(--u) * 6) !important;
+    padding-bottom: calc(var(--u) * 6) !important;
+  }
+}
+
+/* The hero stat block is a 2x2 grid, which on the service pages is the
+   single tallest thing in the hero — 262px of a 704px column. Light lays
+   it out as one low row instead, so the hero states the offer and gets
+   out of the way rather than filling the screen before the story starts. */
+@media (min-width: 900px) {
+  :root:not([data-theme="dark"]) .hero-split .hero-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 22px;
+  }
+  :root:not([data-theme="dark"]) .hero-split .hst { padding: 8px 10px; min-width: 0; }
+  /* Four across is a narrower cell than the 2x2 these numbers were sized
+     for, and the longest of them ("3-5 days") ran past its divider. Let
+     the figure shrink with the cell instead of clipping. */
+  :root:not([data-theme="dark"]) .hero-split .hst .n,
+  :root:not([data-theme="dark"]) .hero-split .hst > :first-child {
+    font-size: clamp(19px, 1.7vw, 26px);
+    white-space: normal;
+  }
+}
+@media (min-width: 900px) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hero-split .hero-stats {
+    grid-template-columns: 1fr 1fr;
+    margin-top: 30px;
+  }
+  :root:not([data-theme="light"]) .hero-split .hst { padding: 10px 12px; }
+}
+
+/* Section rhythm.
+   `.sec` pads 104px top and bottom, so consecutive sections sat 208px
+   apart — breathing room on a dark page with light moving behind it, a
+   long blank scroll on any page that has to tell a story. 128px still
+   separates the sections clearly while keeping the page moving.
+   Each page repeats the `.sec` rule in its own <style>, which loads after
+   this file — hence !important rather than specificity. */
+.sec { padding: calc(var(--u) * 8) 0 !important; }
+@media (max-width: 720px) {
+  .sec { padding: calc(var(--u) * 5) 0 !important; }
 }

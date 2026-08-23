@@ -21,9 +21,9 @@ if('IntersectionObserver' in window)d.className+=' rv-on';})();</script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- fonts load without blocking first paint; metric-matched fallbacks
      (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 <link rel="stylesheet" href="../../assets/night.css">
@@ -85,6 +85,7 @@ if('IntersectionObserver' in window)d.className+=' rv-on';})();</script>
   /* THE page colour — sky only */
   --acc-bright: #3EC8C0;
   --acc-ink: #176A65;
+  --grad-acc-ink: linear-gradient(115deg, #176A65, #176A65 55%, #176A65);
   /* --acc follows the theme: the glowing hue on the dark ground,
      a darkened one on the pale ground so accent text stays readable */
   --acc:   var(--acc-ink);
@@ -309,7 +310,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .pb-stat b {
   display: block; font-family: var(--disp); font-weight: 800;
   font-size: clamp(30px, 3.4vw, 48px); letter-spacing: -.03em;
-  background: var(--grad-acc); -webkit-background-clip: text; background-clip: text; color: transparent;
+  background: var(--grad-acc-ink, var(--grad-acc)); -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .pb-stat span { display: block; margin-top: 8px; font-size: 12.5px; color: var(--ink-4); line-height: 1.5; max-width: 30ch; margin-left: auto; margin-right: auto; }
 .pb-note {
@@ -568,9 +569,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   .rv { transition-duration: .45s; }
 }
 
-:root[data-theme="dark"] { --acc: var(--acc-bright); }
+:root[data-theme="dark"] { --acc: var(--acc-bright); --grad-acc-ink: var(--grad-acc); }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --acc: var(--acc-bright); }
+  :root:not([data-theme="light"]) { --acc: var(--acc-bright); --grad-acc-ink: var(--grad-acc); }
 }
 </style>
 </head>

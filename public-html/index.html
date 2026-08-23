@@ -26,9 +26,9 @@ if('IntersectionObserver' in window)d.className+=' rv-on';})();</script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- fonts load without blocking first paint; metric-matched fallbacks
      (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="assets/styles.css">
 <link rel="stylesheet" href="assets/night.css">
@@ -203,7 +203,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
    ============================================================ */
 .hero {
   position: relative;
-  padding: calc(var(--u) * 15) 0 calc(var(--u) * 10);
+  /* Compact: the old 120px of air above the headline suited a dark page
+     with drifting light behind it. On a flat white ground it just reads as
+     an empty screen before the story starts. */
+  padding: calc(var(--u) * 9) 0 calc(var(--u) * 7);
   text-align: center;
 }
 /* mobile: hero hugs the header — tight 32px gap */

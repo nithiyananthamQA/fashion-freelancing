@@ -1,28 +1,30 @@
 /* ============================================================
    Fashion Freelancing — v8 "Nebula Light"
-   Plus Jakarta Sans display · Inter body
+   Outfit display · Inter body
    Soft lavender base · charcoal ink · violet→indigo→cyan accent
    Glass surfaces · glow shadows · matches the homepage (home.css)
    Token names kept from earlier versions so every page re-skins.
    ============================================================ */
 
 :root {
-  /* Tone — soft lavender-tinted surfaces (NOT flat white) */
-  --paper:   #F4F4FB;   /* lavender base — main background */
-  --paper-2: #ECECF7;   /* deeper lavender — alt sections  */
-  --paper-3: #FFFFFF;   /* white — cards / wells           */
-  --ink:     #14132B;   /* near-black, cool                */
-  --ink-2:   #26253F;
-  --ink-3:   #3B3A57;
-  --ink-4:   #4F4D6B;   /* body / lead text — darkened so it still clears AA
-                          on the tinted panels and the footer, not just on --paper */
-  --ink-5:   #565571;   /* muted — clears AA on the tinted panels too, not just --paper */
-  --ink-6:   #9B99B4;   /* faint                           */
-  --ink-7:   #C7C5D8;
-  --ink-8:   #E4E3EF;
+  /* Tone — flat white, the way a product site reads in daylight.
+     The ink is a near-black navy rather than a true black: it keeps the
+     page from looking harsh while staying well clear of AA at every step
+     of the ramp. */
+  --paper:   #FFFFFF;   /* the ground                       */
+  --paper-2: #F7F5F3;   /* warm off-white — alt sections     */
+  --paper-3: #FFFFFF;   /* cards / wells                     */
+  --ink:     #0A1120;   /* near-black navy — headlines       */
+  --ink-2:   #16203A;
+  --ink-3:   #2A3552;
+  --ink-4:   #3F4A66;   /* body / lead text                  */
+  --ink-5:   #545E77;   /* muted — still clears AA on --paper-2 */
+  --ink-6:   #8A93A5;   /* faint — non-text only             */
+  --ink-7:   #C3C9D4;
+  --ink-8:   #E6E9EF;
 
-  --line:    rgba(20,19,43,.09);
-  --line-2:  rgba(20,19,43,.14);
+  --line:    rgba(10,17,32,.10);
+  --line-2:  rgba(10,17,32,.16);
 
   /* Primary accent — violet/indigo. (Kept as --champagne* names so
      every existing class reference re-skins to the new accent.) */
@@ -137,9 +139,9 @@ a { color: inherit; text-decoration: none; }
 button { font: inherit; cursor: pointer; background: none; border: 0; }
 input, textarea, select { font: inherit; }
 
-/* Display — Plus Jakarta Sans (bold modern geometric) */
+/* Display — Outfit (geometric, tight) */
 :root {
-  --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: 'Outfit', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-body: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 .display { font-family: var(--font-display); letter-spacing: -0.022em; font-weight: 700; }
