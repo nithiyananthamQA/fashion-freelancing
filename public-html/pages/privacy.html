@@ -6,11 +6,11 @@
 <head>
 <script>/* theme: applied before first paint to avoid a flash of the wrong one */
 (function(){var d=document.documentElement;
-try{var t=localStorage.getItem('ff-theme');if(t==='light'||t==='dark')d.setAttribute('data-theme',t);}catch(e){}
+try{var t=localStorage.getItem('ff-theme');if(t==='light'||t==='dark')d.setAttribute('data-theme',t); }catch(e){}
 /* Only allow the scroll-reveal to hide anything once we know script is running
    and the browser can observe it. Without this the page ships 30-60 elements at
    opacity:0 and a single script hiccup leaves half the page permanently blank. */
-if('IntersectionObserver' in window)d.className+=' rv-on';})();</script>
+if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Privacy Policy - Fashion Freelancing</title>
@@ -20,7 +20,7 @@ if('IntersectionObserver' in window)d.className+=' rv-on';})();</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF0055'/%3E%3Cstop offset='1' stop-color='%236E56F0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='19' font-weight='600' fill='%23fff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="../assets/styles.css">
 <link rel="stylesheet" href="../assets/night.css">
 <link rel="stylesheet" href="../assets/network.css">
@@ -41,8 +41,7 @@ if('IntersectionObserver' in window)d.className+=' rv-on';})();</script>
   --grad-acc-ink: linear-gradient(115deg, #602AFF, #602AFF 55%, #602AFF);
   /* --acc follows the theme: the glowing hue on the dark ground,
      a darkened one on the pale ground so accent text stays readable */
-  --acc: var(--acc-ink);
-}
+  --acc: var(--acc-ink); }
 html { color-scheme: dark; scroll-behavior: smooth; }
 body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: clip; }
 /* pill nav chrome */
@@ -66,8 +65,7 @@ body { background: var(--paper); color: var(--ink); font-family: var(--sans); fo
   display: block; width: 100%; text-align: left !important;
   font-family: var(--disp) !important; font-size: 24px !important; font-weight: 700 !important;
   letter-spacing: -.02em; padding: 18px 4px !important;
-  border-bottom: 1px solid rgba(var(--surface-rgb), .08);
-}
+  border-bottom: 1px solid rgba(var(--surface-rgb), .08); }
 .topnav-mobile-links a:last-child { border-bottom: 0; }
 .topnav-burger { background: rgba(var(--surface-rgb), .07) !important; border: 1px solid rgba(var(--surface-rgb), .16) !important; }
 .topnav-burger.is-open span { background: #F4F2FA !important; }
@@ -75,17 +73,15 @@ body { background: var(--paper); color: var(--ink); font-family: var(--sans); fo
   background: transparent;
   /* fully transparent artwork — no white stroke; card-style violet/pink light only */
   filter: drop-shadow(0 4px 16px rgba(139,92,246,.55)) drop-shadow(0 0 28px rgba(255,79,160,.32));
-  transition: filter .35s ease;
-}
+  transition: filter .35s ease; }
 .topnav .logo:hover .logo-img, .footer .logo:hover .logo-img {
-  filter: drop-shadow(0 4px 20px rgba(139,92,246,.75)) drop-shadow(0 0 38px rgba(255,79,160,.5));
-}
+  filter: drop-shadow(0 4px 20px rgba(139,92,246,.75)) drop-shadow(0 0 38px rgba(255,79,160,.5)); }
 .footer { background: rgba(var(--surface-rgb), .03) !important; border-top: 1px solid var(--line) !important; }
 #site-footer * { background-color: transparent; }
 /* document layout */
 .doc-wrap { width: 100%; margin: 0 auto; padding: 64px 10vw 96px; display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: clamp(48px, 5vw, 90px); }
 .doc-toc { position: sticky; top: 110px; align-self: start; font-size: 13px; max-height: calc(100vh - 140px); overflow-y: auto; }
-.doc-toc .k { font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--acc); margin-bottom: 12px; }
+.doc-toc .k { font-family: var(--mono); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--acc); margin-bottom: 12px; }
 .doc-toc a { display: block; padding: 5px 0; color: var(--ink-5); text-decoration: none; }
 .doc-toc a:hover { color: var(--ink); }
 .doc h1 { font-family: var(--disp); font-weight: 800; letter-spacing: -.03em; font-size: clamp(34px, 4.6vw, 58px); line-height: 1.06; margin: 0 0 10px; }

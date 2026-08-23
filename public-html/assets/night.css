@@ -40,7 +40,7 @@
   --u: 8px;
   --nav-h: 72px;
   --sans: 'Inter', 'Inter-fb', system-ui, sans-serif;
-  --disp: 'Outfit', 'PJS-fb', var(--sans);
+  --disp: 'Plus Jakarta Sans', 'PJS-fb', var(--sans);
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
   --easing: cubic-bezier(.22, 1, .36, 1);
 
@@ -193,7 +193,7 @@
 
 /* metric-matched fallbacks — the webfont swap no longer moves layout (CLS) */
 @font-face { font-family: 'Inter-fb'; src: local('Arial'); size-adjust: 107%; ascent-override: 90%; descent-override: 22.5%; line-gap-override: 0%; }
-@font-face { font-family: 'PJS-fb'; src: local('Arial'); size-adjust: 102%; ascent-override: 98%; descent-override: 24%; line-gap-override: 0%; }
+@font-face { font-family: 'PJS-fb'; src: local('Arial'); size-adjust: 105%; ascent-override: 96%; descent-override: 24%; line-gap-override: 0%; }
 
 html { color-scheme: dark; scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
@@ -428,10 +428,7 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible,
    here; without the exclusion those controls lose `display:flex` and their box
    and text stop lining up. */
 .cform label:not(.opt):not(.pick) { display: block; }
-.cform .fl {
-  display: block; font-family: var(--mono); font-size: 10px; font-weight: 500;
-  letter-spacing: .16em; text-transform: uppercase; color: var(--ink-5); margin-bottom: 7px;
-}
+.cform .fl { font-size: 13px; font-weight: 500; color: var(--ink-3); letter-spacing: -.005em; display: block; margin-bottom: 7px; }
 .cform .fl .rq { color: #FF4FA0; margin-left: 3px; }
 .cform .fi {
   width: 100%;
@@ -576,70 +573,76 @@ button[aria-busy='true'] { opacity: .7; cursor: progress; }
 }
 
 /* ------------------------------------------------------------
-   Compact heroes in the light theme
+   Compact heroes
    ------------------------------------------------------------
-   Every service page opens with a hero pinned to the full viewport
-   (min-height: calc(100vh - 104px)). On the dark ground that reads as
-   an intentional full-bleed opening — there is atmosphere moving behind
-   it. On flat white it is a screen of mostly nothing before the story
-   starts, and the visitor has to scroll to learn anything.
+   Every service page opened with a hero pinned to the full viewport
+   (min-height: calc(100vh - 104px)) — a whole screen before the visitor
+   learns anything, in either theme. The hero now sizes to its content,
+   with a floor on desktop so a short one keeps some presence.
 
-   Light sizes the hero to its content instead, with a floor so short
-   heroes keep some presence and a cap so tall ones cannot run away.
-   The page's own rule is more specific than a bare `.hero`, so this
-   override carries `!important` deliberately rather than by habit.
+   The page's own rule is more specific than a bare `.hero`, so these
+   carry `!important` deliberately rather than by habit.
    ------------------------------------------------------------ */
-:root:not([data-theme="dark"]) .hero {
+.hero {
   min-height: 0 !important;
   padding-top: calc(var(--u) * 7) !important;
   padding-bottom: calc(var(--u) * 7) !important;
 }
 @media (min-width: 900px) {
-  :root:not([data-theme="dark"]) .hero { min-height: 520px !important; }
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .hero {
-    min-height: calc(100vh - 104px) !important;
-    padding-top: calc(var(--u) * 6) !important;
-    padding-bottom: calc(var(--u) * 6) !important;
-  }
+  .hero { min-height: 520px !important; }
 }
 
-/* The hero stat block is a 2x2 grid, which on the service pages is the
-   single tallest thing in the hero — 262px of a 704px column. Light lays
-   it out as one low row instead, so the hero states the offer and gets
-   out of the way rather than filling the screen before the story starts. */
+/* The gaps between the hero's own parts. Six stacked elements each with a
+   generous margin added ~104px of pure spacing on the homepage — more than
+   the buttons and the trust line put together. Tightened uniformly so every
+   page gains the same, rather than singling one out. */
+.hero .sub { margin-top: 18px !important; }
+.hero .acts { margin-top: 26px !important; }
+.hero .micro { margin-top: 14px !important; }
+.hero .chips { margin-top: 18px !important; }
+.hero .hero-stats { margin-top: 18px !important; }
+
+/* The hero stat block was a 2x2 grid — on the service pages, 234-261px of
+   a ~680px hero column and the single tallest thing in it. One low row
+   instead, so the hero states the offer and gets out of the way.
+
+   Deliberately targeted at `.hero-stats` itself rather than at one hero
+   variant: the pages use `hero-split` and `hero-center`, and the homepage
+   a third arrangement, so scoping it to any one of them left the others
+   with the tall block. Both cell classes (.hst on the service pages, .st
+   on the homepage) are covered for the same reason.
+
+   Four across is a narrower cell than the figures were sized for, and the
+   longest of them ("3-5 days") ran past its divider, so the figure shrinks
+   with the cell rather than clipping. */
 @media (min-width: 900px) {
-  :root:not([data-theme="dark"]) .hero-split .hero-stats {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    margin-top: 22px;
+  .hero-stats {
+    /* Some pages lay this out with flex, where grid-template-columns is
+       simply ignored and the cells wrap to two rows — which is how one
+       page kept a 249px block while the rest went to 90px. Set the
+       formatting context as well as the tracks. */
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    margin-top: 22px !important;
   }
-  :root:not([data-theme="dark"]) .hero-split .hst { padding: 8px 10px; min-width: 0; }
-  /* Four across is a narrower cell than the 2x2 these numbers were sized
-     for, and the longest of them ("3-5 days") ran past its divider. Let
-     the figure shrink with the cell instead of clipping. */
-  :root:not([data-theme="dark"]) .hero-split .hst .n,
-  :root:not([data-theme="dark"]) .hero-split .hst > :first-child {
+  .hero-stats .hst,
+  .hero-stats .st { padding: 8px 12px !important; min-width: 0; }
+  .hero-stats .hst > :first-child,
+  .hero-stats .st > :first-child {
     font-size: clamp(19px, 1.7vw, 26px);
     white-space: normal;
   }
-}
-@media (min-width: 900px) and (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .hero-split .hero-stats {
-    grid-template-columns: 1fr 1fr;
-    margin-top: 30px;
-  }
-  :root:not([data-theme="light"]) .hero-split .hst { padding: 10px 12px; }
 }
 
 /* Section rhythm.
    `.sec` pads 104px top and bottom, so consecutive sections sat 208px
    apart — breathing room on a dark page with light moving behind it, a
-   long blank scroll on any page that has to tell a story. 128px still
-   separates the sections clearly while keeping the page moving.
+   long blank scroll on any page that has to tell a story. Halved again to
+   32px a side, so consecutive sections sit about an inch apart — close
+   enough to read as one continuous story rather than separate pages.
    Each page repeats the `.sec` rule in its own <style>, which loads after
    this file — hence !important rather than specificity. */
-.sec { padding: calc(var(--u) * 8) 0 !important; }
+.sec { padding: calc(var(--u) * 4) 0 !important; }
 @media (max-width: 720px) {
-  .sec { padding: calc(var(--u) * 5) 0 !important; }
+  .sec { padding: calc(var(--u) * 3) 0 !important; }
 }

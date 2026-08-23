@@ -27,7 +27,7 @@
 /* Breadcrumb back to the service that sent the visitor here. */
 .net-back {
   display: inline-flex; align-items: center; gap: 8px; margin-bottom: 18px;
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase;
+  font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
   color: var(--ink-5); transition: color .2s ease;
 }
 .net-back:hover { color: var(--champagne-2); }
@@ -38,22 +38,14 @@
 
 .net-rail { padding: 22px; position: sticky; top: calc(var(--nav-h) + 28px); }
 @media (max-width: 980px) { .net-rail { position: static; } }
-.net-rail h2 {
-  font-family: var(--mono); font-size: 10px; font-weight: 500;
-  letter-spacing: .2em; text-transform: uppercase; color: var(--champagne-2);
-  margin: 0 0 16px;
-}
+.net-rail h2 { font-size: 17px; font-weight: 600; letter-spacing: -.005em; color: var(--champagne-2); margin: 0 0 16px; }
 .net-rail .cform { gap: 13px; }
 .net-rail-actions { display: grid; gap: 9px; margin-top: 18px; }
 
 /* "More filters" — everything beyond search / service / specialty /
    availability stays folded away on first visit (§4). */
 .net-more { margin-top: 6px; border-top: 1px solid var(--line); padding-top: 14px; }
-.net-more > summary {
-  list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
-  font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--ink-4); padding: 12px 0; min-height: 44px;
-}
+.net-more > summary { font-size: 14px; font-weight: 500; color: var(--ink-3); letter-spacing: -.005em; list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 12px 0; min-height: 44px; }
 .net-more > summary::-webkit-details-marker { display: none; }
 .net-more > summary::after { content: '+'; font-size: 15px; color: var(--champagne-2); }
 .net-more[open] > summary::after { content: '−'; }
@@ -230,7 +222,7 @@
 .spec-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
 
 .spec-service {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
   color: var(--champagne-2);
 }
 .card-spec h3 { font-family: var(--disp); font-size: 20px; font-weight: 700; letter-spacing: -.028em; margin: 6px 0 4px; }
@@ -268,7 +260,7 @@
 .pill-status {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 5px 12px; border-radius: 999px;
-  font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
   border: 1px solid var(--glass-border); background: rgba(var(--surface-rgb), .05); color: var(--ink-4);
 }
 .pill-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
@@ -296,10 +288,7 @@
 @media (max-width: 980px) { .profile-body { grid-template-columns: 1fr; } }
 .panel { padding: 26px; }
 .panel + .panel { margin-top: 18px; }
-.panel > h2 {
-  font-family: var(--mono); font-size: 10px; font-weight: 500;
-  letter-spacing: .2em; text-transform: uppercase; color: var(--champagne-2); margin: 0 0 16px;
-}
+.panel > h2 { font-size: 17px; font-weight: 600; letter-spacing: -.005em; color: var(--champagne-2); margin: 0 0 16px; }
 .panel p { color: var(--ink-4); line-height: 1.7; margin: 0 0 12px; font-size: 14.5px; }
 .panel p:last-child { margin-bottom: 0; }
 
@@ -313,10 +302,7 @@
 .offering h3 { font-family: var(--disp); font-size: 17px; font-weight: 700; letter-spacing: -.02em; margin: 0 0 4px; }
 .offering .role { font-size: 13px; color: var(--ink-5); margin: 0 0 12px; }
 .offering .group { margin-top: 12px; }
-.offering .group h4 {
-  font-family: var(--mono); font-size: 9.5px; font-weight: 500;
-  letter-spacing: .18em; text-transform: uppercase; color: var(--ink-5); margin: 0 0 8px;
-}
+.offering .group h4 { font-size: 15px; font-weight: 600; color: var(--ink); letter-spacing: -.005em; margin: 0 0 8px; }
 
 /* Portfolio evidence */
 .work { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
@@ -341,7 +327,7 @@
 .flow-steps i { flex: 1; height: 5px; border-radius: 99px; background: rgba(var(--surface-rgb), .11); transition: background .3s ease; }
 .flow-steps i.done { background: rgba(167,139,250,.55); }
 .flow-steps i.now { background: var(--grad-hot); }
-.flow-count { font-family: var(--mono); font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-5); text-align: center; }
+.flow-count { font-family: var(--mono); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-5); text-align: center; }
 .flow-panel { padding: 32px clamp(20px, 4vw, 40px); margin-top: 22px; }
 .flow-panel > h2 { font-family: var(--disp); font-size: 24px; font-weight: 700; letter-spacing: -.025em; margin: 0 0 8px; }
 .flow-panel > .lead { color: var(--ink-4); font-size: 14.5px; line-height: 1.6; margin: 0 0 26px; }
@@ -351,11 +337,7 @@
 
 /* A labelled group of related inputs inside a step. */
 .fieldset { border: 0; padding: 0; margin: 0 0 24px; }
-.fieldset > legend {
-  padding: 0; margin-bottom: 12px;
-  font-family: var(--mono); font-size: 10px; font-weight: 500;
-  letter-spacing: .16em; text-transform: uppercase; color: var(--ink-5);
-}
+.fieldset > legend { font-size: 14px; font-weight: 600; color: var(--ink-2); letter-spacing: -.005em; padding: 0; margin-bottom: 12px; }
 .fieldset > .hint { margin: -6px 0 12px; font-size: 12.5px; color: var(--ink-5); line-height: 1.55; }
 
 .notice {
@@ -374,10 +356,7 @@
   transition: border-color .3s var(--easing), transform .3s var(--easing);
 }
 .door:hover { border-color: rgba(var(--surface-rgb), .28); transform: translateY(-3px); }
-.door .who {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--ink-5);
-}
+.door .who { font-size: 13px; font-weight: 500; color: var(--ink-4); letter-spacing: -.005em; }
 .door h3 { font-family: var(--disp); font-size: clamp(21px, 2.4vw, 27px); font-weight: 700; letter-spacing: -.026em; margin: 12px 0 8px; }
 .door p { color: var(--ink-4); font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
 .door .go { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; color: var(--champagne-2); }
@@ -419,7 +398,7 @@
 .thread { display: grid; gap: 12px; max-height: 480px; overflow-y: auto; padding-right: 4px; }
 .msg { padding: 14px 16px; border-radius: 16px; background: rgba(var(--surface-rgb), .05); border: 1px solid var(--line); }
 .msg.mine { background: rgba(139,92,246,.14); border-color: rgba(139,92,246,.28); }
-.msg .who { font-family: var(--mono); font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-5); margin-bottom: 6px; }
+.msg .who { font-size: 12.5px; font-weight: 600; color: var(--ink-4); letter-spacing: -.005em; margin-bottom: 6px; }
 .msg p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-3); white-space: pre-wrap; }
 
 /* The explainable match reason (§9) sits directly under a recommendation. */
@@ -458,17 +437,13 @@
 .review-headline { margin: 14px 0 0; font-size: 15.5px; color: var(--ink-3); line-height: 1.5; }
 
 .review-block { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
-.review-block h4 {
-  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
-  font-family: var(--mono); font-size: 9.5px; font-weight: 500;
-  letter-spacing: .18em; text-transform: uppercase; color: var(--champagne-2); margin: 0 0 10px;
-}
+.review-block h4 { font-size: 15px; font-weight: 600; letter-spacing: -.005em; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; color: var(--champagne-2); margin: 0 0 10px; }
 .review-block p { margin: 0 0 8px; font-size: 14px; line-height: 1.65; color: var(--ink-4); }
 .review-block p:last-child { margin-bottom: 0; }
 .review-tags { font-size: 13px !important; color: var(--ink-4); }
 .review-tags b {
   display: inline-block; min-width: 84px; color: var(--ink-5); font-weight: 500;
-  font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
 }
 
 .review-work { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
@@ -479,14 +454,7 @@
 /* Low-signal operational panels fold away so the queue that needs a human
    is what the page actually leads with. */
 .ops-fold { margin-top: 18px; }
-.ops-fold > summary {
-  list-style: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  min-height: 44px; padding: 12px 18px; border-radius: 14px;
-  background: rgba(var(--surface-rgb), .04); border: 1px solid var(--line);
-  font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--ink-4);
-}
+.ops-fold > summary { font-size: 14px; font-weight: 500; color: var(--ink-3); letter-spacing: -.005em; list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 12px 18px; border-radius: 14px; background: rgba(var(--surface-rgb), .04); border: 1px solid var(--line); }
 .ops-fold > summary::-webkit-details-marker { display: none; }
 .ops-fold > summary::after { content: '+'; font-size: 15px; color: var(--champagne-2); }
 .ops-fold[open] > summary::after { content: '−'; }

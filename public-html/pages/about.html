@@ -6,11 +6,11 @@
 <head>
 <script>/* theme: applied before first paint to avoid a flash of the wrong one */
 (function(){var d=document.documentElement;
-try{var t=localStorage.getItem('ff-theme');if(t==='light'||t==='dark')d.setAttribute('data-theme',t);}catch(e){}
+try{var t=localStorage.getItem('ff-theme');if(t==='light'||t==='dark')d.setAttribute('data-theme',t); }catch(e){}
 /* Only allow the scroll-reveal to hide anything once we know script is running
    and the browser can observe it. Without this the page ships 30-60 elements at
    opacity:0 and a single script hiccup leaves half the page permanently blank. */
-if('IntersectionObserver' in window)d.className+=' rv-on';})();</script>
+if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>About Us - Fashion Freelancing</title>
@@ -19,7 +19,7 @@ if('IntersectionObserver' in window)d.className+=' rv-on';})();</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF0055'/%3E%3Cstop offset='1' stop-color='%236E56F0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='19' font-weight='600' fill='%23fff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="../assets/styles.css">
 <link rel="stylesheet" href="../assets/night.css">
 <link rel="stylesheet" href="../assets/network.css">
@@ -46,8 +46,7 @@ if('IntersectionObserver' in window)d.className+=' rv-on';})();</script>
   --acc-16: rgba(167,139,250,.16);
   --acc-30: rgba(167,139,250,.30);
   --acc-45: rgba(167,139,250,.45);
-  --grad-acc: linear-gradient(115deg, #C4B5FD, #A78BFA 55%, #8B5CF6);
-}
+  --grad-acc: linear-gradient(115deg, #C4B5FD, #A78BFA 55%, #8B5CF6); }
 html { color-scheme: dark; scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: clip; }
@@ -88,8 +87,7 @@ main { position: relative; z-index: 3; }
   display: block; width: 100%; text-align: left !important;
   font-family: var(--disp) !important; font-size: 24px !important; font-weight: 700 !important;
   letter-spacing: -.02em; padding: 18px 4px !important;
-  border-bottom: 1px solid rgba(var(--surface-rgb), .08);
-}
+  border-bottom: 1px solid rgba(var(--surface-rgb), .08); }
 .topnav-mobile-links a:last-child { border-bottom: 0; }
 .topnav-burger { background: rgba(var(--surface-rgb), .07) !important; border: 1px solid rgba(var(--surface-rgb), .16) !important; }
 .topnav-burger.is-open span { background: #F4F2FA !important; }
@@ -97,11 +95,9 @@ main { position: relative; z-index: 3; }
   background: transparent;
   /* fully transparent artwork — no white stroke; card-style violet/pink light only */
   filter: drop-shadow(0 4px 16px rgba(139,92,246,.55)) drop-shadow(0 0 28px rgba(255,79,160,.32));
-  transition: filter .35s ease;
-}
+  transition: filter .35s ease; }
 .topnav .logo:hover .logo-img, .footer .logo:hover .logo-img {
-  filter: drop-shadow(0 4px 20px rgba(139,92,246,.75)) drop-shadow(0 0 38px rgba(255,79,160,.5));
-}
+  filter: drop-shadow(0 4px 20px rgba(139,92,246,.75)) drop-shadow(0 0 38px rgba(255,79,160,.5)); }
 .footer { background: rgba(var(--surface-rgb), .03) !important; border-top: 1px solid var(--line) !important; }
 #site-footer * { background-color: transparent; }
 
@@ -144,7 +140,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 /* principles kit */
 .kit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .kit-c { padding: 26px 24px; }
-.kit-c .ki { font-family: var(--mono); font-size: 10.5px; letter-spacing: .2em; color: var(--acc); }
+.kit-c .ki { font-family: var(--mono); font-size: 12px; letter-spacing: .2em; color: var(--acc); }
 .kit-c h3 { font-family: var(--disp); font-size: 17px; font-weight: 700; margin: 10px 0 8px; }
 .kit-c p { font-size: 13.5px; color: var(--ink-4); line-height: 1.6; margin: 0; }
 @media (max-width: 900px) { .kit { grid-template-columns: repeat(2, 1fr); } }
@@ -303,24 +299,17 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-      });
-    }, { threshold: 0.01, rootMargin: '0px 0px 22% 0px' });
+      }); }, { threshold: 0.01, rootMargin: '0px 0px 22% 0px' });
     rvs.forEach(function (el) {
       if (el.getBoundingClientRect().top < window.innerHeight) { el.classList.add('in'); return; }
-      io.observe(el);
-    });
-  } else {
-    rvs.forEach(function (el) { el.classList.add('in'); });
-  }
+      io.observe(el); }); } else {
+    rvs.forEach(function (el) { el.classList.add('in'); }); }
   var rvJanitor = setInterval(function () {
     var left = document.querySelectorAll('.rv:not(.in)');
     if (!left.length) { clearInterval(rvJanitor); return; }
     left.forEach(function (el) {
       var r = el.getBoundingClientRect();
-      if ((r.width || r.height) && r.top < window.innerHeight * 1.05) el.classList.add('in');
-    });
-  }, 700);
-})();
+      if ((r.width || r.height) && r.top < window.innerHeight * 1.05) el.classList.add('in'); }); }, 700); })();
 </script>
 </body>
 </html>
