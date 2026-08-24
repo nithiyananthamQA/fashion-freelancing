@@ -350,12 +350,33 @@ main { position: relative; z-index: 3; }
 /* ============================================================
    Type atoms
    ============================================================ */
+/* ------------------------------------------------------------
+   Section grammar
+   ------------------------------------------------------------
+   One structure, used by every section on every page:
+
+       eyebrow    12px, uppercase, barely tracked
+       headline   clamp to ~44px, leading 1.12, weight 600
+       subcopy    17px, capped at 68 characters
+
+   The point is the repetition. Once a reader has understood one
+   section they know how to read all of them, and stop parsing the
+   layout to get at the content. Values drifted per page before —
+   weight 800 against 600, leading 1.02 against 1.14, eyebrows tracked
+   anywhere from .1em to .2em — and the page read as a set of unrelated
+   blocks rather than one argument.
+   ------------------------------------------------------------ */
 .kicker {
-  font-family: var(--mono); font-size: 11px; font-weight: 500;
-  letter-spacing: .2em; text-transform: uppercase; color: var(--acc, var(--brand-ink));
+  font-family: var(--mono); font-size: 12px; font-weight: 500;
+  /* .2em on an already-uppercase label makes the eye read letters
+     rather than words. Just enough to separate the caps. */
+  letter-spacing: .04em; text-transform: uppercase; color: var(--acc, var(--brand-ink));
 }
 .h-display {
-  font-family: var(--disp); font-weight: 800; letter-spacing: -.035em; line-height: 1.02;
+  /* 600, not 800: at display size the heavier weight reads as shouting
+     where the lighter one reads as assured. 1.12 leading so a headline
+     that wraps to three lines still breathes. */
+  font-family: var(--disp); font-weight: 600; letter-spacing: -.025em; line-height: 1.12;
   color: var(--ink);
 }
 .grad { background: var(--grad-hot); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -414,9 +435,15 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible,
    ============================================================ */
 .sec { position: relative; padding: calc(var(--u) * 13) 0; }
 @media (max-width: 720px) { .sec { padding: calc(var(--u) * 8) 0; } }
-.sec-head { max-width: 640px; margin: 0 auto 48px; text-align: center; }
-.sec-head h2 { font-size: clamp(28px, 3.8vw, 46px); margin-top: 14px; }
-.sec-head .sub { color: var(--ink-4); font-size: 15.5px; margin-top: 14px; line-height: 1.6; }
+.sec-head { max-width: 660px; margin: 0 auto 40px; text-align: center; }
+.sec-head h2 { font-size: clamp(28px, 3.4vw, 44px); margin-top: 12px; }
+/* The bridge between the claim and the content under it. Sections that
+   jump straight from a headline into a grid leave the reader holding a
+   claim with nothing connecting it to what follows. */
+.sec-head .sub { color: var(--ink-4); font-size: 17px; margin-top: 14px; line-height: 1.6; }
+/* Beyond ~70 characters the eye loses its place coming back to the next
+   line. Applies wherever prose sits, not only in a section head. */
+.sec-head .sub, .hero .sub { max-width: 68ch; margin-left: auto; margin-right: auto; }
 
 /* ============================================================
    Forms — .cform wraps labelled .fl + .fi controls
