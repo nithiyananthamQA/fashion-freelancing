@@ -1,0 +1,172 @@
+---
+/**
+ * /workspace/freelancer/messages — every conversation this specialist is
+ * part of, in one place.
+ *
+ * Messages hang off three different things: a request to hire, a project
+ * they replied to, and work already under way. On the old single-page
+ * workspace each thread was buried inside whichever card it belonged to, so
+ * there was no way to answer "who is waiting on me?" without scrolling the
+ * whole page. This gathers them and puts the ones awaiting a reply first.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one, run } from '../../../server/db';
+import { guard, requireSpecialist } from '../../../server/guards';
+import { newId, nowIso } from '../../../server/ids';
+import { notify } from '../../../server/audit';
+import { freelancerNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireSpecialist(Astro));
+if (gate.response) return gate.response;
+const { user, profileId } = gate.value;
+
+const database = db(Astro);
+let flash: string | null = null;
+
+/* Reply into a thread. The thread is identified by the hire request it
+   belongs to, and that request must belong to this specialist — the id
+   arrives in a form, and a form can be replayed. */
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const requestId = String(form.get('requestId') ?? '');
+  const body = String(form.get('body') ?? '').trim();
+
+  const owned = await one<{ id: string; created_by: string; title: string }>(
+    database,
+    'SELECT id, created_by, title FROM hire_requests WHERE id = ? AND profile_id = ?',
+    requestId, profileId,
+  );
+
+  if (owned && body.length >= 2) {
+    const now = nowIso();
+    await run(
+      database,
+      'INSERT INTO messages (id, hire_request_id, sender_id, body, created_at) VALUES (?, ?, ?, ?, ?)',
+      newId(), owned.id, user.id, body.slice(0, 3000), now,
+    );
+    await notify(database, {
+      userId: owned.created_by,
+      kind: 'message',
+      title: `New message about ${owned.title}`,
+      body: body.slice(0, 140),
+      link: '/workspace/company/messages',
+    });
+    flash = 'Message sent.';
+  } else if (owned) {
+    flash = 'Write a little more before sending.';
+  }
+}
+
+interface Thread {
+  request_id: string;
+  title: string;
+  company_name: string;
+  status: string;
+  last_at: string | null;
+  total: number;
+  /** 1 when the other side spoke last, so the ball is with us. */
+  theirs_last: number;
+}
+
+const threads = await all<Thread>(
+  database,
+  `SELECT h.id AS request_id, h.title, c.name AS company_name, h.status,
+          MAX(m.created_at) AS last_at,
+          COUNT(m.id) AS total,
+          CASE WHEN (
+            SELECT m2.sender_id FROM messages m2
+             WHERE m2.hire_request_id = h.id
+             ORDER BY m2.created_at DESC LIMIT 1
+          ) = ?2 THEN 0 ELSE 1 END AS theirs_last
+     FROM hire_requests h
+     JOIN companies c ON c.id = h.company_id
+     LEFT JOIN messages m ON m.hire_request_id = h.id
+    WHERE h.profile_id = ?1
+    GROUP BY h.id
+    HAVING total > 0
+    -- waiting on us first, then most recently active
+    ORDER BY theirs_last DESC, last_at DESC`,
+  profileId, user.id,
+);
+
+const messages = await all<{
+  hire_request_id: string; body: string; created_at: string; sender_name: string; mine: number;
+}>(
+  database,
+  `SELECT m.hire_request_id, m.body, m.created_at, u.name AS sender_name,
+          CASE WHEN m.sender_id = ?2 THEN 1 ELSE 0 END AS mine
+     FROM messages m
+     JOIN users u ON u.id = m.sender_id
+     JOIN hire_requests h ON h.id = m.hire_request_id
+    WHERE h.profile_id = ?1
+    ORDER BY m.created_at`,
+  profileId, user.id,
+);
+
+const byThread = (id: string) => messages.filter((m) => m.hire_request_id === id);
+const awaiting = threads.filter((t) => t.theirs_last === 1).length;
+
+const when = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+
+const nav = freelancerNav({ messages: awaiting || undefined });
+---
+
+<Workspace
+  title="Messages"
+  role="freelancer"
+  current="/workspace/freelancer/messages"
+  items={nav}
+  who={user.name}
+  heading="Messages"
+  lede={awaiting
+    ? `${awaiting} ${awaiting === 1 ? 'conversation is' : 'conversations are'} waiting on your reply.`
+    : 'Every conversation about work you have been asked to do.'}
+  flash={flash}
+>
+  {threads.length === 0 ? (
+    <div class="ws-empty">
+      <h3>No conversations yet</h3>
+      <p>
+        When a company asks to work with you, their brief and any questions
+        appear here. You can answer without leaving this page.
+      </p>
+      <a class="btn-glass btn-sm" href="/workspace/freelancer">Back to your overview</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      {threads.map((t) => (
+        <article class="panel glass-p">
+          <div class="ws-row-head">
+            <div>
+              <h2 style="margin:0;">{t.title}</h2>
+              <p class="ws-sub">{t.company_name} · {t.total} {t.total === 1 ? 'message' : 'messages'} · {when(t.last_at)}</p>
+            </div>
+            {t.theirs_last === 1 && <span class="pill-tone warn">Needs your reply</span>}
+          </div>
+
+          <div class="thread">
+            {byThread(t.request_id).map((m) => (
+              <div class={`msg ${m.mine === 1 ? 'mine' : ''}`}>
+                <p class="who">{m.sender_name}</p>
+                <p>{m.body}</p>
+              </div>
+            ))}
+          </div>
+
+          <form method="post" class="cform" style="margin-top:14px;">
+            <input type="hidden" name="requestId" value={t.request_id} />
+            <label>
+              <span class="fl">Your reply</span>
+              <textarea class="fi" name="body" rows="3" required minlength="2"
+                        placeholder="Answer their question, or tell them what you need to quote."></textarea>
+            </label>
+            <button class="btn-hot btn-sm" style="justify-self:start;">Send reply</button>
+          </form>
+        </article>
+      ))}
+    </div>
+  )}
+</Workspace>

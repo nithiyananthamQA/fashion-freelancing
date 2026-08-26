@@ -1,0 +1,107 @@
+---
+/**
+ * /workspace/company/team — everyone who can sign in and act on this company
+ * account.
+ *
+ * A message a colleague sent, a project a colleague posted and a hire a
+ * colleague made all read as "yours" everywhere else in the company
+ * workspace, because the records belong to the company rather than to the
+ * person who created them. Nothing said who else that "you" covered. This is
+ * that list: who is on the account, what each of them can do, and which of
+ * them is the reader.
+ *
+ * Read-only. Adding and removing people is not open yet, so the page says so
+ * rather than showing controls that do nothing.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one } from '../../../server/db';
+import { guard, requireCompany } from '../../../server/guards';
+import { accountStatusLabel, companyRoleLabel } from '../../../data/labels';
+import { companyNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireCompany(Astro));
+if (gate.response) return gate.response;
+const { user, companyId } = gate.value;
+
+const database = db(Astro);
+
+const company = await one<{ name: string }>(
+  database,
+  'SELECT name FROM companies WHERE id = ?',
+  companyId,
+);
+
+const members = await all<{
+  user_id: string; name: string; email: string; role: string;
+  job_title: string | null; status: string; joined_at: string;
+}>(
+  database,
+  `SELECT m.user_id, u.name, u.email, m.role, m.job_title, u.status, m.created_at AS joined_at
+     FROM company_members m
+     JOIN users u ON u.id = m.user_id
+    WHERE m.company_id = ?
+    -- owners first, then in the order people joined
+    ORDER BY CASE WHEN m.role = 'owner' THEN 0 ELSE 1 END, m.created_at`,
+  companyId,
+);
+
+const owners = members.filter((m) => m.role === 'owner').length;
+
+const when = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+const nav = companyNav();
+---
+
+<Workspace
+  title="Your team"
+  role="company"
+  current="/workspace/company/team"
+  items={nav}
+  who={user.name}
+  heading="Your team"
+  lede={members.length > 1
+    ? `${members.length} people can sign in to ${company?.name ?? 'this account'} and act on its behalf.`
+    : `You are the only person on ${company?.name ?? 'this account'} so far.`}
+>
+  {members.length === 0 ? (
+    <div class="ws-empty">
+      <h3>Nobody on this account yet</h3>
+      <p>
+        Everyone who can sign in to this company — post projects, read replies,
+        hire people and answer messages — is listed here with what they are
+        allowed to do. Your own account should already be one of them.
+      </p>
+      <a class="btn-glass btn-sm" href="/workspace/company">Back to your overview</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      {members.map((m) => (
+        <article class="panel glass-p">
+          <div class="ws-row-head" style="margin-bottom:0;">
+            <div>
+              <h2 style="margin:0;">{m.name}{m.user_id === user.id ? ' — you' : ''}</h2>
+              <p class="ws-sub">
+                {m.job_title ? `${m.job_title} · ` : ''}{m.email} · Joined {when(m.joined_at)}
+              </p>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              {m.status !== 'active' && (
+                <span class="pill-tone bad">{accountStatusLabel(m.status)}</span>
+              )}
+              <span class="pill-tone">{companyRoleLabel(m.role)}</span>
+            </div>
+          </div>
+        </article>
+      ))}
+
+      <p class="ws-sub">
+        {owners === 1 ? 'The owner' : 'Owners'} set the company up and can act on
+        everything it does. Inviting more people is not open yet — until it is,
+        anyone who needs access has to be added by us.
+      </p>
+    </div>
+  )}
+</Workspace>

@@ -1,0 +1,238 @@
+---
+/**
+ * /workspace/admin/projects — every brief a company has posted, and the one
+ * lever operations has over it.
+ *
+ * On the single admin page this sat below the review queue, the leads and the
+ * live specialists, so the question it answers — is anything live that should
+ * not be, and is anything live that nobody is replying to? — took a scroll to
+ * reach. Each brief carries what it takes to decide that on the spot: who
+ * posted it, what it asks for, how many specialists have replied, and the
+ * close action under it. Closed briefs sink to the bottom; they are history,
+ * not work.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, run } from '../../../server/db';
+import { guard, requireAdmin } from '../../../server/guards';
+import { nowIso } from '../../../server/ids';
+import { audit } from '../../../server/audit';
+import { parse } from '../../../server/validate';
+import { ownedProject } from '../../../server/tenant';
+import { getService } from '../../../data/taxonomy';
+import {
+  engagementLabel, projectStatusForAdmin, statusTone, workLocationLabel,
+} from '../../../data/labels';
+import { adminNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireAdmin(Astro));
+if (gate.response) return gate.response;
+const admin = gate.value;
+
+const database = db(Astro);
+const tenant = Astro.locals.tenant;
+let flash: string | null = null;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const { f } = parse(form);
+
+  if (String(form.get('action') ?? '') === 'close_project') {
+    const projectId = String(form.get('projectId') ?? '');
+    const reason = f.text('reason', 'Reason', { max: 500 });
+
+    /* The id arrives in a form and a form can be replayed, so the brief is
+       fetched back and the company that posted it proved to be in this
+       workspace before anything is written. Requiring it to still be open
+       also stops a resubmitted form from re-closing — and re-auditing — a
+       brief somebody already took down. */
+    const project = await ownedProject<{ id: string; title: string; status: string }>(
+      database, projectId, tenant, 'p.id, p.title, p.status',
+    );
+
+    if (!project || project.status === 'closed') {
+      flash = 'That project is already closed, or is not one you can act on.';
+    } else {
+      await run(
+        database,
+        "UPDATE projects SET status = 'closed', updated_at = ? WHERE id = ?",
+        nowIso(), project.id,
+      );
+      await audit(database, {
+        actorId: admin.id, action: 'project.closed', entityType: 'project',
+        entityId: project.id, detail: { reason }, request: Astro.request,
+      });
+      flash = `"${project.title}" is closed. Specialists no longer see it, and no new replies can arrive.`;
+    }
+  }
+}
+
+interface Project {
+  id: string;
+  title: string;
+  status: string;
+  service_id: string;
+  brief: string;
+  engagement: string | null;
+  budget_min: number | null;
+  budget_max: number | null;
+  currency: string | null;
+  work_location: string | null;
+  deadline: string | null;
+  created_at: string;
+  company_name: string;
+  applicants: number;
+  invited: number;
+}
+
+/* Drafts are excluded: nobody outside the company that is writing one can see
+   it, so there is nothing here to moderate. Both counts are scoped the same
+   way as the list itself — a reply from another workspace must not show up in
+   this workspace's total. */
+const projects = await all<Project>(
+  database,
+  `SELECT p.id, p.title, p.status, p.service_id, p.brief, p.engagement,
+          p.budget_min, p.budget_max, p.currency, p.work_location, p.deadline,
+          p.created_at, c.name AS company_name,
+          (SELECT COUNT(*) FROM applications a
+             JOIN specialist_profiles ap ON ap.id = a.profile_id
+             JOIN users au ON au.id = ap.user_id
+            WHERE a.project_id = p.id AND au.tenant IN (?1, 'public')) AS applicants,
+          (SELECT COUNT(*) FROM project_invites i
+             JOIN specialist_profiles ip ON ip.id = i.profile_id
+             JOIN users iu ON iu.id = ip.user_id
+            WHERE i.project_id = p.id AND iu.tenant IN (?1, 'public')) AS invited
+     FROM projects p
+     JOIN companies c ON c.id = p.company_id
+    WHERE p.status != 'draft' AND c.tenant IN (?1, 'public')
+    -- closed briefs are history, so the ones still running sort above them
+    ORDER BY CASE WHEN p.status = 'closed' THEN 1 ELSE 0 END, p.created_at DESC
+    LIMIT 50`,
+  tenant,
+);
+
+/** Still reachable by a specialist, so still worth an operator's attention. */
+const OPEN = ['submitted', 'published', 'responding', 'shortlisted'];
+const open = projects.filter((p) => OPEN.includes(p.status)).length;
+
+const day = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
+/** The money line, in whatever shape the company actually filled in. */
+function budget(p: Project): string | null {
+  if (p.budget_min === null && p.budget_max === null) return null;
+  const unit = p.currency ?? 'USD';
+  if (p.budget_min !== null && p.budget_max !== null) return `${unit} ${p.budget_min}–${p.budget_max}`;
+  if (p.budget_min !== null) return `${unit} ${p.budget_min} and up`;
+  return `Up to ${unit} ${p.budget_max}`;
+}
+
+/** What the brief asks for, minus the fields left blank. */
+const facts = (p: Project): string[] => [
+  budget(p),
+  engagementLabel(p.engagement) || null,
+  workLocationLabel(p.work_location) || null,
+  p.deadline ? `Due ${day(p.deadline)}` : null,
+].filter((x): x is string => Boolean(x));
+
+/** Who has answered it, and who was pointed at it by hand. */
+function reach(p: Project): string {
+  const replies = p.applicants === 0
+    ? 'No replies yet'
+    : p.applicants === 1 ? '1 specialist has replied' : `${p.applicants} specialists have replied`;
+  const invited = p.invited === 0
+    ? ''
+    : p.invited === 1 ? ' · 1 invited by hand' : ` · ${p.invited} invited by hand`;
+  return replies + invited;
+}
+
+/* A brief runs to whatever length the company typed. Enough of it to judge
+   whether it belongs on the site, not the whole thing. */
+const excerpt = (text: string) => (text.length > 320 ? `${text.slice(0, 320).trimEnd()}…` : text);
+
+/** pill-tone only paints warn, ok and bad — anything else stays neutral. */
+const tone = (value: string) => {
+  const t = statusTone(value);
+  return t === 'info' ? 'pill-tone' : `pill-tone ${t}`;
+};
+
+const serviceName = (id: string) => getService(id)?.name ?? 'No service named';
+
+const nav = adminNav();
+---
+
+<Workspace
+  title="Posted projects"
+  role="admin"
+  current="/workspace/admin/projects"
+  items={nav}
+  who={admin.name}
+  heading="Posted projects"
+  lede={projects.length
+    ? `${projects.length} ${projects.length === 1 ? 'brief' : 'briefs'} posted · ${open} still open to specialists.`
+    : 'Every brief a company has posted, who has replied to it, and a way to take it down.'}
+  flash={flash}
+>
+  {projects.length === 0 ? (
+    <div class="ws-empty">
+      <h3>No projects posted yet</h3>
+      <p>
+        A brief appears here the moment a company posts it — who posted it,
+        which service it needs, what it pays, how many specialists have replied,
+        and the button to close it if it should not be live. Post one from a
+        company account and it shows up here straight away.
+      </p>
+      <a class="btn-glass btn-sm" href="/projects/new">Post a project</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      {projects.map((project) => (
+        <article class="panel glass-p">
+          <div class="ws-row-head">
+            <div>
+              <h2 style="margin:0;">{project.title}</h2>
+              <p class="ws-sub">
+                {project.company_name} · {serviceName(project.service_id)} · posted {day(project.created_at)}
+              </p>
+              {facts(project).length > 0 && <p class="ws-sub">{facts(project).join(' · ')}</p>}
+              <p class="ws-sub">{reach(project)}</p>
+            </div>
+            <span class={tone(project.status)}>{projectStatusForAdmin(project.status)}</span>
+          </div>
+
+          <div class="thread">
+            <div class="msg">
+              <p class="who">The brief</p>
+              <p>{excerpt(project.brief)}</p>
+            </div>
+          </div>
+
+          {project.status === 'closed' ? (
+            <p class="ws-sub" style="margin-top:14px;">
+              Closed. Specialists cannot see it or reply to it, and the reason is
+              in the activity log.
+            </p>
+          ) : (
+            <form method="post" class="cform" style="margin-top:14px;">
+              <input type="hidden" name="projectId" value={project.id} />
+              <label>
+                <span class="fl">Close this project</span>
+                <input class="fi" type="text" name="reason" maxlength="500"
+                       placeholder="Why — kept in the activity log" />
+              </label>
+              <button class="btn-glass btn-sm" name="action" value="close_project"
+                      formnovalidate style="justify-self:start;">
+                Close project
+              </button>
+              <p class="ws-sub" style="margin:0;">
+                It disappears from the specialist side immediately. Replies already
+                sent stay where they are.
+              </p>
+            </form>
+          )}
+        </article>
+      ))}
+    </div>
+  )}
+</Workspace>

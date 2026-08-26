@@ -1,0 +1,256 @@
+---
+/**
+ * /workspace/company/settings — the company details every specialist reads
+ * before deciding whether to answer.
+ *
+ * All four were typed once on /company/setup and then frozen. A name entered
+ * in a hurry went out on every request to hire and every project posted after
+ * it, a website left blank stayed blank, and a company that moved country had
+ * nowhere to say so. This is the only screen that can correct them.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { db, one, run } from '../../../server/db';
+import { guard, requireCompany } from '../../../server/guards';
+import { nowIso } from '../../../server/ids';
+import { hasErrors, parse } from '../../../server/validate';
+import { companyRoleLabel } from '../../../data/labels';
+import { companyNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireCompany(Astro));
+if (gate.response) return gate.response;
+const { user, companyId } = gate.value;
+
+const database = db(Astro);
+
+interface Company {
+  id: string;
+  name: string;
+  website: string | null;
+  country: string | null;
+  timezone: string | null;
+  created_at: string;
+  role: string;
+}
+
+/* Read through the membership rather than by id alone: the row is only this
+   page's business while the signed-in account is still on the account. */
+const company = await one<Company>(
+  database,
+  `SELECT c.id, c.name, c.website, c.country, c.timezone, c.created_at, m.role
+     FROM companies c
+     JOIN company_members m ON m.company_id = c.id
+    WHERE c.id = ? AND m.user_id = ?`,
+  companyId, user.id,
+);
+
+let values = {
+  name: company?.name ?? '',
+  website: company?.website ?? '',
+  country: company?.country ?? '',
+  timezone: company?.timezone ?? '',
+};
+let errors: Record<string, string> = {};
+let flash: string | null = null;
+
+if (Astro.request.method === 'POST' && company) {
+  const form = await Astro.request.formData();
+  const { f, errors: found } = parse(form);
+  errors = found;
+
+  const name = f.text('name', 'Company name', { required: true, min: 2, max: 120 });
+  /* Kept before validation: `url()` returns null on a bad address, and losing
+     what they typed is a worse punishment than the typo. */
+  const websiteTyped = String(form.get('website') ?? '').trim();
+  const website = f.url('website', 'Website');
+  const country = f.text('country', 'Country', { max: 60 });
+  const timezone = f.text('timezone', 'Timezone', { max: 60 });
+
+  values = {
+    name,
+    website: errors.website ? websiteTyped : website ?? '',
+    country,
+    timezone,
+  };
+
+  if (hasErrors(errors)) {
+    flash = 'Nothing was saved — check the highlighted field below.';
+  } else {
+    /* The id comes off the session and never off the form, and the membership
+       is proved again here, so a replayed post cannot rename someone else's
+       company. */
+    await run(
+      database,
+      `UPDATE companies
+          SET name = ?, website = ?, country = ?, timezone = ?, updated_at = ?
+        WHERE id = ?
+          AND EXISTS (SELECT 1 FROM company_members m
+                       WHERE m.company_id = companies.id AND m.user_id = ?)`,
+      name, website, country || null, timezone || null, nowIso(), company.id, user.id,
+    );
+    flash = 'Saved. Specialists see this on every request and project you send.';
+  }
+}
+
+const team = await one<{ people: number }>(
+  database,
+  'SELECT COUNT(*) AS people FROM company_members WHERE company_id = ?',
+  companyId,
+);
+const people = team?.people ?? 1;
+
+/* Named consequences rather than a red asterisk: a blank field costs something
+   specific, and that is the only argument for filling it in. */
+const blanks: { label: string; why: string }[] = [];
+if (!values.website) {
+  blanks.push({
+    label: 'Website',
+    why: 'A specialist deciding whether to reply has nothing to look at, and the busiest ones check who is asking first.',
+  });
+}
+if (!values.country) {
+  blanks.push({
+    label: 'Country',
+    why: 'Nobody can tell whether working with you means overlapping hours or none at all.',
+  });
+}
+if (!values.timezone) {
+  blanks.push({
+    label: 'Timezone',
+    why: 'Your browser’s best guess is already filled in above — saving it is what makes a deadline mean the same thing to both sides.',
+  });
+}
+
+const when = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+const nav = companyNav();
+---
+
+<Workspace
+  title="Settings"
+  role="company"
+  current="/workspace/company/settings"
+  items={nav}
+  who={user.name}
+  heading="Settings"
+  lede={blanks.length
+    ? `${blanks.length} of your company details ${blanks.length === 1 ? 'is' : 'are'} still blank.`
+    : 'What specialists see about you before they decide whether to answer.'}
+  flash={flash}
+>
+  {!company ? (
+    <div class="ws-empty">
+      <h3>No company on this account yet</h3>
+      <p>
+        Your company name, website, country and timezone appear here once the
+        account is set up — they are what a specialist reads before answering
+        your first request.
+      </p>
+      <a class="btn-hot btn-sm" href="/company/setup">Set up your company</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      <section class="panel glass-p">
+        <div class="ws-row-head">
+          <div>
+            <h2 style="margin:0;">Company details</h2>
+            <p class="ws-sub">
+              Set up {when(company.created_at)} · {people === 1
+                ? 'You are the only person who can change these'
+                : `${people} people on this account can change these`}
+            </p>
+          </div>
+          <span class="pill-tone">{companyRoleLabel(company.role)}</span>
+        </div>
+
+        <form method="post" class="cform" novalidate>
+          <label>
+            <span class="fl">Company name<span class="rq" aria-hidden="true">*</span></span>
+            <input class="fi" type="text" name="name" value={values.name}
+                   required minlength="2" maxlength="120" autocomplete="organization"
+                   aria-invalid={errors.name ? 'true' : undefined} />
+            <span class="fh">This is the name on every request to hire and every project you post.</span>
+            {errors.name && <span class="cform-err" role="alert">{errors.name}</span>}
+          </label>
+
+          <label>
+            <span class="fl">Website</span>
+            <input class="fi" type="text" name="website" value={values.website}
+                   maxlength="200" autocomplete="url" placeholder="Optional"
+                   aria-invalid={errors.website ? 'true' : undefined} />
+            {errors.website && <span class="cform-err" role="alert">{errors.website}</span>}
+          </label>
+
+          <div class="row2">
+            <label>
+              <span class="fl">Country</span>
+              <input class="fi" type="text" name="country" value={values.country}
+                     maxlength="60" autocomplete="country-name" placeholder="Optional"
+                     aria-invalid={errors.country ? 'true' : undefined} />
+              {errors.country && <span class="cform-err" role="alert">{errors.country}</span>}
+            </label>
+
+            <label>
+              <span class="fl">Timezone</span>
+              <input class="fi" id="f-timezone" type="text" name="timezone" value={values.timezone}
+                     maxlength="60" placeholder="Detected automatically"
+                     aria-invalid={errors.timezone ? 'true' : undefined} />
+              {errors.timezone && <span class="cform-err" role="alert">{errors.timezone}</span>}
+            </label>
+          </div>
+
+          <button class="btn-hot btn-sm" style="justify-self:start;">Save changes</button>
+        </form>
+      </section>
+
+      <section class="panel glass-p">
+        <div class="ws-row-head">
+          <div>
+            <h2 style="margin:0;">Who can change this</h2>
+            <p class="ws-sub">
+              Anyone on the account edits the same details, and a change here shows on work
+              already under way as well as everything sent after it.
+            </p>
+          </div>
+        </div>
+        <a class="btn-glass btn-sm" href="/workspace/company/team">See your team</a>
+      </section>
+
+      {blanks.length === 0 ? (
+        <div class="ws-empty">
+          <h3>Nothing left blank</h3>
+          <p>
+            Any detail you clear above comes back here, with what a specialist would
+            have no answer for while it is missing. Right now everything on your
+            company is filled in.
+          </p>
+          <a class="btn-glass btn-sm" href="/specialists">Find a specialist</a>
+        </div>
+      ) : (
+        blanks.map((blank) => (
+          <article class="panel glass-p">
+            <div class="ws-row-head" style="margin:0;">
+              <div>
+                <h2 style="margin:0;">{blank.label}</h2>
+                <p class="ws-sub">{blank.why}</p>
+              </div>
+              <span class="pill-tone warn">Not saved</span>
+            </div>
+          </article>
+        ))
+      )}
+    </div>
+  )}
+</Workspace>
+
+<script is:inline>
+  /* The browser knows the timezone; most people do not know its IANA name.
+     Only ever fills a field that is empty, so a saved value is never overwritten. */
+  (function () {
+    var field = document.getElementById('f-timezone');
+    if (!field || field.value) return;
+    try { field.value = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+  })();
+</script>

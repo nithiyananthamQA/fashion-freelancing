@@ -1,0 +1,249 @@
+---
+/**
+ * /workspace/admin/activity — what has happened in this workspace, and every
+ * message the site wrote down but has not delivered.
+ *
+ * Both of these were folded away at the very bottom of the single admin page,
+ * inside <details> elements that stayed shut. That is the wrong place for
+ * them: the audit log is the only record of who did what, and the mail queue
+ * holds live confirmation and password-reset links that somebody is sitting
+ * waiting for. Read together they answer one question — what has this
+ * workspace been doing, and is anyone stuck waiting on us?
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, env } from '../../../server/db';
+import { guard, requireAdmin } from '../../../server/guards';
+import { activityLabel, mailStatusLabel } from '../../../data/labels';
+import { adminNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireAdmin(Astro));
+if (gate.response) return gate.response;
+const admin = gate.value;
+
+const database = db(Astro);
+const tenant = Astro.locals.tenant;
+
+interface Entry {
+  action: string;
+  created_at: string;
+  actor: string | null;
+}
+
+interface Message {
+  id: string;
+  to_email: string;
+  subject: string;
+  body: string;
+  status: string;
+  error: string | null;
+  created_at: string;
+}
+
+const [activity, undelivered] = await Promise.all([
+  /* Scoped on audit_logs.tenant, not by joining users on actor_id: plenty of
+     actions have no signed-in actor, and attributing those by the join used to
+     drop every anonymous row into everybody's log. */
+  all<Entry>(
+    database,
+    `SELECT a.action, a.created_at, u.name AS actor
+       FROM audit_logs a
+       LEFT JOIN users u ON u.id = a.actor_id
+      WHERE a.tenant IN (?, 'public')
+      ORDER BY a.created_at DESC
+      LIMIT 60`,
+    tenant,
+  ),
+  /* Queued and failed together. Both mean the same thing to whoever is
+     reading — the person on the other end never got it — and a failed message
+     is the one that will never retry on its own. */
+  all<Message>(
+    database,
+    `SELECT id, to_email, subject, body, status, error, created_at
+       FROM outbound_email
+      WHERE status IN ('queued', 'failed') AND tenant IN (?, 'public')
+      ORDER BY created_at DESC
+      LIMIT 40`,
+    tenant,
+  ),
+]);
+
+/* Whether anything will ever pick the queue up. Without both of these every
+   message stops at 'queued' forever, and the only way the link reaches the
+   person waiting is somebody copying it off this page. */
+const runtime = env(Astro);
+const canSend = Boolean(runtime.RESEND_API_KEY && runtime.MAIL_FROM);
+
+const clock = (iso: string) =>
+  new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+const when = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+/** A stable per-day key in the same zone the day headings are rendered in. */
+const dayOf = (iso: string) => new Date(iso).toLocaleDateString('en-GB');
+
+const todayKey = dayOf(new Date().toISOString());
+const yesterdayKey = dayOf(new Date(Date.now() - 86_400_000).toISOString());
+
+const dayHeading = (key: string, iso: string) =>
+  key === todayKey ? 'Today'
+  : key === yesterdayKey ? 'Yesterday'
+  : new Date(iso).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+
+/* Sixty entries in one unbroken column is a wall nobody reads. The rows arrive
+   newest-first, so walking them in order gathers each day as it goes. */
+interface Day { key: string; heading: string; entries: Entry[] }
+const days: Day[] = [];
+for (const entry of activity) {
+  const key = dayOf(entry.created_at);
+  const open = days[days.length - 1];
+  if (open && open.key === key) open.entries.push(entry);
+  else days.push({ key, heading: dayHeading(key, entry.created_at), entries: [entry] });
+}
+
+const nav = adminNav();
+---
+
+<Workspace
+  title="Activity & email"
+  role="admin"
+  current="/workspace/admin/activity"
+  items={nav}
+  who={admin.name}
+  heading="Activity & email"
+  lede={undelivered.length
+    ? `${undelivered.length} ${undelivered.length === 1 ? 'message has' : 'messages have'} not reached anyone yet.`
+    : 'Everything that has happened here, and any message still waiting to go out.'}
+>
+  {activity.length === 0 && undelivered.length === 0 ? (
+    <div class="ws-empty">
+      <h3>Nothing has happened here yet</h3>
+      <p>
+        Every account created, application approved, project posted and payment
+        recorded is written down here, alongside any confirmation or
+        password-reset message the site has not managed to deliver. Approving
+        an application is what usually writes the first few lines.
+      </p>
+      <a class="btn-glass btn-sm" href="/workspace/admin/reviews">Open the applications to review</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      <section class="panel glass-p">
+        <div class="ws-row-head">
+          <div>
+            <h2 style="margin:0;">What has happened</h2>
+            <p class="ws-sub">
+              {activity.length > 0
+                ? `The last ${activity.length} ${activity.length === 1 ? 'thing' : 'things'} anyone did in this workspace, newest first. Nothing here can be edited or removed — it is the record.`
+                : 'Everything anyone does in this workspace is written down here, and nothing written down can be edited or removed.'}
+            </p>
+          </div>
+          {activity.length > 0 && (
+            <span class="pill-tone">{days.length} {days.length === 1 ? 'day' : 'days'}</span>
+          )}
+        </div>
+      </section>
+
+      {days.length === 0 ? (
+        <div class="ws-empty">
+          <h3>No activity recorded yet</h3>
+          <p>
+            Signing in, submitting an application, approving one, posting a
+            project and recording a payment all leave a line here, so you can
+            see who did what and when. Approve an application and the first
+            entries appear.
+          </p>
+          <a class="btn-glass btn-sm" href="/workspace/admin/reviews">Open the applications to review</a>
+        </div>
+      ) : (
+        days.map((day) => (
+          <article class="panel glass-p">
+            <div class="ws-row-head">
+              <div>
+                <h2 style="margin:0;">{day.heading}</h2>
+                <p class="ws-sub">
+                  {day.entries.length} {day.entries.length === 1 ? 'thing happened' : 'things happened'}
+                </p>
+              </div>
+            </div>
+
+            <div class="thread">
+              {day.entries.map((entry) => (
+                <div class="msg">
+                  <p class="who">{entry.actor ?? 'Somebody not signed in'} · {clock(entry.created_at)}</p>
+                  <p>{activityLabel(entry.action)}</p>
+                </div>
+              ))}
+            </div>
+          </article>
+        ))
+      )}
+
+      <section class="panel glass-p">
+        <div class="ws-row-head">
+          <div>
+            <h2 style="margin:0;">Email waiting to go out</h2>
+            <p class="ws-sub">
+              {canSend
+                ? 'Every message is written down before it is sent. Anything still listed here failed to send or has not been picked up yet — the person on the other end has not received it.'
+                : 'No mail provider is configured, so nothing sends on its own and every message stops here. Copy the link out and send it by hand, or set RESEND_API_KEY and MAIL_FROM to deliver them for real.'}
+            </p>
+          </div>
+          {undelivered.length > 0 && <span class="pill-tone warn">{undelivered.length} not delivered</span>}
+        </div>
+      </section>
+
+      {undelivered.length === 0 ? (
+        <div class="ws-empty">
+          <h3>Nothing is waiting to be sent</h3>
+          <p>
+            Confirmation and password-reset messages are written down here
+            before they go out, so a link is never lost when mail cannot be
+            delivered. Create an account and its confirmation message appears
+            here within seconds.
+          </p>
+          <a class="btn-glass btn-sm" href="/sign-in?mode=create">Create an account</a>
+        </div>
+      ) : (
+        undelivered.map((message) => (
+          <article class="panel glass-p">
+            <div class="ws-row-head">
+              <div>
+                <h2 style="margin:0;">{message.subject}</h2>
+                <p class="ws-sub">To {message.to_email} · written {when(message.created_at)} at {clock(message.created_at)}</p>
+              </div>
+              <span class={`pill-tone ${message.status === 'failed' ? 'bad' : 'warn'}`}>
+                {mailStatusLabel(message.status)}
+              </span>
+            </div>
+
+            <div class="thread">
+              <div class="msg">
+                <p class="who">What it says</p>
+                {/* Kept as typed: the line breaks are the message, and the sign-in
+                    link inside it has to survive being copied out. */}
+                <p style="white-space:pre-wrap;word-break:break-word;">{message.body}</p>
+              </div>
+
+              {message.error && (
+                <div class="msg">
+                  <p class="who">Why it did not send</p>
+                  <p style="word-break:break-word;">{message.error}</p>
+                </div>
+              )}
+            </div>
+
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;">
+              <a class="btn-glass btn-sm"
+                 href={`mailto:${message.to_email}?subject=${encodeURIComponent(message.subject)}&body=${encodeURIComponent(message.body)}`}>
+                Send it by hand
+              </a>
+            </div>
+          </article>
+        ))
+      )}
+    </div>
+  )}
+</Workspace>

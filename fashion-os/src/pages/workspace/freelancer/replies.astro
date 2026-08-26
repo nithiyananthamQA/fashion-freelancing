@@ -1,0 +1,182 @@
+---
+/**
+ * /workspace/freelancer/replies — every reply this specialist sent to a
+ * posted project, and what came of it.
+ *
+ * On the old single-page workspace a reply was one line of title and status,
+ * so the specialist could not see what they had actually offered — the pitch,
+ * the price and the timeline all lived only in the form they had submitted and
+ * closed. Without them there is no way to answer "what did I quote?" before
+ * quoting again, and no way to take a reply back. Replies still in play sort
+ * first; the decided ones stay below as a record.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one, run } from '../../../server/db';
+import { guard, requireSpecialist } from '../../../server/guards';
+import { nowIso } from '../../../server/ids';
+import { notify } from '../../../server/audit';
+import { freelancerNav } from '../../../data/workspace-nav';
+import { getService } from '../../../data/taxonomy';
+import { applicationStatusLabel, engagementLabel, statusTone } from '../../../data/labels';
+
+const gate = await guard(Astro, () => requireSpecialist(Astro));
+if (gate.response) return gate.response;
+const { user, profileId } = gate.value;
+
+const database = db(Astro);
+let flash: string | null = null;
+
+/* Take a reply back. The id arrives in a form and a form can be replayed, so
+   ownership is re-checked on write — and only a reply still awaiting a
+   decision can be withdrawn, never one already hired or declined. */
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const applicationId = String(form.get('applicationId') ?? '');
+
+  const owned = await one<{ id: string; title: string; created_by: string }>(
+    database,
+    `SELECT a.id, p.title, p.created_by
+       FROM applications a
+       JOIN projects p ON p.id = a.project_id
+      WHERE a.id = ? AND a.profile_id = ? AND a.status IN ('submitted', 'shortlisted')`,
+    applicationId, profileId,
+  );
+
+  if (owned) {
+    await run(
+      database,
+      "UPDATE applications SET status = 'withdrawn', updated_at = ? WHERE id = ?",
+      nowIso(), owned.id,
+    );
+    await notify(database, {
+      userId: owned.created_by,
+      kind: 'application_withdrawn',
+      title: `${user.name} withdrew their reply to ${owned.title}`,
+      link: '/workspace/company',
+    });
+    flash = 'Reply withdrawn. The company has been told.';
+  } else {
+    flash = 'That reply can no longer be withdrawn — it has already been decided.';
+  }
+}
+
+interface Reply {
+  id: string;
+  pitch: string;
+  price: number | null;
+  currency: string | null;
+  timeline: string | null;
+  status: string;
+  created_at: string;
+  title: string;
+  service_id: string;
+  engagement: string | null;
+  project_status: string;
+  company_name: string;
+}
+
+const replies = await all<Reply>(
+  database,
+  `SELECT a.id, a.pitch, a.price, a.currency, a.timeline, a.status, a.created_at,
+          p.title, p.service_id, p.engagement, p.status AS project_status,
+          c.name AS company_name
+     FROM applications a
+     JOIN projects p ON p.id = a.project_id
+     JOIN companies c ON c.id = p.company_id
+    WHERE a.profile_id = ?
+    -- still in play first, then the decided ones, newest change first
+    ORDER BY CASE WHEN a.status IN ('declined', 'withdrawn') THEN 1 ELSE 0 END,
+             a.updated_at DESC`,
+  profileId,
+);
+
+const open = replies.filter((r) => r.status === 'submitted' || r.status === 'shortlisted').length;
+
+/* A reply nobody ever answered: the project moved on without a decision on it. */
+const wentQuiet = (r: Reply) =>
+  r.status === 'submitted'
+  && ['hired', 'in_progress', 'delivered', 'completed', 'closed'].includes(r.project_status);
+
+const money = (r: Reply) =>
+  r.price === null ? 'No price given' : `${r.currency ?? 'USD'} ${r.price.toLocaleString('en-GB')}`;
+
+const when = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
+const tone = (status: string) => {
+  const t = statusTone(status);
+  // pill-tone only paints warn, ok and bad — anything else stays neutral.
+  return t === 'info' ? 'pill-tone' : `pill-tone ${t}`;
+};
+
+const nav = freelancerNav({ replies: open || undefined });
+---
+
+<Workspace
+  title="Replies you sent"
+  role="freelancer"
+  current="/workspace/freelancer/replies"
+  items={nav}
+  who={user.name}
+  heading="Replies you sent"
+  lede={open
+    ? `${open} ${open === 1 ? 'reply is' : 'replies are'} still waiting on a decision.`
+    : 'Every project you replied to, what you offered, and what came of it.'}
+  flash={flash}
+>
+  {replies.length === 0 ? (
+    <div class="ws-empty">
+      <h3>You have not replied to a project yet</h3>
+      <p>
+        Projects matching the services you offer are listed under Projects.
+        Reply to one with your message, your price and how long you need, and
+        it appears here alongside the company's answer.
+      </p>
+      <a class="btn-hot btn-sm" href="/projects">Browse open projects</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      {replies.map((r) => (
+        <article class="panel glass-p">
+          <div class="ws-row-head">
+            <div>
+              <h2 style="margin:0;">{r.title}</h2>
+              <p class="ws-sub">
+                {getService(r.service_id)?.name} · {r.company_name} · sent {when(r.created_at)}
+              </p>
+            </div>
+            <span class={tone(r.status)}>{applicationStatusLabel(r.status)}</span>
+          </div>
+
+          <div class="thread">
+            <div class="msg mine">
+              <p class="who">What you offered</p>
+              <p>{r.pitch}</p>
+            </div>
+          </div>
+
+          <p class="ws-sub" style="margin-top:12px;">
+            {money(r)}
+            {r.engagement && <span> · {engagementLabel(r.engagement)}</span>}
+            <span> · {r.timeline ? r.timeline : 'No timeline given'}</span>
+          </p>
+
+          {wentQuiet(r) && (
+            <p class="ws-sub">
+              This project has since been filled, and no decision was recorded
+              against your reply.
+            </p>
+          )}
+
+          {(r.status === 'submitted' || r.status === 'shortlisted') && (
+            <form method="post" style="margin-top:14px;">
+              <input type="hidden" name="applicationId" value={r.id} />
+              <button class="btn-glass btn-sm">Withdraw this reply</button>
+            </form>
+          )}
+        </article>
+      ))}
+    </div>
+  )}
+</Workspace>

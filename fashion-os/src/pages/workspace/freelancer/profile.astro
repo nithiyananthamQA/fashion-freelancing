@@ -1,0 +1,343 @@
+---
+/**
+ * /workspace/freelancer/profile — this specialist's public page, read back to
+ * them the way a company reads it.
+ *
+ * Everything here was typed into the seven-step application and then never
+ * shown again. The only way to check it was to open /specialists/<handle>,
+ * which does not exist until the profile is approved — so the people who most
+ * need to see what they look like, the ones still waiting on a decision, were
+ * the ones who could not. This shows the same facts at every status, says who
+ * can currently see them, and names each blank rather than quietly leaving it
+ * out.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one, readList } from '../../../server/db';
+import { guard, requireSpecialist } from '../../../server/guards';
+import { freelancerNav } from '../../../data/workspace-nav';
+import { APPLICATION_STEPS, TOTAL_APPLICATION_STEPS, getService } from '../../../data/taxonomy';
+import {
+  availabilityLabel, portfolioModerationLabel, profileStatusLabel,
+  rateModelLabel, statusTone, workLocationLabel,
+} from '../../../data/labels';
+
+const gate = await guard(Astro, () => requireSpecialist(Astro));
+if (gate.response) return gate.response;
+const { user, profileId } = gate.value;
+
+const database = db(Astro);
+
+const profile = await one<{
+  status: string; handle: string | null; wizard_step: number;
+  headline: string | null; bio: string | null; years_experience: number | null;
+  languages: string | null; location: string | null; timezone: string | null;
+  availability: string | null; capacity: string | null; turnaround: string | null;
+  rate_min: number | null; rate_max: number | null; rate_currency: string | null;
+  rate_model: string | null; preferred_size: string | null; work_location: string | null;
+  regions: string | null; approved_at: string | null;
+}>(
+  database,
+  `SELECT status, handle, wizard_step, headline, bio, years_experience, languages,
+          location, timezone, availability, capacity, turnaround,
+          rate_min, rate_max, rate_currency, rate_model, preferred_size,
+          work_location, regions, approved_at
+     FROM specialist_profiles
+    WHERE id = ?`,
+  profileId,
+);
+
+interface Piece {
+  title: string;
+  contribution: string;
+  service_id: string | null;
+  media_key: string | null;
+  external_url: string | null;
+  client_name: string | null;
+  has_permission: number;
+  moderation: string;
+}
+
+const [portfolio, primary, review] = await Promise.all([
+  all<Piece>(
+    database,
+    `SELECT title, contribution, service_id, media_key, external_url,
+            client_name, has_permission, moderation
+       FROM portfolio_items
+      WHERE profile_id = ?
+      ORDER BY position, created_at`,
+    profileId,
+  ),
+  /* The service and role sit above the name on the public page, so they are
+     the first thing a company reads — the rest of the list lives on Your
+     services. */
+  one<{ service_id: string; role_key: string | null }>(
+    database,
+    `SELECT service_id, role_key FROM specialist_service_offerings
+      WHERE profile_id = ? ORDER BY is_primary DESC, created_at LIMIT 1`,
+    profileId,
+  ),
+  one<{ notes: string | null }>(
+    database,
+    `SELECT notes FROM verification_reviews
+      WHERE profile_id = ? ORDER BY created_at DESC LIMIT 1`,
+    profileId,
+  ),
+]);
+
+const status = profile?.status ?? 'draft';
+const live = status === 'approved';
+const publicUrl = live && profile?.handle ? `/specialists/${profile.handle}` : null;
+
+const step = profile?.wizard_step ?? 1;
+const stepTitle = APPLICATION_STEPS.find((s) => s.step === step)?.title ?? 'Account';
+
+const service = getService(primary?.service_id);
+const roleName = service?.roles?.find((r) => r.id === primary?.role_key)?.name ?? null;
+
+const currency = profile?.rate_currency ?? 'USD';
+const rate = profile?.rate_min
+  ? profile.rate_max && profile.rate_max !== profile.rate_min
+    ? `${currency} ${profile.rate_min}–${profile.rate_max}`
+    : `From ${currency} ${profile.rate_min}`
+  : null;
+
+/* rate_model is the single answer to how this person charges — the wizard
+   mirrors it into work_preference, so reading both would print it twice. */
+const charging = readList(profile?.rate_model).map(rateModelLabel).filter(Boolean).join(' · ');
+const languages = readList(profile?.languages).join(', ');
+const regions = readList(profile?.regions).join(', ');
+const bioParagraphs = (profile?.bio ?? '').split(/\n+/).map((line) => line.trim()).filter(Boolean);
+
+const showing = portfolio.filter((p) => p.moderation === 'approved').length;
+const waiting = portfolio.filter((p) => p.moderation === 'pending').length;
+
+/* Blank fields a company actively looks for. Every one of them is required
+   before an application can be submitted, so this is really a count for the
+   people still part-way through. */
+const missing = [
+  !profile?.headline,
+  !profile?.bio,
+  rate === null,
+  !profile?.availability,
+  !profile?.work_location,
+  portfolio.length === 0,
+].filter(Boolean).length;
+
+const when = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+const statusLine: Record<string, string> = {
+  draft: `Nobody can see this page. Your application stops at step ${step} of ${TOTAL_APPLICATION_STEPS}, ${stepTitle}, and nothing is published until it is finished and approved.`,
+  submitted: 'Our review team has your application. Nothing below is public while they read it, which usually takes a few working days.',
+  needs_changes: 'We need a few changes before this page can go live. The notes are below — make them in your application and send it back.',
+  approved: `Companies can find this page in the directory, and projects matching your services reach you.${profile?.approved_at ? ` Live since ${when(profile.approved_at)}.` : ''}`,
+  paused: 'Your page is hidden from the directory and from matching, so nobody can open it at the moment. Our team paused it, and Messages is the place to ask why.',
+};
+
+/* Indexed access is checked, so the fallback has to be asserted rather than
+   left to the reader. */
+const whoCanSee = statusLine[status] ?? statusLine.draft!;
+
+/** The meta line under the headline, in the order the public page prints it. */
+const years = profile?.years_experience ?? null;
+const facts = [
+  years === null ? null : `${years} years experience`,
+  profile?.location,
+  profile?.timezone,
+  languages,
+].filter(Boolean).join(' · ');
+
+const tone = (value: string) => {
+  const t = statusTone(value);
+  // pill-tone only paints warn, ok and bad — anything else stays neutral.
+  return t === 'info' ? 'pill-tone' : `pill-tone ${t}`;
+};
+
+/** The line under a portfolio title: what it is, and whether it is a picture. */
+const pieceFacts = (piece: Piece): string => {
+  const parts: string[] = [];
+  const pieceService = getService(piece.service_id);
+  if (pieceService) parts.push(pieceService.name);
+  if (piece.has_permission === 1 && piece.client_name) parts.push(`Client: ${piece.client_name}`);
+  parts.push(piece.media_key ? 'Shown as an image' : piece.external_url ? 'Shown as a link' : 'No image or link');
+  return parts.join(' · ');
+};
+
+const lede = missing > 0
+  ? `${missing} ${missing === 1 ? 'thing a company looks for is' : 'things a company looks for are'} still blank.`
+  : live && waiting > 0
+    ? `${waiting} ${waiting === 1 ? 'piece of work is' : 'pieces of work are'} still being checked, so ${waiting === 1 ? 'it is' : 'they are'} not on your page yet.`
+    : live
+      ? 'This is what a company reads when they find you.'
+      : 'This is what a company will read once your page is approved.';
+
+const nav = freelancerNav();
+---
+
+<Workspace
+  title="Your public page"
+  role="freelancer"
+  current="/workspace/freelancer/profile"
+  items={nav}
+  who={user.name}
+  heading="Your public page"
+  lede={lede}
+  flash={null}
+>
+  <div class="stack-sm">
+    <section class="panel glass-p">
+      <div class="ws-row-head">
+        <div>
+          <h2 style="margin:0;">Who can see this page</h2>
+          <p class="ws-sub">{whoCanSee}</p>
+        </div>
+        <span class={tone(status)}>{profileStatusLabel(status)}</span>
+      </div>
+
+      {status === 'needs_changes' && review?.notes && (
+        <div class="thread">
+          <div class="msg">
+            <p class="who">What our review team asked for</p>
+            <p>{review.notes}</p>
+          </div>
+        </div>
+      )}
+
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;">
+        {publicUrl
+          ? <a class="btn-hot btn-sm" href={publicUrl}>Open your live page</a>
+          : <a class="btn-hot btn-sm" href="/apply">{status === 'draft' ? 'Finish your application' : 'Open your application'}</a>}
+        {live && <a class="btn-glass btn-sm" href="/apply">Edit what is on it</a>}
+        <a class="btn-glass btn-sm" href="/workspace/freelancer/services">See the services you are listed under</a>
+      </div>
+    </section>
+
+    <section class="panel glass-p">
+      <div class="ws-row-head">
+        <div>
+          <h2 style="margin:0;">{profile?.headline ?? 'No headline yet'}</h2>
+          <p class="ws-sub">
+            {user.name}{service ? ` · ${service.name}` : ''}{roleName ? ` · ${roleName}` : ''}
+          </p>
+        </div>
+      </div>
+
+      {bioParagraphs.length > 0
+        ? bioParagraphs.map((line) => <p class="ws-sub">{line}</p>)
+        : (
+          <p class="ws-sub">
+            Your biography is the paragraph a company reads before deciding
+            whether to ask for you by name. It is still empty.
+          </p>
+        )}
+
+      {facts && <p class="ws-sub">{facts}</p>}
+
+      {!profile?.headline && (
+        <p class="ws-sub">
+          Without a headline your directory card is a name and nothing else, so
+          companies scroll past it.
+        </p>
+      )}
+
+      <a class="btn-glass btn-sm" href="/apply?step=4" style="margin-top:14px;">
+        {profile?.headline && profile?.bio ? 'Edit your headline and biography' : 'Write your headline and biography'}
+      </a>
+    </section>
+
+    <section class="panel glass-p">
+      <div class="ws-row-head">
+        <div>
+          <h2 style="margin:0;">Working with you</h2>
+          <p class="ws-sub">The facts a company checks before they send a brief.</p>
+        </div>
+      </div>
+
+      {rate
+        ? <p class="ws-sub"><b>Starting rate</b> {rate}</p>
+        : <p class="ws-sub">No rate yet. Companies filter the directory by budget, so a blank rate leaves you out of those searches entirely.</p>}
+      {charging && <p class="ws-sub"><b>How you charge</b> {charging}</p>}
+      {profile?.work_location && <p class="ws-sub"><b>Where you work</b> {workLocationLabel(profile.work_location)}</p>}
+      {profile?.turnaround && <p class="ws-sub"><b>Turnaround</b> {profile.turnaround}</p>}
+      {profile?.availability
+        ? <p class="ws-sub"><b>Availability</b> {availabilityLabel(profile.availability)}</p>
+        : <p class="ws-sub">You have not said when you are free. Availability is one of the first filters companies reach for.</p>}
+
+      {(profile?.capacity || profile?.preferred_size || regions) && (
+        <p class="ws-sub">
+          Your capacity, preferred project size and regions are not printed on
+          the page — we ask so we can put the right work in front of you.
+        </p>
+      )}
+
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;">
+        <a class={rate ? 'btn-glass btn-sm' : 'btn-hot btn-sm'} href="/apply?step=6">
+          {rate ? 'Edit your rates' : 'Set your rates'}
+        </a>
+        <a class="btn-glass btn-sm" href="/apply?step=4">
+          {profile?.availability ? 'Edit availability and turnaround' : 'Say when you are free'}
+        </a>
+      </div>
+    </section>
+
+    <section class="panel glass-p">
+      <div class="ws-row-head">
+        <div>
+          <h2 style="margin:0;">Selected work</h2>
+          <p class="ws-sub">
+            {portfolio.length === 0
+              ? 'Nothing added yet.'
+              : `${showing} of ${portfolio.length} ${portfolio.length === 1 ? 'piece is' : 'pieces are'} on your page. Every piece is checked by our team before it appears.`}
+          </p>
+        </div>
+      </div>
+
+      {portfolio.length === 0 ? (
+        <div class="ws-empty">
+          <h3>No work on your page</h3>
+          <p>
+            Companies decide from the work, not the words, and at least one
+            piece is needed before your application can be sent. Add a piece
+            with what you did on it and it appears here — publicly once our
+            team has checked it.
+          </p>
+          <a class="btn-hot btn-sm" href="/apply?step=5">Add a piece of work</a>
+        </div>
+      ) : (
+        <div class="stack-sm">
+          {portfolio.map((piece) => (
+            <div>
+              <div class="ws-row-head" style="margin-bottom:6px;">
+                <div>
+                  <h2 style="margin:0;">{piece.title}</h2>
+                  <p class="ws-sub">{pieceFacts(piece)}</p>
+                </div>
+                <span class={tone(piece.moderation)}>{portfolioModerationLabel(piece.moderation)}</span>
+              </div>
+              <p class="ws-sub">{piece.contribution}</p>
+              {piece.moderation === 'pending' && (
+                <p class="ws-sub">Only you can see this one until our team has checked it.</p>
+              )}
+              {piece.moderation === 'rejected' && (
+                <p class="ws-sub">
+                  This one was not accepted, so it is left off your page. Replace
+                  it with work you can show, and say what you did on it.
+                </p>
+              )}
+              {piece.external_url && (
+                <a class="btn-glass btn-sm" href={piece.external_url} rel="noopener nofollow ugc"
+                   target="_blank" style="margin-top:10px;">Open the link you gave</a>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {portfolio.length > 0 && (
+        <a class="btn-glass btn-sm" href="/apply?step=5" style="margin-top:14px;">Add or replace a piece</a>
+      )}
+    </section>
+  </div>
+</Workspace>

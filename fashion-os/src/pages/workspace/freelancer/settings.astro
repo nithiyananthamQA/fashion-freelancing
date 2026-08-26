@@ -1,0 +1,235 @@
+---
+/**
+ * /workspace/freelancer/settings — the account behind the profile: the name
+ * that goes out on everything this specialist sends, and how we reach them.
+ *
+ * These four columns live on `users`, and until now the only place they could
+ * be typed was the sign-up form — so a name entered wrong on day one followed
+ * the specialist into every message and every hire request they answered, with
+ * nowhere to correct it. The email is shown but not editable: it is the
+ * sign-in credential, so moving it is a verification flow, not a text box.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { db, one, run } from '../../../server/db';
+import { guard, requireSpecialist } from '../../../server/guards';
+import { nowIso } from '../../../server/ids';
+import { hasErrors, parse } from '../../../server/validate';
+import { freelancerNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireSpecialist(Astro));
+if (gate.response) return gate.response;
+const { user } = gate.value;
+
+const database = db(Astro);
+
+interface Account {
+  name: string;
+  email: string;
+  country: string | null;
+  timezone: string | null;
+  phone: string | null;
+  phone_verified_at: string | null;
+  email_verified_at: string | null;
+}
+
+const account = await one<Account>(
+  database,
+  `SELECT name, email, country, timezone, phone, phone_verified_at, email_verified_at
+     FROM users
+    WHERE id = ?`,
+  user.id,
+);
+
+let values = {
+  name: account?.name ?? user.name,
+  country: account?.country ?? '',
+  timezone: account?.timezone ?? '',
+  phone: account?.phone ?? '',
+};
+let errors: Record<string, string> = {};
+let flash: string | null = null;
+
+/* The only row this page can touch is the caller's own: the id comes off the
+   session, and the form carries no id at all, so there is nothing to replay
+   with somebody else's. */
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const { f, errors: found } = parse(form);
+  errors = found;
+
+  const name = f.text('name', 'Your name', { required: true, min: 2, max: 120 });
+  const country = f.text('country', 'Country', { max: 60 });
+  const timezone = f.text('timezone', 'Timezone', { max: 60 });
+  const phone = f.text('phone', 'Phone number', { max: 40 });
+
+  /* Deliberately loose — numbers are written differently in every country, and
+     the only real test of one is whether somebody answers it. */
+  if (phone && !/^\+?[\d\s()./-]{6,}$/.test(phone)) {
+    errors.phone = 'Use digits, spaces, brackets and + only.';
+  }
+
+  // Keep what they typed on screen, so a rejected save costs them nothing.
+  values = { name, country, timezone, phone };
+
+  if (hasErrors(errors)) {
+    flash = 'Nothing was saved — check the highlighted field below.';
+  } else {
+    /* A number that has changed has not been confirmed, whatever the old one
+       had been through. */
+    const phoneVerifiedAt = phone === (account?.phone ?? '') ? account?.phone_verified_at ?? null : null;
+
+    await run(
+      database,
+      `UPDATE users
+          SET name = ?, country = ?, timezone = ?, phone = ?, phone_verified_at = ?, updated_at = ?
+        WHERE id = ?`,
+      name, country || null, timezone || null, phone || null, phoneVerifiedAt, nowIso(), user.id,
+    );
+    flash = 'Saved. Companies see this name on everything you send from here.';
+  }
+}
+
+/* The session's copy of the name is a request old by now, so the sidebar reads
+   from what was actually written rather than showing the name they replaced. */
+const who = hasErrors(errors) ? account?.name ?? user.name : values.name;
+
+const emailConfirmed = Boolean(account?.email_verified_at);
+
+/* Named consequences rather than a red asterisk: a blank field costs something
+   specific, and that is the only argument for filling it in. */
+const blanks: { label: string; why: string }[] = [];
+if (!values.country) {
+  blanks.push({ label: 'Country', why: 'We have nothing to tell a company that asks where you are based.' });
+}
+if (!values.timezone) {
+  blanks.push({ label: 'Timezone', why: 'Your browser’s best guess is already filled in above — saving it is what makes it stick.' });
+}
+if (!values.phone) {
+  blanks.push({ label: 'Phone number', why: 'Email is the only way to reach you when something needs an answer today.' });
+}
+
+const nav = freelancerNav();
+---
+
+<Workspace
+  title="Settings"
+  role="freelancer"
+  current="/workspace/freelancer/settings"
+  items={nav}
+  who={who}
+  heading="Settings"
+  lede={blanks.length
+    ? `${blanks.length} of your account details ${blanks.length === 1 ? 'is' : 'are'} still blank.`
+    : 'The name on everything you send from here, and how we reach you.'}
+  flash={flash}
+>
+  <div class="stack-sm">
+    <section class="panel glass-p">
+      <div class="ws-row-head">
+        <div>
+          <h2 style="margin:0;">Your details</h2>
+          <p class="ws-sub">
+            Your name appears on every message and every request you answer. The rest is for us:
+            the location and hours companies read are set on <a href="/workspace/freelancer/profile">your public page</a>.
+          </p>
+        </div>
+      </div>
+
+      <form method="post" class="cform" novalidate>
+        <label>
+          <span class="fl">Your name<span class="rq" aria-hidden="true">*</span></span>
+          <input class="fi" type="text" name="name" value={values.name}
+                 required minlength="2" maxlength="120" autocomplete="name"
+                 aria-invalid={errors.name ? 'true' : undefined} />
+          {errors.name && <span class="cform-err" role="alert">{errors.name}</span>}
+        </label>
+
+        <div class="row2">
+          <label>
+            <span class="fl">Country</span>
+            <input class="fi" type="text" name="country" value={values.country}
+                   maxlength="60" autocomplete="country-name" placeholder="Optional"
+                   aria-invalid={errors.country ? 'true' : undefined} />
+            {errors.country && <span class="cform-err" role="alert">{errors.country}</span>}
+          </label>
+
+          <label>
+            <span class="fl">Timezone</span>
+            <input class="fi" id="f-timezone" type="text" name="timezone" value={values.timezone}
+                   maxlength="60" placeholder="Detected automatically"
+                   aria-invalid={errors.timezone ? 'true' : undefined} />
+            {errors.timezone && <span class="cform-err" role="alert">{errors.timezone}</span>}
+          </label>
+        </div>
+
+        <label>
+          <span class="fl">Phone number</span>
+          <input class="fi" type="tel" name="phone" value={values.phone}
+                 maxlength="40" autocomplete="tel" placeholder="Optional"
+                 aria-invalid={errors.phone ? 'true' : undefined} />
+          <span class="fh">Kept for us to reach you. It is never shown on your public page.</span>
+          {errors.phone && <span class="cform-err" role="alert">{errors.phone}</span>}
+        </label>
+
+        <button class="btn-hot btn-sm" style="justify-self:start;">Save changes</button>
+      </form>
+    </section>
+
+    <section class="panel glass-p">
+      <div class="ws-row-head">
+        <div>
+          <h2 style="margin:0;">How you sign in</h2>
+          <p class="ws-sub">{account?.email ?? user.email}</p>
+        </div>
+        <span class={`pill-tone ${emailConfirmed ? 'ok' : 'warn'}`}>
+          {emailConfirmed ? 'Confirmed' : 'Not confirmed yet'}
+        </span>
+      </div>
+      <p>
+        This address is how you sign in, so it cannot be swapped in a text box here. Ask us to move
+        the account and we will do it once the new address is confirmed.
+      </p>
+      {!emailConfirmed && (
+        <p>
+          We emailed a confirmation link when the account was created, and those links last 24 hours.
+          If it never arrived, tell us and we will send a fresh one.
+        </p>
+      )}
+    </section>
+
+    {blanks.length === 0 ? (
+      <div class="ws-empty">
+        <h3>Nothing left blank</h3>
+        <p>
+          Any detail you clear above comes back here, with what we would have no answer for
+          while it is missing. Right now everything we hold on your account is filled in.
+        </p>
+        <a class="btn-glass btn-sm" href="/workspace/freelancer/profile">See your public page</a>
+      </div>
+    ) : (
+      blanks.map((blank) => (
+        <article class="panel glass-p">
+          <div class="ws-row-head" style="margin:0;">
+            <div>
+              <h2 style="margin:0;">{blank.label}</h2>
+              <p class="ws-sub">{blank.why}</p>
+            </div>
+            <span class="pill-tone warn">Not saved</span>
+          </div>
+        </article>
+      ))
+    )}
+  </div>
+</Workspace>
+
+<script is:inline>
+  /* The browser knows the timezone; most people do not know its IANA name.
+     Only ever fills a field that is empty, so a saved value is never overwritten. */
+  (function () {
+    var field = document.getElementById('f-timezone');
+    if (!field || field.value) return;
+    try { field.value = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+  })();
+</script>

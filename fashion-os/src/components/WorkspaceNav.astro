@@ -1,0 +1,64 @@
+---
+/**
+ * The workspace sidebar.
+ *
+ * Each role gets its own set of destinations. The set is defined here rather
+ * than in each page so a link can never exist in one place and not another,
+ * and so the "you are here" state is decided in exactly one spot.
+ *
+ * An item may carry a count. It renders only when there is something to count:
+ * a badge reading zero is noise, and worse, it trains people to ignore badges.
+ */
+export interface NavItem {
+  href: string;
+  label: string;
+  /** Shown as a badge. Omit, or pass 0, and no badge appears. */
+  count?: number;
+}
+
+interface Props {
+  role: 'freelancer' | 'company' | 'admin';
+  current: string;
+  items: NavItem[];
+  /** Shown under the role name — the person's or company's name. */
+  who?: string;
+}
+
+const { role, current, items, who } = Astro.props as Props;
+
+const ROLE_LABEL = {
+  freelancer: 'Specialist',
+  company: 'Company',
+  admin: 'Operations',
+} as const;
+---
+
+<nav class="ws-nav" aria-label="Workspace">
+  <div class="ws-nav-head">
+    <span class="ws-role">{ROLE_LABEL[role]}</span>
+    {who && <span class="ws-who">{who}</span>}
+  </div>
+
+  <ul class="ws-nav-list">
+    {items.map((item) => {
+      const active = item.href === current;
+      return (
+        <li>
+          <a
+            href={item.href}
+            class={active ? 'is-current' : ''}
+            aria-current={active ? 'page' : undefined}
+          >
+            <span>{item.label}</span>
+            {/* a zero badge is noise; only render a real number */}
+            {item.count ? <b class="ws-badge">{item.count}</b> : null}
+          </a>
+        </li>
+      );
+    })}
+  </ul>
+
+  <form method="post" action="/api/sign-out" class="ws-nav-foot">
+    <button type="submit" class="btn-glass btn-sm">Sign out</button>
+  </form>
+</nav>

@@ -1,0 +1,47 @@
+---
+/**
+ * The shell every workspace page sits in: site chrome, a sidebar of the
+ * role's destinations, and a titled main column.
+ *
+ * It wraps Night rather than replacing it, so the workspace keeps the site's
+ * header, footer, theme toggle and both palettes instead of becoming a second
+ * design that has to be maintained alongside the first.
+ */
+import Night from './Night.astro';
+import WorkspaceNav from '../components/WorkspaceNav.astro';
+import type { NavItem } from '../components/WorkspaceNav.astro';
+
+interface Props {
+  title: string;
+  role: 'freelancer' | 'company' | 'admin';
+  current: string;
+  items: NavItem[];
+  who?: string;
+  /** The page's own heading, and an optional line under it. */
+  heading: string;
+  lede?: string;
+  /** A short confirmation of something that just happened. */
+  flash?: string | null;
+}
+
+const { title, role, current, items, who, heading, lede, flash } = Astro.props as Props;
+---
+
+<Night title={title} noindex current="" quoteBot={false}>
+  <main id="main" class="ws-shell">
+    <div class="wrap ws-grid">
+      <WorkspaceNav role={role} current={current} items={items} who={who} />
+
+      <div class="ws-main">
+        <header class="ws-head">
+          <h1>{heading}</h1>
+          {lede && <p class="ws-lede">{lede}</p>}
+        </header>
+
+        {flash && <p class="ws-flash" role="status">{flash}</p>}
+
+        <slot />
+      </div>
+    </div>
+  </main>
+</Night>

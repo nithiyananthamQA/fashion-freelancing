@@ -1,0 +1,269 @@
+---
+/**
+ * /workspace/freelancer — the specialist's overview.
+ *
+ * The shape is the one the earlier dashboard used and the owner asked for:
+ * the figures that matter across the top, then a wide column for the work
+ * itself with a narrower one beside it for context. Each card shows only the
+ * first few rows and hands off to its own page, so the overview stays an
+ * overview instead of growing back into the single long scroll it replaced.
+ *
+ * Every figure here is counted from the specialist's own records — nothing is
+ * illustrative.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one } from '../../../server/db';
+import { guard, requireSpecialist } from '../../../server/guards';
+import { getService } from '../../../data/taxonomy';
+import {
+  applicationStatusLabel, engagementStatusLabel, hireStatusForSpecialist, statusTone,
+} from '../../../data/labels';
+import { freelancerNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireSpecialist(Astro));
+if (gate.response) return gate.response;
+const { user, profileId } = gate.value;
+
+const database = db(Astro);
+
+const profile = await one<{
+  status: string; handle: string | null; headline: string | null; availability: string | null;
+}>(
+  database,
+  'SELECT status, handle, headline, availability FROM specialist_profiles WHERE id = ?',
+  profileId,
+);
+
+const [requests, invites, applications, engagements, unanswered, paid] = await Promise.all([
+  all<{ id: string; title: string; status: string; company_name: string; budget_min: number | null; budget_max: number | null; currency: string | null }>(
+    database,
+    `SELECT h.id, h.title, h.status, c.name AS company_name, h.budget_min, h.budget_max, h.currency
+       FROM hire_requests h JOIN companies c ON c.id = h.company_id
+      WHERE h.profile_id = ?
+      ORDER BY h.created_at DESC`,
+    profileId,
+  ),
+  all<{ id: string; title: string; service_id: string; reason: string | null; company_name: string }>(
+    database,
+    `SELECT p.id, p.title, p.service_id, i.reason, c.name AS company_name
+       FROM project_invites i
+       JOIN projects p ON p.id = i.project_id
+       JOIN companies c ON c.id = p.company_id
+      WHERE i.profile_id = ? AND i.status = 'sent'
+        AND p.status IN ('published','responding','shortlisted')
+      ORDER BY i.created_at DESC`,
+    profileId,
+  ),
+  all<{ id: string; status: string; price: number | null; title: string }>(
+    database,
+    `SELECT a.id, a.status, a.price, p.title
+       FROM applications a JOIN projects p ON p.id = a.project_id
+      WHERE a.profile_id = ?
+      ORDER BY a.created_at DESC`,
+    profileId,
+  ),
+  all<{ id: string; title: string; status: string; company_name: string }>(
+    database,
+    `SELECT e.id, e.title, e.status, c.name AS company_name
+       FROM engagements e JOIN companies c ON c.id = e.company_id
+      WHERE e.profile_id = ?
+      ORDER BY e.created_at DESC`,
+    profileId,
+  ),
+  /* threads where the company spoke last: the ball is with us */
+  one<{ n: number }>(
+    database,
+    `SELECT COUNT(*) AS n FROM hire_requests h
+      WHERE h.profile_id = ?1
+        AND EXISTS (SELECT 1 FROM messages m WHERE m.hire_request_id = h.id)
+        AND (SELECT m2.sender_id FROM messages m2
+              WHERE m2.hire_request_id = h.id ORDER BY m2.created_at DESC LIMIT 1) <> ?2`,
+    profileId, user.id,
+  ),
+  one<{ total: number; currency: string | null }>(
+    database,
+    `SELECT COALESCE(SUM(pay.amount), 0) AS total, MAX(pay.currency) AS currency
+       FROM payments pay JOIN engagements e ON e.id = pay.engagement_id
+      WHERE e.profile_id = ? AND pay.kind = 'payout' AND pay.status = 'paid'`,
+    profileId,
+  ),
+]);
+
+const open = requests.filter((r) => ['sent', 'viewed', 'question'].includes(r.status));
+const live = engagements.filter((e) => !['completed', 'cancelled'].includes(e.status));
+const waiting = unanswered?.n ?? 0;
+
+const money = (n: number, ccy: string | null) =>
+  new Intl.NumberFormat('en-GB', { style: 'currency', currency: ccy || 'USD', maximumFractionDigits: 0 }).format(n);
+
+const budget = (r: { budget_min: number | null; budget_max: number | null; currency: string | null }) =>
+  r.budget_min || r.budget_max
+    ? [r.budget_min && money(r.budget_min, r.currency), r.budget_max && money(r.budget_max, r.currency)]
+        .filter(Boolean).join(' – ')
+    : 'Budget not stated';
+
+const initials = (s: string) => s.split(/\s+/).slice(0, 2).map((w) => w[0] ?? '').join('').toUpperCase();
+
+const nav = freelancerNav({
+  requests: open.length || undefined,
+  invites: invites.length || undefined,
+  work: live.length || undefined,
+  messages: waiting || undefined,
+});
+
+const approved = profile?.status === 'approved';
+---
+
+<Workspace
+  title="Overview"
+  role="freelancer"
+  current="/workspace/freelancer"
+  items={nav}
+  who={user.name}
+  heading={`Welcome back, ${user.name.split(/\s+/)[0]}`}
+  lede={approved
+    ? 'Your profile is live. Here is what is waiting on you.'
+    : 'Your profile is not live yet — finish your application to start receiving work.'}
+>
+  <div class="ws-stats">
+    <div class="ws-stat">
+      <span class="k">Requests to answer</span>
+      <span class="v">{open.length}</span>
+      <span class="d">{open.length ? 'Companies waiting on you' : 'Nothing waiting'}</span>
+    </div>
+    <div class="ws-stat">
+      <span class="k">Work in progress</span>
+      <span class="v">{live.length}</span>
+      <span class="d">{engagements.length - live.length} finished</span>
+    </div>
+    <div class="ws-stat">
+      <span class="k">Replies sent</span>
+      <span class="v">{applications.length}</span>
+      <span class="d">To projects you were matched to</span>
+    </div>
+    <div class="ws-stat">
+      <span class="k">Paid to you</span>
+      <span class="v">{money(paid?.total ?? 0, paid?.currency ?? null)}</span>
+      <span class="d">Recorded against finished work</span>
+    </div>
+  </div>
+
+  <div class="ws-cols">
+    <div class="ws-col">
+      <section class="ws-card">
+        <div class="ws-card-head">
+          <h2>Requests to hire you</h2>
+          <a href="/workspace/freelancer/requests">See all →</a>
+        </div>
+        {open.length === 0 ? (
+          <div class="ws-empty">
+            <h3>No open requests</h3>
+            <p>When a company asks to work with you, their brief and budget arrive here for you to accept, decline or ask about.</p>
+          </div>
+        ) : (
+          <div class="ws-rows">
+            {open.slice(0, 4).map((r) => (
+              <a class="ws-row" href="/workspace/freelancer/requests">
+                <span class="mark">{initials(r.company_name)}</span>
+                <span class="body">
+                  <span class="t">{r.title}</span>
+                  <span class="m">{r.company_name} · {budget(r)}</span>
+                </span>
+                <span class={`pill-tone ${statusTone(r.status)}`}>{hireStatusForSpecialist(r.status)}</span>
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section class="ws-card">
+        <div class="ws-card-head">
+          <h2>Work in progress</h2>
+          <a href="/workspace/freelancer/work">See all →</a>
+        </div>
+        {live.length === 0 ? (
+          <div class="ws-empty">
+            <h3>Nothing under way</h3>
+            <p>Accepted work appears here, so you and the company are looking at the same list.</p>
+          </div>
+        ) : (
+          <div class="ws-rows">
+            {live.slice(0, 4).map((e) => (
+              <a class="ws-row" href="/workspace/freelancer/work">
+                <span class="mark">{initials(e.company_name)}</span>
+                <span class="body">
+                  <span class="t">{e.title}</span>
+                  <span class="m">{e.company_name}</span>
+                </span>
+                <span class={`pill-tone ${statusTone(e.status)}`}>{engagementStatusLabel(e.status)}</span>
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+
+    <div class="ws-col">
+      <section class="ws-card">
+        <div class="ws-card-head"><h2>Your profile</h2></div>
+        <p class="ws-sub" style="margin-top:0;">
+          {approved
+            ? 'Live in the directory and included in matching.'
+            : 'Not visible to companies yet.'}
+        </p>
+        <p style="margin:10px 0 0;">
+          <span class={`pill-tone ${approved ? 'ok' : 'warn'}`}>
+            {approved ? 'Approved' : 'Waiting for review'}
+          </span>
+        </p>
+        {approved && profile?.handle && (
+          <p style="margin:14px 0 0;">
+            <a class="btn-glass btn-sm" href={`/specialists/${profile.handle}`}>View your public page</a>
+          </p>
+        )}
+        {!approved && (
+          <p style="margin:14px 0 0;">
+            <a class="btn-hot btn-sm" href="/apply">Finish your application</a>
+          </p>
+        )}
+      </section>
+
+      <section class="ws-card">
+        <div class="ws-card-head">
+          <h2>Project invitations</h2>
+          <a href="/workspace/freelancer/projects">See all →</a>
+        </div>
+        {invites.length === 0 ? (
+          <p class="ws-sub" style="margin-top:0;">
+            Projects matching your services will appear here with the reason you were matched.
+          </p>
+        ) : (
+          <div class="ws-rows">
+            {invites.slice(0, 3).map((i) => (
+              <a class="ws-row" href="/workspace/freelancer/projects">
+                <span class="body">
+                  <span class="t">{i.title}</span>
+                  <span class="m">{getService(i.service_id)?.name ?? i.service_id}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section class="ws-card">
+        <div class="ws-card-head">
+          <h2>Messages</h2>
+          <a href="/workspace/freelancer/messages">Open →</a>
+        </div>
+        <p class="ws-sub" style="margin-top:0;">
+          {waiting
+            ? `${waiting} ${waiting === 1 ? 'conversation is' : 'conversations are'} waiting on your reply.`
+            : 'Nothing waiting on you.'}
+        </p>
+      </section>
+    </div>
+  </div>
+</Workspace>

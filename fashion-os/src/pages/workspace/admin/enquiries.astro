@@ -1,0 +1,179 @@
+---
+/**
+ * /workspace/admin/enquiries — the direct-service side of the business:
+ * somebody filled in the contact form or finished the quote bot and is sitting
+ * waiting to hear back from us.
+ *
+ * On the single admin page these shared a screen with the application review,
+ * so the one queue with a real person waiting on a reply was read in the same
+ * breath as a queue of profiles waiting on a decision. They are different work.
+ * Here the unanswered ones come first, the settled ones sink to the bottom, and
+ * the whole message sits on the card so nobody replies without reading what was
+ * actually asked.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, run } from '../../../server/db';
+import { guard, requireAdmin } from '../../../server/guards';
+import { ownedLead } from '../../../server/tenant';
+import { getService } from '../../../data/taxonomy';
+import { leadSourceLabel, leadStatusLabel, statusTone } from '../../../data/labels';
+import { adminNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireAdmin(Astro));
+if (gate.response) return gate.response;
+const admin = gate.value;
+
+const database = db(Astro);
+const tenant = Astro.locals.tenant;
+let flash: string | null = null;
+
+/* The moves an operator can make, in the order the work actually happens.
+   'new' is not among them — an enquiry arrives there and never goes back. */
+const STAGES = ['contacted', 'quoted', 'won', 'lost'] as const;
+
+/** Buttons say what the operator just did, not which enum value they store. */
+const STAGE_ACTION: Record<(typeof STAGES)[number], string> = {
+  contacted: 'I have replied',
+  quoted: 'I sent a price',
+  won: 'They said yes',
+  lost: 'They went elsewhere',
+};
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const action = String(form.get('action') ?? '');
+
+  if (action === 'lead_status') {
+    const leadId = String(form.get('leadId') ?? '');
+    const next = String(form.get('status') ?? '');
+
+    /* The id arrives in a form and a form can be replayed carrying somebody
+       else's, so the enquiry is proved to be in this workspace before the
+       write. The stage is checked against our own list too — the column has a
+       CHECK constraint, and a rejected write would surface as a 500 rather
+       than as a sentence anyone can read. */
+    const lead = (STAGES as readonly string[]).includes(next)
+      ? await ownedLead<{ id: string; name: string }>(database, leadId, tenant, 'id, name')
+      : null;
+
+    if (!lead) {
+      flash = 'That enquiry is not in your queue.';
+    } else {
+      await run(database, 'UPDATE leads SET status = ? WHERE id = ?', next, lead.id);
+      flash = `${lead.name} — ${leadStatusLabel(next)}.`;
+    }
+  }
+}
+
+interface Enquiry {
+  id: string;
+  name: string;
+  email: string;
+  company: string | null;
+  service: string | null;
+  message: string;
+  timeline: string | null;
+  source: string;
+  page: string | null;
+  status: string;
+  created_at: string;
+}
+
+const enquiries = await all<Enquiry>(
+  database,
+  `SELECT id, name, email, company, service, message, timeline, source, page, status, created_at
+     FROM leads
+    WHERE tenant IN (?, 'public')
+    -- a work queue: nobody-has-replied first, settled last, newest within each
+    ORDER BY (status = 'new') DESC, (status IN ('won','lost')) ASC, created_at DESC
+    LIMIT 100`,
+  tenant,
+);
+
+const unanswered = enquiries.filter((e) => e.status === 'new').length;
+
+const when = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+/** pill-tone only paints warn, ok and bad — anything else stays neutral. */
+const tone = (value: string) => {
+  const t = statusTone(value);
+  return t === 'info' ? 'pill-tone' : `pill-tone ${t}`;
+};
+
+/** How to reach them and what they asked for, minus the fields left blank. */
+const context = (e: Enquiry): string[] => [
+  e.email,
+  e.service === 'multiple' ? 'More than one service' : (getService(e.service)?.name ?? null),
+  e.timeline,
+  leadSourceLabel(e.source),
+  e.page ? `sent from ${e.page}` : null,
+  when(e.created_at),
+].filter((x): x is string => Boolean(x));
+
+const nav = adminNav({ enquiries: unanswered || undefined });
+---
+
+<Workspace
+  title="Project enquiries"
+  role="admin"
+  current="/workspace/admin/enquiries"
+  items={nav}
+  who={admin.name}
+  heading="Project enquiries"
+  lede={unanswered
+    ? `${unanswered} ${unanswered === 1 ? 'person has' : 'people have'} written in and nobody has replied yet.`
+    : 'Everyone who asked us to do the work directly, and where each conversation got to.'}
+  flash={flash}
+>
+  {enquiries.length === 0 ? (
+    <div class="ws-empty">
+      <h3>Nobody has written in yet</h3>
+      <p>
+        Every enquiry from the contact form, the service pages and the quote bot
+        lands here with the whole message, so you can read what was asked, reply
+        by email and record where the conversation got to. Send someone to a
+        service page and the first one appears.
+      </p>
+      <a class="btn-glass btn-sm" href="/#contact">Open the contact form</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      {enquiries.map((e) => (
+        <article class="panel glass-p">
+          <div class="ws-row-head">
+            <div>
+              <h2 style="margin:0;">{e.company ? `${e.name} · ${e.company}` : e.name}</h2>
+              <p class="ws-sub">{context(e).join(' · ')}</p>
+            </div>
+            <span class={tone(e.status)}>{leadStatusLabel(e.status)}</span>
+          </div>
+
+          <div class="thread">
+            <div class="msg">
+              <p class="who">What they asked for</p>
+              <p>{e.message}</p>
+            </div>
+          </div>
+
+          <form method="post" class="cform" style="margin-top:14px;">
+            <input type="hidden" name="leadId" value={e.id} />
+            <input type="hidden" name="action" value="lead_status" />
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+              <a class="btn-hot btn-sm" href={`mailto:${e.email}`}>Reply by email</a>
+              {STAGES.filter((stage) => stage !== e.status).map((stage) => (
+                <button class="btn-glass btn-sm" name="status" value={stage}>{STAGE_ACTION[stage]}</button>
+              ))}
+            </div>
+            <p class="ws-sub" style="margin:0;">
+              Sending the email does not move the enquiry on its own — mark where
+              it got to, so whoever opens this next knows what is left to do.
+            </p>
+          </form>
+        </article>
+      ))}
+    </div>
+  )}
+</Workspace>

@@ -1,0 +1,223 @@
+---
+/**
+ * /workspace/freelancer/services — what this specialist has told us they do,
+ * exactly as a company reading their public page would see it.
+ *
+ * These four lists are not decoration: the directory filters on them and the
+ * matcher routes projects by them, so a service left half-filled quietly costs
+ * work. Until now they were only visible inside the application wizard — seven
+ * steps of forms — which is no way to answer "what am I actually listed for?".
+ * This is the read-only answer, with every gap named and each one linking back
+ * to the step of /apply that fills it.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one, readList } from '../../../server/db';
+import { guard, requireSpecialist } from '../../../server/guards';
+import { freelancerNav } from '../../../data/workspace-nav';
+import { getService, stackForRole, MAX_SECONDARY_SERVICES } from '../../../data/taxonomy';
+import { specialtyLookup, stackLookup, tagNames } from '../../../server/repo/specialists';
+import { PUBLIC_TENANT } from '../../../server/tenant';
+
+const gate = await guard(Astro, () => requireSpecialist(Astro));
+if (gate.response) return gate.response;
+const { user, profileId } = gate.value;
+
+const database = db(Astro);
+
+const profile = await one<{ status: string; handle: string | null }>(
+  database,
+  'SELECT status, handle FROM specialist_profiles WHERE id = ?',
+  profileId,
+);
+const live = profile?.status === 'approved';
+
+const rows = await all<{
+  service_id: string; is_primary: number; role_key: string | null;
+  specialties: string; skill_ids: string; tool_ids: string; stack_ids: string;
+}>(
+  database,
+  `SELECT service_id, is_primary, role_key, specialties, skill_ids, tool_ids, stack_ids
+     FROM specialist_service_offerings
+    WHERE profile_id = ?
+    ORDER BY is_primary DESC, created_at`,
+  profileId,
+);
+
+/* Skills, tools, specialties and stack are stored as id lists, and a tag an
+   admin has since merged has to render as the name it was merged into — so
+   every id is resolved through the same lookups the public profile uses. */
+const [tags, specialties, stacks] = await Promise.all([
+  tagNames(database),
+  specialtyLookup(database),
+  stackLookup(database),
+]);
+
+/**
+ * Open work currently reaching this specialist through each service, matching
+ * the visibility rule /projects already enforces: this workspace, published,
+ * open to matching, and not already replied to.
+ */
+const waitingRows = await all<{ service_id: string; n: number }>(
+  database,
+  `SELECT p.service_id, COUNT(*) AS n
+     FROM projects p
+     JOIN companies c ON c.id = p.company_id
+    WHERE c.tenant IN (?1, ?2)
+      AND p.visibility = 'matched'
+      AND p.status IN ('published', 'responding', 'shortlisted')
+      AND EXISTS (SELECT 1 FROM specialist_service_offerings o
+                   WHERE o.profile_id = ?3 AND o.service_id = p.service_id)
+      AND NOT EXISTS (SELECT 1 FROM applications a
+                       WHERE a.project_id = p.id AND a.profile_id = ?3)
+    GROUP BY p.service_id`,
+  Astro.locals.tenant, PUBLIC_TENANT, profileId,
+);
+const waiting = new Map(waitingRows.map((row) => [row.service_id, row.n]));
+
+const nameOf = (map: Map<string, string>) => (id: string) => map.get(id) ?? id;
+
+const offerings = rows.map((row) => {
+  const service = getService(row.service_id);
+  const roleName = service?.roles?.find((r) => r.id === row.role_key)?.name ?? null;
+
+  /* A role decides which stack questions apply — a backend developer is never
+     asked about styling — so "no stack listed" is only a gap for the groups
+     this role actually uses. */
+  const stackGroups = service && row.role_key ? stackForRole(service, row.role_key) : {};
+  const stackApplies = Object.keys(stackGroups).length > 0;
+
+  const chosen = {
+    specialties: readList(row.specialties).map(nameOf(specialties)),
+    skills: readList(row.skill_ids).map(nameOf(tags)),
+    tools: readList(row.tool_ids).map(nameOf(tags)),
+    stack: readList(row.stack_ids).map(nameOf(stacks)),
+  };
+
+  const gaps: string[] = [];
+  if (service?.roles && !row.role_key) gaps.push('the role you work in');
+  if (!chosen.specialties.length) gaps.push('specialties');
+  if (!chosen.skills.length) gaps.push('skills');
+  if (!chosen.tools.length) gaps.push('tools');
+  if (stackApplies && !chosen.stack.length) gaps.push('technology stack');
+
+  return {
+    serviceId: row.service_id,
+    serviceName: service?.name ?? row.service_id,
+    isPrimary: row.is_primary === 1,
+    roleName,
+    ...chosen,
+    gaps,
+    // The role and specialty questions live on step 2, everything else on 3.
+    fixStep: !chosen.specialties.length || (service?.roles && !row.role_key) ? 2 : 3,
+    open: waiting.get(row.service_id) ?? 0,
+  };
+});
+
+const incomplete = offerings.filter((o) => o.gaps.length > 0).length;
+const remaining = 1 + MAX_SECONDARY_SERVICES - offerings.length;
+
+const list = (values: string[]) => values.join(' · ');
+
+const lede = offerings.length === 0
+  ? 'The services you offer decide which projects reach you.'
+  : incomplete
+    ? `${incomplete} of your ${offerings.length} ${offerings.length === 1 ? 'service is' : 'services are'} missing details that companies filter on.`
+    : live
+      ? 'This is what a company sees when they find you, and what your work is matched against.'
+      : 'This is what companies will see once your profile is approved.';
+
+const nav = freelancerNav();
+---
+
+<Workspace
+  title="Your services"
+  role="freelancer"
+  current="/workspace/freelancer/services"
+  items={nav}
+  who={user.name}
+  heading="Your services"
+  lede={lede}
+>
+  {offerings.length === 0 ? (
+    <div class="ws-empty">
+      <h3>You have not chosen a service yet</h3>
+      <p>
+        Pick the work you do and the skills and tools you do it with, and each
+        one appears here — the same lists companies search the directory by,
+        and the ones projects are matched against. Nothing reaches you until at
+        least one is set.
+      </p>
+      <a class="btn-hot btn-sm" href="/apply?step=2">Choose the work you do</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      {offerings.map((o) => (
+        <article class="panel glass-p">
+          <div class="ws-row-head">
+            <div>
+              <h2 style="margin:0;">{o.serviceName}</h2>
+              <p class="ws-sub">
+                {o.roleName ? `${o.roleName} · ` : ''}
+                {o.open > 0
+                  ? `${o.open} open ${o.open === 1 ? 'project' : 'projects'} you can reply to`
+                  : 'No open projects for this service right now'}
+              </p>
+            </div>
+            {o.isPrimary
+              ? <span class="pill-tone ok">Main service</span>
+              : <span class="pill-tone">Also offered</span>}
+          </div>
+
+          {o.specialties.length > 0 && (
+            <p class="ws-sub"><b>Specialties</b> {list(o.specialties)}</p>
+          )}
+          {o.skills.length > 0 && (
+            <p class="ws-sub"><b>Skills</b> {list(o.skills)}</p>
+          )}
+          {o.tools.length > 0 && (
+            <p class="ws-sub"><b>Tools &amp; software</b> {list(o.tools)}</p>
+          )}
+          {o.stack.length > 0 && (
+            <p class="ws-sub"><b>Technology stack</b> {list(o.stack)}</p>
+          )}
+
+          {o.gaps.length > 0 && (
+            <p class="ws-sub">
+              Still missing: {list(o.gaps)}. Companies narrow the directory by
+              these, so you are left out of those searches until they are filled
+              in.
+            </p>
+          )}
+
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;">
+            <a class={o.gaps.length ? 'btn-hot btn-sm' : 'btn-glass btn-sm'} href={`/apply?step=${o.fixStep}`}>
+              {o.gaps.length ? 'Fill in what is missing' : 'Edit this service'}
+            </a>
+            {o.open > 0 && <a class="btn-glass btn-sm" href="/projects">See those projects</a>}
+            {live && profile?.handle && (
+              <a class="btn-glass btn-sm" href={`/specialists/${profile.handle}`}>See how it reads</a>
+            )}
+          </div>
+        </article>
+      ))}
+
+      {remaining > 0 && (
+        <article class="panel glass-p">
+          <div class="ws-row-head">
+            <div>
+              <h2 style="margin:0;">Room for {remaining} more</h2>
+              <p class="ws-sub">
+                You can offer one main service and up to {MAX_SECONDARY_SERVICES} others.
+                Each one you add is another set of projects matched to you — but
+                only add work you would genuinely take on.
+              </p>
+            </div>
+          </div>
+          <a class="btn-glass btn-sm" href="/apply?step=2">Add another service</a>
+        </article>
+      )}
+    </div>
+  )}
+</Workspace>

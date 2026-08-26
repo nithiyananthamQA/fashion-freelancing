@@ -1,0 +1,241 @@
+---
+/**
+ * /workspace/freelancer/projects — the projects the matcher put in front of
+ * this specialist, and the form that answers them.
+ *
+ * On /projects an invitation sat in the same list as everything else the
+ * specialist happened to be eligible for, so the two questions people
+ * actually ask — "who asked for me?" and "why me?" — were buried. This page
+ * carries only invitations that are still open, each with the match reason
+ * beside it, and drops one the moment it has been replied to: from then on it
+ * belongs under "Replies you sent".
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one, run } from '../../../server/db';
+import { guard, requireSpecialist } from '../../../server/guards';
+import { newId, nowIso } from '../../../server/ids';
+import { notify } from '../../../server/audit';
+import { parse } from '../../../server/validate';
+import { getService } from '../../../data/taxonomy';
+import { engagementLabel, workLocationLabel } from '../../../data/labels';
+import { ownedProject, PUBLIC_TENANT } from '../../../server/tenant';
+import { freelancerNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireSpecialist(Astro));
+if (gate.response) return gate.response;
+const { user, profileId } = gate.value;
+
+const database = db(Astro);
+let flash: string | null = null;
+
+/* Reply to an invitation. */
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const projectId = String(form.get('projectId') ?? '');
+  const { f, errors } = parse(form);
+  const pitch = f.text('pitch', 'Your message', { required: true, min: 30, max: 3000 });
+  const price = f.int('price', 'Your price', { min: 0 });
+  const timeline = f.text('timeline', 'Timeline', { max: 200 });
+
+  /* The project id arrived in a form and a form can be replayed with someone
+     else's, so permission is proved again on write: the project has to be in
+     this workspace, still open, and still invited to this specialist. The
+     invitation is the permission — without it there is nothing to answer. */
+  const project = await ownedProject<{ id: string; title: string; created_by: string; status: string }>(
+    database, projectId, Astro.locals.tenant, 'p.id, p.title, p.created_by, p.status',
+  );
+  const invite = project
+    ? await one<{ id: string }>(
+        database,
+        "SELECT id FROM project_invites WHERE project_id = ? AND profile_id = ? AND status IN ('sent','viewed')",
+        project.id, profileId,
+      )
+    : null;
+
+  const firstError = Object.values(errors)[0];
+
+  if (!project || !invite || !['published', 'responding', 'shortlisted'].includes(project.status)) {
+    flash = 'That invitation is no longer open, so your reply was not sent.';
+  } else if (firstError) {
+    flash = firstError;
+  } else {
+    const now = nowIso();
+    await run(
+      database,
+      `INSERT INTO applications (id, project_id, profile_id, pitch, price, timeline, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, 'submitted', ?, ?)
+       ON CONFLICT (project_id, profile_id)
+       DO UPDATE SET pitch = excluded.pitch, price = excluded.price,
+                     timeline = excluded.timeline, status = 'submitted', updated_at = excluded.updated_at`,
+      newId(), project.id, profileId, pitch, price, timeline || null, now, now,
+    );
+    await run(
+      database,
+      "UPDATE project_invites SET status = 'applied' WHERE project_id = ? AND profile_id = ?",
+      project.id, profileId,
+    );
+    await run(
+      database,
+      "UPDATE projects SET status = 'responding', updated_at = ? WHERE id = ? AND status = 'published'",
+      now, project.id,
+    );
+    await notify(database, {
+      userId: project.created_by,
+      kind: 'application',
+      title: `New reply: ${project.title}`,
+      body: `${user.name} replied to your project.`,
+      link: '/workspace/company/replies',
+    });
+    flash = `Your reply to ${project.title} is with the company. It now sits under "Replies you sent".`;
+  }
+}
+
+interface Invitation {
+  project_id: string;
+  title: string;
+  service_id: string;
+  brief: string;
+  deliverables: string | null;
+  engagement: string | null;
+  budget_min: number | null;
+  budget_max: number | null;
+  currency: string | null;
+  deadline: string | null;
+  work_location: string | null;
+  nda_required: number;
+  company_name: string;
+  /** Why the matcher chose this specialist, in the company's own words (§9). */
+  reason: string | null;
+}
+
+const invitations = await all<Invitation>(
+  database,
+  `SELECT p.id AS project_id, p.title, p.service_id, p.brief, p.deliverables,
+          p.engagement, p.budget_min, p.budget_max, p.currency, p.deadline,
+          p.work_location, p.nda_required,
+          c.name AS company_name, i.reason
+     FROM project_invites i
+     JOIN projects p ON p.id = i.project_id
+     JOIN companies c ON c.id = p.company_id
+    WHERE i.profile_id = ?1
+      AND i.status IN ('sent','viewed')
+      AND p.status IN ('published','responding','shortlisted')
+      AND c.tenant IN (?2, ?3)
+      -- once answered it lives on "Replies you sent"; two homes means two truths
+      AND NOT EXISTS (SELECT 1 FROM applications a
+                       WHERE a.project_id = p.id AND a.profile_id = ?1)
+    ORDER BY i.created_at DESC
+    LIMIT 40`,
+  profileId, Astro.locals.tenant, PUBLIC_TENANT,
+);
+
+/* Read after the listing, so a brand new invitation is still counted as unseen
+   on the render that first shows it. This is how the company tells read from
+   unread (§9). */
+await run(
+  database,
+  "UPDATE project_invites SET status = 'viewed' WHERE profile_id = ? AND status = 'sent'",
+  profileId,
+);
+
+const money = (row: Invitation): string | null => {
+  if (row.budget_min === null && row.budget_max === null) return null;
+  const currency = row.currency ?? 'USD';
+  if (row.budget_min !== null && row.budget_max !== null) return `${currency} ${row.budget_min}–${row.budget_max}`;
+  return `${currency} ${row.budget_min ?? row.budget_max}`;
+};
+
+/** The handful of facts someone weighs before deciding to spend an hour replying. */
+const facts = (row: Invitation): string => {
+  const parts: string[] = [];
+  const budget = money(row);
+  if (budget) parts.push(`Budget ${budget}`);
+  if (row.engagement) parts.push(engagementLabel(row.engagement));
+  if (row.deadline) parts.push(`Due ${row.deadline}`);
+  if (row.work_location) parts.push(workLocationLabel(row.work_location));
+  if (row.nda_required === 1) parts.push('NDA required');
+  return parts.join(' · ');
+};
+
+const nav = freelancerNav({ invites: invitations.length || undefined });
+---
+
+<Workspace
+  title="Project invitations"
+  role="freelancer"
+  current="/workspace/freelancer/projects"
+  items={nav}
+  who={user.name}
+  heading="Project invitations"
+  lede={invitations.length
+    ? `${invitations.length} ${invitations.length === 1 ? 'project is' : 'projects are'} waiting for your reply.`
+    : 'Work you were matched to, and the reason you were matched.'}
+  flash={flash}
+>
+  {invitations.length === 0 ? (
+    <div class="ws-empty">
+      <h3>No open invitations right now</h3>
+      <p>
+        When a company posts work in one of the services on your profile, the
+        invitation appears here with the reason you were picked. The more
+        services you list, the more work reaches you.
+      </p>
+      <a class="btn-hot btn-sm" href="/apply">Add the services you offer</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      {invitations.map((invitation) => {
+        const service = getService(invitation.service_id);
+        const meta = facts(invitation);
+        return (
+          <article class="panel glass-p">
+            <div class="ws-row-head">
+              <div>
+                <h2 style="margin:0;">{invitation.title}</h2>
+                <p class="ws-sub">{service?.name} · {invitation.company_name}</p>
+              </div>
+              <span class="pill-tone warn">Needs your reply</span>
+            </div>
+
+            <p class="ws-sub" style="white-space:pre-wrap;">{invitation.brief}</p>
+
+            {invitation.deliverables && (
+              <p class="ws-sub">What they need delivered: {invitation.deliverables}</p>
+            )}
+
+            {meta && <p class="ws-sub">{meta}</p>}
+
+            {invitation.reason && (
+              <p class="why">Recommended because: {invitation.reason}</p>
+            )}
+
+            <details style="margin-top:16px;">
+              <summary class="btn-hot btn-sm" style="display:inline-flex;list-style:none;">Reply to this project</summary>
+              <form method="post" class="cform" style="margin-top:16px;" novalidate>
+                <input type="hidden" name="projectId" value={invitation.project_id} />
+                <label>
+                  <span class="fl">Why you, for this brief<span class="rq" aria-hidden="true">*</span></span>
+                  <textarea class="fi" name="pitch" rows="4" required minlength="30"
+                            placeholder="What in your experience maps directly onto this work?"></textarea>
+                </label>
+                <div class="row2">
+                  <label>
+                    <span class="fl">Your price ({invitation.currency ?? 'USD'})</span>
+                    <input class="fi" type="number" name="price" min="0" step="1" />
+                  </label>
+                  <label>
+                    <span class="fl">Timeline you can commit to</span>
+                    <input class="fi" type="text" name="timeline" placeholder="e.g. 10 working days" />
+                  </label>
+                </div>
+                <button type="submit" class="btn-hot btn-sm" style="justify-self:start;">Send reply</button>
+              </form>
+            </details>
+          </article>
+        );
+      })}
+    </div>
+  )}
+</Workspace>

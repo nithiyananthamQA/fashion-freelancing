@@ -1,0 +1,178 @@
+---
+/**
+ * /workspace/freelancer/earnings — every payment recorded against work this
+ * specialist has taken on, and what is still outstanding.
+ *
+ * Money was the one question the workspace never answered. A specialist could
+ * see what they had agreed to do and who with, but not what had been paid or
+ * what was still owed, so that record lived in their own spreadsheet and
+ * nowhere else.
+ *
+ * The site does not hold the money — a fee is agreed and settled directly
+ * between the two sides — so this is a record, not a wallet. The empty state
+ * has to say that plainly rather than implying a payout is on its way.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one } from '../../../server/db';
+import { guard, requireSpecialist } from '../../../server/guards';
+import { freelancerNav } from '../../../data/workspace-nav';
+import {
+  engagementStatusLabel, paymentKindLabel, paymentStatusLabel, statusTone,
+} from '../../../data/labels';
+
+const gate = await guard(Astro, () => requireSpecialist(Astro));
+if (gate.response) return gate.response;
+const { user, profileId } = gate.value;
+
+const database = db(Astro);
+
+interface Payment {
+  id: string;
+  kind: string;
+  amount: number;
+  currency: string;
+  status: string;
+  reference: string | null;
+  created_at: string;
+  work_title: string;
+  work_status: string;
+  company_name: string;
+}
+
+/* Payments hang off engagements, never off a person, so the engagement is what
+   proves the row is this specialist's — the join is the isolation. */
+const payments = await all<Payment>(
+  database,
+  `SELECT pay.id, pay.kind, pay.amount, pay.currency, pay.status, pay.reference, pay.created_at,
+          e.title AS work_title, e.status AS work_status, c.name AS company_name
+     FROM payments pay
+     JOIN engagements e ON e.id = pay.engagement_id
+     JOIN companies c ON c.id = e.company_id
+    WHERE e.profile_id = ?
+    -- what is still owed first, then most recently changed
+    ORDER BY CASE WHEN pay.status = 'due' THEN 0 ELSE 1 END, pay.updated_at DESC`,
+  profileId,
+);
+
+/* Only the count is needed, and only so the empty state can point at whichever
+   step actually comes next for this person. */
+const work = await one<{ total: number }>(
+  database,
+  `SELECT COUNT(*) AS total FROM engagements
+    WHERE profile_id = ? AND status IN ('active', 'delivered', 'revision')`,
+  profileId,
+);
+const workInProgress = work?.total ?? 0;
+
+/*
+ * Totals count payouts only. An invoice and the payout that settles it are two
+ * rows for the same money, so adding both would tell someone they had earned
+ * twice what they had. Currencies are kept apart for the same reason: a total
+ * only means anything within one currency.
+ */
+const totals = new Map<string, { paid: number; due: number }>();
+for (const p of payments) {
+  if (p.kind !== 'payout') continue;
+  const running = totals.get(p.currency) ?? { paid: 0, due: 0 };
+  if (p.status === 'paid') running.paid += p.amount;
+  else if (p.status === 'due') running.due += p.amount;
+  totals.set(p.currency, running);
+}
+const byCurrency = [...totals.entries()];
+const awaiting = payments.filter((p) => p.kind === 'payout' && p.status === 'due').length;
+const anyInvoices = payments.some((p) => p.kind === 'invoice');
+
+const money = (currency: string, amount: number) => `${currency} ${amount.toLocaleString('en-GB')}`;
+
+const when = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+const tone = (status: string) => {
+  const t = statusTone(status);
+  // pill-tone only paints warn, ok and bad — anything else stays neutral.
+  return t === 'info' ? 'pill-tone' : `pill-tone ${t}`;
+};
+
+const nav = freelancerNav();
+---
+
+<Workspace
+  title="Payments"
+  role="freelancer"
+  current="/workspace/freelancer/earnings"
+  items={nav}
+  who={user.name}
+  heading="Payments"
+  lede={awaiting
+    ? `${awaiting} ${awaiting === 1 ? 'payment is' : 'payments are'} recorded against your work but not yet paid.`
+    : 'What has been paid for your work, and what is still owed.'}
+  flash={null}
+>
+  {payments.length === 0 ? (
+    <div class="ws-empty">
+      <h3>No payments recorded yet</h3>
+      <p>
+        Your fee is agreed directly with the company and paid directly by them —
+        this site does not hold it or take a cut. Once a payment is recorded
+        against a piece of work it appears here, with the amount, the company,
+        and whether it has been settled.
+      </p>
+      {workInProgress > 0 ? (
+        <a class="btn-glass btn-sm" href="/workspace/freelancer">See your work in progress</a>
+      ) : (
+        <a class="btn-hot btn-sm" href="/projects">Browse open projects</a>
+      )}
+    </div>
+  ) : (
+    <div class="stack-sm">
+      <section class="panel glass-p">
+        <div class="ws-row-head">
+          <div>
+            <h2 style="margin:0;">Your totals</h2>
+            <p class="ws-sub">
+              Money paid to you, counted separately per currency.
+              {anyInvoices && ' Invoices sent to the company are listed below but left out of these totals, so the same fee is never counted twice.'}
+            </p>
+          </div>
+        </div>
+
+        {byCurrency.length === 0 ? (
+          <p class="ws-sub">
+            Nothing has been paid to you yet — everything recorded so far was billed to the company.
+          </p>
+        ) : (
+          <div class="stack-sm">
+            {byCurrency.map(([currency, t]) => (
+              <div class="ws-row-head" style="margin:0;">
+                <p class="ws-sub" style="margin:0;"><strong>{money(currency, t.paid)}</strong> paid to you</p>
+                <p class="ws-sub" style="margin:0;">
+                  {t.due > 0
+                    ? <span><strong>{money(currency, t.due)}</strong> still to come</span>
+                    : <span>Nothing outstanding</span>}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {payments.map((p) => (
+        <article class="panel glass-p">
+          <div class="ws-row-head">
+            <div>
+              <h2 style="margin:0;">{money(p.currency, p.amount)}</h2>
+              <p class="ws-sub">{paymentKindLabel(p.kind)} · {p.work_title} · {p.company_name}</p>
+              <p class="ws-sub">
+                Recorded {when(p.created_at)} · work is {engagementStatusLabel(p.work_status).toLowerCase()}
+                {p.reference && <span> · reference {p.reference}</span>}
+              </p>
+            </div>
+            <span class={tone(p.status)}>{paymentStatusLabel(p.status)}</span>
+          </div>
+        </article>
+      ))}
+    </div>
+  )}
+</Workspace>

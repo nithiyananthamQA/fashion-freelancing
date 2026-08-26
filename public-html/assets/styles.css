@@ -14,17 +14,22 @@
   --paper:   #FFFFFF;   /* the ground                       */
   --paper-2: #F7F5F3;   /* warm off-white — alt sections     */
   --paper-3: #FFFFFF;   /* cards / wells                     */
-  --ink:     #0A1120;   /* near-black navy — headlines       */
-  --ink-2:   #16203A;
-  --ink-3:   #2A3552;
-  --ink-4:   #3F4A66;   /* body / lead text                  */
-  --ink-5:   #545E77;   /* muted — still clears AA on --paper-2 */
-  --ink-6:   #8A93A5;   /* faint — non-text only             */
-  --ink-7:   #C3C9D4;
-  --ink-8:   #E6E9EF;
+  /* Near-black, only faintly cool. The previous ramp was a navy at 69%
+     saturation, and because the whole ramp inherited it, body text itself
+     read as blue rather than as text — colour where there was no meaning.
+     These carry the same contrast to within a hair while dropping the
+     saturation by more than half, so colour is left free to mean something. */
+  --ink:     #111418;   /* headlines                         */
+  --ink-2:   #1D2229;
+  --ink-3:   #333941;
+  --ink-4:   #474D57;   /* body / lead text                  */
+  --ink-5:   #5B616B;   /* muted — still clears AA on --paper-2 */
+  --ink-6:   #8E939B;   /* faint — non-text only             */
+  --ink-7:   #C6C9CE;
+  --ink-8:   #E7E9EC;
 
-  --line:    rgba(10,17,32,.10);
-  --line-2:  rgba(10,17,32,.16);
+  --line:    rgba(17,20,24,.10);
+  --line-2:  rgba(17,20,24,.16);
 
   /* Primary accent — violet/indigo. (Kept as --champagne* names so
      every existing class reference re-skins to the new accent.) */

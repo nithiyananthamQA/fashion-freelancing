@@ -1,0 +1,243 @@
+---
+/**
+ * /workspace/admin/specialists — everyone who is already through review, and
+ * the two levers that change what the public sees about them.
+ *
+ * Approving somebody is a decision made once, in the applications queue. What
+ * happens afterwards is a different job: deciding who sits at the top of the
+ * directory, and taking somebody out of it when they stop replying or their
+ * work is no longer something we want to put in front of a client. On the old
+ * single-page admin those buttons were a strip at the bottom of a very long
+ * page, with nothing next to them to justify pressing either one.
+ *
+ * So each card carries the reasons: what they lead with, how much of their work
+ * is actually public, and how much interest they have had. Featured people sort
+ * first, and anyone currently hidden sorts last — the directory's own order,
+ * so the page reads the way the public page reads.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, run } from '../../../server/db';
+import { guard, requireAdmin } from '../../../server/guards';
+import { nowIso } from '../../../server/ids';
+import { audit, notify } from '../../../server/audit';
+import { ownedProfile } from '../../../server/tenant';
+import { getService } from '../../../data/taxonomy';
+import { availabilityLabel, profileStatusLabel, statusTone } from '../../../data/labels';
+import { adminNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireAdmin(Astro));
+if (gate.response) return gate.response;
+const admin = gate.value;
+
+const database = db(Astro);
+const tenant = Astro.locals.tenant;
+let flash: string | null = null;
+
+/* Feature, unfeature, hide or relist one live specialist.
+ *
+ * The id arrives in a form and a form can be replayed, so the profile is
+ * fetched back and proved to belong to this workspace before anything is
+ * written. It also has to still be live: without the status check a replayed
+ * "relist" could push a rejected or half-finished draft straight into the
+ * public directory, skipping review entirely. */
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const action = String(form.get('action') ?? '');
+  const profileId = String(form.get('profileId') ?? '');
+  const now = nowIso();
+
+  if (['feature', 'unfeature', 'hide', 'relist'].includes(action)) {
+    const profile = await ownedProfile<{ id: string; user_id: string; status: string; name: string }>(
+      database, profileId, tenant, 'p.id, p.user_id, p.status, u.name',
+    );
+
+    if (!profile || !['approved', 'paused'].includes(profile.status)) {
+      flash = 'That specialist is no longer live, so nothing was changed.';
+    } else if (action === 'feature' || action === 'unfeature') {
+      const featured = action === 'feature' ? 1 : 0;
+      await run(
+        database,
+        'UPDATE specialist_profiles SET featured = ?, updated_at = ? WHERE id = ?',
+        featured, now, profile.id,
+      );
+      flash = featured
+        ? `${profile.name} is featured — they now sort to the top of the directory.`
+        : `${profile.name} is no longer featured. They stay in the directory, in the usual order.`;
+    } else {
+      const next = action === 'hide' ? 'paused' : 'approved';
+      await run(
+        database,
+        'UPDATE specialist_profiles SET status = ?, updated_at = ? WHERE id = ?',
+        next, now, profile.id,
+      );
+      // Their public page and every search result changes under them, so they
+      // are told rather than left to discover it.
+      await notify(database, {
+        userId: profile.user_id,
+        kind: 'profile_review',
+        title: next === 'paused' ? 'Your profile has been paused' : 'Your profile is back in the directory',
+        body: next === 'paused'
+          ? 'Your page is hidden from the directory and from matching for now. Nothing you have written has been deleted.'
+          : 'Companies can find you again, and you can be matched to new projects.',
+        link: '/workspace/freelancer',
+      });
+      await audit(database, {
+        actorId: admin.id,
+        action: next === 'paused' ? 'profile.paused' : 'profile.approved',
+        entityType: 'specialist_profile', entityId: profile.id, request: Astro.request,
+      });
+      flash = next === 'paused'
+        ? `${profile.name} is hidden — out of the directory and out of matching until you relist them.`
+        : `${profile.name} is back in the directory and can be matched to projects again.`;
+    }
+  }
+}
+
+interface Live {
+  id: string;
+  handle: string | null;
+  name: string;
+  email: string;
+  headline: string | null;
+  availability: string | null;
+  status: string;
+  featured: number;
+  approved_at: string | null;
+  service_id: string | null;
+  /** Pieces that actually reached their public page, not everything uploaded. */
+  public_work: number;
+  approaches: number;
+}
+
+const live = await all<Live>(
+  database,
+  `SELECT p.id, p.handle, u.name, u.email, p.headline, p.availability, p.status,
+          p.featured, p.approved_at,
+          (SELECT o.service_id FROM specialist_service_offerings o
+            WHERE o.profile_id = p.id ORDER BY o.is_primary DESC LIMIT 1) AS service_id,
+          (SELECT COUNT(*) FROM portfolio_items pi
+            WHERE pi.profile_id = p.id AND pi.moderation = 'approved') AS public_work,
+          (SELECT COUNT(*) FROM hire_requests h
+             JOIN companies c ON c.id = h.company_id
+            WHERE h.profile_id = p.id AND c.tenant IN (?1, 'public')) AS approaches
+     FROM specialist_profiles p
+     JOIN users u ON u.id = p.user_id
+    WHERE p.status IN ('approved','paused') AND u.tenant IN (?1, 'public')
+    -- the directory's own order: featured first, hidden last, then by name
+    ORDER BY CASE WHEN p.status = 'paused' THEN 1 ELSE 0 END, p.featured DESC, u.name`,
+  tenant,
+);
+
+const listed = live.filter((person) => person.status === 'approved').length;
+const featured = live.filter((person) => person.featured === 1 && person.status === 'approved').length;
+const hidden = live.length - listed;
+
+const day = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
+/** pill-tone only paints warn, ok and bad — anything else stays neutral. */
+const tone = (value: string) => {
+  const t = statusTone(value);
+  return t === 'info' ? 'pill-tone' : `pill-tone ${t}`;
+};
+
+/** The line under the name: what they do, and what they have to show for it. */
+const facts = (person: Live): string[] => [
+  getService(person.service_id ?? '')?.name ?? 'No main service chosen',
+  availabilityLabel(person.availability) || null,
+  `${person.public_work} ${person.public_work === 1 ? 'piece' : 'pieces'} of work showing publicly`,
+  person.approaches > 0
+    ? `${person.approaches} ${person.approaches === 1 ? 'company has' : 'companies have'} asked to hire them`
+    : 'No approaches yet',
+  person.approved_at ? `Approved ${day(person.approved_at)}` : null,
+].filter((x): x is string => Boolean(x));
+
+const nav = adminNav();
+---
+
+<Workspace
+  title="Live specialists"
+  role="admin"
+  current="/workspace/admin/specialists"
+  items={nav}
+  who={admin.name}
+  heading="Live specialists"
+  lede={live.length
+    ? `${listed} in the directory${featured ? `, ${featured} featured` : ''}${hidden ? ` · ${hidden} hidden` : ''}.`
+    : 'Everyone who is through review, and whether the public can see them.'}
+  flash={flash}
+>
+  {live.length === 0 ? (
+    <div class="ws-empty">
+      <h3>Nobody is live yet</h3>
+      <p>
+        Everyone you approve appears here, with the two levers that change what
+        the public sees: feature them so they sort to the top of the directory,
+        or hide them so they drop out of it and out of matching without losing
+        anything they have written. Approve an application and the first person
+        shows up on this page.
+      </p>
+      <a class="btn-glass btn-sm" href="/workspace/admin/reviews">Open the applications queue</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      {live.map((person) => (
+        <article class="panel glass-p">
+          <div class="ws-row-head">
+            <div>
+              <h2 style="margin:0;">{person.name}</h2>
+              <p class="ws-sub">{facts(person).join(' · ')}</p>
+              <p class="ws-sub">{person.email}</p>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+              {person.featured === 1 && <span class="pill-tone ok">Featured</span>}
+              <span class={tone(person.status)}>{profileStatusLabel(person.status)}</span>
+            </div>
+          </div>
+
+          {person.headline && (
+            <div class="thread">
+              <div class="msg">
+                <p class="who">How they describe themselves</p>
+                <p>{person.headline}</p>
+              </div>
+            </div>
+          )}
+
+          {person.public_work === 0 && (
+            <p class="ws-sub">
+              Nothing of theirs is on their public page yet — either they have
+              added no work, or it is still sitting in the moderation queue.
+              Featuring them would send people to an empty page.
+            </p>
+          )}
+
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;">
+            {person.handle && (
+              <a class="btn-glass btn-sm" href={`/specialists/${person.handle}`} target="_blank" rel="noopener">
+                See their public page
+              </a>
+            )}
+
+            <form method="post">
+              <input type="hidden" name="profileId" value={person.id} />
+              <button class="btn-glass btn-sm" name="action" value={person.featured === 1 ? 'unfeature' : 'feature'}>
+                {person.featured === 1 ? 'Stop featuring' : 'Feature in the directory'}
+              </button>
+            </form>
+
+            <form method="post">
+              <input type="hidden" name="profileId" value={person.id} />
+              <button class={person.status === 'paused' ? 'btn-hot btn-sm' : 'btn-glass btn-sm'}
+                      name="action" value={person.status === 'paused' ? 'relist' : 'hide'}>
+                {person.status === 'paused' ? 'Put back in the directory' : 'Hide from the directory'}
+              </button>
+            </form>
+          </div>
+        </article>
+      ))}
+    </div>
+  )}
+</Workspace>

@@ -1,0 +1,201 @@
+---
+/**
+ * /workspace/company/saved — the people this company put aside while comparing.
+ *
+ * The shortlist starts before anyone signs in, so by the time a buyer reaches
+ * the workspace it is often the longest list they own — and on the old
+ * single-page workspace it was a stack of bare names near the bottom, with no
+ * way to tell who was free next week or to clear out someone they had gone off.
+ * This gives each saved specialist the two facts that decide whether to brief
+ * them — what they do, and whether they can take work — a way through to their
+ * public page, and a way off the list.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one, run } from '../../../server/db';
+import { guard, requireCompany } from '../../../server/guards';
+import { getService } from '../../../data/taxonomy';
+import { availabilityLabel, workLocationLabel } from '../../../data/labels';
+import { companyNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireCompany(Astro));
+if (gate.response) return gate.response;
+const { user, companyId } = gate.value;
+
+const database = db(Astro);
+let flash: string | null = null;
+
+/* Remove someone from the list. The profile id arrives in a form and a form can
+   be replayed with somebody else's, so the saved row is read back scoped to this
+   company before anything is deleted — and that read is also where the name for
+   the confirmation comes from. */
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const profileId = String(form.get('profileId') ?? '');
+
+  const savedRow = await one<{ profile_id: string; name: string }>(
+    database,
+    `SELECT s.profile_id, u.name
+       FROM saved_specialists s
+       JOIN specialist_profiles p ON p.id = s.profile_id
+       JOIN users u ON u.id = p.user_id
+      WHERE s.company_id = ? AND s.profile_id = ?`,
+    companyId, profileId,
+  );
+
+  if (savedRow && String(form.get('action') ?? '') === 'remove') {
+    await run(
+      database,
+      'DELETE FROM saved_specialists WHERE company_id = ? AND profile_id = ?',
+      companyId, savedRow.profile_id,
+    );
+    flash = `${savedRow.name} removed. Saving them again from their page puts them straight back.`;
+  } else if (!savedRow) {
+    flash = 'That specialist is no longer on your saved list.';
+  }
+}
+
+interface Saved {
+  id: string;
+  handle: string | null;
+  name: string;
+  headline: string | null;
+  location: string | null;
+  availability: string | null;
+  work_location: string | null;
+  rate_min: number | null;
+  rate_max: number | null;
+  rate_currency: string | null;
+  service_id: string | null;
+  saved_at: string;
+  saved_by: string;
+  saved_by_name: string;
+  /** 1 when their public page is live, so there is somewhere to send the buyer. */
+  listed: number;
+}
+
+const saved = await all<Saved>(
+  database,
+  `SELECT p.id, p.handle, u.name, p.headline, p.location, p.availability, p.work_location,
+          p.rate_min, p.rate_max, p.rate_currency,
+          s.created_at AS saved_at, s.saved_by, su.name AS saved_by_name,
+          (SELECT o.service_id FROM specialist_service_offerings o
+            WHERE o.profile_id = p.id ORDER BY o.is_primary DESC LIMIT 1) AS service_id,
+          CASE WHEN p.status = 'approved' AND p.handle IS NOT NULL THEN 1 ELSE 0 END AS listed
+     FROM saved_specialists s
+     JOIN specialist_profiles p ON p.id = s.profile_id
+     JOIN users u ON u.id = p.user_id
+     JOIN users su ON su.id = s.saved_by
+    WHERE s.company_id = ?
+    -- the ones you can act on today first, then most recently saved
+    ORDER BY listed DESC, s.created_at DESC`,
+  companyId,
+);
+
+const free = saved.filter((s) => s.listed === 1 && s.availability === 'available_now').length;
+
+const day = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+/** What they charge, in whatever shape they actually filled in. */
+function rate(s: Saved): string | null {
+  if (s.rate_min === null) return null;
+  const unit = s.rate_currency ?? 'USD';
+  return s.rate_max && s.rate_max !== s.rate_min
+    ? `${unit} ${s.rate_min}–${s.rate_max}`
+    : `From ${unit} ${s.rate_min}`;
+}
+
+/**
+ * The meta line, minus anything they left blank. On a team account the person
+ * who saved someone is often not the person reading, so their name is carried
+ * here rather than left as a mystery entry in a shared list.
+ */
+function meta(s: Saved): string {
+  const savedOn = `saved ${day(s.saved_at)}${s.saved_by === user.id ? '' : ` by ${s.saved_by_name}`}`;
+  return [
+    getService(s.service_id)?.name ?? null,
+    s.location,
+    workLocationLabel(s.work_location) || null,
+    rate(s),
+    savedOn,
+  ].filter((x): x is string => Boolean(x)).join(' · ');
+}
+
+/** pill-tone only paints warn, ok and bad — everything else stays neutral. */
+const availabilityTone = (value: string | null) =>
+  value === 'available_now' ? 'pill-tone ok' : value === 'booked' ? 'pill-tone warn' : 'pill-tone';
+
+const nav = companyNav({ saved: saved.length || undefined });
+---
+
+<Workspace
+  title="Saved specialists"
+  role="company"
+  current="/workspace/company/saved"
+  items={nav}
+  who={user.name}
+  heading="Saved specialists"
+  lede={saved.length
+    ? free
+      ? `${free} of the ${saved.length} people you saved ${free === 1 ? 'is' : 'are'} free to start now.`
+      : 'Everyone you put aside while comparing, and what each of them does.'
+    : 'Everyone you put aside while comparing, in one place.'}
+  flash={flash}
+>
+  {saved.length === 0 ? (
+    <div class="ws-empty">
+      <h3>You have not saved anyone yet</h3>
+      <p>
+        Use <b>Save</b> on any specialist's page and they are kept here — what
+        they do, what they charge and whether they can take work — so you can
+        compare a few people properly before you brief anyone. Saving works
+        before you sign in too, so nothing you picked earlier is lost.
+      </p>
+      <a class="btn-hot btn-sm" href="/specialists">Find a specialist</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      {saved.map((s) => (
+        <article class="panel glass-p">
+          <div class="ws-row-head">
+            <div>
+              <h2 style="margin:0;">{s.name}</h2>
+              <p class="ws-sub">{meta(s)}</p>
+              {s.headline && <p class="ws-sub">{s.headline}</p>}
+            </div>
+            {s.listed === 1
+              ? s.availability && (
+                  <span class={availabilityTone(s.availability)}>{availabilityLabel(s.availability)}</span>
+                )
+              : <span class="pill-tone bad">Not taking work right now</span>}
+          </div>
+
+          {s.listed === 0 && (
+            <p class="ws-sub" style="margin-top:12px;">
+              {s.name} is not in the directory at the moment, so their page is
+              closed and you cannot brief them. Keep them saved in case that
+              changes, or take them off the list.
+            </p>
+          )}
+
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;">
+            {s.listed === 1 && s.handle && (
+              <>
+                <a class="btn-glass btn-sm" href={`/specialists/${s.handle}`}>View their page</a>
+                <a class="btn-hot btn-sm" href={`/hire/${s.handle}`}>Request to hire</a>
+              </>
+            )}
+
+            <form method="post">
+              <input type="hidden" name="profileId" value={s.id} />
+              <button class="btn-glass btn-sm" name="action" value="remove"
+                      data-busy="Removing…">Remove from saved</button>
+            </form>
+          </div>
+        </article>
+      ))}
+    </div>
+  )}
+</Workspace>

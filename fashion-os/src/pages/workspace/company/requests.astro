@@ -1,0 +1,307 @@
+---
+/**
+ * /workspace/company/requests — every specialist this company asked directly,
+ * where each request has got to, and the conversation underneath it.
+ *
+ * On the old single-page workspace these sat in one flat list: a request sent
+ * this morning looked exactly like one a specialist declined last month, and
+ * the questions they had asked were folded away inside the row. The only
+ * question a buyer actually has is "who is waiting on me?", so the ones where
+ * the specialist spoke last sort to the top, and their thread and the reply box
+ * sit on the same card as the brief they refer to.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one, run } from '../../../server/db';
+import { guard, requireCompany } from '../../../server/guards';
+import { newId, nowIso } from '../../../server/ids';
+import { notify } from '../../../server/audit';
+import { getService } from '../../../data/taxonomy';
+import {
+  engagementLabel, hireStatusForCompany, statusTone, workLocationLabel,
+} from '../../../data/labels';
+import { companyNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireCompany(Astro));
+if (gate.response) return gate.response;
+const { user, companyId } = gate.value;
+
+const database = db(Astro);
+let flash: string | null = null;
+
+/** The states where the request is still live and either side can still act. */
+const OPEN = ['sent', 'viewed', 'question', 'proposal'];
+
+/* Reply into a thread, or close a request that has gone nowhere. The id
+   arrives in a form and a form can be replayed with somebody else's, so the
+   request is fetched back scoped to this company before anything is written. */
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const requestId = String(form.get('requestId') ?? '');
+  const action = String(form.get('action') ?? '');
+
+  const request = await one<{ id: string; title: string; status: string; owner_user: string; specialist: string }>(
+    database,
+    `SELECT h.id, h.title, h.status, u.id AS owner_user, u.name AS specialist
+       FROM hire_requests h
+       JOIN specialist_profiles p ON p.id = h.profile_id
+       JOIN users u ON u.id = p.user_id
+      WHERE h.id = ? AND h.company_id = ? AND h.status != 'draft'`,
+    requestId, companyId,
+  );
+
+  if (!request) {
+    flash = 'That request could not be found.';
+  } else if (action === 'reply') {
+    const body = String(form.get('body') ?? '').trim();
+    if (body.length >= 2) {
+      await run(
+        database,
+        'INSERT INTO messages (id, hire_request_id, sender_id, body, created_at) VALUES (?, ?, ?, ?, ?)',
+        newId(), request.id, user.id, body.slice(0, 2000), nowIso(),
+      );
+      await notify(database, {
+        userId: request.owner_user, kind: 'hire_message',
+        title: `Reply about: ${request.title}`,
+        body: body.slice(0, 140),
+        link: '/workspace/freelancer/requests',
+      });
+      flash = `Sent to ${request.specialist}.`;
+    } else {
+      flash = 'Write a little more before sending.';
+    }
+  } else if (action === 'withdraw') {
+    // Only a live request can be withdrawn — one already accepted is work now.
+    if (OPEN.includes(request.status)) {
+      await run(
+        database,
+        "UPDATE hire_requests SET status = 'closed', updated_at = ? WHERE id = ?",
+        nowIso(), request.id,
+      );
+      // Silence reads as "still deciding", so they are told either way.
+      await notify(database, {
+        userId: request.owner_user, kind: 'hire_closed',
+        title: `Closed: ${request.title}`,
+        body: 'This request has been withdrawn, so there is nothing to answer.',
+        link: '/workspace/freelancer/requests',
+      });
+      flash = 'Closed. They have been told, so they are not left waiting.';
+    } else {
+      flash = 'That request has already been answered, so it cannot be withdrawn.';
+    }
+  }
+}
+
+interface Request {
+  id: string;
+  title: string;
+  brief: string;
+  status: string;
+  service_id: string;
+  created_at: string;
+  name: string;
+  handle: string | null;
+  headline: string | null;
+  budget_min: number | null;
+  budget_max: number | null;
+  currency: string | null;
+  engagement: string | null;
+  work_location: string | null;
+  start_date: string | null;
+  deadline: string | null;
+  nda_required: number;
+  /** 0 = the company owes a reply, 1 = the specialist does, 2 = settled. */
+  turn: number;
+}
+
+const requests = await all<Request>(
+  database,
+  `SELECT h.id, h.title, h.brief, h.status, h.service_id, h.created_at,
+          u.name, sp.handle, sp.headline,
+          h.budget_min, h.budget_max, h.currency, h.engagement, h.work_location,
+          h.start_date, h.deadline, h.nda_required,
+          CASE
+            WHEN h.status NOT IN ('sent','viewed','question','proposal') THEN 2
+            -- a price always needs a decision from this side
+            WHEN h.status = 'proposal' THEN 0
+            -- otherwise whoever spoke last holds the ball
+            WHEN (SELECT m.sender_id FROM messages m
+                   WHERE m.hire_request_id = h.id
+                   ORDER BY m.created_at DESC LIMIT 1)
+                 IN (SELECT cm.user_id FROM company_members cm WHERE cm.company_id = ?1) THEN 1
+            WHEN EXISTS (SELECT 1 FROM messages m2 WHERE m2.hire_request_id = h.id) THEN 0
+            ELSE 1
+          END AS turn
+     FROM hire_requests h
+     JOIN specialist_profiles sp ON sp.id = h.profile_id
+     JOIN users u ON u.id = sp.user_id
+    WHERE h.company_id = ?1 AND h.status != 'draft'
+    -- your turn first, then anything still open, then the settled ones
+    ORDER BY turn, h.created_at DESC`,
+  companyId,
+);
+
+const messages = await all<{
+  hire_request_id: string; body: string; created_at: string; sender_name: string; mine: number;
+}>(
+  database,
+  `SELECT m.hire_request_id, m.body, m.created_at, u.name AS sender_name,
+          CASE WHEN m.sender_id IN (SELECT cm.user_id FROM company_members cm WHERE cm.company_id = ?1)
+               THEN 1 ELSE 0 END AS mine
+     FROM messages m
+     JOIN users u ON u.id = m.sender_id
+     JOIN hire_requests h ON h.id = m.hire_request_id
+    WHERE h.company_id = ?1
+    ORDER BY m.created_at`,
+  companyId,
+);
+
+const byRequest = (id: string) => messages.filter((m) => m.hire_request_id === id);
+const waiting = requests.filter((r) => r.turn === 0).length;
+
+const isOpen = (r: Request) => OPEN.includes(r.status);
+const isWork = (r: Request) => ['accepted', 'active', 'completed'].includes(r.status);
+
+const day = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
+/** The money line, in whatever shape this company actually filled in. */
+function budget(r: Request): string | null {
+  if (r.budget_min === null && r.budget_max === null) return null;
+  const unit = r.currency ?? 'USD';
+  if (r.budget_min !== null && r.budget_max !== null) return `${unit} ${r.budget_min}–${r.budget_max}`;
+  if (r.budget_min !== null) return `${unit} ${r.budget_min} and up`;
+  return `Up to ${unit} ${r.budget_max}`;
+}
+
+/** Everything worth knowing at a glance, minus the fields left blank. */
+function facts(r: Request): string[] {
+  return [
+    budget(r),
+    engagementLabel(r.engagement) || null,
+    workLocationLabel(r.work_location) || null,
+    r.start_date ? `Starts ${day(r.start_date)}` : null,
+    r.deadline ? `Due ${day(r.deadline)}` : null,
+    r.nda_required === 1 ? 'NDA required' : null,
+  ].filter((x): x is string => Boolean(x));
+}
+
+const tone = (status: string) => {
+  const t = statusTone(status);
+  // pill-tone only paints warn, ok and bad — anything else stays neutral.
+  return t === 'info' ? 'pill-tone' : `pill-tone ${t}`;
+};
+
+const nav = companyNav({ requests: waiting || undefined });
+---
+
+<Workspace
+  title="People you asked"
+  role="company"
+  current="/workspace/company/requests"
+  items={nav}
+  who={user.name}
+  heading="People you asked"
+  lede={waiting
+    ? `${waiting} ${waiting === 1 ? 'request is' : 'requests are'} waiting on you.`
+    : 'Everyone you have asked to work with, and where each request has got to.'}
+  flash={flash}
+>
+  {requests.length === 0 ? (
+    <div class="ws-empty">
+      <h3>You have not asked anyone yet</h3>
+      <p>
+        Open a specialist's page and use <b>Request to hire</b>. Your brief,
+        budget and dates go to them privately, and their answer — along with
+        anything they need to ask you first — lands here, where you can reply
+        without leaving the page.
+      </p>
+      <a class="btn-hot btn-sm" href="/specialists">Find a specialist</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      {requests.map((r) => {
+        const thread = byRequest(r.id);
+        return (
+          <article class="panel glass-p">
+            <div class="ws-row-head">
+              <div>
+                <h2 style="margin:0;">{r.name}</h2>
+                <p class="ws-sub">
+                  {r.title} · {getService(r.service_id)?.name} · asked {day(r.created_at)}
+                  {thread.length > 0 && <span> · {thread.length} {thread.length === 1 ? 'message' : 'messages'}</span>}
+                </p>
+                {r.headline && <p class="ws-sub">{r.headline}</p>}
+              </div>
+              <span class={tone(r.status)}>{hireStatusForCompany(r.status)}</span>
+            </div>
+
+            <p class="ws-sub" style="white-space:pre-wrap;">{r.brief}</p>
+
+            {facts(r).length > 0 && <p class="ws-sub">{facts(r).join(' · ')}</p>}
+
+            {thread.length > 0 && (
+              <div class="thread" style="margin-top:14px;">
+                {thread.map((m) => (
+                  <div class={`msg ${m.mine === 1 ? 'mine' : ''}`}>
+                    <p class="who">{m.sender_name}</p>
+                    <p>{m.body}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {r.status === 'sent' && thread.length === 0 && (
+              <p class="ws-sub" style="margin-top:12px;">
+                {r.name} has not opened this yet. Adding a note is often what gets an answer.
+              </p>
+            )}
+
+            {r.status === 'declined' && (
+              <p class="ws-sub" style="margin-top:12px;">
+                {r.name} turned this one down. You can still ask them about a different piece of work.
+              </p>
+            )}
+
+            {(isOpen(r) || isWork(r)) && (
+              <form method="post" class="cform" style="margin-top:14px;">
+                <input type="hidden" name="requestId" value={r.id} />
+                <label>
+                  <span class="fl">{thread.length ? 'Your reply' : `Send ${r.name} a message`}</span>
+                  <textarea class="fi" name="body" rows="3" required minlength="2"
+                            placeholder="Answer what they asked, or add anything they need before they can quote."></textarea>
+                </label>
+                <button class="btn-hot btn-sm" name="action" value="reply"
+                        style="justify-self:start;" data-busy="Sending…">Send</button>
+              </form>
+            )}
+
+            {isOpen(r) && (
+              <p class="ws-sub" style="margin-top:14px;">
+                Closing this request tells {r.name} to stop holding time for it.
+              </p>
+            )}
+
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;">
+              {r.handle && <a class="btn-glass btn-sm" href={`/specialists/${r.handle}`}>View profile</a>}
+
+              {isOpen(r) && (
+                <form method="post">
+                  <input type="hidden" name="requestId" value={r.id} />
+                  <button class="btn-glass btn-sm" name="action" value="withdraw">Close this request</button>
+                </form>
+              )}
+
+              {isWork(r) && <a class="btn-glass btn-sm" href="/workspace/company/work">See the work</a>}
+
+              {r.handle && ['declined', 'closed', 'completed'].includes(r.status) && (
+                <a class="btn-hot btn-sm" href={`/hire/${r.handle}`}>Ask them again</a>
+              )}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  )}
+</Workspace>

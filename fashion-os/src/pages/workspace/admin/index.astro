@@ -1,0 +1,239 @@
+---
+/**
+ * /workspace/admin — the operations overview.
+ *
+ * Same shape as the other two: the figures across the top, then the queues
+ * that need a decision on the left and the state of the network on the right.
+ * Anything actionable links to its own page, where the actions live.
+ *
+ * Every figure is scoped to the caller's workspace plus the shared demo
+ * content, exactly as the queues themselves are — an admin sees the totals
+ * for what they can actually act on, not for the whole database.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one } from '../../../server/db';
+import { guard, requireAdmin } from '../../../server/guards';
+import { adminNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireAdmin(Astro));
+if (gate.response) return gate.response;
+const admin = gate.value;
+
+const database = db(Astro);
+const tenant = Astro.locals.tenant;
+
+const [counts, queues, recent] = await Promise.all([
+  one<{ approved: number; companies: number; projects: number; engagements: number }>(
+    database,
+    `SELECT
+      (SELECT COUNT(*) FROM specialist_profiles p JOIN users u ON u.id = p.user_id
+        WHERE p.status = 'approved' AND u.tenant IN (?1, 'public')) AS approved,
+      (SELECT COUNT(*) FROM companies WHERE tenant IN (?1, 'public')) AS companies,
+      (SELECT COUNT(*) FROM projects p JOIN companies c ON c.id = p.company_id
+        WHERE p.status != 'draft' AND c.tenant IN (?1, 'public')) AS projects,
+      (SELECT COUNT(*) FROM engagements e JOIN companies c ON c.id = e.company_id
+        WHERE e.status = 'active' AND c.tenant IN (?1, 'public')) AS engagements`,
+    tenant,
+  ),
+  one<{ reviews: number; portfolio: number; tags: number; leads: number }>(
+    database,
+    `SELECT
+      (SELECT COUNT(*) FROM specialist_profiles p JOIN users u ON u.id = p.user_id
+        WHERE p.status = 'submitted' AND u.tenant IN (?1, 'public')) AS reviews,
+      (SELECT COUNT(*) FROM portfolio_items pi
+         JOIN specialist_profiles p ON p.id = pi.profile_id
+         JOIN users u ON u.id = p.user_id
+        WHERE pi.moderation = 'pending' AND u.tenant IN (?1, 'public')) AS portfolio,
+      (SELECT (SELECT COUNT(*) FROM skills s LEFT JOIN users su ON su.id = s.created_by
+                WHERE s.status = 'pending' AND (su.tenant IS NULL OR su.tenant IN (?1, 'public')))
+            + (SELECT COUNT(*) FROM tools t LEFT JOIN users tu ON tu.id = t.created_by
+                WHERE t.status = 'pending' AND (tu.tenant IS NULL OR tu.tenant IN (?1, 'public')))) AS tags,
+      (SELECT COUNT(*) FROM leads WHERE status = 'new' AND tenant IN (?1, 'public')) AS leads`,
+    tenant,
+  ),
+  all<{ action: string; entity_type: string; created_at: string; actor: string | null }>(
+    database,
+    `SELECT a.action, a.entity_type, a.created_at, u.name AS actor
+       FROM audit_logs a LEFT JOIN users u ON u.id = a.actor_id
+      WHERE a.tenant IN (?, 'public')
+      ORDER BY a.created_at DESC LIMIT 6`,
+    tenant,
+  ),
+]);
+
+const q = {
+  reviews: queues?.reviews ?? 0,
+  portfolio: queues?.portfolio ?? 0,
+  tags: queues?.tags ?? 0,
+  leads: queues?.leads ?? 0,
+};
+const moderation = q.portfolio + q.tags;
+const outstanding = q.reviews + moderation + q.leads;
+
+/* The activity log records machine actions; nobody should have to read
+   "profile.approved" to know what happened. */
+const SAID: Record<string, string> = {
+  'user.signed_up': 'joined',
+  'user.signed_in': 'signed in',
+  'user.email_verified': 'confirmed their email',
+  'user.password_reset': 'reset their password',
+  'company.created': 'created a company',
+  'profile.submitted': 'submitted an application',
+  'profile.approved': 'was approved as a specialist',
+  'profile.needs_changes': 'was asked for changes',
+  'profile.rejected': 'had an application rejected',
+  'profile.paused': 'was paused',
+  'project.published': 'published a project',
+  'project.closed': 'closed a project',
+  'hire_request.sent': 'asked a specialist to work with them',
+  'hire_request.answered': 'answered a hire request',
+  'engagement.created': 'started work',
+  'engagement.completed': 'finished work',
+  'portfolio.moderated': 'moderated a portfolio item',
+  'taxonomy.tag_approved': 'approved a new tag',
+};
+const said = (a: string) => SAID[a] ?? a.replace(/[._]/g, ' ');
+
+const when = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
+const nav = adminNav({
+  reviews: q.reviews || undefined,
+  moderation: moderation || undefined,
+  enquiries: q.leads || undefined,
+});
+---
+
+<Workspace
+  title="Operations"
+  role="admin"
+  current="/workspace/admin"
+  items={nav}
+  who={admin.name}
+  heading="Operations"
+  lede={outstanding
+    ? `${outstanding} ${outstanding === 1 ? 'thing needs' : 'things need'} a decision from you.`
+    : 'Nothing is waiting on a decision.'}
+>
+  <div class="ws-stats">
+    <div class="ws-stat">
+      <span class="k">Approved specialists</span>
+      <span class="v">{counts?.approved ?? 0}</span>
+      <span class="d">Live in the directory</span>
+    </div>
+    <div class="ws-stat">
+      <span class="k">Companies</span>
+      <span class="v">{counts?.companies ?? 0}</span>
+      <span class="d">With an account</span>
+    </div>
+    <div class="ws-stat">
+      <span class="k">Projects posted</span>
+      <span class="v">{counts?.projects ?? 0}</span>
+      <span class="d">Excluding drafts</span>
+    </div>
+    <div class="ws-stat">
+      <span class="k">Work under way</span>
+      <span class="v">{counts?.engagements ?? 0}</span>
+      <span class="d">Currently active</span>
+    </div>
+  </div>
+
+  <div class="ws-cols">
+    <div class="ws-col">
+      <section class="ws-card">
+        <div class="ws-card-head"><h2>Waiting on you</h2></div>
+        {outstanding === 0 ? (
+          <div class="ws-empty">
+            <h3>Nothing in the queues</h3>
+            <p>Applications, portfolio items, new tags and enquiries appear here as they arrive.</p>
+          </div>
+        ) : (
+          <div class="ws-rows">
+            {q.reviews > 0 && (
+              <a class="ws-row" href="/workspace/admin/reviews">
+                <span class="mark">{q.reviews}</span>
+                <span class="body">
+                  <span class="t">Applications to review</span>
+                  <span class="m">Specialists waiting to be approved or sent back</span>
+                </span>
+                <span class="pill-tone warn">Needs a decision</span>
+              </a>
+            )}
+            {moderation > 0 && (
+              <a class="ws-row" href="/workspace/admin/moderation">
+                <span class="mark">{moderation}</span>
+                <span class="body">
+                  <span class="t">Moderation queue</span>
+                  <span class="m">{q.portfolio} portfolio {q.portfolio === 1 ? 'item' : 'items'} · {q.tags} new {q.tags === 1 ? 'tag' : 'tags'}</span>
+                </span>
+                <span class="pill-tone warn">Needs a decision</span>
+              </a>
+            )}
+            {q.leads > 0 && (
+              <a class="ws-row" href="/workspace/admin/enquiries">
+                <span class="mark">{q.leads}</span>
+                <span class="body">
+                  <span class="t">New project enquiries</span>
+                  <span class="m">Sent from the service pages, not yet answered</span>
+                </span>
+                <span class="pill-tone warn">Needs a reply</span>
+              </a>
+            )}
+          </div>
+        )}
+      </section>
+
+      <section class="ws-card">
+        <div class="ws-card-head">
+          <h2>The network</h2>
+          <a href="/workspace/admin/specialists">Manage →</a>
+        </div>
+        <div class="ws-rows">
+          <a class="ws-row" href="/workspace/admin/specialists">
+            <span class="body">
+              <span class="t">Live specialists</span>
+              <span class="m">Feature, pause or relist anyone in the directory</span>
+            </span>
+          </a>
+          <a class="ws-row" href="/workspace/admin/projects">
+            <span class="body">
+              <span class="t">Posted projects</span>
+              <span class="m">See who replied, or close a project</span>
+            </span>
+          </a>
+          <a class="ws-row" href="/workspace/admin/people">
+            <span class="body">
+              <span class="t">People</span>
+              <span class="m">Everyone with an account in this workspace</span>
+            </span>
+          </a>
+        </div>
+      </section>
+    </div>
+
+    <div class="ws-col">
+      <section class="ws-card">
+        <div class="ws-card-head">
+          <h2>Recent activity</h2>
+          <a href="/workspace/admin/activity">See all →</a>
+        </div>
+        {recent.length === 0 ? (
+          <p class="ws-sub" style="margin-top:0;">Nothing has happened in this workspace yet.</p>
+        ) : (
+          <div class="ws-rows">
+            {recent.map((r) => (
+              <div class="ws-row" style="cursor:default;">
+                <span class="body">
+                  <span class="t" style="white-space:normal;">{r.actor ?? 'Someone'} {said(r.action)}</span>
+                  <span class="m">{when(r.created_at)}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  </div>
+</Workspace>

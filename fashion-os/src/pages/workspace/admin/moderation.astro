@@ -1,0 +1,393 @@
+---
+/**
+ * /workspace/admin/moderation — the two queues that hold things back from
+ * public pages: portfolio pieces a specialist uploaded, and skills or tools
+ * they typed in themselves instead of picking from the list.
+ *
+ * Both sat near the bottom of the single admin page, below the application
+ * review and the leads, so the question an operator actually opens the page
+ * with — is anything blocked on me? — meant scrolling past everything else.
+ * They belong together: both are "somebody added something, nobody has looked
+ * at it yet", and both are cleared with the same three decisions.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one, run } from '../../../server/db';
+import { guard, requireAdmin } from '../../../server/guards';
+import { audit } from '../../../server/audit';
+import { ownedProfile } from '../../../server/tenant';
+import { getService } from '../../../data/taxonomy';
+import { portfolioModerationLabel, tagKindLabel, tagStatusLabel } from '../../../data/labels';
+import { adminNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireAdmin(Astro));
+if (gate.response) return gate.response;
+const admin = gate.value;
+
+const database = db(Astro);
+const tenant = Astro.locals.tenant;
+let flash: string | null = null;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const action = String(form.get('action') ?? '');
+
+  /* Approve or reject one portfolio piece. The id arrives in a form and a form
+     can be replayed, so the piece is fetched back and its owner proved to be in
+     this workspace before anything is written. Only a piece still waiting
+     matches, so a resubmitted form cannot quietly overturn a decision that has
+     already been made and published. */
+  if (action === 'portfolio_approve' || action === 'portfolio_reject') {
+    const itemId = String(form.get('itemId') ?? '');
+    const item = await one<{ id: string; profile_id: string }>(
+      database,
+      "SELECT id, profile_id FROM portfolio_items WHERE id = ? AND moderation = 'pending'",
+      itemId,
+    );
+
+    if (!item || !(await ownedProfile(database, item.profile_id, tenant))) {
+      flash = 'That piece has already been checked.';
+    } else {
+      const decision = action === 'portfolio_approve' ? 'approved' : 'rejected';
+      await run(database, 'UPDATE portfolio_items SET moderation = ? WHERE id = ?', decision, item.id);
+      await audit(database, {
+        actorId: admin.id, action: 'portfolio.moderated', entityType: 'portfolio_item',
+        entityId: item.id, detail: { decision }, request: Astro.request,
+      });
+      flash = decision === 'approved'
+        ? 'Approved. It now shows on their public page.'
+        : 'Rejected. It stays off their public page.';
+    }
+  }
+
+  /* Approve, merge or reject one proposed tag. Same replay problem, same shape
+     of answer — and the merge target is checked too, or a replayed form could
+     point a tag at any id in the table and break the name shown on every
+     profile using it. */
+  if (['tag_approve', 'tag_merge', 'tag_reject'].includes(action)) {
+    // Interpolated into SQL, so it is narrowed to one of two literals first.
+    const table = String(form.get('table') ?? '') === 'tools' ? 'tools' : 'skills';
+    const tagId = String(form.get('tagId') ?? '');
+    const mergeInto = String(form.get('mergeInto') ?? '');
+
+    const tag = await one<{ id: string; service_id: string | null }>(
+      database,
+      `SELECT s.id, s.service_id FROM ${table} s
+         LEFT JOIN users u ON u.id = s.created_by
+        WHERE s.id = ? AND s.status = 'pending'
+          AND (u.tenant IS NULL OR u.tenant IN (?, 'public'))`,
+      tagId, tenant,
+    );
+
+    let decided = false;
+
+    if (!tag) {
+      flash = 'That tag has already been dealt with.';
+    } else if (action === 'tag_approve') {
+      await run(database, `UPDATE ${table} SET status = 'approved' WHERE id = ?`, tag.id);
+      flash = 'Approved. It is now a filter people can search by.';
+      decided = true;
+    } else if (action === 'tag_merge') {
+      // `IS` rather than `=` so a tag with no service matches the null target.
+      const target = mergeInto
+        ? await one<{ id: string; name: string }>(
+            database,
+            `SELECT id, name FROM ${table}
+              WHERE id = ? AND status = 'approved' AND service_id IS ?`,
+            mergeInto, tag.service_id,
+          )
+        : null;
+
+      if (!target) {
+        flash = 'Pick which existing tag this one means before merging.';
+      } else {
+        await run(
+          database, `UPDATE ${table} SET status = 'merged', merged_into = ? WHERE id = ?`,
+          target.id, tag.id,
+        );
+        flash = `Merged. Everyone who chose it now shows "${target.name}".`;
+        decided = true;
+      }
+    } else {
+      await run(database, `UPDATE ${table} SET status = 'rejected' WHERE id = ?`, tag.id);
+      flash = 'Rejected. It stays off the public filters.';
+      decided = true;
+    }
+
+    if (tag && decided) {
+      await audit(database, {
+        actorId: admin.id,
+        action: action === 'tag_approve' ? 'taxonomy.tag_approved'
+          : action === 'tag_merge' ? 'taxonomy.tag_merged' : 'taxonomy.tag_rejected',
+        entityType: table, entityId: tag.id, detail: { mergeInto }, request: Astro.request,
+      });
+    }
+  }
+}
+
+interface Piece {
+  id: string;
+  title: string;
+  contribution: string;
+  service_id: string | null;
+  media_key: string | null;
+  external_url: string | null;
+  client_name: string | null;
+  has_permission: number;
+  moderation: string;
+  created_at: string;
+  name: string;
+  handle: string | null;
+}
+
+interface Tag {
+  id: string;
+  name: string;
+  service_id: string | null;
+  status: string;
+  created_at: string;
+  proposed_by: string | null;
+}
+
+const [pieces, pendingSkills, pendingTools, approvedTags] = await Promise.all([
+  all<Piece>(
+    database,
+    `SELECT pi.id, pi.title, pi.contribution, pi.service_id, pi.media_key, pi.external_url,
+            pi.client_name, pi.has_permission, pi.moderation, pi.created_at,
+            u.name, p.handle
+       FROM portfolio_items pi
+       JOIN specialist_profiles p ON p.id = pi.profile_id
+       JOIN users u ON u.id = p.user_id
+      WHERE pi.moderation = 'pending' AND u.tenant IN (?, 'public')
+      -- a queue, so whoever has waited longest is answered first
+      ORDER BY pi.created_at LIMIT 30`,
+    tenant,
+  ),
+  all<Tag>(
+    database,
+    `SELECT s.id, s.name, s.service_id, s.status, s.created_at, u.name AS proposed_by
+       FROM skills s LEFT JOIN users u ON u.id = s.created_by
+      WHERE s.status = 'pending' AND (u.tenant IS NULL OR u.tenant IN (?, 'public'))
+      ORDER BY s.created_at`,
+    tenant,
+  ),
+  all<Tag>(
+    database,
+    `SELECT s.id, s.name, s.service_id, s.status, s.created_at, u.name AS proposed_by
+       FROM tools s LEFT JOIN users u ON u.id = s.created_by
+      WHERE s.status = 'pending' AND (u.tenant IS NULL OR u.tenant IN (?, 'public'))
+      ORDER BY s.created_at`,
+    tenant,
+  ),
+  /* The tags a pending one can be folded into: already public, so merging can
+     only ever point at a name the directory already shows. */
+  all<{ id: string; name: string; service_id: string | null; kind: string }>(
+    database,
+    `SELECT id, name, service_id, 'skills' AS kind FROM skills WHERE status = 'approved'
+     UNION ALL
+     SELECT id, name, service_id, 'tools' AS kind FROM tools WHERE status = 'approved'
+     ORDER BY name`,
+  ),
+]);
+
+const tags = [
+  ...pendingSkills.map((t) => ({ ...t, kind: 'skills' as const })),
+  ...pendingTools.map((t) => ({ ...t, kind: 'tools' as const })),
+].sort((a, b) => a.created_at.localeCompare(b.created_at));
+
+const mergeTargets = (kind: 'skills' | 'tools', serviceId: string | null) =>
+  approvedTags.filter((t) => t.kind === kind && t.service_id === serviceId);
+
+const waiting = pieces.length + tags.length;
+
+const when = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+const serviceName = (id: string | null) => getService(id ?? '')?.name ?? 'No service named';
+
+const nav = adminNav({ moderation: waiting || undefined });
+---
+
+<Workspace
+  title="Moderation queue"
+  role="admin"
+  current="/workspace/admin/moderation"
+  items={nav}
+  who={admin.name}
+  heading="Moderation queue"
+  lede={waiting
+    ? `${waiting} ${waiting === 1 ? 'thing is' : 'things are'} held back from public pages until you decide.`
+    : 'Work and tags people have added, held back until somebody here has looked at them.'}
+  flash={flash}
+>
+  {waiting === 0 ? (
+    <div class="ws-empty">
+      <h3>Nothing waiting to be checked</h3>
+      <p>
+        Two things land here. A portfolio piece stays off a specialist's public
+        page until it is approved, and a skill or tool somebody typed in
+        themselves stays out of the search filters until it is either accepted
+        or folded into the tag that already meant the same thing. Approving an
+        application is what usually fills this queue.
+      </p>
+      <a class="btn-glass btn-sm" href="/workspace/admin">Back to your overview</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      <section class="panel glass-p">
+        <div class="ws-row-head">
+          <div>
+            <h2 style="margin:0;">Portfolio waiting to be checked</h2>
+            <p class="ws-sub">
+              Nothing here is on a public page yet. Approving puts the piece on
+              the specialist's profile; rejecting leaves it visible only to them.
+            </p>
+          </div>
+          {pieces.length > 0 && <span class="pill-tone warn">{pieces.length} to check</span>}
+        </div>
+      </section>
+
+      {pieces.length === 0 ? (
+        <div class="ws-empty">
+          <h3>No portfolio pieces waiting</h3>
+          <p>
+            Every piece of work a specialist uploads is held back from their
+            public page until it has been checked here. One appears as soon as
+            somebody adds work to their profile.
+          </p>
+          <a class="btn-glass btn-sm" href="/specialists">See who is live</a>
+        </div>
+      ) : (
+        pieces.map((piece) => (
+          <article class="panel glass-p">
+            <div class="ws-row-head">
+              <div>
+                <h2 style="margin:0;">{piece.title}</h2>
+                <p class="ws-sub">
+                  {piece.name} · {serviceName(piece.service_id)} · added {when(piece.created_at)}
+                </p>
+              </div>
+              <span class="pill-tone warn">{portfolioModerationLabel(piece.moderation)}</span>
+            </div>
+
+            <div class="thread">
+              <div class="msg">
+                <p class="who">What they did on it</p>
+                <p>{piece.contribution}</p>
+              </div>
+            </div>
+
+            {piece.client_name && (
+              <p class="ws-sub" style="margin-top:12px;">
+                {piece.has_permission === 1
+                  ? `Names ${piece.client_name} as the client, and says they have permission to.`
+                  : `Names ${piece.client_name} as the client without confirming permission — check that before approving.`}
+              </p>
+            )}
+
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;">
+              {piece.media_key && (
+                <a class="btn-glass btn-sm" href={`/api/files/${piece.media_key}`} target="_blank" rel="noopener">
+                  Open the file
+                </a>
+              )}
+              {piece.external_url && (
+                <a class="btn-glass btn-sm" href={piece.external_url} target="_blank" rel="noopener nofollow">
+                  Open the link ↗
+                </a>
+              )}
+              {piece.handle && (
+                <a class="btn-glass btn-sm" href={`/specialists/${piece.handle}`}>See their profile</a>
+              )}
+
+              <form method="post">
+                <input type="hidden" name="itemId" value={piece.id} />
+                <button class="btn-hot btn-sm" name="action" value="portfolio_approve">Approve</button>
+              </form>
+
+              <form method="post">
+                <input type="hidden" name="itemId" value={piece.id} />
+                <button class="btn-glass btn-sm" name="action" value="portfolio_reject">Reject</button>
+              </form>
+            </div>
+          </article>
+        ))
+      )}
+
+      <section class="panel glass-p">
+        <div class="ws-row-head">
+          <div>
+            <h2 style="margin:0;">Custom skills and tools waiting to be checked</h2>
+            <p class="ws-sub">
+              Somebody typed these in rather than picking from the list. Approve
+              one to make it a filter of its own, or merge it into the tag that
+              already meant the same thing so the directory keeps one name for
+              one idea.
+            </p>
+          </div>
+          {tags.length > 0 && <span class="pill-tone warn">{tags.length} to check</span>}
+        </div>
+      </section>
+
+      {tags.length === 0 ? (
+        <div class="ws-empty">
+          <h3>No proposed tags waiting</h3>
+          <p>
+            When a specialist writes in a skill or tool the list did not offer,
+            it lands here before it becomes something companies can search by.
+            Nobody has proposed one recently.
+          </p>
+          <a class="btn-glass btn-sm" href="/workspace/admin">Back to your overview</a>
+        </div>
+      ) : (
+        tags.map((tag) => {
+          const targets = mergeTargets(tag.kind, tag.service_id);
+          return (
+            <article class="panel glass-p">
+              <div class="ws-row-head">
+                <div>
+                  <h2 style="margin:0;">{tag.name}</h2>
+                  <p class="ws-sub">
+                    {tagKindLabel(tag.kind)} · {serviceName(tag.service_id)}
+                    {tag.proposed_by && <span> · proposed by {tag.proposed_by}</span>}
+                    <span> · {when(tag.created_at)}</span>
+                  </p>
+                </div>
+                <span class="pill-tone warn">{tagStatusLabel(tag.status)}</span>
+              </div>
+
+              <form method="post" class="cform" style="margin-top:14px;">
+                <input type="hidden" name="tagId" value={tag.id} />
+                <input type="hidden" name="table" value={tag.kind} />
+
+                {targets.length > 0 ? (
+                  <label>
+                    <span class="fl">Merge into</span>
+                    <select class="fi" name="mergeInto">
+                      <option value="">Keep it as a tag of its own</option>
+                      {targets.map((target) => (
+                        <option value={target.id}>{target.name}</option>
+                      ))}
+                    </select>
+                  </label>
+                ) : (
+                  <p class="ws-sub" style="margin:0;">
+                    There is no public tag alongside this one yet, so there is
+                    nothing to merge it into — approve it or reject it.
+                  </p>
+                )}
+
+                <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-self:start;">
+                  <button class="btn-hot btn-sm" name="action" value="tag_approve">Approve</button>
+                  {targets.length > 0 && (
+                    <button class="btn-glass btn-sm" name="action" value="tag_merge">Merge</button>
+                  )}
+                  <button class="btn-glass btn-sm" name="action" value="tag_reject">Reject</button>
+                </div>
+              </form>
+            </article>
+          );
+        })
+      )}
+    </div>
+  )}
+</Workspace>

@@ -1,0 +1,266 @@
+---
+/**
+ * /workspace/freelancer/requests — every company that has asked to hire this
+ * specialist, with the answer they are waiting for.
+ *
+ * On the old single-page workspace these sat below the profile card, so a
+ * request that needed an answer today looked exactly like one settled a month
+ * ago. Here the ones waiting on the specialist sort to the top, and the
+ * accept / decline / ask-a-question actions live on the same card as the brief
+ * they refer to.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one, run } from '../../../server/db';
+import { guard, requireSpecialist } from '../../../server/guards';
+import { newId, nowIso } from '../../../server/ids';
+import { audit, notify } from '../../../server/audit';
+import { parse } from '../../../server/validate';
+import { getService } from '../../../data/taxonomy';
+import {
+  engagementLabel, hireStatusForSpecialist, statusTone, workLocationLabel,
+} from '../../../data/labels';
+import { freelancerNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireSpecialist(Astro));
+if (gate.response) return gate.response;
+const { user, profileId } = gate.value;
+
+const database = db(Astro);
+let flash: string | null = null;
+
+/* Answer a request: accept, decline or ask a question. The id arrives in a
+   form and a form can be replayed, so the request is re-fetched scoped to this
+   specialist before anything is written. */
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const requestId = String(form.get('requestId') ?? '');
+  const action = String(form.get('action') ?? '');
+
+  const request = await one<{ id: string; title: string; company_id: string; created_by: string; status: string }>(
+    database,
+    'SELECT id, title, company_id, created_by, status FROM hire_requests WHERE id = ? AND profile_id = ?',
+    requestId, profileId,
+  );
+
+  if (request) {
+    const now = nowIso();
+    if (action === 'accept') {
+      const engagementId = newId();
+      await database.batch([
+        database.prepare("UPDATE hire_requests SET status = 'accepted', updated_at = ? WHERE id = ?").bind(now, request.id),
+        database.prepare(
+          `INSERT INTO engagements (id, company_id, profile_id, hire_request_id, title, status, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, 'active', ?, ?)`,
+        ).bind(engagementId, request.company_id, profileId, request.id, request.title, now, now),
+      ]);
+      await notify(database, {
+        userId: request.created_by, kind: 'hire_accepted',
+        title: `${user.name} accepted: ${request.title}`, link: '/workspace/company/requests',
+      });
+      await audit(database, {
+        actorId: user.id, action: 'engagement.created', entityType: 'engagement', entityId: engagementId,
+        request: Astro.request,
+      });
+      flash = 'Accepted. The work is now in progress, and the company has been told.';
+    } else if (action === 'decline') {
+      await run(database, "UPDATE hire_requests SET status = 'declined', updated_at = ? WHERE id = ?", now, request.id);
+      await notify(database, {
+        userId: request.created_by, kind: 'hire_declined',
+        title: `${user.name} declined: ${request.title}`, link: '/workspace/company/requests',
+      });
+      flash = 'Declined. The company has been told.';
+    } else if (action === 'question') {
+      const { f } = parse(form);
+      const body = f.text('body', 'Your question', { required: true, min: 5, max: 2000 });
+      if (body) {
+        await run(
+          database,
+          'INSERT INTO messages (id, hire_request_id, sender_id, body, created_at) VALUES (?, ?, ?, ?, ?)',
+          newId(), request.id, user.id, body, now,
+        );
+        await run(database, "UPDATE hire_requests SET status = 'question', updated_at = ? WHERE id = ?", now, request.id);
+        await notify(database, {
+          userId: request.created_by, kind: 'hire_question',
+          title: `Question about: ${request.title}`, link: '/workspace/company/requests',
+        });
+        flash = 'Question sent. It is in your messages too, so you can follow it up there.';
+      } else {
+        flash = 'Write a little more before sending.';
+      }
+    }
+  }
+}
+
+interface Request {
+  id: string;
+  title: string;
+  brief: string;
+  status: string;
+  service_id: string;
+  company_name: string;
+  budget_min: number | null;
+  budget_max: number | null;
+  currency: string | null;
+  engagement: string | null;
+  work_location: string | null;
+  start_date: string | null;
+  deadline: string | null;
+  nda_required: number;
+  created_at: string;
+  /** 0 = the specialist owes an answer, 1 = the company does, 2 = settled. */
+  turn: number;
+}
+
+const requests = await all<Request>(
+  database,
+  `SELECT h.id, h.title, h.brief, h.status, h.service_id, c.name AS company_name,
+          h.budget_min, h.budget_max, h.currency, h.engagement, h.work_location,
+          h.start_date, h.deadline, h.nda_required, h.created_at,
+          CASE h.status
+            WHEN 'sent'   THEN 0
+            WHEN 'viewed' THEN 0
+            WHEN 'question' THEN 1
+            WHEN 'proposal' THEN 1
+            ELSE 2
+          END AS turn
+     FROM hire_requests h
+     JOIN companies c ON c.id = h.company_id
+    WHERE h.profile_id = ? AND h.status != 'draft'
+    -- your turn first, then anything still open, then the settled ones
+    ORDER BY turn, h.created_at DESC`,
+  profileId,
+);
+
+const messages = await all<{
+  hire_request_id: string; body: string; created_at: string; sender_name: string; mine: number;
+}>(
+  database,
+  `SELECT m.hire_request_id, m.body, m.created_at, u.name AS sender_name,
+          CASE WHEN m.sender_id = ?2 THEN 1 ELSE 0 END AS mine
+     FROM messages m
+     JOIN users u ON u.id = m.sender_id
+     JOIN hire_requests h ON h.id = m.hire_request_id
+    WHERE h.profile_id = ?1
+    ORDER BY m.created_at`,
+  profileId, user.id,
+);
+
+const byRequest = (id: string) => messages.filter((m) => m.hire_request_id === id);
+const waiting = requests.filter((r) => r.turn === 0).length;
+
+const day = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
+/** The money line, in whatever shape the company actually filled in. */
+function budget(r: Request): string | null {
+  if (r.budget_min === null && r.budget_max === null) return null;
+  const unit = r.currency ?? 'USD';
+  if (r.budget_min !== null && r.budget_max !== null) return `${unit} ${r.budget_min}–${r.budget_max}`;
+  if (r.budget_min !== null) return `${unit} ${r.budget_min} and up`;
+  return `Up to ${unit} ${r.budget_max}`;
+}
+
+/** Everything worth knowing at a glance, minus the fields left blank. */
+function facts(r: Request): string[] {
+  return [
+    budget(r),
+    engagementLabel(r.engagement) || null,
+    workLocationLabel(r.work_location) || null,
+    r.start_date ? `Starts ${day(r.start_date)}` : null,
+    r.deadline ? `Due ${day(r.deadline)}` : null,
+    r.nda_required === 1 ? 'NDA required' : null,
+  ].filter((x): x is string => Boolean(x));
+}
+
+const nav = freelancerNav({ requests: waiting || undefined });
+---
+
+<Workspace
+  title="Requests to hire you"
+  role="freelancer"
+  current="/workspace/freelancer/requests"
+  items={nav}
+  who={user.name}
+  heading="Requests to hire you"
+  lede={waiting
+    ? `${waiting} ${waiting === 1 ? 'request is' : 'requests are'} waiting on your answer.`
+    : 'Companies that have asked to work with you, newest first.'}
+  flash={flash}
+>
+  {requests.length === 0 ? (
+    <div class="ws-empty">
+      <h3>No requests yet</h3>
+      <p>
+        When a company finds you and asks you to take on a piece of work, their
+        brief, budget and dates land here — and you can accept, decline or ask
+        them a question without leaving the page. Listing the services you take
+        on is what puts you in front of them.
+      </p>
+      <a class="btn-hot btn-sm" href="/workspace/freelancer/services">List your services</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      {requests.map((request) => (
+        <article class="panel glass-p">
+          <div class="ws-row-head">
+            <div>
+              <h2 style="margin:0;">{request.title}</h2>
+              <p class="ws-sub">
+                {request.company_name} · {getService(request.service_id)?.name} · Asked {day(request.created_at)}
+              </p>
+            </div>
+            <span class={`pill-tone ${statusTone(request.status)}`}>
+              {hireStatusForSpecialist(request.status)}
+            </span>
+          </div>
+
+          <p class="ws-sub" style="white-space:pre-wrap;">{request.brief}</p>
+
+          {facts(request).length > 0 && (
+            <p class="ws-sub">{facts(request).join(' · ')}</p>
+          )}
+
+          {byRequest(request.id).length > 0 && (
+            <div class="thread" style="margin-top:14px;">
+              {byRequest(request.id).map((m) => (
+                <div class={`msg ${m.mine === 1 ? 'mine' : ''}`}>
+                  <p class="who">{m.sender_name}</p>
+                  <p>{m.body}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {['sent', 'viewed', 'question'].includes(request.status) && (
+            <div class="stack-sm" style="margin-top:16px;">
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <form method="post">
+                  <input type="hidden" name="requestId" value={request.id} />
+                  <button class="btn-hot btn-sm" name="action" value="accept">Accept</button>
+                </form>
+                <form method="post">
+                  <input type="hidden" name="requestId" value={request.id} />
+                  <button class="btn-glass btn-sm" name="action" value="decline">Decline</button>
+                </form>
+              </div>
+              <details>
+                <summary class="btn-glass btn-sm" style="display:inline-flex;list-style:none;">Ask a question</summary>
+                <form method="post" class="cform" style="margin-top:12px;">
+                  <input type="hidden" name="requestId" value={request.id} />
+                  <label>
+                    <span class="fl">Your question</span>
+                    <textarea class="fi" name="body" rows="3" required minlength="5"
+                              placeholder="What do you still need to know before you can quote?"></textarea>
+                  </label>
+                  <button class="btn-hot btn-sm" name="action" value="question" style="justify-self:start;">Send question</button>
+                </form>
+              </details>
+            </div>
+          )}
+        </article>
+      ))}
+    </div>
+  )}
+</Workspace>

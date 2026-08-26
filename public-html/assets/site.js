@@ -85,6 +85,10 @@
         <a href="/specialists" class="${current==='specialists'?'active':''}">Find a specialist</a>
         <a href="${r("pages/about.html")}">About</a>
         <a href="${r("pages/help.html")}">Help</a>
+        <!-- Returning users had no way in: the nav offered only "Start a project".
+             /sign-in sends an already-signed-in visitor straight to their
+             workspace, so this one link serves both cases. -->
+        <a href="/sign-in" class="nav-signin">Sign in</a>
       </nav>
 
       <div class="topnav-cta">
@@ -133,6 +137,7 @@
           <a class="sub" href="${r("pages/services/graphic-design.html")}">Graphic design</a>
         </div>
       </nav>
+      <a href="/sign-in" class="tm-signin">Sign in</a>
       <div class="topnav-mobile-cta">
         <button class="theme-toggle theme-toggle-wide" type="button" data-theme-toggle
                 aria-label="Switch to light theme" title="Switch theme">
@@ -221,6 +226,7 @@
             <li><a href="${r("index.html")}#contact">Start a project</a></li>
             <li><a href="/specialists">Find a specialist</a></li>
             <li><a href="/apply">Join as a freelancer</a></li>
+            <li><a href="/sign-in">Sign in</a></li>
           </ul>
         </details>
       </div>
@@ -258,15 +264,15 @@
         'box-shadow:0 30px 80px -20px rgba(var(--shadow-rgb), .75);opacity:0;visibility:hidden;pointer-events:none;',
         'transition:opacity .25s cubic-bezier(.22,1,.36,1),transform .25s cubic-bezier(.22,1,.36,1),visibility .25s;}',
         '.nav-svc-panel.open{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%) translateY(0);}',
-        '.nsp-col h6{font-family:"IBM Plex Mono",monospace;font-size: 11.5px;letter-spacing:.18em;text-transform:uppercase;',
-        'color:#A78BFA;margin:0 0 10px;font-weight:500;}',
+        '.nsp-col h6{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.04em;text-transform:uppercase;',
+        'color:var(--ink-5);margin:0 0 10px;font-weight:500;}',
         '.nsp-col a{display:block;padding:8px 10px;margin:0 -10px;border-radius:10px;text-decoration:none;',
         'font-family:Inter,sans-serif;font-size:14px;font-weight:500;color:rgba(var(--ink-rgb), .72);',
         'transition:background .2s ease,color .2s ease;}',
         '.nsp-col a:hover{background:rgba(var(--surface-rgb), .07);color:var(--ink);}',
         '@media (max-width:720px){.nav-svc-panel{display:none;}.nav-svc-trigger svg{display:none;}}',
-        '.tm-label{display:block;font-family:"IBM Plex Mono",monospace;font-size: 12px;letter-spacing:.2em;',
-        'text-transform:uppercase;color:#A78BFA;padding:22px 4px 10px;}',
+        '.tm-label{display:block;font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.04em;',
+        'text-transform:uppercase;color:var(--ink-5);padding:22px 4px 10px;}',
         '.tm-svcs{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;width:100%;}',
         '.topnav-mobile-links .tm-svcs a.sub{font-family:Inter,sans-serif !important;font-size:15px !important;',
         'font-weight:500 !important;color:rgba(var(--ink-rgb), .66) !important;padding:10px 4px !important;',

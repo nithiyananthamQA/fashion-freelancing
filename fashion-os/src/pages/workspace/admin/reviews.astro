@@ -1,0 +1,288 @@
+---
+/**
+ * /workspace/admin/reviews — the applications queue, one card per person.
+ *
+ * A reviewer is being asked to put someone's name and work on a public page,
+ * so the card carries the whole submission rather than a summary: what they
+ * wrote about themselves, what they can do per service, the terms they work
+ * on, and every portfolio piece with a way to open it. The decision buttons
+ * sit under the thing being decided, so nobody approves a profile they have
+ * not read.
+ *
+ * The ones still waiting on us sort above the ones we have already sent back.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { db, one, run } from '../../../server/db';
+import { guard, requireAdmin } from '../../../server/guards';
+import { handleFromName, newId, nowIso } from '../../../server/ids';
+import { audit, notify } from '../../../server/audit';
+import { parse } from '../../../server/validate';
+import { loadApplicationsForReview } from '../../../server/repo/specialists';
+import { ownedProfile } from '../../../server/tenant';
+import {
+  availabilityLabel, portfolioModerationLabel, projectSizeLabel,
+  rateModelLabel, statusTone, workLocationLabel,
+} from '../../../data/labels';
+import { adminNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireAdmin(Astro));
+if (gate.response) return gate.response;
+const admin = gate.value;
+
+const database = db(Astro);
+const tenant = Astro.locals.tenant;
+let flash: string | null = null;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const action = String(form.get('action') ?? '');
+  const { f } = parse(form);
+  const now = nowIso();
+
+  if (['approve', 'needs_changes', 'reject', 'pause'].includes(action)) {
+    const profileId = String(form.get('profileId') ?? '');
+    const notes = f.text('notes', 'Notes', { max: 2000 });
+    // Scoped on write, not just on read. The queue below is workspace-scoped
+    // already, but a form carries the id and a form can be replayed.
+    const profile = await ownedProfile<{ id: string; user_id: string; handle: string | null; name: string }>(
+      database, profileId, tenant, 'p.id, p.user_id, p.handle, u.name',
+    );
+
+    if (profile) {
+      const nextStatus =
+        action === 'approve' ? 'approved' : action === 'pause' ? 'paused' : action === 'reject' ? 'draft' : 'needs_changes';
+
+      // A public handle is minted once, at first approval, and never changes —
+      // an approved profile URL must keep working.
+      let handle = profile.handle;
+      if (action === 'approve' && !handle) {
+        const base = handleFromName(profile.name);
+        handle = base;
+        for (let n = 2; n < 50; n++) {
+          const clash = await one<{ id: string }>(database, 'SELECT id FROM specialist_profiles WHERE handle = ?', handle);
+          if (!clash) break;
+          handle = `${base}-${n}`;
+        }
+      }
+
+      await run(
+        database,
+        `UPDATE specialist_profiles
+            SET status = ?, handle = ?, approved_at = COALESCE(approved_at, ?), updated_at = ?
+          WHERE id = ?`,
+        nextStatus,
+        handle,
+        action === 'approve' ? now : null,
+        now,
+        profile.id,
+      );
+      await run(
+        database,
+        'INSERT INTO verification_reviews (id, profile_id, reviewer_id, decision, notes, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+        newId(), profile.id, admin.id,
+        action === 'approve' ? 'approved' : action === 'pause' ? 'paused' : action === 'reject' ? 'rejected' : 'needs_changes',
+        notes || null, now,
+      );
+      await notify(database, {
+        userId: profile.user_id,
+        kind: 'profile_review',
+        title:
+          action === 'approve' ? 'Your profile is approved' :
+          action === 'pause' ? 'Your profile has been paused' :
+          action === 'reject' ? 'Your application needs rework' : 'A few changes are needed',
+        body: notes || undefined,
+        link: '/workspace/freelancer',
+      });
+      await audit(database, {
+        actorId: admin.id,
+        action: action === 'approve' ? 'profile.approved' : action === 'pause' ? 'profile.paused'
+              : action === 'reject' ? 'profile.rejected' : 'profile.needs_changes',
+        entityType: 'specialist_profile', entityId: profile.id, detail: { notes }, request: Astro.request,
+      });
+      flash =
+        action === 'approve' ? `${profile.name} is approved. Their public page is live and they are in the directory now.` :
+        action === 'pause' ? `${profile.name} is paused. They stay out of the directory until you approve them.` :
+        action === 'reject' ? `${profile.name} has been sent back to a draft, with your notes.` :
+        `Changes requested from ${profile.name}. They have your notes and can resubmit.`;
+    } else {
+      flash = 'That application is no longer in your queue.';
+    }
+  }
+}
+
+const pending = await loadApplicationsForReview(database, tenant);
+
+/* Anything sent back is sitting with the applicant, so it is not work for us
+   until they resubmit. The undecided ones go first. */
+const queue = [...pending].sort((a, b) => Number(a.status === 'needs_changes') - Number(b.status === 'needs_changes'));
+const waiting = pending.filter((app) => app.status !== 'needs_changes').length;
+
+const day = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
+/** Who they are, minus the fields they left blank. */
+const identity = (app: (typeof queue)[number]): string[] => [
+  app.email,
+  app.location,
+  app.yearsExperience !== null ? `${app.yearsExperience} years' experience` : null,
+  app.languages.length ? app.languages.join(', ') : null,
+  app.submittedAt ? `Submitted ${day(app.submittedAt)}` : null,
+].filter((x): x is string => Boolean(x));
+
+/** What they will charge and how they want to work, in one readable line. */
+function terms(app: (typeof queue)[number]): string[] {
+  const rate = app.rateMin
+    ? app.rateMax && app.rateMax !== app.rateMin
+      ? `${app.rateCurrency} ${app.rateMin}–${app.rateMax}`
+      : `From ${app.rateCurrency} ${app.rateMin}`
+    : null;
+  const charges = app.rateModel.map(rateModelLabel).filter(Boolean).join(', ');
+  return [
+    availabilityLabel(app.availability) || null,
+    rate,
+    charges || null,
+    workLocationLabel(app.workLocation) || null,
+    projectSizeLabel(app.preferredSize) || null,
+    app.turnaround,
+  ].filter((x): x is string => Boolean(x));
+}
+
+/** pill-tone only paints warn, ok and bad — anything else stays neutral. */
+const tone = (value: string) => {
+  const t = statusTone(value);
+  return t === 'info' ? 'pill-tone' : `pill-tone ${t}`;
+};
+
+const nav = adminNav({ reviews: waiting || undefined });
+---
+
+<Workspace
+  title="Applications to review"
+  role="admin"
+  current="/workspace/admin/reviews"
+  items={nav}
+  who={admin.name}
+  heading="Applications to review"
+  lede={waiting
+    ? `${waiting} ${waiting === 1 ? 'application is' : 'applications are'} waiting on your decision.`
+    : 'Everything a specialist submitted, so you can judge the whole thing before it goes public.'}
+  flash={flash}
+>
+  {queue.length === 0 ? (
+    <div class="ws-empty">
+      <h3>Nothing to review</h3>
+      <p>
+        When a specialist finishes the application form and submits it, their
+        whole submission lands here — what they wrote, what they can do, what
+        they charge and every piece of work they attached — with the approve,
+        request-changes, pause and reject buttons on the same card. Send someone
+        the application form and the first one appears here.
+      </p>
+      <a class="btn-glass btn-sm" href="/apply">Open the application form</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      {queue.map((app) => (
+        <article class="panel glass-p">
+          <div class="ws-row-head">
+            <div>
+              <h2 style="margin:0;">{app.name}</h2>
+              <p class="ws-sub">{identity(app).join(' · ')}</p>
+              {app.headline && <p class="ws-sub">{app.headline}</p>}
+            </div>
+            {app.status === 'needs_changes' ? (
+              <span class={tone(app.status)}>Sent back — waiting on them</span>
+            ) : (
+              <span class="pill-tone warn">Waiting on you</span>
+            )}
+          </div>
+
+          {app.bioLines.length > 0 && (
+            <div class="thread">
+              <div class="msg">
+                <p class="who">In their words</p>
+                {app.bioLines.map((line) => <p>{line}</p>)}
+              </div>
+            </div>
+          )}
+
+          {app.offerings.map((offering) => (
+            <p class="ws-sub">
+              <b>{offering.serviceName}</b>
+              {offering.isPrimary && <span> · main service</span>}
+              {offering.roleName && <span> · {offering.roleName}</span>}
+              {offering.specialties.length > 0 && <span><br />Specialties: {offering.specialties.join(' · ')}</span>}
+              {offering.skills.length > 0 && <span><br />Skills: {offering.skills.join(' · ')}</span>}
+              {offering.tools.length > 0 && <span><br />Tools: {offering.tools.join(' · ')}</span>}
+              {offering.stack.length > 0 && <span><br />Stack: {offering.stack.join(' · ')}</span>}
+            </p>
+          ))}
+
+          <p class="ws-sub">
+            <b>Working terms</b> {terms(app).length ? terms(app).join(' · ') : 'Nothing stated'}
+          </p>
+
+          <p class="ws-sub" style="margin-top:14px;">
+            <b>Work they attached ({app.portfolio.length})</b>
+          </p>
+
+          {app.portfolio.length === 0 ? (
+            <p class="ws-sub">
+              Nothing attached. A profile with no work on it cannot go public as
+              it stands — ask for pieces before approving.
+            </p>
+          ) : (
+            <div class="thread" style="margin-top:8px;">
+              {app.portfolio.map((item) => (
+                <div class="msg">
+                  <p class="who">{item.title}</p>
+                  <p>{item.contribution}</p>
+                  {item.clientName && <p class="ws-sub">Client: {item.clientName}</p>}
+                  <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;">
+                    {item.mediaKey && (
+                      <a class="btn-glass btn-sm" href={`/api/files/${item.mediaKey}`} target="_blank" rel="noopener">Open file</a>
+                    )}
+                    {item.externalUrl && (
+                      <a class="btn-glass btn-sm" href={item.externalUrl} target="_blank" rel="noopener nofollow">Open link</a>
+                    )}
+                    <span class={tone(item.moderation)}>{portfolioModerationLabel(item.moderation)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {app.lastNote && (
+            <div class="thread" style="margin-top:14px;">
+              <div class="msg mine">
+                <p class="who">The last note you sent them</p>
+                <p>{app.lastNote}</p>
+              </div>
+            </div>
+          )}
+
+          <form method="post" class="cform" style="margin-top:18px;">
+            <input type="hidden" name="profileId" value={app.id} />
+            <label>
+              <span class="fl">Notes to the applicant</span>
+              <textarea class="fi" name="notes" rows="2"
+                        placeholder="If you are asking for changes, say exactly what to fix."></textarea>
+              <span class="ws-sub">Sent to them, and kept in the review history.</span>
+            </label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <button class="btn-hot btn-sm" name="action" value="approve" data-busy="Approving…">Approve &amp; publish</button>
+              <button class="btn-glass btn-sm" name="action" value="needs_changes" formnovalidate>Request changes</button>
+              <button class="btn-glass btn-sm" name="action" value="pause" formnovalidate>Pause</button>
+              <button class="btn-glass btn-sm" name="action" value="reject" formnovalidate>Reject</button>
+            </div>
+            <p class="ws-sub" style="margin:0;">
+              Approving mints their public URL and lists them in the directory immediately.
+            </p>
+          </form>
+        </article>
+      ))}
+    </div>
+  )}
+</Workspace>

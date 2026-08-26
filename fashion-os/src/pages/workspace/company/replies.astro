@@ -1,0 +1,286 @@
+---
+/**
+ * /workspace/company/replies — every reply a specialist sent to a project this
+ * company posted, and the decision still owed on it.
+ *
+ * On the old single-page workspace these sat in one list with the decided ones
+ * mixed into the undecided, so the only question that matters — who is waiting
+ * on me? — meant reading every row. The replies awaiting a decision come first
+ * here, each carrying what was actually offered: the pitch, the price and the
+ * timeline, next to the budget the project was posted with, so the two numbers
+ * can be compared without opening the project.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one, run } from '../../../server/db';
+import { guard, requireCompany } from '../../../server/guards';
+import { newId, nowIso } from '../../../server/ids';
+import { audit, notify } from '../../../server/audit';
+import { getService } from '../../../data/taxonomy';
+import { applicationStatusLabel, engagementLabel, statusTone } from '../../../data/labels';
+import { companyNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireCompany(Astro));
+if (gate.response) return gate.response;
+const { user, companyId } = gate.value;
+
+const database = db(Astro);
+let flash: string | null = null;
+
+/* Shortlist, hire or decline a reply. The id arrives in a form and a form can
+   be replayed with somebody else's, so the reply is fetched back through its
+   project and proved to belong to this company before anything is written —
+   and only a reply still awaiting a decision matches, so a resubmitted hire
+   cannot open a second engagement. */
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const applicationId = String(form.get('applicationId') ?? '');
+  const action = String(form.get('action') ?? '');
+
+  const application = await one<{
+    id: string; project_id: string; profile_id: string; title: string; owner_user: string;
+  }>(
+    database,
+    `SELECT a.id, a.project_id, a.profile_id, p.title, u.id AS owner_user
+       FROM applications a
+       JOIN projects p ON p.id = a.project_id
+       JOIN specialist_profiles sp ON sp.id = a.profile_id
+       JOIN users u ON u.id = sp.user_id
+      WHERE a.id = ? AND p.company_id = ? AND a.status IN ('submitted', 'shortlisted')`,
+    applicationId, companyId,
+  );
+
+  if (!application) {
+    flash = 'That reply has already been decided.';
+  } else {
+    const now = nowIso();
+
+    if (action === 'shortlist') {
+      await run(database, "UPDATE applications SET status = 'shortlisted', updated_at = ? WHERE id = ?", now, application.id);
+      await run(database, "UPDATE projects SET status = 'shortlisted', updated_at = ? WHERE id = ?", now, application.project_id);
+      await notify(database, {
+        userId: application.owner_user, kind: 'shortlisted',
+        title: `Shortlisted: ${application.title}`, link: '/workspace/freelancer/replies',
+      });
+      flash = 'Shortlisted. The specialist has been told.';
+    } else if (action === 'hire') {
+      const engagementId = newId();
+      await database.batch([
+        database.prepare("UPDATE applications SET status = 'hired', updated_at = ? WHERE id = ?").bind(now, application.id),
+        database.prepare("UPDATE projects SET status = 'hired', updated_at = ? WHERE id = ?").bind(now, application.project_id),
+        database.prepare(
+          `INSERT INTO engagements (id, company_id, profile_id, project_id, title, status, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, 'active', ?, ?)`,
+        ).bind(engagementId, companyId, application.profile_id, application.project_id, application.title, now, now),
+      ]);
+      await notify(database, {
+        userId: application.owner_user, kind: 'hired',
+        title: `You were hired: ${application.title}`, link: '/workspace/freelancer/work',
+      });
+      await audit(database, {
+        actorId: user.id, action: 'engagement.created', entityType: 'engagement', entityId: engagementId,
+        request: Astro.request,
+      });
+      flash = 'Hired. They have been told, and the project is closed to everyone else.';
+    } else if (action === 'decline') {
+      await run(database, "UPDATE applications SET status = 'declined', updated_at = ? WHERE id = ?", now, application.id);
+      // Silence reads as "still thinking", so the specialist is told either way.
+      await notify(database, {
+        userId: application.owner_user, kind: 'application_declined',
+        title: `Not chosen: ${application.title}`, link: '/workspace/freelancer/replies',
+      });
+      flash = 'Declined. They have been told, so they are not left waiting.';
+    }
+  }
+}
+
+interface Reply {
+  id: string;
+  pitch: string;
+  price: number | null;
+  currency: string | null;
+  timeline: string | null;
+  status: string;
+  created_at: string;
+  name: string;
+  handle: string | null;
+  headline: string | null;
+  project_title: string;
+  service_id: string;
+  engagement: string | null;
+  budget_min: number | null;
+  budget_max: number | null;
+  project_currency: string | null;
+  project_status: string;
+}
+
+const replies = await all<Reply>(
+  database,
+  `SELECT a.id, a.pitch, a.price, a.currency, a.timeline, a.status, a.created_at,
+          u.name, sp.handle, sp.headline,
+          p.title AS project_title, p.service_id, p.engagement,
+          p.budget_min, p.budget_max, p.currency AS project_currency,
+          p.status AS project_status
+     FROM applications a
+     JOIN projects p ON p.id = a.project_id
+     JOIN specialist_profiles sp ON sp.id = a.profile_id
+     JOIN users u ON u.id = sp.user_id
+    WHERE p.company_id = ?
+    -- waiting on a decision first, then whoever was hired, then the closed ones
+    ORDER BY CASE WHEN a.status IN ('submitted', 'shortlisted') THEN 0
+                  WHEN a.status = 'hired' THEN 1
+                  ELSE 2 END,
+             a.updated_at DESC`,
+  companyId,
+);
+
+const posted = await one<{ total: number }>(
+  database,
+  'SELECT COUNT(*) AS total FROM projects WHERE company_id = ?',
+  companyId,
+);
+
+const isOpen = (r: Reply) => r.status === 'submitted' || r.status === 'shortlisted';
+
+/* Hiring closes the project to everyone else, so any reply still sitting on a
+   filled project can no longer be accepted — only tidied away. */
+const filled = (r: Reply) =>
+  ['hired', 'in_progress', 'delivered', 'completed', 'closed'].includes(r.project_status);
+
+const open = replies.filter(isOpen).length;
+
+const amount = (value: number, currency: string | null) =>
+  `${currency ?? 'USD'} ${value.toLocaleString('en-GB')}`;
+
+/** What the company said it would spend, for comparing against the quote. */
+const budget = (r: Reply): string | null => {
+  if (r.budget_min !== null && r.budget_max !== null) {
+    return `${amount(r.budget_min, r.project_currency)}–${r.budget_max.toLocaleString('en-GB')}`;
+  }
+  if (r.budget_max !== null) return `up to ${amount(r.budget_max, r.project_currency)}`;
+  if (r.budget_min !== null) return `from ${amount(r.budget_min, r.project_currency)}`;
+  return null;
+};
+
+const when = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
+const tone = (status: string) => {
+  const t = statusTone(status);
+  // pill-tone only paints warn, ok and bad — anything else stays neutral.
+  return t === 'info' ? 'pill-tone' : `pill-tone ${t}`;
+};
+
+const nav = companyNav({ replies: open || undefined });
+---
+
+<Workspace
+  title="Replies to your projects"
+  role="company"
+  current="/workspace/company/replies"
+  items={nav}
+  who={user.name}
+  heading="Replies to your projects"
+  lede={open
+    ? `${open} ${open === 1 ? 'reply is' : 'replies are'} waiting on your decision.`
+    : 'Everyone who answered a project you posted, and what they offered to do it for.'}
+  flash={flash}
+>
+  {replies.length === 0 ? (
+    <div class="ws-empty">
+      <h3>No replies yet</h3>
+      <p>
+        When a specialist answers one of your projects, their message, the price
+        they want and how long they need appear here — with the buttons to
+        shortlist them, hire them, or let them know they were not chosen.
+      </p>
+      {posted && posted.total > 0 ? (
+        <a class="btn-glass btn-sm" href="/specialists">Ask a specialist directly</a>
+      ) : (
+        <a class="btn-hot btn-sm" href="/projects/new">Post a project</a>
+      )}
+    </div>
+  ) : (
+    <div class="stack-sm">
+      {replies.map((r) => (
+        <article class="panel glass-p">
+          <div class="ws-row-head">
+            <div>
+              <h2 style="margin:0;">{r.name}</h2>
+              <p class="ws-sub">
+                {r.project_title} · {getService(r.service_id)?.name} · replied {when(r.created_at)}
+              </p>
+              {r.headline && <p class="ws-sub">{r.headline}</p>}
+            </div>
+            <span class={tone(r.status)}>{applicationStatusLabel(r.status)}</span>
+          </div>
+
+          <div class="thread">
+            <div class="msg">
+              <p class="who">What they offered</p>
+              <p>{r.pitch}</p>
+            </div>
+          </div>
+
+          <p class="ws-sub" style="margin-top:12px;">
+            {r.price === null ? 'No price given' : amount(r.price, r.currency)}
+            {r.engagement && <span> · {engagementLabel(r.engagement)}</span>}
+            <span> · {r.timeline ? r.timeline : 'No timeline given'}</span>
+            {budget(r) && <span> · you budgeted {budget(r)}</span>}
+          </p>
+
+          {isOpen(r) && !filled(r) && (
+            <p class="ws-sub">
+              Hiring tells them they have the job and closes this project to
+              everyone else.
+            </p>
+          )}
+
+          {isOpen(r) && filled(r) && (
+            <p class="ws-sub">
+              You have already hired someone for this project, so this reply can
+              no longer be accepted. Decline it so they stop waiting on you.
+            </p>
+          )}
+
+          {r.status === 'withdrawn' && (
+            <p class="ws-sub">{r.name} took this reply back, so there is nothing to decide.</p>
+          )}
+
+          {(r.handle || isOpen(r) || r.status === 'hired') && (
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;">
+              {r.handle && <a class="btn-glass btn-sm" href={`/specialists/${r.handle}`}>View profile</a>}
+
+              {isOpen(r) && !filled(r) && r.status === 'submitted' && (
+                <form method="post">
+                  <input type="hidden" name="applicationId" value={r.id} />
+                  <button class="btn-glass btn-sm" name="action" value="shortlist">Shortlist</button>
+                </form>
+              )}
+
+              {isOpen(r) && !filled(r) && (
+                <form method="post">
+                  <input type="hidden" name="applicationId" value={r.id} />
+                  <button class="btn-hot btn-sm" name="action" value="hire" data-busy="Hiring…">
+                    Hire {r.name}
+                  </button>
+                </form>
+              )}
+
+              {isOpen(r) && (
+                <form method="post">
+                  <input type="hidden" name="applicationId" value={r.id} />
+                  <button class="btn-glass btn-sm" name="action" value="decline">Decline</button>
+                </form>
+              )}
+
+              {r.status === 'hired' && (
+                <a class="btn-glass btn-sm" href="/workspace/company/work">See the work</a>
+              )}
+            </div>
+          )}
+        </article>
+      ))}
+    </div>
+  )}
+</Workspace>

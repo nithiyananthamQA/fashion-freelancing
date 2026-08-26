@@ -1,0 +1,262 @@
+---
+/**
+ * /workspace/freelancer/work — everything a company has actually hired this
+ * specialist for: what is still open, what is finished, and the money recorded
+ * against each one.
+ *
+ * An engagement is created the moment a request to hire is accepted or a reply
+ * is picked, and on the old single-page workspace it was one line of title and
+ * status. That answers "how many?" but not the two questions a specialist
+ * really has — what did they ask me for, and have I been paid. Both sit one
+ * join away, so both are here, with the unfinished work first.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one, run } from '../../../server/db';
+import { guard, requireSpecialist } from '../../../server/guards';
+import { nowIso } from '../../../server/ids';
+import { notify } from '../../../server/audit';
+import { getService } from '../../../data/taxonomy';
+import {
+  engagementLabel, engagementStatusLabel,
+  paymentKindLabel, paymentStatusLabel, statusTone,
+} from '../../../data/labels';
+import { freelancerNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireSpecialist(Astro));
+if (gate.response) return gate.response;
+const { user, profileId } = gate.value;
+
+const database = db(Astro);
+let flash: string | null = null;
+
+/* Hand the work over for review. The id arrives in a form and a form can be
+   replayed with somebody else's, so ownership is proved again on write — and
+   only work still open can be delivered, never something already finished. */
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const engagementId = String(form.get('engagementId') ?? '');
+
+  const owned = await one<{ id: string; title: string; buyer_id: string | null }>(
+    database,
+    `SELECT e.id, e.title,
+            -- whoever asked for the work, falling back to whoever owns the company
+            COALESCE(h.created_by, p.created_by,
+              (SELECT m.user_id FROM company_members m
+                WHERE m.company_id = e.company_id
+                ORDER BY CASE WHEN m.role = 'owner' THEN 0 ELSE 1 END
+                LIMIT 1)) AS buyer_id
+       FROM engagements e
+       LEFT JOIN hire_requests h ON h.id = e.hire_request_id
+       LEFT JOIN projects p ON p.id = e.project_id
+      WHERE e.id = ? AND e.profile_id = ? AND e.status IN ('active', 'revision')`,
+    engagementId, profileId,
+  );
+
+  if (owned) {
+    await run(
+      database,
+      "UPDATE engagements SET status = 'delivered', updated_at = ? WHERE id = ?",
+      nowIso(), owned.id,
+    );
+    if (owned.buyer_id) {
+      await notify(database, {
+        userId: owned.buyer_id,
+        kind: 'engagement_delivered',
+        title: `${user.name} delivered: ${owned.title}`,
+        body: 'It is waiting for your review.',
+        link: '/workspace/company/work',
+      });
+    }
+    flash = 'Marked as delivered. The company has been asked to review it.';
+  } else {
+    flash = 'That work can no longer be marked as delivered.';
+  }
+}
+
+interface Job {
+  id: string;
+  title: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  company_name: string;
+  /** Null only if the request or project behind the work was since deleted. */
+  service_id: string | null;
+  brief: string | null;
+  deliverables: string | null;
+  engagement: string | null;
+  deadline: string | null;
+  from_project: number;
+}
+
+interface Payment {
+  id: string;
+  engagement_id: string;
+  kind: string;
+  amount: number;
+  currency: string;
+  status: string;
+  reference: string | null;
+  created_at: string;
+}
+
+/* Work reaches a specialist two ways — an accepted request, or a reply the
+   company picked — and the brief lives on whichever of the two started it. */
+const jobs = await all<Job>(
+  database,
+  `SELECT e.id, e.title, e.status, e.created_at, e.updated_at,
+          c.name AS company_name,
+          COALESCE(h.service_id, p.service_id)     AS service_id,
+          COALESCE(h.brief, p.brief)               AS brief,
+          COALESCE(h.deliverables, p.deliverables) AS deliverables,
+          COALESCE(h.engagement, p.engagement)     AS engagement,
+          COALESCE(h.deadline, p.deadline)         AS deadline,
+          CASE WHEN e.project_id IS NULL THEN 0 ELSE 1 END AS from_project
+     FROM engagements e
+     JOIN companies c ON c.id = e.company_id
+     LEFT JOIN hire_requests h ON h.id = e.hire_request_id
+     LEFT JOIN projects p ON p.id = e.project_id
+    WHERE e.profile_id = ?
+    -- still open first, then whatever moved most recently
+    ORDER BY CASE WHEN e.status IN ('completed', 'closed') THEN 1 ELSE 0 END,
+             e.updated_at DESC`,
+  profileId,
+);
+
+const payments = await all<Payment>(
+  database,
+  `SELECT y.id, y.engagement_id, y.kind, y.amount, y.currency, y.status,
+          y.reference, y.created_at
+     FROM payments y
+     JOIN engagements e ON e.id = y.engagement_id
+    WHERE e.profile_id = ?
+    ORDER BY y.created_at DESC`,
+  profileId,
+);
+
+const forJob = (id: string) => payments.filter((y) => y.engagement_id === id);
+
+const open = jobs.filter((j) => !['completed', 'closed'].includes(j.status)).length;
+
+const money = (y: Payment) => `${y.currency} ${y.amount.toLocaleString('en-GB')}`;
+
+const when = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+/** The handful of facts a specialist checks before opening the work again. */
+const facts = (j: Job): string => {
+  const parts: string[] = [j.company_name];
+  const service = getService(j.service_id);
+  if (service) parts.push(service.name);
+  if (j.engagement) parts.push(engagementLabel(j.engagement));
+  if (j.deadline) parts.push(`Due ${j.deadline}`);
+  parts.push(j.from_project === 1 ? 'From a posted project' : 'From a request to hire');
+  parts.push(`Started ${when(j.created_at)}`);
+  return parts.join(' · ');
+};
+
+const tone = (status: string) => {
+  const t = statusTone(status);
+  // pill-tone only paints warn, ok and bad — anything else stays neutral.
+  return t === 'info' ? 'pill-tone' : `pill-tone ${t}`;
+};
+
+const nav = freelancerNav({ work: open || undefined });
+---
+
+<Workspace
+  title="Work in progress"
+  role="freelancer"
+  current="/workspace/freelancer/work"
+  items={nav}
+  who={user.name}
+  heading="Work in progress"
+  lede={open
+    ? `${open} ${open === 1 ? 'job is' : 'jobs are'} still open.`
+    : 'Everything companies have hired you for, and the money recorded against it.'}
+  flash={flash}
+>
+  {jobs.length === 0 ? (
+    <div class="ws-empty">
+      <h3>Nobody has hired you yet</h3>
+      <p>
+        Work appears here the moment a company hires you — either by you
+        accepting a request to work with them, or by them picking your reply to
+        a posted project. The brief, the state of the job and every payment
+        recorded against it then stay on this page.
+      </p>
+      <a class="btn-hot btn-sm" href="/workspace/freelancer/requests">Answer your requests to hire</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      {jobs.map((j) => (
+        <article class="panel glass-p">
+          <div class="ws-row-head">
+            <div>
+              <h2 style="margin:0;">{j.title}</h2>
+              <p class="ws-sub">{facts(j)}</p>
+            </div>
+            <span class={tone(j.status)}>{engagementStatusLabel(j.status)}</span>
+          </div>
+
+          {j.brief && (
+            <div class="thread">
+              <div class="msg">
+                <p class="who">What they asked for</p>
+                <p>{j.brief}</p>
+              </div>
+            </div>
+          )}
+
+          {j.deliverables && (
+            <p class="ws-sub">What they need delivered: {j.deliverables}</p>
+          )}
+
+          {j.status === 'delivered' && (
+            <p class="ws-sub">You have handed this over. It is with {j.company_name} to review.</p>
+          )}
+
+          {j.status === 'disputed' && (
+            <p class="ws-sub">
+              {j.company_name} has raised a dispute on this work. Our team will
+              be in touch — anything you send in Messages becomes part of it.
+            </p>
+          )}
+
+          <div class="stack-sm" style="margin-top:14px;">
+            {forJob(j.id).length === 0 ? (
+              <p class="ws-sub" style="margin:0;">
+                No payments recorded against this work yet. The company raises
+                the invoice from their side, and every invoice and payout then
+                shows up on this line.
+              </p>
+            ) : forJob(j.id).map((y) => (
+              <div class="ws-row-head" style="margin:0;">
+                <p class="ws-sub" style="margin:0;">
+                  {paymentKindLabel(y.kind)} · {money(y)}
+                  {y.reference && <span> · {y.reference}</span>}
+                  <span> · {when(y.created_at)}</span>
+                </p>
+                <span class={tone(y.status)}>{paymentStatusLabel(y.status)}</span>
+              </div>
+            ))}
+          </div>
+
+          {(j.status === 'active' || j.status === 'revision') && (
+            <form method="post" style="margin-top:14px;">
+              <input type="hidden" name="engagementId" value={j.id} />
+              <button class="btn-hot btn-sm">
+                {j.status === 'revision' ? 'Send the changes back' : 'Mark as delivered'}
+              </button>
+            </form>
+          )}
+
+          <a class="btn-glass btn-sm" href="/workspace/freelancer/messages"
+             style="margin-top:14px;">Message {j.company_name}</a>
+        </article>
+      ))}
+    </div>
+  )}
+</Workspace>

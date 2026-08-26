@@ -1,0 +1,284 @@
+---
+/**
+ * /workspace/company — the hiring side's overview.
+ *
+ * Same shape as the specialist's: the figures across the top, then a wide
+ * column for the work and a narrower one for context. Each card shows the
+ * first few rows and hands off to its own page, so this stays a place to
+ * see where things stand rather than a place to do everything.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, one } from '../../../server/db';
+import { guard, requireCompany } from '../../../server/guards';
+import { getService } from '../../../data/taxonomy';
+import {
+  engagementStatusLabel, hireStatusForCompany, projectStatusForCompany, statusTone,
+} from '../../../data/labels';
+import { companyNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireCompany(Astro));
+if (gate.response) return gate.response;
+const { user, companyId } = gate.value;
+
+const database = db(Astro);
+
+const company = await one<{ name: string }>(
+  database, 'SELECT name FROM companies WHERE id = ?', companyId,
+);
+
+const [projects, applications, requests, engagements, saved, unanswered, invoiced] = await Promise.all([
+  all<{ id: string; title: string; service_id: string; status: string; applicants: number }>(
+    database,
+    `SELECT p.id, p.title, p.service_id, p.status,
+            (SELECT COUNT(*) FROM applications a
+               JOIN specialist_profiles sp ON sp.id = a.profile_id
+               JOIN users au ON au.id = sp.user_id
+              WHERE a.project_id = p.id AND au.tenant IN (?2, 'public')) AS applicants
+       FROM projects p
+      WHERE p.company_id = ?1 AND p.status != 'draft'
+      ORDER BY p.created_at DESC`,
+    companyId, Astro.locals.tenant,
+  ),
+  all<{ id: string; status: string; price: number | null; title: string; name: string }>(
+    database,
+    `SELECT a.id, a.status, a.price, p.title, u.name
+       FROM applications a
+       JOIN projects p ON p.id = a.project_id
+       JOIN specialist_profiles sp ON sp.id = a.profile_id
+       JOIN users u ON u.id = sp.user_id
+      WHERE p.company_id = ?
+      ORDER BY a.created_at DESC`,
+    companyId,
+  ),
+  all<{ id: string; title: string; status: string; name: string; handle: string | null }>(
+    database,
+    `SELECT h.id, h.title, h.status, u.name, sp.handle
+       FROM hire_requests h
+       JOIN specialist_profiles sp ON sp.id = h.profile_id
+       JOIN users u ON u.id = sp.user_id
+      WHERE h.company_id = ?
+      ORDER BY h.created_at DESC`,
+    companyId,
+  ),
+  all<{ id: string; title: string; status: string; name: string }>(
+    database,
+    `SELECT e.id, e.title, e.status, u.name
+       FROM engagements e
+       JOIN specialist_profiles sp ON sp.id = e.profile_id
+       JOIN users u ON u.id = sp.user_id
+      WHERE e.company_id = ?
+      ORDER BY e.created_at DESC`,
+    companyId,
+  ),
+  all<{ id: string; name: string; handle: string | null; service_id: string | null }>(
+    database,
+    `SELECT sp.id, u.name, sp.handle,
+            (SELECT o.service_id FROM specialist_service_offerings o
+              WHERE o.profile_id = sp.id ORDER BY o.is_primary DESC LIMIT 1) AS service_id
+       FROM saved_specialists s
+       JOIN specialist_profiles sp ON sp.id = s.profile_id
+       JOIN users u ON u.id = sp.user_id
+      WHERE s.company_id = ?
+      ORDER BY s.created_at DESC`,
+    companyId,
+  ),
+  /* threads where the specialist spoke last */
+  one<{ n: number }>(
+    database,
+    `SELECT COUNT(*) AS n FROM hire_requests h
+      WHERE h.company_id = ?1
+        AND EXISTS (SELECT 1 FROM messages m WHERE m.hire_request_id = h.id)
+        AND (SELECT m2.sender_id FROM messages m2
+              WHERE m2.hire_request_id = h.id ORDER BY m2.created_at DESC LIMIT 1) <> ?2`,
+    companyId, user.id,
+  ),
+  one<{ total: number; currency: string | null }>(
+    database,
+    `SELECT COALESCE(SUM(pay.amount), 0) AS total, MAX(pay.currency) AS currency
+       FROM payments pay JOIN engagements e ON e.id = pay.engagement_id
+      WHERE e.company_id = ? AND pay.kind = 'invoice' AND pay.status = 'paid'`,
+    companyId,
+  ),
+]);
+
+const openRequests = requests.filter((r) => ['sent', 'viewed', 'question'].includes(r.status));
+const live = engagements.filter((e) => !['completed', 'cancelled'].includes(e.status));
+const openProjects = projects.filter((p) => ['published', 'responding', 'shortlisted'].includes(p.status));
+const waiting = unanswered?.n ?? 0;
+
+const money = (n: number, ccy: string | null) =>
+  new Intl.NumberFormat('en-GB', { style: 'currency', currency: ccy || 'USD', maximumFractionDigits: 0 }).format(n);
+
+const initials = (s: string) => s.split(/\s+/).slice(0, 2).map((w) => w[0] ?? '').join('').toUpperCase();
+
+const nav = companyNav({
+  replies: applications.length || undefined,
+  requests: openRequests.length || undefined,
+  work: live.length || undefined,
+  messages: waiting || undefined,
+  saved: saved.length || undefined,
+});
+---
+
+<Workspace
+  title="Overview"
+  role="company"
+  current="/workspace/company"
+  items={nav}
+  who={company?.name ?? user.name}
+  heading={`Welcome back, ${user.name.split(/\s+/)[0]}`}
+  lede="Where your projects and the people working on them stand."
+>
+  <div class="ws-stats">
+    <div class="ws-stat">
+      <span class="k">Open projects</span>
+      <span class="v">{openProjects.length}</span>
+      <span class="d">{applications.length} {applications.length === 1 ? 'reply' : 'replies'} received</span>
+    </div>
+    <div class="ws-stat">
+      <span class="k">Awaiting an answer</span>
+      <span class="v">{openRequests.length}</span>
+      <span class="d">People you asked to work with</span>
+    </div>
+    <div class="ws-stat">
+      <span class="k">Work in progress</span>
+      <span class="v">{live.length}</span>
+      <span class="d">{engagements.length - live.length} finished</span>
+    </div>
+    <div class="ws-stat">
+      <span class="k">Invoiced</span>
+      <span class="v">{money(invoiced?.total ?? 0, invoiced?.currency ?? null)}</span>
+      <span class="d">Recorded against your work</span>
+    </div>
+  </div>
+
+  <div class="ws-cols">
+    <div class="ws-col">
+      <section class="ws-card">
+        <div class="ws-card-head">
+          <h2>Replies to your projects</h2>
+          <a href="/workspace/company/replies">See all →</a>
+        </div>
+        {applications.length === 0 ? (
+          <div class="ws-empty">
+            <h3>No replies yet</h3>
+            <p>Post a project and matched specialists can reply with a price and a timeline. You choose who to hire.</p>
+            <a class="btn-hot btn-sm" href="/projects/new">Post a project</a>
+          </div>
+        ) : (
+          <div class="ws-rows">
+            {applications.slice(0, 4).map((a) => (
+              <a class="ws-row" href="/workspace/company/replies">
+                <span class="mark">{initials(a.name)}</span>
+                <span class="body">
+                  <span class="t">{a.name} · {a.title}</span>
+                  <span class="m">{a.price ? money(a.price, null) : 'No price given'}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section class="ws-card">
+        <div class="ws-card-head">
+          <h2>Your projects</h2>
+          <a href="/projects/new">Post another →</a>
+        </div>
+        {projects.length === 0 ? (
+          <div class="ws-empty">
+            <h3>No projects posted</h3>
+            <p>Describe the work once and we match it to approved specialists in that service.</p>
+            <a class="btn-hot btn-sm" href="/projects/new">Post a project</a>
+          </div>
+        ) : (
+          <div class="ws-rows">
+            {projects.slice(0, 4).map((p) => (
+              <a class="ws-row" href="/workspace/company/replies">
+                <span class="body">
+                  <span class="t">{p.title}</span>
+                  <span class="m">{getService(p.service_id)?.name ?? p.service_id} · {p.applicants} {p.applicants === 1 ? 'reply' : 'replies'}</span>
+                </span>
+                <span class={`pill-tone ${statusTone(p.status)}`}>{projectStatusForCompany(p.status)}</span>
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+
+    <div class="ws-col">
+      <section class="ws-card">
+        <div class="ws-card-head">
+          <h2>People you asked</h2>
+          <a href="/workspace/company/requests">See all →</a>
+        </div>
+        {openRequests.length === 0 ? (
+          <p class="ws-sub" style="margin-top:0;">
+            Ask a specialist directly from their page and the conversation starts here.
+          </p>
+        ) : (
+          <div class="ws-rows">
+            {openRequests.slice(0, 3).map((r) => (
+              <a class="ws-row" href="/workspace/company/requests">
+                <span class="body">
+                  <span class="t">{r.name}</span>
+                  <span class="m">{r.title}</span>
+                </span>
+                <span class={`pill-tone ${statusTone(r.status)}`}>{hireStatusForCompany(r.status)}</span>
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section class="ws-card">
+        <div class="ws-card-head">
+          <h2>Work in progress</h2>
+          <a href="/workspace/company/work">See all →</a>
+        </div>
+        {live.length === 0 ? (
+          <p class="ws-sub" style="margin-top:0;">Accepted work appears here for both sides to follow.</p>
+        ) : (
+          <div class="ws-rows">
+            {live.slice(0, 3).map((e) => (
+              <a class="ws-row" href="/workspace/company/work">
+                <span class="body">
+                  <span class="t">{e.title}</span>
+                  <span class="m">{e.name}</span>
+                </span>
+                <span class={`pill-tone ${statusTone(e.status)}`}>{engagementStatusLabel(e.status)}</span>
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section class="ws-card">
+        <div class="ws-card-head">
+          <h2>Saved specialists</h2>
+          <a href="/workspace/company/saved">See all →</a>
+        </div>
+        {saved.length === 0 ? (
+          <p class="ws-sub" style="margin-top:0;">
+            Save people as you browse — no account needed to start a list.
+          </p>
+        ) : (
+          <div class="ws-rows">
+            {saved.slice(0, 3).map((s) => (
+              <a class="ws-row" href={s.handle ? `/specialists/${s.handle}` : '/workspace/company/saved'}>
+                <span class="mark">{initials(s.name)}</span>
+                <span class="body">
+                  <span class="t">{s.name}</span>
+                  <span class="m">{s.service_id ? getService(s.service_id)?.name ?? s.service_id : 'Specialist'}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  </div>
+</Workspace>
