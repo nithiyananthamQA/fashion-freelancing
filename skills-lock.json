@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "bmad-prd": {
+      "source": "aj-geddes/claude-code-bmad-skills",
+      "sourceType": "github",
+      "skillPath": "bmad-planning-orchestrator/skills/bmad-prd/SKILL.md",
+      "computedHash": "47e0565a7fbd82cc1b177a914e93be6b00ed00892e028e3f73b54faee2376bb0"
+    },
+    "bmad-product-brief": {
+      "source": "aj-geddes/claude-code-bmad-skills",
+      "sourceType": "github",
+      "skillPath": "bmad-planning-orchestrator/skills/bmad-product-brief/SKILL.md",
+      "computedHash": "c65826a2cfd8160d8505be8aa087e32731ff997c9141c675f8a5c4690f2a6c58"
+    },
+    "bmad-research": {
+      "source": "aj-geddes/claude-code-bmad-skills",
+      "sourceType": "github",
+      "skillPath": "bmad-planning-orchestrator/skills/bmad-research/SKILL.md",
+      "computedHash": "7ec8b29022d708dd577aba5d6306a53abb3c5b7056043c0e98c282ffa1c9b123"
+    },
+    "bmad-ux": {
+      "source": "aj-geddes/claude-code-bmad-skills",
+      "sourceType": "github",
+      "skillPath": "bmad-planning-orchestrator/skills/bmad-ux/SKILL.md",
+      "computedHash": "880b5b946e84590fd3bc18021c09093bcd8091af7aa2762ebaf17acf6c7899c1"
+    }
+  }
+}

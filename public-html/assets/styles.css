@@ -11,9 +11,13 @@
      The ink is a near-black navy rather than a true black: it keeps the
      page from looking harsh while staying well clear of AA at every step
      of the ramp. */
-  --paper:   #FFFFFF;   /* the ground                       */
-  --paper-2: #F7F5F3;   /* warm off-white — alt sections     */
-  --paper-3: #FFFFFF;   /* cards / wells                     */
+  /* Pure white reads as undesigned, and gives a white card nothing to sit
+     on. A faintly warm ground with white kept for raised surfaces lets a
+     card or a field lift off the page instead of needing a border to prove
+     it is there. Measured separation 1.05 — visible, not stripey. */
+  --paper:   #FAF9F7;   /* the ground                       */
+  --paper-2: #F2F0EC;   /* deeper warm — alt sections        */
+  --paper-3: #FFFFFF;   /* raised: cards, wells, fields      */
   /* Near-black, only faintly cool. The previous ramp was a navy at 69%
      saturation, and because the whole ramp inherited it, body text itself
      read as blue rather than as text — colour where there was no meaning.
