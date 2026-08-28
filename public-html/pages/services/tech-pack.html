@@ -23,9 +23,9 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- fonts load without blocking first paint; metric-matched fallbacks
      (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 <link rel="stylesheet" href="../../assets/night.css">
@@ -188,7 +188,7 @@ main { position: relative; z-index: 3; }
 /* ---- Atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
-  letter-spacing: .04em; text-transform: uppercase; color: var(--acc); }
+  letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); }
 .h-display { font-family: var(--disp); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; color: var(--ink); }
 .acc-t { color: var(--acc); }
 .glass-p {
@@ -546,7 +546,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap hero-split">
       <div class="hero-copy">
         <span class="kicker rv in">Tech packs — done for you</span>
-        <h1 class="h-display rv in" style="margin-top:14px;">The document that makes factories <span class="acc-t">take you seriously.</span></h1>
+        <h1 class="h-display rv in rv-display" style="margin-top:14px;">The document that makes factories <span class="acc-t">take you seriously.</span></h1>
         <p class="sub rv in">
           Factory-ready tech packs for fashion brands — every measurement, trim and stitch
           specified. Send a sketch, a photo or a Pinterest board; we build the rest.
@@ -563,7 +563,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       </div>
 
       <!-- right: the deliverable, previewed in the hero -->
-      <div class="hero-view rv in" aria-hidden="true">
+      <div class="hero-view rv in rv-media" aria-hidden="true">
     <figure class="sheet">
       <picture>
         <source type="image/webp" srcset="../../assets/img/tech-sheet-polo-900.webp 900w, ../../assets/img/tech-sheet-polo-1600.webp 1600w" sizes="(max-width: 900px) 92vw, 46vw" />
@@ -584,19 +584,19 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Coverage</span>
-        <h2 class="h-display rv" id="gar-h">Any garment. Any factory. <span class="acc-t">Anywhere.</span></h2>
+        <h2 class="h-display rv rv-display" id="gar-h">Any garment. Any factory. <span class="acc-t">Anywhere.</span></h2>
       </div>
       <div class="garments">
-        <div class="gar glass-p rv"><h4>Streetwear</h4><p>Hoodies · tees · caps</p></div>
-        <div class="gar glass-p rv"><h4>Activewear</h4><p>Leggings · sets · stretch</p></div>
-        <div class="gar glass-p rv"><h4>Denim</h4><p>Jeans · jackets · washes</p></div>
-        <div class="gar glass-p rv"><h4>Dresses &amp; wovens</h4><p>Drape-critical pieces</p></div>
-        <div class="gar glass-p rv rv-d1"><h4>Outerwear</h4><p>Bombers · coats · parkas</p></div>
-        <div class="gar glass-p rv rv-d1"><h4>Swim &amp; lingerie</h4><p>Fit-sensitive builds</p></div>
-        <div class="gar glass-p rv rv-d1"><h4>Kidswear</h4><p>Compliance-aware specs</p></div>
-        <div class="gar glass-p rv rv-d1"><h4>Accessories</h4><p>Bags · scarves · soft goods</p></div>
+        <div class="gar glass-p rv rv-row"><h4>Streetwear</h4><p>Hoodies · tees · caps</p></div>
+        <div class="gar glass-p rv rv-row"><h4>Activewear</h4><p>Leggings · sets · stretch</p></div>
+        <div class="gar glass-p rv rv-row"><h4>Denim</h4><p>Jeans · jackets · washes</p></div>
+        <div class="gar glass-p rv rv-row"><h4>Dresses &amp; wovens</h4><p>Drape-critical pieces</p></div>
+        <div class="gar glass-p rv rv-d1 rv-row"><h4>Outerwear</h4><p>Bombers · coats · parkas</p></div>
+        <div class="gar glass-p rv rv-d1 rv-row"><h4>Swim &amp; lingerie</h4><p>Fit-sensitive builds</p></div>
+        <div class="gar glass-p rv rv-d1 rv-row"><h4>Kidswear</h4><p>Compliance-aware specs</p></div>
+        <div class="gar glass-p rv rv-d1 rv-row"><h4>Accessories</h4><p>Bags · scarves · soft goods</p></div>
       </div>
-      <p class="gar-strip rv">Written in <b>international factory-standard terminology</b> — understood in India, China, Turkey, Portugal and beyond, even when you don't share a language.</p>
+      <p class="gar-strip rv rv-row">Written in <b>international factory-standard terminology</b> — understood in India, China, Turkey, Portugal and beyond, even when you don't share a language.</p>
     </div>
   </section>
 
@@ -604,7 +604,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Inside the document</span>
-        <h2 class="h-display rv" id="anatomy-h">What's actually inside a <span class="acc-t">factory-ready</span> tech pack.</h2>
+        <h2 class="h-display rv rv-display" id="anatomy-h">What's actually inside a <span class="acc-t">factory-ready</span> tech pack.</h2>
         <p class="sub rv">Six pages, each answering a question the factory would otherwise guess at.</p>
       </div>
       <div class="ana rv">
@@ -656,7 +656,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">How it works</span>
-        <h2 class="h-display rv" id="process-h">From idea to factory-ready in <span class="acc-t">four steps.</span></h2>
+        <h2 class="h-display rv rv-display" id="process-h">From idea to factory-ready in <span class="acc-t">four steps.</span></h2>
       </div>
       <div class="steps">
         <div class="step glass-p rv"><span class="t">Day 0</span><div class="n">01</div><h3>Send your idea</h3><p>A sketch, a photo or reference links. No perfect drawings needed — that's our job.</p></div>
@@ -671,7 +671,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Questions founders ask first</span>
-        <h2 class="h-display rv" id="faq-h">Asked before <span class="acc-t">every pack.</span></h2>
+        <h2 class="h-display rv rv-display" id="faq-h">Asked before <span class="acc-t">every pack.</span></h2>
       </div>
       <div class="faq-list rv">
         <div class="faq-row glass-p">
@@ -727,7 +727,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       <div class="contact-panel glass-p">
       <div class="sec-head">
         <span class="kicker rv">Start your pack</span>
-        <h2 class="h-display rv" id="contact-h">Your factory is waiting for a reason to <span class="acc-t">say yes.</span></h2>
+        <h2 class="h-display rv rv-display" id="contact-h">Your factory is waiting for a reason to <span class="acc-t">say yes.</span></h2>
         <p class="sub rv">Give them one. Fixed quote in 24 hours — free to ask.</p>
       </div>
       <div class="contact-grid">

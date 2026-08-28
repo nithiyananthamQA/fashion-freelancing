@@ -26,9 +26,9 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- fonts load without blocking first paint; metric-matched fallbacks
      (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="assets/styles.css">
 <link rel="stylesheet" href="assets/night.css">
@@ -147,7 +147,7 @@ main { position: relative; z-index: 3; }
 /* ---- Type + atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
-  letter-spacing: .04em; text-transform: uppercase; color: var(--lg-orange); }
+  letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); }
 .h-display { font-family: var(--disp); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; color: var(--ink); }
 .grad { background: var(--grad-hot); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .glass-p {
@@ -508,7 +508,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
   <section class="hero" aria-label="Fashion Freelancing services — overview">
     <div class="wrap">
       <div class="pill glass-p rv in"><span class="dot"></span> Fashion tech company · 10 services, one team</div>
-      <h1 class="h-display rv in">Everything your fashion business needs — <span class="grad">under one team.</span></h1>
+      <h1 class="h-display rv in rv-display">Everything your fashion business needs — <span class="grad">under one team.</span></h1>
       <p class="sub rv in">
         Designs, tech packs, 3D sampling, patterns, AI photography, websites and more.
         One brief in, one delivery out — hire safely, get it delivered safely.
@@ -518,7 +518,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
         <a href="#contact" class="btn-glass">Start a project</a>
       </div>
       <div class="micro rv in">Reply within 24 hours · Fixed price before work starts</div>
-      <div class="hero-stats glass-p rv in">
+      <div class="hero-stats glass-p rv in rv-figure">
         <div class="st"><div class="n"><span data-count="10">0</span></div><div class="l">services, one roof</div></div>
         <div class="st"><div class="n">24h</div><div class="l">reply window</div></div>
         <div class="st"><div class="n"><span data-count="2">0</span></div><div class="l">revision rounds included</div></div>
@@ -550,7 +550,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
         <div class="duo-head">
           <div>
             <span class="kicker rv">What we deliver</span>
-            <h2 class="h-display rv" style="margin-top:10px;">Ten services. <span class="grad">One brief.</span></h2>
+            <h2 class="h-display rv rv-display" style="margin-top:10px;">Ten services. <span class="grad">One brief.</span></h2>
           </div>
           <span class="rail-hint">Scroll — each service lights up</span>
         </div>
@@ -655,7 +655,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">The specialist network</span>
-        <h2 class="h-display rv" id="net-h">Need a specialist <span class="grad">for your project?</span></h2>
+        <h2 class="h-display rv rv-display" id="net-h">Need a specialist <span class="grad">for your project?</span></h2>
         <p class="sub rv" style="margin-top:14px;">
           Browse approved professionals across our ten services, or join the network
           and receive relevant work opportunities.
@@ -663,7 +663,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
       </div>
 
       <div class="doors">
-        <a class="door glass-p rv" href="/specialists">
+        <a class="door glass-p rv rv-row" href="/specialists">
           <span class="who">For brands &amp; companies</span>
           <h3>Find a specialist</h3>
           <p>Browse approved professionals for a specific project. Filter by service, specialty, skills and tools — no account needed to look.</p>
@@ -672,7 +672,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
           </span>
         </a>
 
-        <a class="door glass-p rv rv-d1" href="/apply">
+        <a class="door glass-p rv rv-d1 rv-row" href="/apply">
           <span class="who">For independent professionals</span>
           <h3>Join as a freelancer</h3>
           <p>Show your work and get considered for suitable projects. Build a service-specific profile, submit your portfolio, and receive matched invitations.</p>
@@ -689,7 +689,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">How it works</span>
-        <h2 class="h-display rv" id="process-h">Three steps, <span class="grad">start to finish.</span></h2>
+        <h2 class="h-display rv rv-display" id="process-h">Three steps, <span class="grad">start to finish.</span></h2>
       </div>
       <div class="steps">
         <div class="step glass-p rv"><div class="n">01</div><h3>Send your brief</h3><p>This form or a quick call — sketches, links, anything. You get a fixed written quote within 24 hours.</p></div>
@@ -704,7 +704,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Who it's for</span>
-        <h2 class="h-display rv" id="aud-h">Tell us who you are — <span class="grad">we'll fit around you.</span></h2>
+        <h2 class="h-display rv rv-display" id="aud-h">Tell us who you are — <span class="grad">we'll fit around you.</span></h2>
       </div>
       <div class="aud">
         <div class="aud-t glass-p rv"><span class="lt">B</span><h4>Fashion brands</h4><p>Design and production help without hiring a full studio.</p></div>
@@ -728,7 +728,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
       <div class="contact-panel glass-p">
         <div class="sec-head" style="margin-bottom:38px;">
           <span class="kicker rv">Start a project</span>
-          <h2 class="h-display rv" id="contact-h">One brief in. <span class="grad">One delivery out.</span></h2>
+          <h2 class="h-display rv rv-display" id="contact-h">One brief in. <span class="grad">One delivery out.</span></h2>
           <p class="sub rv" style="color:var(--ink-4);margin-top:14px;">Tell us about the work — a real person replies within 24 hours.</p>
         </div>
         <div class="contact-grid">

@@ -21,9 +21,9 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- fonts load without blocking first paint; metric-matched fallbacks
      (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 <link rel="stylesheet" href="../../assets/night.css">
@@ -177,7 +177,7 @@ main { position: relative; z-index: 3; }
 /* ---- Atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
-  letter-spacing: .04em; text-transform: uppercase; color: var(--acc); }
+  letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); }
 .h-display { font-family: var(--disp); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; color: var(--ink); }
 .acc-t { color: var(--acc); }
 .glass-p {
@@ -542,7 +542,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap hero-center">
       <div>
         <span class="kicker rv in">AI customer agent — built for your store</span>
-        <h1 class="h-display rv in" style="margin-top:14px;">Answers every customer. At 3PM <span class="acc-t">and 3AM.</span></h1>
+        <h1 class="h-display rv in rv-display" style="margin-top:14px;">Answers every customer. At 3PM <span class="acc-t">and 3AM.</span></h1>
         <p class="sub rv in">
           A custom AI agent trained only on your business — sizing, orders, shipping, returns —
           on WhatsApp, Instagram and your website. And when a human is needed, it hands over. Gracefully.
@@ -565,9 +565,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head" style="margin-bottom:30px;">
         <span class="kicker rv">See it answer</span>
-        <h2 class="h-display rv">A 3 AM conversation, <span class="acc-t">handled.</span></h2>
+        <h2 class="h-display rv rv-display">A 3 AM conversation, <span class="acc-t">handled.</span></h2>
       </div>
-      <div class="vwrap rv">
+      <div class="vwrap rv rv-media">
         <div class="bot glass-p" aria-label="Example conversation" role="img">
           <div class="bot-bar"><span class="bot-dot"></span>Your store · online<span class="bot-time">03:12 AM</span></div>
           <div class="bot-log">
@@ -588,12 +588,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Why it matters</span>
-        <h2 class="h-display rv" id="cs-h">The customer who doesn't get an answer <span class="acc-t">buys somewhere else.</span></h2>
+        <h2 class="h-display rv rv-display" id="cs-h">The customer who doesn't get an answer <span class="acc-t">buys somewhere else.</span></h2>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>The 11PM size question</h3><p>People shop when they shop — not when you're at your desk. A sizing question that waits until morning is usually a sale that didn't.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">02</span><h3>The same ten questions</h3><p>Sizing, delivery, returns, stock, payment — most of your inbox is the same ten questions, asked by different people, every day.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">03</span><h3>The founder as support desk</h3><p>Every hour you spend re-typing your returns policy is an hour not spent on the product. That's the expensive part.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3>The 11PM size question</h3><p>People shop when they shop — not when you're at your desk. A sizing question that waits until morning is usually a sale that didn't.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">02</span><h3>The same ten questions</h3><p>Sizing, delivery, returns, stock, payment — most of your inbox is the same ten questions, asked by different people, every day.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">03</span><h3>The founder as support desk</h3><p>Every hour you spend re-typing your returns policy is an hour not spent on the product. That's the expensive part.</p></div>
       </div>
     </div>
   </section>
@@ -603,18 +603,18 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">What you get</span>
-        <h2 class="h-display rv" id="kit-h">The repetitive 80%, handled. The human 20%, <span class="acc-t">handed to you.</span></h2>
+        <h2 class="h-display rv rv-display" id="kit-h">The repetitive 80%, handled. The human 20%, <span class="acc-t">handed to you.</span></h2>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>Sizing &amp; fit</h3><p>Answers from your size charts and fit notes — including "does it run small?"</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">02</span><h3>Product questions</h3><p>Fabric, care, colours, styling — from your own product information.</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">03</span><h3>Stock &amp; availability</h3><p>What's in, what's gone, what's restocking — kept current with your catalog.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">04</span><h3>Shipping &amp; delivery</h3><p>Times, costs and thresholds by destination — your policy, quoted exactly.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">05</span><h3>Returns &amp; exchanges</h3><p>Your rules, explained kindly — and escalated to you when someone's unhappy.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">06</span><h3>Order status</h3><p>"Where is my order?" answered without you opening a single tab.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">07</span><h3>Lead capture</h3><p>When someone's ready to buy or wants a restock alert, their details reach you, not a void.</p></div>
-        <div class="kit-c tint glass-p rv rv-d2"><span class="ki">08</span><h3>Human handoff</h3><p>Frustration, refunds, anything complex — a person takes over with the full transcript.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">09</span><h3>Your voice</h3><p>Trained on how you actually talk to customers — reviewed by you before launch.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3>Sizing &amp; fit</h3><p>Answers from your size charts and fit notes — including "does it run small?"</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">02</span><h3>Product questions</h3><p>Fabric, care, colours, styling — from your own product information.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">03</span><h3>Stock &amp; availability</h3><p>What's in, what's gone, what's restocking — kept current with your catalog.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">04</span><h3>Shipping &amp; delivery</h3><p>Times, costs and thresholds by destination — your policy, quoted exactly.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">05</span><h3>Returns &amp; exchanges</h3><p>Your rules, explained kindly — and escalated to you when someone's unhappy.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">06</span><h3>Order status</h3><p>"Where is my order?" answered without you opening a single tab.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">07</span><h3>Lead capture</h3><p>When someone's ready to buy or wants a restock alert, their details reach you, not a void.</p></div>
+        <div class="kit-c tint glass-p rv rv-d2 rv-row"><span class="ki">08</span><h3>Human handoff</h3><p>Frustration, refunds, anything complex — a person takes over with the full transcript.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">09</span><h3>Your voice</h3><p>Trained on how you actually talk to customers — reviewed by you before launch.</p></div>
       </div>
     </div>
   </section>
@@ -624,7 +624,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Where it lives</span>
-        <h2 class="h-display rv" id="ch-h">On the channels your customers <span class="acc-t">already use.</span></h2>
+        <h2 class="h-display rv rv-display" id="ch-h">On the channels your customers <span class="acc-t">already use.</span></h2>
         <p class="sub rv">For most fashion stores the answer starts with WhatsApp. We'll recommend the rollout order based on where your questions actually arrive.</p>
       </div>
       <div class="fmt-wall rv">
@@ -641,7 +641,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">The voice test</span>
-        <h2 class="h-display rv" id="vc-h">Your customers can smell <span class="acc-t">a generic bot.</span></h2>
+        <h2 class="h-display rv rv-display" id="vc-h">Your customers can smell <span class="acc-t">a generic bot.</span></h2>
       </div>
       <div class="cmp2">
         <div class="cmp-col glass-p rv">
@@ -672,7 +672,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="acc-honest">
         <span class="kicker rv">The rule that makes it safe</span>
-        <h2 class="h-display rv" id="hr-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">Trained on your business. <span class="acc-t">Nothing else.</span></h2>
+        <h2 class="h-display rv rv-display" id="hr-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">Trained on your business. <span class="acc-t">Nothing else.</span></h2>
         <p class="rv">The agent's knowledge is a closed box you control: your policies, your products, your FAQ, your tone. It cannot invent a discount, promise a delivery date you never offered, or improvise an answer to a question it can't source. Outside the box, it says so honestly — and hands the conversation to you with the full transcript.</p>
         <p class="soft rv">An AI that guesses is a liability wearing your brand's name. Ours is built not to.</p>
       </div>
@@ -684,7 +684,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">How it works</span>
-        <h2 class="h-display rv" id="how-h">From your FAQ to a working agent, <span class="acc-t">in four steps.</span></h2>
+        <h2 class="h-display rv rv-display" id="how-h">From your FAQ to a working agent, <span class="acc-t">in four steps.</span></h2>
       </div>
       <div class="chat-wrap" style="grid-template-columns:1fr;max-width:860px;margin:0 auto;">
         <div class="weeks rv-steps">
@@ -704,7 +704,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Questions</span>
-        <h2 class="h-display rv" id="faq-h">Asked before <span class="acc-t">every launch.</span></h2>
+        <h2 class="h-display rv rv-display" id="faq-h">Asked before <span class="acc-t">every launch.</span></h2>
       </div>
       <div class="faq-list rv">
         <div class="faq-row glass-p">
@@ -757,7 +757,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       <div class="contact-panel glass-p">
       <div class="sec-head">
         <span class="kicker rv">Get your quote</span>
-        <h2 class="h-display rv" id="contact-h">Your customers are asking questions <span class="acc-t">right now.</span></h2>
+        <h2 class="h-display rv rv-display" id="contact-h">Your customers are asking questions <span class="acc-t">right now.</span></h2>
         <p class="sub rv">Tell us where they ask and what they ask — fixed quote within 24 hours.</p>
       </div>
       <div class="contact-grid">

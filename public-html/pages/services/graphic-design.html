@@ -21,9 +21,9 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- fonts load without blocking first paint; metric-matched fallbacks
      (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 <link rel="stylesheet" href="../../assets/night.css">
@@ -177,7 +177,7 @@ main { position: relative; z-index: 3; }
 /* ---- Atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
-  letter-spacing: .04em; text-transform: uppercase; color: var(--acc); }
+  letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); }
 .h-display { font-family: var(--disp); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; color: var(--ink); }
 .acc-t { color: var(--acc); }
 .glass-p {
@@ -535,7 +535,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap hero-center">
       <div>
         <span class="kicker rv in">Graphic design — for fashion brands</span>
-        <h1 class="h-display rv in" style="margin-top:14px;">One brand look. Everywhere your <span class="acc-t">customers see you.</span></h1>
+        <h1 class="h-display rv in rv-display" style="margin-top:14px;">One brand look. Everywhere your <span class="acc-t">customers see you.</span></h1>
         <p class="sub rv in">
           Social creatives, lookbooks, hang tags, banners, campaigns — all drawn from one
           documented visual system, so your brand stops looking like five different freelancers.
@@ -558,9 +558,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head" style="margin-bottom:30px;">
         <span class="kicker rv">One system</span>
-        <h2 class="h-display rv">Six surfaces. <span class="acc-t">One brand.</span></h2>
+        <h2 class="h-display rv rv-display">Six surfaces. <span class="acc-t">One brand.</span></h2>
       </div>
-      <div class="vwrap rv">
+      <div class="vwrap rv rv-media">
         <div class="brd glass-p" aria-hidden="true">
           <div class="brd-grid">
             <div class="bt b-post"><i></i><span>Feed post</span></div>
@@ -582,12 +582,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Why it matters</span>
-        <h2 class="h-display rv" id="dr-h">Your product is consistent. <span class="acc-t">Your brand should be too.</span></h2>
+        <h2 class="h-display rv rv-display" id="dr-h">Your product is consistent. <span class="acc-t">Your brand should be too.</span></h2>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>The feed that looks like five brands</h3><p>A Canva post here, a freelancer there, a template from 2023 — customers read the mess as "small," even when the product is excellent.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">02</span><h3>version9_final_FINAL.psd</h3><p>Files scattered across old laptops and ex-freelancers' drives. Nobody can find the logo source. Every new job starts from a screenshot.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">03</span><h3>Every asset, negotiated from zero</h3><p>Without a system, each banner is a fresh debate about colours and fonts — you pay for the same decisions again and again.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3>The feed that looks like five brands</h3><p>A Canva post here, a freelancer there, a template from 2023 — customers read the mess as "small," even when the product is excellent.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">02</span><h3>version9_final_FINAL.psd</h3><p>Files scattered across old laptops and ex-freelancers' drives. Nobody can find the logo source. Every new job starts from a screenshot.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">03</span><h3>Every asset, negotiated from zero</h3><p>Without a system, each banner is a fresh debate about colours and fonts — you pay for the same decisions again and again.</p></div>
       </div>
     </div>
   </section>
@@ -597,18 +597,18 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">What we design</span>
-        <h2 class="h-display rv" id="kit-h">If it carries your name, <span class="acc-t">it's in scope.</span></h2>
+        <h2 class="h-display rv rv-display" id="kit-h">If it carries your name, <span class="acc-t">it's in scope.</span></h2>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>Social creatives &amp; templates</h3><p>Feed, stories and reels covers — plus templates your team can refill on-brand.</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">02</span><h3>Lookbooks &amp; catalogs</h3><p>Print and digital — the document your collection deserves at buyer meetings.</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">03</span><h3>Hang tags, labels &amp; packaging</h3><p>The touchpoints customers hold — tags, care labels, boxes, tissue, mailers.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">04</span><h3>Marketplace banners &amp; A+</h3><p>Store banners and enhanced-content visuals sized to each platform's spec.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">05</span><h3>Ad &amp; email creatives</h3><p>Campaign sets for drops and sales — consistent from ad to inbox to page.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">06</span><h3>Brand refresh</h3><p>Logo, palette and typography — evolved carefully, not thrown away.</p></div>
-        <div class="kit-c tint glass-p rv rv-d2"><span class="ki">07</span><h3>The visual system</h3><p>Colours, type, spacing and image rules — documented, so consistency survives us.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">08</span><h3>Print management ready</h3><p>Print-ready files with bleed, marks and colour profiles your printer asks for.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">09</span><h3>Two revision rounds</h3><p>Structured feedback, most work approved in round one — see why below.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3>Social creatives &amp; templates</h3><p>Feed, stories and reels covers — plus templates your team can refill on-brand.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">02</span><h3>Lookbooks &amp; catalogs</h3><p>Print and digital — the document your collection deserves at buyer meetings.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">03</span><h3>Hang tags, labels &amp; packaging</h3><p>The touchpoints customers hold — tags, care labels, boxes, tissue, mailers.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">04</span><h3>Marketplace banners &amp; A+</h3><p>Store banners and enhanced-content visuals sized to each platform's spec.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">05</span><h3>Ad &amp; email creatives</h3><p>Campaign sets for drops and sales — consistent from ad to inbox to page.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">06</span><h3>Brand refresh</h3><p>Logo, palette and typography — evolved carefully, not thrown away.</p></div>
+        <div class="kit-c tint glass-p rv rv-d2 rv-row"><span class="ki">07</span><h3>The visual system</h3><p>Colours, type, spacing and image rules — documented, so consistency survives us.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">08</span><h3>Print management ready</h3><p>Print-ready files with bleed, marks and colour profiles your printer asks for.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">09</span><h3>Two revision rounds</h3><p>Structured feedback, most work approved in round one — see why below.</p></div>
       </div>
     </div>
   </section>
@@ -618,7 +618,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">How consistency actually happens</span>
-        <h2 class="h-display rv" id="sy-h">We don't design assets. <span class="acc-t">We design the system that designs them.</span></h2>
+        <h2 class="h-display rv rv-display" id="sy-h">We don't design assets. <span class="acc-t">We design the system that designs them.</span></h2>
       </div>
       <div class="cmp2">
         <div class="cmp-col glass-p rv">
@@ -649,7 +649,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="acc-honest">
         <span class="kicker rv">The revision policy</span>
-        <h2 class="h-display rv" id="tr-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">Two rounds. <span class="acc-t">On purpose.</span></h2>
+        <h2 class="h-display rv rv-display" id="tr-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">Two rounds. <span class="acc-t">On purpose.</span></h2>
         <p class="rv">"Unlimited revisions" sounds generous and works terribly — it rewards vague briefs, invites committee feedback, and projects limp to a version nobody loves. Two structured rounds force the conversation that matters: what exactly should change, and why. Most work here is approved in round one because the brief was interrogated before pixels moved.</p>
         <p class="soft rv">If the scope genuinely changes mid-project, we say so and re-quote honestly — we don't bury it in "revisions."</p>
       </div>
@@ -661,7 +661,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">How it works</span>
-        <h2 class="h-display rv" id="how-h">Brief to on-brand, <span class="acc-t">in four steps.</span></h2>
+        <h2 class="h-display rv rv-display" id="how-h">Brief to on-brand, <span class="acc-t">in four steps.</span></h2>
       </div>
       <div class="chat-wrap" style="grid-template-columns:1fr;max-width:860px;margin:0 auto;">
         <div class="weeks rv-steps">
@@ -679,13 +679,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">The handover</span>
-        <h2 class="h-display rv" id="ho-h">Everything. Yours. <span class="acc-t">Forever.</span></h2>
+        <h2 class="h-display rv rv-display" id="ho-h">Everything. Yours. <span class="acc-t">Forever.</span></h2>
         <p class="sub rv">The quiet scandal of design freelancing is the hostage file — the source you never get, so you're locked in. Here's what leaves with you instead:</p>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>Source files, layered</h3><p>AI, PSD or Figma — editable, organised, named like a professional packed them. Because one did.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">02</span><h3>Every export, every spec</h3><p>Print-ready PDFs with bleed and marks; web exports per platform size. Re-exporting is never a paid favour.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">03</span><h3>Fonts &amp; licenses, documented</h3><p>What each font is, where it's used, and what its license covers — no surprise letters from type foundries.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3>Source files, layered</h3><p>AI, PSD or Figma — editable, organised, named like a professional packed them. Because one did.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">02</span><h3>Every export, every spec</h3><p>Print-ready PDFs with bleed and marks; web exports per platform size. Re-exporting is never a paid favour.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">03</span><h3>Fonts &amp; licenses, documented</h3><p>What each font is, where it's used, and what its license covers — no surprise letters from type foundries.</p></div>
       </div>
     </div>
   </section>
@@ -697,7 +697,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Questions</span>
-        <h2 class="h-display rv" id="faq-h">Asked before <span class="acc-t">every brief.</span></h2>
+        <h2 class="h-display rv rv-display" id="faq-h">Asked before <span class="acc-t">every brief.</span></h2>
       </div>
       <div class="faq-list rv">
         <div class="faq-row glass-p">
@@ -750,7 +750,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       <div class="contact-panel glass-p">
       <div class="sec-head">
         <span class="kicker rv">Get your quote</span>
-        <h2 class="h-display rv" id="contact-h">Tell us where your brand shows up. We'll make it <span class="acc-t">look like one brand.</span></h2>
+        <h2 class="h-display rv rv-display" id="contact-h">Tell us where your brand shows up. We'll make it <span class="acc-t">look like one brand.</span></h2>
         <p class="sub rv">Describe what you need designed — fixed quote within 24 hours.</p>
       </div>
       <div class="contact-grid">

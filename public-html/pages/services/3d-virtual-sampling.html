@@ -23,9 +23,9 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- fonts load without blocking first paint; metric-matched fallbacks
      (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 <link rel="stylesheet" href="../../assets/night.css">
@@ -187,7 +187,7 @@ main { position: relative; z-index: 3; }
 /* ---- Atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
-  letter-spacing: .04em; text-transform: uppercase; color: var(--acc); }
+  letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); }
 .h-display { font-family: var(--disp); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; color: var(--ink); }
 .acc-t { color: var(--acc); }
 .glass-p {
@@ -662,7 +662,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap hero-split">
       <div class="hero-copy">
         <span class="kicker rv in">3D virtual sampling — for brands &amp; manufacturers</span>
-        <h1 class="h-display rv in">See the garment before a <span class="acc-t">single stitch</span> is cut.</h1>
+        <h1 class="h-display rv in rv-display">See the garment before a <span class="acc-t">single stitch</span> is cut.</h1>
         <p class="sub rv in">
           Send your tech pack. In days you're reviewing a production-accurate 3D sample —
           true fabric drape, every colorway — with no couriers, no cutting, no waiting on a factory queue.
@@ -671,7 +671,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
           <a href="#contact" class="btn-acc">Start your 3D sample</a>
           <a href="#try" class="btn-glass">Spin a real sample ↓</a>
         </div>
-        <div class="hero-stats glass-p rv in">
+        <div class="hero-stats glass-p rv in rv-figure">
           <div class="hst"><b>24h</b><span>first render on your screen</span></div>
           <div class="hst"><b>3–5<i> days</i></b><span>brief to full sample</span></div>
           <div class="hst"><b>Every</b><span>colorway from one build</span></div>
@@ -680,7 +680,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       </div>
 
       <!-- right: ambient auto-rotating preview — display only, no user camera control -->
-      <div class="hero-view rv in" aria-hidden="true">
+      <div class="hero-view rv in rv-media" aria-hidden="true">
         <div class="dais" aria-hidden="true"></div>
         <model-viewer id="mv-hero"
           alt=""
@@ -706,24 +706,24 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">What you get</span>
-        <h2 class="h-display rv" id="kit-h">One garment in. A complete <span class="acc-t">review kit</span> out.</h2>
+        <h2 class="h-display rv rv-display" id="kit-h">One garment in. A complete <span class="acc-t">review kit</span> out.</h2>
         <p class="sub rv">Everything below ships with every sample — built for factory meetings and buyer approvals.</p>
       </div>
       <div class="bento">
-        <div class="tile tile-lg glass-p rv">
+        <div class="tile tile-lg glass-p rv rv-row">
           <span class="ti">01</span>
           <h3>Photoreal garment renders</h3>
           <p>Front, side and back at photographic quality — simulated in CLO3D and Browzwear, the same engines the biggest brands develop in.</p>
           <div class="sc sc-views" aria-hidden="true"><i></i><i></i><i></i></div>
         </div>
-        <div class="tile glass-p rv"><span class="ti">02</span><h3>True fabric drape</h3><p>Weight, stretch and fall simulated from your material spec.</p><div class="sc sc-drape" aria-hidden="true"></div></div>
-        <div class="tile glass-p rv"><span class="ti">03</span><h3>Every colorway</h3><p>All colorways rendered from the same model — included.</p><div class="sc sc-swatch" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
-        <div class="tile glass-p rv rv-d1"><span class="ti">04</span><h3>360° turntable video</h3><p>A rotating view for buyer presentations and content.</p><div class="sc sc-turn" aria-hidden="true"><i></i></div></div>
-        <div class="tile glass-p rv rv-d1"><span class="ti">05</span><h3>First render in 24h</h3><p>The clock starts the moment your brief lands.</p><div class="sc sc-clock" aria-hidden="true"><i></i></div></div>
-        <div class="tile glass-p rv rv-d1"><span class="ti">06</span><h3>Presentation deck</h3><p>A formatted PDF ready for factories or buyers.</p><div class="sc sc-deck" aria-hidden="true"><i></i><i></i><i></i></div></div>
-        <div class="tile glass-p rv rv-d2"><span class="ti">07</span><h3>Flat-lay export</h3><p>Clean overhead flat lay for your tech pack or store.</p></div>
-        <div class="tile tile-tint glass-p rv rv-d2"><span class="ti">08</span><h3>CLO3D + Browzwear</h3><p>Industry-standard software, chosen per garment. No licence needed on your side.</p></div>
-        <div class="tile glass-p rv rv-d2"><span class="ti">09</span><h3>Two revision rounds</h3><p>Fit, colorway, fabric or camera — adjusted in hours, not weeks.</p><div class="sc sc-rounds" aria-hidden="true"><i></i></div></div>
+        <div class="tile glass-p rv rv-row"><span class="ti">02</span><h3>True fabric drape</h3><p>Weight, stretch and fall simulated from your material spec.</p><div class="sc sc-drape" aria-hidden="true"></div></div>
+        <div class="tile glass-p rv rv-row"><span class="ti">03</span><h3>Every colorway</h3><p>All colorways rendered from the same model — included.</p><div class="sc sc-swatch" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
+        <div class="tile glass-p rv rv-d1 rv-row"><span class="ti">04</span><h3>360° turntable video</h3><p>A rotating view for buyer presentations and content.</p><div class="sc sc-turn" aria-hidden="true"><i></i></div></div>
+        <div class="tile glass-p rv rv-d1 rv-row"><span class="ti">05</span><h3>First render in 24h</h3><p>The clock starts the moment your brief lands.</p><div class="sc sc-clock" aria-hidden="true"><i></i></div></div>
+        <div class="tile glass-p rv rv-d1 rv-row"><span class="ti">06</span><h3>Presentation deck</h3><p>A formatted PDF ready for factories or buyers.</p><div class="sc sc-deck" aria-hidden="true"><i></i><i></i><i></i></div></div>
+        <div class="tile glass-p rv rv-d2 rv-row"><span class="ti">07</span><h3>Flat-lay export</h3><p>Clean overhead flat lay for your tech pack or store.</p></div>
+        <div class="tile tile-tint glass-p rv rv-d2 rv-row"><span class="ti">08</span><h3>CLO3D + Browzwear</h3><p>Industry-standard software, chosen per garment. No licence needed on your side.</p></div>
+        <div class="tile glass-p rv rv-d2 rv-row"><span class="ti">09</span><h3>Two revision rounds</h3><p>Fit, colorway, fabric or camera — adjusted in hours, not weeks.</p><div class="sc sc-rounds" aria-hidden="true"><i></i></div></div>
       </div>
     </div>
   </section>
@@ -733,7 +733,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Try it yourself</span>
-        <h2 class="h-display rv">This is what lands in your inbox. <span class="acc-t">Spin it.</span></h2>
+        <h2 class="h-display rv rv-display">This is what lands in your inbox. <span class="acc-t">Spin it.</span></h2>
         <p class="sub rv">A real deliverable — drag it, zoom in, inspect the seams. Your factory and your buyers review exactly this.</p>
       </div>
       <div class="stage3d rv">
@@ -768,7 +768,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">How it works</span>
-        <h2 class="h-display rv" id="how-h">Send a tech pack. Get a <span class="acc-t">sample back.</span></h2>
+        <h2 class="h-display rv rv-display" id="how-h">Send a tech pack. Get a <span class="acc-t">sample back.</span></h2>
         <p class="sub rv">This is what a sampling round with us actually looks like.</p>
       </div>
       <div class="chat-wrap">
@@ -800,7 +800,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Why it matters</span>
-        <h2 class="h-display rv" id="cmp-h">One sampling round. Two very <span class="acc-t">different waits.</span></h2>
+        <h2 class="h-display rv rv-display" id="cmp-h">One sampling round. Two very <span class="acc-t">different waits.</span></h2>
         <p class="sub rv">Same garment, same tech pack — watch the difference.</p>
       </div>
       <div class="duo2">
@@ -838,7 +838,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="acc-honest">
         <span class="kicker rv">Accuracy, honestly</span>
-        <h2 class="h-display rv" id="acc-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">Real fabric physics, <span class="acc-t">not pretty pictures.</span></h2>
+        <h2 class="h-display rv rv-display" id="acc-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">Real fabric physics, <span class="acc-t">not pretty pictures.</span></h2>
         <p class="rv">We simulate from your actual fabric spec — GSM, stretch percentage, drape — so the render behaves like the textile, not like a video game. Most sample changes come from fit and fabric issues; that's exactly what a 3D pass catches before you cut.</p>
         <p class="soft rv">A 3D sample is a design tool, not a replacement for your final checks. Most brands still make one physical proto before bulk — that decision stays entirely with you. If a construction is hard to simulate reliably, we'll say so up front.</p>
       </div>
@@ -850,7 +850,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Questions</span>
-        <h2 class="h-display rv" id="faq-h">Asked before <span class="acc-t">every sample.</span></h2>
+        <h2 class="h-display rv rv-display" id="faq-h">Asked before <span class="acc-t">every sample.</span></h2>
       </div>
       <div class="faq-list rv">
         <div class="faq-row glass-p">
@@ -907,7 +907,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       <div class="contact-panel glass-p">
       <div class="sec-head">
         <span class="kicker rv">Get your quote</span>
-        <h2 class="h-display rv" id="contact-h">Send a tech pack. Get a <span class="acc-t">sample back.</span></h2>
+        <h2 class="h-display rv rv-display" id="contact-h">Send a tech pack. Get a <span class="acc-t">sample back.</span></h2>
         <p class="sub rv">Tell us about the garment. You'll have a fixed quote within 24 hours.</p>
       </div>
       <div class="contact-grid">

@@ -23,9 +23,9 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- fonts load without blocking first paint; metric-matched fallbacks
      (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 <link rel="stylesheet" href="../../assets/night.css">
@@ -188,7 +188,7 @@ main { position: relative; z-index: 3; }
 /* ---- Atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
-  letter-spacing: .04em; text-transform: uppercase; color: var(--acc); }
+  letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); }
 .h-display { font-family: var(--disp); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; color: var(--ink); }
 .acc-t { color: var(--acc); }
 .glass-p {
@@ -686,7 +686,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   <section class="hero" aria-label="Website development — overview">
     <div class="wrap hero-center">
       <span class="kicker rv in">Website design &amp; build — end to end</span>
-      <h1 class="h-display rv in">A website that wins you <span class="acc-t">customers.</span></h1>
+      <h1 class="h-display rv in rv-display">A website that wins you <span class="acc-t">customers.</span></h1>
       <p class="sub rv in">
         We plan it, design it, write it, build it, and keep it running — for any business,
         not just fashion. One team, one fixed price.
@@ -695,7 +695,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <a href="#contact" class="btn-acc">Get my free quote</a>
         <a href="#included" class="btn-glass">What's included ↓</a>
       </div>
-      <div class="hero-stats glass-p rv in">
+      <div class="hero-stats glass-p rv in rv-figure">
         <div class="hst"><b>24h</b><span>fixed written quote</span></div>
         <div class="hst"><b>3–5<i>wks</i></b><span>idea to launch</span></div>
         <div class="hst"><b>30<i>days</i></b><span>free fixes after launch</span></div>
@@ -709,7 +709,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Why it matters</span>
-        <h2 class="h-display rv" id="ff-h">Found on Google. Loaded in <span class="acc-t">a blink.</span></h2>
+        <h2 class="h-display rv rv-display" id="ff-h">Found on Google. Loaded in <span class="acc-t">a blink.</span></h2>
         <p class="sub rv">Two things decide whether a website brings you customers. We build for both.</p>
       </div>
       <div class="duo2">
@@ -752,11 +752,11 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">What you get</span>
-        <h2 class="h-display rv" id="included-h">Everything your website needs — <span class="acc-t">included.</span></h2>
+        <h2 class="h-display rv rv-display" id="included-h">Everything your website needs — <span class="acc-t">included.</span></h2>
         <p class="sub rv">Design to hosting, one team and one quote. Nothing sold as an extra later.</p>
       </div>
       <div class="bento">
-        <div class="tile tile-lg glass-p rv">
+        <div class="tile tile-lg glass-p rv rv-row">
           <span class="ti">01</span>
           <h3>Custom web development</h3>
           <p>Built from the ground up with clean, fast code — your business is never forced into a cookie-cutter template.</p>
@@ -765,17 +765,17 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
             <div class="cv"><span class="ln"></span><span class="ln"></span><span class="ln"></span><span class="kbd">npm run launch ▸</span></div>
           </div>
         </div>
-        <div class="tile glass-p rv"><span class="ti">02</span><h3>Discovery &amp; strategy</h3><p>We plan the site around what actually makes you money.</p><div class="sc sc-radar" aria-hidden="true"><b></b><b></b><i></i></div></div>
-        <div class="tile glass-p rv"><span class="ti">03</span><h3>UI/UX design</h3><p>Looks right, feels easy — visitors find what they need fast.</p><div class="sc sc-uiux" aria-hidden="true"><i></i><i></i></div></div>
-        <div class="tile glass-p rv"><span class="ti">04</span><h3>CMS setup</h3><p>Edit your own text, photos and posts — no developer needed.</p><div class="sc sc-cms" aria-hidden="true"><i></i><i></i><i></i></div></div>
-        <div class="tile glass-p rv"><span class="ti">05</span><h3>E-commerce</h3><p>Products, cart and secure checkout, selling day and night.</p><div class="sc sc-cart" aria-hidden="true"><span class="c"></span><span class="b">+3</span></div></div>
-        <div class="tile glass-p rv"><span class="ti">06</span><h3>SEO</h3><p>People searching Google for what you sell find you, not competitors.</p><div class="sc sc-seo" aria-hidden="true"><span class="s"></span><i></i><i></i></div></div>
-        <div class="tile glass-p rv"><span class="ti">07</span><h3>Speed &amp; performance</h3><p>Loads in a blink. Slow pages lose visitors and rankings.</p><div class="sc sc-speed" aria-hidden="true"><span class="g"></span><span class="nd"></span></div></div>
-        <div class="tile glass-p rv"><span class="ti">08</span><h3>Hosting &amp; infrastructure</h3><p>Fast, reliable servers we manage — you never think about it.</p><div class="sc sc-host" aria-hidden="true"><i></i><i></i><i></i></div></div>
-        <div class="tile glass-p rv"><span class="ti">09</span><h3>Security &amp; SSL</h3><p>The padlock in the browser, plus protection from hackers and spam.</p><div class="sc sc-lock" aria-hidden="true"><span class="sh"></span><span class="bd"></span></div></div>
-        <div class="tile tile-tint glass-p rv"><span class="ti">10</span><h3>Maintenance &amp; support</h3><p>Updated, backed up, and on call when something needs changing.</p><div class="sc sc-maint" aria-hidden="true"><span class="gear"></span></div></div>
-        <div class="tile glass-p rv"><span class="ti">11</span><h3>Analytics &amp; tracking</h3><p>See who visits, where they come from, and what's working.</p><div class="sc sc-chart" aria-hidden="true"><i></i><i></i><i></i><i></i></div></div>
-        <div class="tile glass-p rv"><span class="ti">12</span><h3>Integrations</h3><p>Connected to your payments, bookings and customer tools.</p><div class="sc sc-nodes" aria-hidden="true"><i></i><i></i><i></i><b></b><b></b></div></div>
+        <div class="tile glass-p rv rv-row"><span class="ti">02</span><h3>Discovery &amp; strategy</h3><p>We plan the site around what actually makes you money.</p><div class="sc sc-radar" aria-hidden="true"><b></b><b></b><i></i></div></div>
+        <div class="tile glass-p rv rv-row"><span class="ti">03</span><h3>UI/UX design</h3><p>Looks right, feels easy — visitors find what they need fast.</p><div class="sc sc-uiux" aria-hidden="true"><i></i><i></i></div></div>
+        <div class="tile glass-p rv rv-row"><span class="ti">04</span><h3>CMS setup</h3><p>Edit your own text, photos and posts — no developer needed.</p><div class="sc sc-cms" aria-hidden="true"><i></i><i></i><i></i></div></div>
+        <div class="tile glass-p rv rv-row"><span class="ti">05</span><h3>E-commerce</h3><p>Products, cart and secure checkout, selling day and night.</p><div class="sc sc-cart" aria-hidden="true"><span class="c"></span><span class="b">+3</span></div></div>
+        <div class="tile glass-p rv rv-row"><span class="ti">06</span><h3>SEO</h3><p>People searching Google for what you sell find you, not competitors.</p><div class="sc sc-seo" aria-hidden="true"><span class="s"></span><i></i><i></i></div></div>
+        <div class="tile glass-p rv rv-row"><span class="ti">07</span><h3>Speed &amp; performance</h3><p>Loads in a blink. Slow pages lose visitors and rankings.</p><div class="sc sc-speed" aria-hidden="true"><span class="g"></span><span class="nd"></span></div></div>
+        <div class="tile glass-p rv rv-row"><span class="ti">08</span><h3>Hosting &amp; infrastructure</h3><p>Fast, reliable servers we manage — you never think about it.</p><div class="sc sc-host" aria-hidden="true"><i></i><i></i><i></i></div></div>
+        <div class="tile glass-p rv rv-row"><span class="ti">09</span><h3>Security &amp; SSL</h3><p>The padlock in the browser, plus protection from hackers and spam.</p><div class="sc sc-lock" aria-hidden="true"><span class="sh"></span><span class="bd"></span></div></div>
+        <div class="tile tile-tint glass-p rv rv-row"><span class="ti">10</span><h3>Maintenance &amp; support</h3><p>Updated, backed up, and on call when something needs changing.</p><div class="sc sc-maint" aria-hidden="true"><span class="gear"></span></div></div>
+        <div class="tile glass-p rv rv-row"><span class="ti">11</span><h3>Analytics &amp; tracking</h3><p>See who visits, where they come from, and what's working.</p><div class="sc sc-chart" aria-hidden="true"><i></i><i></i><i></i><i></i></div></div>
+        <div class="tile glass-p rv rv-row"><span class="ti">12</span><h3>Integrations</h3><p>Connected to your payments, bookings and customer tools.</p><div class="sc sc-nodes" aria-hidden="true"><i></i><i></i><i></i><b></b><b></b></div></div>
       </div>
     </div>
   </section>
@@ -833,7 +833,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">How it works</span>
-        <h2 class="h-display rv" id="process-h">It's just a <span class="acc-t">conversation.</span></h2>
+        <h2 class="h-display rv rv-display" id="process-h">It's just a <span class="acc-t">conversation.</span></h2>
         <p class="sub rv">No forms full of jargon. You talk, we build — this is a real week with us.</p>
       </div>
       <div class="chat-wrap">
@@ -865,7 +865,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Start here</span>
-        <h2 class="h-display rv" id="for-you-h">Describe your project in <span class="acc-t">10 seconds.</span></h2>
+        <h2 class="h-display rv rv-display" id="for-you-h">Describe your project in <span class="acc-t">10 seconds.</span></h2>
         <p class="sub rv">Tap what you are and what you need — we'll draft your brief.</p>
       </div>
       <div class="build rv">
@@ -910,7 +910,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Questions</span>
-        <h2 class="h-display rv" id="faq-h">Asked before <span class="acc-t">every project.</span></h2>
+        <h2 class="h-display rv rv-display" id="faq-h">Asked before <span class="acc-t">every project.</span></h2>
       </div>
       <div class="faq-list rv">
         <div class="faq-row glass-p">
@@ -967,7 +967,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       <div class="contact-panel glass-p">
       <div class="sec-head">
         <span class="kicker rv">Get your quote</span>
-        <h2 class="h-display rv" id="contact-h">Let's build <span class="acc-t">yours.</span></h2>
+        <h2 class="h-display rv rv-display" id="contact-h">Let's build <span class="acc-t">yours.</span></h2>
         <p class="sub rv">Tell us about your business. You'll have a fixed quote within 24 hours.</p>
       </div>
       <div class="contact-grid">

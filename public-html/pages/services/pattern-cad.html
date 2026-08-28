@@ -21,9 +21,9 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- fonts load without blocking first paint; metric-matched fallbacks
      (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 <link rel="stylesheet" href="../../assets/night.css">
@@ -177,7 +177,7 @@ main { position: relative; z-index: 3; }
 /* ---- Atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
-  letter-spacing: .04em; text-transform: uppercase; color: var(--acc); }
+  letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); }
 .h-display { font-family: var(--disp); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; color: var(--ink); }
 .acc-t { color: var(--acc); }
 .glass-p {
@@ -576,7 +576,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap hero-split">
       <div class="hero-copy">
         <span class="kicker rv in">Digital pattern making — done for you</span>
-        <h1 class="h-display rv in" style="margin-top:14px;">Patterns your factory can <span class="acc-t">actually cut.</span></h1>
+        <h1 class="h-display rv in rv-display" style="margin-top:14px;">Patterns your factory can <span class="acc-t">actually cut.</span></h1>
         <p class="sub rv in">
           Production-ready CAD patterns from your sketch or tech pack — graded size sets,
           seam allowances, notches, and files in the system your factory already runs.
@@ -593,7 +593,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       </div>
 
       <!-- right: the deliverable, previewed in the hero -->
-      <div class="hero-view rv in" aria-hidden="true">
+      <div class="hero-view rv in rv-media" aria-hidden="true">
     <div class="draft glass-p" aria-hidden="true">
       <svg viewBox="0 0 420 340" class="draft-svg">
         <defs>
@@ -618,18 +618,18 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">What you get</span>
-        <h2 class="h-display rv" id="kit-h">Everything a cutter checks <span class="acc-t">before they trust a pattern.</span></h2>
+        <h2 class="h-display rv rv-display" id="kit-h">Everything a cutter checks <span class="acc-t">before they trust a pattern.</span></h2>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>Base pattern — production draft</h3><p>Drafted to your spec with fabric-appropriate ease, ready for the sample room.</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">02</span><h3>Graded size set</h3><p>Your full size range with consistent grade rules — nested file plus individual sizes.</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">03</span><h3>Seam allowances, per seam</h3><p>Not a blanket 1cm — allowances set to your construction, seam by seam.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">04</span><h3>Notches &amp; drill marks</h3><p>Placed for the sewing line, so panels match at the machine, not just on screen.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">05</span><h3>Cutter's must</h3><p>Piece list, cut quantities, fabric/fusing/lining split — the sheet the cutting room asks for.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">06</span><h3>Measurement check</h3><p>Pattern measured against your tech pack spec at base size, documented.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">07</span><h3>Native + DXF files</h3><p>Your factory's system plus universal DXF — no conversion roulette.</p></div>
-        <div class="kit-c tint glass-p rv rv-d2"><span class="ki">08</span><h3>Your blocks, your property</h3><p>Patterns, blocks and grade rules transfer to you — take them to any factory, any time.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">09</span><h3>Two revision rounds</h3><p>Fit corrections after your sample review — built into the price.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3>Base pattern — production draft</h3><p>Drafted to your spec with fabric-appropriate ease, ready for the sample room.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">02</span><h3>Graded size set</h3><p>Your full size range with consistent grade rules — nested file plus individual sizes.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">03</span><h3>Seam allowances, per seam</h3><p>Not a blanket 1cm — allowances set to your construction, seam by seam.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">04</span><h3>Notches &amp; drill marks</h3><p>Placed for the sewing line, so panels match at the machine, not just on screen.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">05</span><h3>Cutter's must</h3><p>Piece list, cut quantities, fabric/fusing/lining split — the sheet the cutting room asks for.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">06</span><h3>Measurement check</h3><p>Pattern measured against your tech pack spec at base size, documented.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">07</span><h3>Native + DXF files</h3><p>Your factory's system plus universal DXF — no conversion roulette.</p></div>
+        <div class="kit-c tint glass-p rv rv-d2 rv-row"><span class="ki">08</span><h3>Your blocks, your property</h3><p>Patterns, blocks and grade rules transfer to you — take them to any factory, any time.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">09</span><h3>Two revision rounds</h3><p>Fit corrections after your sample review — built into the price.</p></div>
       </div>
     </div>
   </section>
@@ -638,9 +638,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head" style="margin-bottom:30px;">
         <span class="kicker rv">The deliverable</span>
-        <h2 class="h-display rv">The drawing a cutter <span class="acc-t">trusts.</span></h2>
+        <h2 class="h-display rv rv-display">The drawing a cutter <span class="acc-t">trusts.</span></h2>
       </div>
-      <div class="vwrap rv">
+      <div class="vwrap rv rv-media">
         <div class="draft glass-p" aria-hidden="true">
           <svg viewBox="0 0 420 340" class="draft-svg">
             <defs>
@@ -666,7 +666,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">How it works</span>
-        <h2 class="h-display rv" id="how-h">Sketch to cuttable file, <span class="acc-t">in four steps.</span></h2>
+        <h2 class="h-display rv rv-display" id="how-h">Sketch to cuttable file, <span class="acc-t">in four steps.</span></h2>
       </div>
       <div class="chat-wrap" style="grid-template-columns:1fr;max-width:860px;margin:0 auto;">
         <div class="weeks rv-steps">
@@ -683,7 +683,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Formats</span>
-        <h2 class="h-display rv" id="fw-h">Whatever your factory runs, <span class="acc-t">we speak it.</span></h2>
+        <h2 class="h-display rv rv-display" id="fw-h">Whatever your factory runs, <span class="acc-t">we speak it.</span></h2>
         <p class="sub rv">Don't know what your factory uses? Ask them one question — "what CAD system do you cut from?" — and forward us the answer.</p>
       </div>
       <div class="fmt-wall rv">
@@ -703,7 +703,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Questions</span>
-        <h2 class="h-display rv" id="faq-h">Asked before <span class="acc-t">every pattern.</span></h2>
+        <h2 class="h-display rv rv-display" id="faq-h">Asked before <span class="acc-t">every pattern.</span></h2>
       </div>
       <div class="faq-list rv">
         <div class="faq-row glass-p">
@@ -755,7 +755,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       <div class="contact-panel glass-p">
       <div class="sec-head">
         <span class="kicker rv">Get your quote</span>
-        <h2 class="h-display rv" id="contact-h">Send your sketch or tech pack. Get a <span class="acc-t">cuttable pattern.</span></h2>
+        <h2 class="h-display rv rv-display" id="contact-h">Send your sketch or tech pack. Get a <span class="acc-t">cuttable pattern.</span></h2>
         <p class="sub rv">Tell us the garment and your factory’s system — fixed quote within 24 hours.</p>
       </div>
       <div class="contact-grid">

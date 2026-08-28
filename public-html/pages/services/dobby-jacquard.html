@@ -21,9 +21,9 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- fonts load without blocking first paint; metric-matched fallbacks
      (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 <link rel="stylesheet" href="../../assets/night.css">
@@ -177,7 +177,7 @@ main { position: relative; z-index: 3; }
 /* ---- Atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
-  letter-spacing: .04em; text-transform: uppercase; color: var(--acc); }
+  letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); }
 .h-display { font-family: var(--disp); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; color: var(--ink); }
 .acc-t { color: var(--acc); }
 .glass-p {
@@ -580,7 +580,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap hero-split">
       <div class="hero-copy">
         <span class="kicker rv in">Dobby &amp; jacquard design — done for you</span>
-        <h1 class="h-display rv in" style="margin-top:14px;">Designs that <span class="acc-t">actually weave.</span></h1>
+        <h1 class="h-display rv in rv-display" style="margin-top:14px;">Designs that <span class="acc-t">actually weave.</span></h1>
         <p class="sub rv in">
           Loom-ready dobby and jacquard designs for mills and brands — weave drafts,
           construction specs and colorways engineered for the loom you run, not just the screen.
@@ -597,7 +597,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       </div>
 
       <!-- right: the deliverable, previewed in the hero -->
-      <div class="hero-view rv in" aria-hidden="true">
+      <div class="hero-view rv in rv-media" aria-hidden="true">
     <div class="loom glass-p" aria-hidden="true">
       <div class="loom-warp"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="loom-weft"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -617,18 +617,18 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">What you get</span>
-        <h2 class="h-display rv" id="kit-h">Not a pretty JPEG. <span class="acc-t">A weaving instruction.</span></h2>
+        <h2 class="h-display rv rv-display" id="kit-h">Not a pretty JPEG. <span class="acc-t">A weaving instruction.</span></h2>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>Point-paper weave draft</h3><p>The design on point paper — every intersection decided, ready for the loom software.</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">02</span><h3>Construction spec</h3><p>EPI, PPI, yarn counts and weave structure per area — the sheet your weaver reads first.</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">03</span><h3>Repeat sized to your loom</h3><p>Built to your hook count or shaft count — no stretching, no cropping at the mill.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">04</span><h3>Woven simulation</h3><p>See structure, floats and colour mixing before a single pick is thrown.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">05</span><h3>Float check, documented</h3><p>Maximum float lengths verified per structure — the snag test happens in the file.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">06</span><h3>Warp &amp; weft colorways</h3><p>Variants engineered for weft-change economics — more range, fewer warps.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">07</span><h3>Blanket layout on request</h3><p>Multiple colorways arranged for a single sampling run.</p></div>
-        <div class="kit-c tint glass-p rv rv-d2"><span class="ki">08</span><h3>Exclusive ownership</h3><p>Full rights transfer on final payment — never resold, never re-coloured for anyone else.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">09</span><h3>Two revision rounds</h3><p>Structure, colour and motif adjustments — most designs approved in round one.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3>Point-paper weave draft</h3><p>The design on point paper — every intersection decided, ready for the loom software.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">02</span><h3>Construction spec</h3><p>EPI, PPI, yarn counts and weave structure per area — the sheet your weaver reads first.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">03</span><h3>Repeat sized to your loom</h3><p>Built to your hook count or shaft count — no stretching, no cropping at the mill.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">04</span><h3>Woven simulation</h3><p>See structure, floats and colour mixing before a single pick is thrown.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">05</span><h3>Float check, documented</h3><p>Maximum float lengths verified per structure — the snag test happens in the file.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">06</span><h3>Warp &amp; weft colorways</h3><p>Variants engineered for weft-change economics — more range, fewer warps.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">07</span><h3>Blanket layout on request</h3><p>Multiple colorways arranged for a single sampling run.</p></div>
+        <div class="kit-c tint glass-p rv rv-d2 rv-row"><span class="ki">08</span><h3>Exclusive ownership</h3><p>Full rights transfer on final payment — never resold, never re-coloured for anyone else.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">09</span><h3>Two revision rounds</h3><p>Structure, colour and motif adjustments — most designs approved in round one.</p></div>
       </div>
     </div>
   </section>
@@ -637,9 +637,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head" style="margin-bottom:30px;">
         <span class="kicker rv">How it is built</span>
-        <h2 class="h-display rv">From warp and weft to a <span class="acc-t">weave draft.</span></h2>
+        <h2 class="h-display rv rv-display">From warp and weft to a <span class="acc-t">weave draft.</span></h2>
       </div>
-      <div class="vwrap rv">
+      <div class="vwrap rv rv-media">
         <div class="loom glass-p" aria-hidden="true">
           <div class="loom-warp"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           <div class="loom-weft"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -660,7 +660,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">How it works</span>
-        <h2 class="h-display rv" id="how-h">Idea to loom, <span class="acc-t">in four steps.</span></h2>
+        <h2 class="h-display rv rv-display" id="how-h">Idea to loom, <span class="acc-t">in four steps.</span></h2>
       </div>
       <div class="chat-wrap" style="grid-template-columns:1fr;max-width:860px;margin:0 auto;">
         <div class="weeks rv-steps">
@@ -677,7 +677,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Which loom does your idea need?</span>
-        <h2 class="h-display rv" id="dj-h">Dobby or jacquard — <span class="acc-t">we'll tell you straight.</span></h2>
+        <h2 class="h-display rv rv-display" id="dj-h">Dobby or jacquard — <span class="acc-t">we'll tell you straight.</span></h2>
         <p class="sub rv">If the cheaper loom can do it, we say so. That's the point of the 24-hour quote.</p>
       </div>
       <div class="cmp2">
@@ -707,7 +707,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="acc-honest">
         <span class="kicker rv">Colorway economics</span>
-        <h2 class="h-display rv" id="ce-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">Change the weft, not <span class="acc-t">the warp.</span></h2>
+        <h2 class="h-display rv rv-display" id="ce-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">Change the weft, not <span class="acc-t">the warp.</span></h2>
         <p class="rv">At the mill, swapping weft yarns between colorways is quick and cheap. Re-beaming a new warp is neither. So we design your colorway range to pull as much variety as possible from weft changes alone — and when a colorway genuinely needs a new warp, we flag it before you commit, not after the mill invoices you.</p>
         <p class="soft rv">This is the kind of decision that's invisible in a JPEG and very visible in your production cost.</p>
       </div>
@@ -718,7 +718,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Structure vocabulary</span>
-        <h2 class="h-display rv" id="st-h">The structures your mill <span class="acc-t">already trusts.</span></h2>
+        <h2 class="h-display rv rv-display" id="st-h">The structures your mill <span class="acc-t">already trusts.</span></h2>
       </div>
       <div class="fmt-wall rv">
         <span class="fmt">Plain &amp; rib</span>
@@ -737,7 +737,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Questions</span>
-        <h2 class="h-display rv" id="faq-h">Asked before <span class="acc-t">every weave.</span></h2>
+        <h2 class="h-display rv rv-display" id="faq-h">Asked before <span class="acc-t">every weave.</span></h2>
       </div>
       <div class="faq-list rv">
         <div class="faq-row glass-p">
@@ -789,7 +789,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       <div class="contact-panel glass-p">
       <div class="sec-head">
         <span class="kicker rv">Get your quote</span>
-        <h2 class="h-display rv" id="contact-h">Send your idea. Get back a design <span class="acc-t">your loom can run.</span></h2>
+        <h2 class="h-display rv rv-display" id="contact-h">Send your idea. Get back a design <span class="acc-t">your loom can run.</span></h2>
         <p class="sub rv">Tell us the fabric and the loom if you know it — fixed quote within 24 hours.</p>
       </div>
       <div class="contact-grid">

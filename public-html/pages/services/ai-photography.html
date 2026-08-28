@@ -21,9 +21,9 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- fonts load without blocking first paint; metric-matched fallbacks
      (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 <link rel="stylesheet" href="../../assets/night.css">
@@ -177,7 +177,7 @@ main { position: relative; z-index: 3; }
 /* ---- Atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
-  letter-spacing: .04em; text-transform: uppercase; color: var(--acc); }
+  letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); }
 .h-display { font-family: var(--disp); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; color: var(--ink); }
 .acc-t { color: var(--acc); }
 .glass-p {
@@ -527,7 +527,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap hero-center">
       <div>
         <span class="kicker rv in">AI photography — human-checked</span>
-        <h1 class="h-display rv in" style="margin-top:14px;">On-model photos from the flat shots <span class="acc-t">you already have.</span></h1>
+        <h1 class="h-display rv in rv-display" style="margin-top:14px;">On-model photos from the flat shots <span class="acc-t">you already have.</span></h1>
         <p class="sub rv in">
           Your garment on a consistent model, in consistent light, across the whole catalog —
           no studio day, no scheduling, and every image checked by a human against the real product.
@@ -550,9 +550,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head" style="margin-bottom:30px;">
         <span class="kicker rv">The transformation</span>
-        <h2 class="h-display rv">Flat shot in. <span class="acc-t">On-model out.</span></h2>
+        <h2 class="h-display rv rv-display">Flat shot in. <span class="acc-t">On-model out.</span></h2>
       </div>
-      <div class="vwrap rv">
+      <div class="vwrap rv rv-media">
         <div class="ba glass-p" aria-hidden="true">
           <div class="ba-f">
             <div class="ba-frame">
@@ -579,12 +579,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Why it matters</span>
-        <h2 class="h-display rv" id="ps-h">The photoshoot is the bottleneck <span class="acc-t">between you and launch.</span></h2>
+        <h2 class="h-display rv rv-display" id="ps-h">The photoshoot is the bottleneck <span class="acc-t">between you and launch.</span></h2>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>The shoot you keep postponing</h3><p>Model, photographer, studio, steaming, retouching — a full production to photograph a restock. So new SKUs sit unlisted.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">02</span><h3>The catalog that looks like five brands</h3><p>Different models, different light, different floors — every shoot batch ages your grid a different way.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">03</span><h3>Flat shots don't sell fit</h3><p>Customers buy when they can see drape on a body. A flat lay answers "what is it" — never "how will it look on me."</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3>The shoot you keep postponing</h3><p>Model, photographer, studio, steaming, retouching — a full production to photograph a restock. So new SKUs sit unlisted.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">02</span><h3>The catalog that looks like five brands</h3><p>Different models, different light, different floors — every shoot batch ages your grid a different way.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">03</span><h3>Flat shots don't sell fit</h3><p>Customers buy when they can see drape on a body. A flat lay answers "what is it" — never "how will it look on me."</p></div>
       </div>
     </div>
   </section>
@@ -594,7 +594,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">How it works</span>
-        <h2 class="h-display rv" id="how-h">The step that matters is the <span class="acc-t">human in the middle.</span></h2>
+        <h2 class="h-display rv rv-display" id="how-h">The step that matters is the <span class="acc-t">human in the middle.</span></h2>
       </div>
       <div class="chat-wrap" style="grid-template-columns:1fr;max-width:860px;margin:0 auto;">
         <div class="weeks rv-steps">
@@ -612,18 +612,18 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">What you get</span>
-        <h2 class="h-display rv" id="kit-h">A catalog that finally looks like <span class="acc-t">one brand.</span></h2>
+        <h2 class="h-display rv rv-display" id="kit-h">A catalog that finally looks like <span class="acc-t">one brand.</span></h2>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>On-model images per garment</h3><p>Your product on a model, in your agreed direction — from the flat shot alone.</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">02</span><h3>Consistent model &amp; light</h3><p>The same looks, poses and lighting across every SKU — the grid reads as one collection.</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">03</span><h3>Colourway coverage</h3><p>Every colour variant photographed — without re-shooting anything.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">04</span><h3>Channel-ready crops</h3><p>Ratios and resolutions for Shopify, Instagram and the marketplaces you name.</p></div>
-        <div class="kit-c tint glass-p rv rv-d1"><span class="ki">05</span><h3>Human garment-fidelity QA</h3><p>Each image checked against the real product before you see it — documented.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">06</span><h3>Disclosure guidance</h3><p>Where a platform requires an AI label, we tell you — before you publish.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">07</span><h3>Full usage rights</h3><p>Delivered images are yours to use across your channels, documented.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">08</span><h3>Restock speed</h3><p>New colour or returning SKU? New images in days — no studio calendar.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">09</span><h3>Two revision rounds</h3><p>Model direction and image corrections — built into the price.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3>On-model images per garment</h3><p>Your product on a model, in your agreed direction — from the flat shot alone.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">02</span><h3>Consistent model &amp; light</h3><p>The same looks, poses and lighting across every SKU — the grid reads as one collection.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">03</span><h3>Colourway coverage</h3><p>Every colour variant photographed — without re-shooting anything.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">04</span><h3>Channel-ready crops</h3><p>Ratios and resolutions for Shopify, Instagram and the marketplaces you name.</p></div>
+        <div class="kit-c tint glass-p rv rv-d1 rv-row"><span class="ki">05</span><h3>Human garment-fidelity QA</h3><p>Each image checked against the real product before you see it — documented.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">06</span><h3>Disclosure guidance</h3><p>Where a platform requires an AI label, we tell you — before you publish.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">07</span><h3>Full usage rights</h3><p>Delivered images are yours to use across your channels, documented.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">08</span><h3>Restock speed</h3><p>New colour or returning SKU? New images in days — no studio calendar.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">09</span><h3>Two revision rounds</h3><p>Model direction and image corrections — built into the price.</p></div>
       </div>
     </div>
   </section>
@@ -633,7 +633,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="acc-honest">
         <span class="kicker rv">The fidelity promise</span>
-        <h2 class="h-display rv" id="fp-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">The garment is the truth. <span class="acc-t">The image serves it.</span></h2>
+        <h2 class="h-display rv rv-display" id="fp-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">The garment is the truth. <span class="acc-t">The image serves it.</span></h2>
         <p class="rv">An AI image that "improves" your product — sharper print, better drape, a colour that pops more than the dye ever will — is a returns machine. Our QA rejects any image that doesn't match the physical garment a customer will unbox. What you show is what they get, or the image doesn't ship.</p>
         <p class="soft rv">That's also why the frames above are placeholders: we don't decorate this page with generated fashion imagery and call it proof.</p>
       </div>
@@ -645,7 +645,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">An honest comparison</span>
-        <h2 class="h-display rv" id="hc-h">When to shoot real. <span class="acc-t">When to generate.</span></h2>
+        <h2 class="h-display rv rv-display" id="hc-h">When to shoot real. <span class="acc-t">When to generate.</span></h2>
       </div>
       <div class="cmp2">
         <div class="cmp-col glass-p rv">
@@ -676,12 +676,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Rights &amp; ethics</span>
-        <h2 class="h-display rv" id="re-h">Safe to publish. <span class="acc-t">Safe to stand behind.</span></h2>
+        <h2 class="h-display rv rv-display" id="re-h">Safe to publish. <span class="acc-t">Safe to stand behind.</span></h2>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>No borrowed faces</h3><p>Synthetic models only — never a real person's likeness without consent. No scraped faces, no look-alikes.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">02</span><h3>Platform rules, tracked</h3><p>Marketplace AI-imagery policies differ and change. We deliver compliant for the channels you name, and flag where a label is required.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">03</span><h3>Your images, documented</h3><p>Usage rights to every delivered image are yours, in writing — store, ads, marketplaces.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3>No borrowed faces</h3><p>Synthetic models only — never a real person's likeness without consent. No scraped faces, no look-alikes.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">02</span><h3>Platform rules, tracked</h3><p>Marketplace AI-imagery policies differ and change. We deliver compliant for the channels you name, and flag where a label is required.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">03</span><h3>Your images, documented</h3><p>Usage rights to every delivered image are yours, in writing — store, ads, marketplaces.</p></div>
       </div>
     </div>
   </section>
@@ -693,7 +693,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Questions</span>
-        <h2 class="h-display rv" id="faq-h">Asked before <span class="acc-t">every catalog.</span></h2>
+        <h2 class="h-display rv rv-display" id="faq-h">Asked before <span class="acc-t">every catalog.</span></h2>
       </div>
       <div class="faq-list rv">
         <div class="faq-row glass-p">
@@ -746,7 +746,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       <div class="contact-panel glass-p">
       <div class="sec-head">
         <span class="kicker rv">Get your quote</span>
-        <h2 class="h-display rv" id="contact-h">Send one flat shot. See what <span class="acc-t">your catalog could look like.</span></h2>
+        <h2 class="h-display rv rv-display" id="contact-h">Send one flat shot. See what <span class="acc-t">your catalog could look like.</span></h2>
         <p class="sub rv">Tell us the garments and where the photos will run — fixed quote within 24 hours.</p>
       </div>
       <div class="contact-grid">

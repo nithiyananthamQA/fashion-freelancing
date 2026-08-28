@@ -21,9 +21,9 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- fonts load without blocking first paint; metric-matched fallbacks
      (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 <link rel="stylesheet" href="../../assets/night.css">
@@ -177,7 +177,7 @@ main { position: relative; z-index: 3; }
 /* ---- Atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
-  letter-spacing: .04em; text-transform: uppercase; color: var(--acc); }
+  letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); }
 .h-display { font-family: var(--disp); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; color: var(--ink); }
 .acc-t { color: var(--acc); }
 .glass-p {
@@ -538,7 +538,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap hero-center">
       <div>
         <span class="kicker rv in">Listing creation — done for you</span>
-        <h1 class="h-display rv in" style="margin-top:14px;">Listings that get found. <span class="acc-t">Copy that gets bought.</span></h1>
+        <h1 class="h-display rv in rv-display" style="margin-top:14px;">Listings that get found. <span class="acc-t">Copy that gets bought.</span></h1>
         <p class="sub rv in">
           Fashion listings engineered for how people actually search — keyword-researched titles,
           benefit-led copy, complete attributes and size content that cuts returns. For marketplaces and your own store.
@@ -561,9 +561,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head" style="margin-bottom:30px;">
         <span class="kicker rv">The anatomy</span>
-        <h2 class="h-display rv">One listing, every part <span class="acc-t">working.</span></h2>
+        <h2 class="h-display rv rv-display">One listing, every part <span class="acc-t">working.</span></h2>
       </div>
-      <div class="vwrap rv">
+      <div class="vwrap rv rv-media">
         <div class="lst glass-p" aria-hidden="true">
           <div class="lst-card">
             <div class="lst-img"><svg viewBox="0 0 60 60"><path d="M18 10 L25 7 C25 11 35 11 35 7 L42 10 L48 19 L41 23 L41 52 L19 52 L19 23 L12 19 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div>
@@ -589,12 +589,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Why it matters</span>
-        <h2 class="h-display rv" id="lu-h">A great product with a weak listing is <span class="acc-t">invisible inventory.</span></h2>
+        <h2 class="h-display rv rv-display" id="lu-h">A great product with a weak listing is <span class="acc-t">invisible inventory.</span></h2>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>Nobody finds it</h3><p>Shoppers search "cotton kurta set women office wear" — a title that says "Beautiful Dress — New Collection" matches none of it.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">02</span><h3>Finders don't buy</h3><p>Copy that lists facts ("100% cotton") without selling the outcome ("stays crisp through a 10-hour day") loses the click it earned.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">03</span><h3>Buyers return it</h3><p>Fashion's returns problem is largely a fit-information problem. Listings without honest size guidance pay for it twice — shipping both ways.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3>Nobody finds it</h3><p>Shoppers search "cotton kurta set women office wear" — a title that says "Beautiful Dress — New Collection" matches none of it.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">02</span><h3>Finders don't buy</h3><p>Copy that lists facts ("100% cotton") without selling the outcome ("stays crisp through a 10-hour day") loses the click it earned.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">03</span><h3>Buyers return it</h3><p>Fashion's returns problem is largely a fit-information problem. Listings without honest size guidance pay for it twice — shipping both ways.</p></div>
       </div>
     </div>
   </section>
@@ -604,7 +604,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Platforms</span>
-        <h2 class="h-display rv" id="pl-h">Written to each platform's rules — <span class="acc-t">not copy-pasted between them.</span></h2>
+        <h2 class="h-display rv rv-display" id="pl-h">Written to each platform's rules — <span class="acc-t">not copy-pasted between them.</span></h2>
         <p class="sub rv">Title limits, attribute schemas and search behaviour differ on every platform. The same words don't work twice.</p>
       </div>
       <div class="fmt-wall rv">
@@ -624,18 +624,18 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">What you get</span>
-        <h2 class="h-display rv" id="kit-h">Every part of the listing, <span class="acc-t">actually written.</span></h2>
+        <h2 class="h-display rv rv-display" id="kit-h">Every part of the listing, <span class="acc-t">actually written.</span></h2>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>Keyword-researched title</h3><p>Built from what shoppers type for this garment on this platform — inside the character limit.</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">02</span><h3>Bullets that sell</h3><p>Fabric, fit and features translated into reasons to buy — not a spec dump.</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">03</span><h3>Description / A+ copy</h3><p>The long-form sell for shoppers who scroll — structured, scannable, on-brand.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">04</span><h3>Backend search terms</h3><p>The keywords buyers use but titles can't fit — synonyms, regional terms, misspellings.</p></div>
-        <div class="kit-c tint glass-p rv rv-d1"><span class="ki">05</span><h3>Size &amp; fit content</h3><p>Honest fit guidance and size-chart copy — the cheapest returns reduction there is.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">06</span><h3>Complete attributes</h3><p>Every category field filled correctly — filters are search too, and empty fields hide you.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">07</span><h3>Image order brief</h3><p>Which shots to lead with and what's missing — copy and images sell together.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">08</span><h3>Keyword sheet included</h3><p>The research behind every listing, handed over — no black box.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">09</span><h3>Upload-ready delivery</h3><p>In your platform's sheet or direct to your store — plus two revision rounds.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3>Keyword-researched title</h3><p>Built from what shoppers type for this garment on this platform — inside the character limit.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">02</span><h3>Bullets that sell</h3><p>Fabric, fit and features translated into reasons to buy — not a spec dump.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">03</span><h3>Description / A+ copy</h3><p>The long-form sell for shoppers who scroll — structured, scannable, on-brand.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">04</span><h3>Backend search terms</h3><p>The keywords buyers use but titles can't fit — synonyms, regional terms, misspellings.</p></div>
+        <div class="kit-c tint glass-p rv rv-d1 rv-row"><span class="ki">05</span><h3>Size &amp; fit content</h3><p>Honest fit guidance and size-chart copy — the cheapest returns reduction there is.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">06</span><h3>Complete attributes</h3><p>Every category field filled correctly — filters are search too, and empty fields hide you.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">07</span><h3>Image order brief</h3><p>Which shots to lead with and what's missing — copy and images sell together.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">08</span><h3>Keyword sheet included</h3><p>The research behind every listing, handed over — no black box.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">09</span><h3>Upload-ready delivery</h3><p>In your platform's sheet or direct to your store — plus two revision rounds.</p></div>
       </div>
     </div>
   </section>
@@ -645,7 +645,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="acc-honest">
         <span class="kicker rv">Why fashion-only matters</span>
-        <h2 class="h-display rv" id="fw-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">We only write fashion. <span class="acc-t">That's the point.</span></h2>
+        <h2 class="h-display rv rv-display" id="fw-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">We only write fashion. <span class="acc-t">That's the point.</span></h2>
         <p class="rv">A generalist writes "blue dress." A fashion writer knows the shopper types "A-line midi," searches by occasion and fabric, filters by neckline, and returns the garment when the listing said nothing about stretch. Garment vocabulary, fit language and the returns problem are the job — not an add-on to it.</p>
         <p class="soft rv">It's the same reason our tech packs and patterns exist: we speak garment, on every page of this site.</p>
       </div>
@@ -657,7 +657,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Scale honestly</span>
-        <h2 class="h-display rv" id="bk-h">One hero product, or <span class="acc-t">six hundred SKUs.</span></h2>
+        <h2 class="h-display rv rv-display" id="bk-h">One hero product, or <span class="acc-t">six hundred SKUs.</span></h2>
       </div>
       <div class="cmp2">
         <div class="cmp-col glass-p rv">
@@ -688,12 +688,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Honest expectations</span>
-        <h2 class="h-display rv" id="he-h">What changes when, <span class="acc-t">truthfully.</span></h2>
+        <h2 class="h-display rv rv-display" id="he-h">What changes when, <span class="acc-t">truthfully.</span></h2>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>Immediately</h3><p>Complete attributes and correct keywords make you findable and filterable from the day the listing goes live.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">02</span><h3>Over weeks</h3><p>Ranking moves as clicks and orders accumulate — platforms reward listings that convert, and that takes traffic and time.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">03</span><h3>What copy can't fix</h3><p>Weak photos, wrong pricing, or a product nobody wants. If we see one of those, we say so before you pay for words.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3>Immediately</h3><p>Complete attributes and correct keywords make you findable and filterable from the day the listing goes live.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">02</span><h3>Over weeks</h3><p>Ranking moves as clicks and orders accumulate — platforms reward listings that convert, and that takes traffic and time.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">03</span><h3>What copy can't fix</h3><p>Weak photos, wrong pricing, or a product nobody wants. If we see one of those, we say so before you pay for words.</p></div>
       </div>
     </div>
   </section>
@@ -703,7 +703,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">How it works</span>
-        <h2 class="h-display rv" id="how-h">Catalog to live listings, <span class="acc-t">in four steps.</span></h2>
+        <h2 class="h-display rv rv-display" id="how-h">Catalog to live listings, <span class="acc-t">in four steps.</span></h2>
       </div>
       <div class="chat-wrap" style="grid-template-columns:1fr;max-width:860px;margin:0 auto;">
         <div class="weeks rv-steps">
@@ -723,7 +723,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Questions</span>
-        <h2 class="h-display rv" id="faq-h">Asked before <span class="acc-t">every listing.</span></h2>
+        <h2 class="h-display rv rv-display" id="faq-h">Asked before <span class="acc-t">every listing.</span></h2>
       </div>
       <div class="faq-list rv">
         <div class="faq-row glass-p">
@@ -776,7 +776,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       <div class="contact-panel glass-p">
       <div class="sec-head">
         <span class="kicker rv">Get your quote</span>
-        <h2 class="h-display rv" id="contact-h">Send your catalog. Get listings that <span class="acc-t">earn their keep.</span></h2>
+        <h2 class="h-display rv rv-display" id="contact-h">Send your catalog. Get listings that <span class="acc-t">earn their keep.</span></h2>
         <p class="sub rv">Tell us the platform and how many SKUs — fixed quote within 24 hours.</p>
       </div>
       <div class="contact-grid">

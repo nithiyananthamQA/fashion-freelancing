@@ -21,9 +21,9 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- fonts load without blocking first paint; metric-matched fallbacks
      (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 <link rel="stylesheet" href="../../assets/night.css">
@@ -177,7 +177,7 @@ main { position: relative; z-index: 3; }
 /* ---- Atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
-  letter-spacing: .04em; text-transform: uppercase; color: var(--acc); }
+  letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); }
 .h-display { font-family: var(--disp); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; color: var(--ink); }
 .acc-t { color: var(--acc); }
 .glass-p {
@@ -569,7 +569,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap hero-split">
       <div class="hero-copy">
         <span class="kicker rv in">Seamless patterns — done for you</span>
-        <h1 class="h-display rv in" style="margin-top:14px;">Prints that stay seamless <span class="acc-t">in production.</span></h1>
+        <h1 class="h-display rv in rv-display" style="margin-top:14px;">Prints that stay seamless <span class="acc-t">in production.</span></h1>
         <p class="sub rv in">
           Exclusive repeat patterns for fashion brands — mill-ready files, colour separations,
           and a repeat we tile-test before you ever cut fabric.
@@ -586,7 +586,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       </div>
 
       <!-- right: the deliverable, previewed in the hero -->
-      <div class="hero-view rv in" aria-hidden="true">
+      <div class="hero-view rv in rv-media" aria-hidden="true">
     <div class="tile-demo glass-p" aria-hidden="true">
       <div class="td-canvas"></div>
       <div class="td-grid"></div>
@@ -600,18 +600,18 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">What you get</span>
-        <h2 class="h-display rv" id="kit-h">When your mill says "production-ready," <span class="acc-t">this is what they mean.</span></h2>
+        <h2 class="h-display rv rv-display" id="kit-h">When your mill says "production-ready," <span class="acc-t">this is what they mean.</span></h2>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv"><span class="ki">01</span><h3>Layered master file</h3><p>Editable AI/PSD source — motifs on layers, ready for future colorways.</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">02</span><h3>Tile-tested repeat</h3><p>The seamless tile, verified at 3×3 and larger, at print scale.</p></div>
-        <div class="kit-c glass-p rv"><span class="ki">03</span><h3>Mill files — 300 DPI</h3><p>TIFF/PNG in CMYK and RGB, sized to your fabric width and repeat height.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">04</span><h3>Pantone-referenced colours</h3><p>Colour standards your printer can match — "that blue" is not a colour.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">05</span><h3>Colour separations</h3><p>Indexed separations for rotary and screen printing, on request.</p></div>
-        <div class="kit-c glass-p rv rv-d1"><span class="ki">06</span><h3>Repeat spec sheet</h3><p>Tile size, drop type, DPI and direction — the mill's questions, pre-answered.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">07</span><h3>Colorway variants</h3><p>Your palette applied across the repeat — test the range before printing.</p></div>
-        <div class="kit-c tint glass-p rv rv-d2"><span class="ki">08</span><h3>Exclusive ownership</h3><p>Full copyright transfers to you on final payment. One print, one brand.</p></div>
-        <div class="kit-c glass-p rv rv-d2"><span class="ki">09</span><h3>Two revision rounds</h3><p>Motifs, colours, scale — most prints approved in round one.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3>Layered master file</h3><p>Editable AI/PSD source — motifs on layers, ready for future colorways.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">02</span><h3>Tile-tested repeat</h3><p>The seamless tile, verified at 3×3 and larger, at print scale.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">03</span><h3>Mill files — 300 DPI</h3><p>TIFF/PNG in CMYK and RGB, sized to your fabric width and repeat height.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">04</span><h3>Pantone-referenced colours</h3><p>Colour standards your printer can match — "that blue" is not a colour.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">05</span><h3>Colour separations</h3><p>Indexed separations for rotary and screen printing, on request.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">06</span><h3>Repeat spec sheet</h3><p>Tile size, drop type, DPI and direction — the mill's questions, pre-answered.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">07</span><h3>Colorway variants</h3><p>Your palette applied across the repeat — test the range before printing.</p></div>
+        <div class="kit-c tint glass-p rv rv-d2 rv-row"><span class="ki">08</span><h3>Exclusive ownership</h3><p>Full copyright transfers to you on final payment. One print, one brand.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">09</span><h3>Two revision rounds</h3><p>Motifs, colours, scale — most prints approved in round one.</p></div>
       </div>
     </div>
   </section>
@@ -620,9 +620,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head" style="margin-bottom:30px;">
         <span class="kicker rv">See it tiling</span>
-        <h2 class="h-display rv">A live repeat — no seam, <span class="acc-t">no break.</span></h2>
+        <h2 class="h-display rv rv-display">A live repeat — no seam, <span class="acc-t">no break.</span></h2>
       </div>
-      <div class="vwrap rv">
+      <div class="vwrap rv rv-media">
         <div class="tile-demo glass-p" aria-hidden="true">
           <div class="td-canvas"></div>
           <div class="td-grid"></div>
@@ -637,7 +637,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">How it works</span>
-        <h2 class="h-display rv" id="how-h">Brief today. <span class="acc-t">Quote tomorrow.</span></h2>
+        <h2 class="h-display rv rv-display" id="how-h">Brief today. <span class="acc-t">Quote tomorrow.</span></h2>
       </div>
       <div class="chat-wrap" style="grid-template-columns:1fr;max-width:860px;margin:0 auto;">
         <div class="weeks rv-steps">
@@ -654,19 +654,19 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Repeat types, explained</span>
-        <h2 class="h-display rv" id="rt-h">You don't need to know which one you need. <span class="acc-t">We do.</span></h2>
+        <h2 class="h-display rv rv-display" id="rt-h">You don't need to know which one you need. <span class="acc-t">We do.</span></h2>
         <p class="sub rv">Tell us the garment — we pick the repeat that hides the mechanics and flatters the cut.</p>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv">
+        <div class="kit-c glass-p rv rv-row">
           <div class="rt-mini rt-full" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           <h3>Full drop</h3><p>Motifs align in a straight grid — clean, architectural, great for geometrics and stripes-with-motifs.</p>
         </div>
-        <div class="kit-c glass-p rv rv-d1">
+        <div class="kit-c glass-p rv rv-d1 rv-row">
           <div class="rt-mini rt-half" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           <h3>Half drop</h3><p>Every second column shifts down half a tile — the eye stops finding the grid. The workhorse of florals.</p>
         </div>
-        <div class="kit-c glass-p rv rv-d2">
+        <div class="kit-c glass-p rv rv-d2 rv-row">
           <div class="rt-mini rt-toss" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           <h3>Tossed</h3><p>Motifs scattered in every direction — organic, dense, forgiving on any cut line. Kids, sleep, resort.</p>
         </div>
@@ -678,7 +678,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="acc-honest">
         <span class="kicker rv">Ownership &amp; exclusivity</span>
-        <h2 class="h-display rv" id="own-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">You don't license it. <span class="acc-t">You own it.</span></h2>
+        <h2 class="h-display rv rv-display" id="own-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">You don't license it. <span class="acc-t">You own it.</span></h2>
         <p class="rv">Full copyright transfers to you on final payment. The artwork is never resold, never re-coloured for someone else, never shown in our portfolio without your written OK. One print, one brand — in writing.</p>
         <p class="soft rv">That's an exclusive transfer, not a "license" — ask us the difference and we'll explain it in one paragraph.</p>
       </div>
@@ -689,7 +689,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv">Questions</span>
-        <h2 class="h-display rv" id="faq-h">Asked before <span class="acc-t">every print.</span></h2>
+        <h2 class="h-display rv rv-display" id="faq-h">Asked before <span class="acc-t">every print.</span></h2>
       </div>
       <div class="faq-list rv">
         <div class="faq-row glass-p">
@@ -741,7 +741,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       <div class="contact-panel glass-p">
       <div class="sec-head">
         <span class="kicker rv">Get your quote</span>
-        <h2 class="h-display rv" id="contact-h">Send the brief today. Get one fixed number <span class="acc-t">tomorrow.</span></h2>
+        <h2 class="h-display rv rv-display" id="contact-h">Send the brief today. Get one fixed number <span class="acc-t">tomorrow.</span></h2>
         <p class="sub rv">No licensing maze, no retainer — an exclusive print your mill can run.</p>
       </div>
       <div class="contact-grid">
