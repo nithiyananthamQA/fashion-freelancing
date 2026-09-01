@@ -354,17 +354,35 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .mv-load.tap { pointer-events: auto; cursor: pointer; }
 .mv-load.tap .ring { animation: none; border-top-color: var(--acc-30); }
 .mv-hint {
-  position: absolute; left: 50%; bottom: 16%; translate: -50% 0; z-index: 3;
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 10px 18px; border-radius: 999px; border: 1px solid var(--acc-30);
-  background: rgba(var(--scrim-rgb), .7);
-  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-  font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--acc-l); cursor: default;
-  animation: floaty 5.5s ease-in-out infinite;
-  transition: opacity .6s ease; }
+  position: absolute; left: 50%; bottom: 14%; translate: -50% 0; z-index: 3;
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 9px 16px 9px 12px; border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: rgba(var(--scrim-rgb), .82);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  /* Sentence case at a readable size. Tracked capitals are a label
+     treatment, and this is an instruction someone has to read at a glance. */
+  font-family: var(--sans); font-size: 13.5px; font-weight: 500; letter-spacing: 0;
+  color: var(--ink-2); cursor: grab;
+  transition: opacity .6s ease, transform .3s var(--easing); }
+.mv-hint:hover { transform: translateY(-2px); }
+.mv-hint:active { cursor: grabbing; }
 .mv-hint.off { opacity: 0; pointer-events: none; }
-@keyframes floaty { 50% { transform: translateY(-8px); } }
+
+/* The affordance is the drawing, not the sentence: a hand that sweeps the way
+   your finger would, so the gesture is shown rather than described. It runs
+   three times and stops — an instruction that never stops moving becomes
+   furniture, and the model behind it is the thing to watch. */
+.mv-hint .mv-drag {
+  flex: none; width: 22px; height: 22px; color: var(--acc);
+  animation: mv-sweep 2.4s cubic-bezier(.33,1,.68,1) 3;
+  transform-box: fill-box; transform-origin: center;
+}
+@keyframes mv-sweep {
+  0%, 100% { transform: translateX(-5px) rotate(-9deg); }
+  50%      { transform: translateX(5px) rotate(9deg); }
+}
+@media (prefers-reduced-motion: reduce) { .mv-hint .mv-drag { animation: none; } }
 .mv-cap {
   text-align: center; margin: 4px 0 0;
   font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
@@ -451,14 +469,39 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .sc-drape::before { top: 6px; animation: drape-sway 4s ease-in-out infinite; }
 .sc-drape::after { top: 24px; border-bottom-color: var(--acc); animation: drape-sway 4s ease-in-out infinite reverse; }
 @keyframes drape-sway { 50% { transform: translateX(8px) scaleY(1.2); } }
-/* colorway swatches */
+/* Colorway swatches.
+   These were five dots in the same accent colour, pulsing in turn — which
+   illustrates a rhythm, not a colourway. A buyer reading "every colorway"
+   should see colours. Real garment colours, and the one lifted at any moment
+   is the one being "rendered". */
 .sc-swatch { display: flex; align-items: center; justify-content: center; gap: 10px; }
-.sc-swatch i { width: 16px; height: 16px; border-radius: 50%; background: var(--acc); opacity: .3; animation: swatch-on 3.5s ease-in-out infinite; }
-.sc-swatch i:nth-child(2) { animation-delay: .7s; }
-.sc-swatch i:nth-child(3) { animation-delay: 1.4s; }
-.sc-swatch i:nth-child(4) { animation-delay: 2.1s; }
-.sc-swatch i:nth-child(5) { animation-delay: 2.8s; }
-@keyframes swatch-on { 0%, 100% { opacity: .3; transform: scale(1); } 12% { opacity: 1; transform: scale(1.25); } 30% { opacity: .3; transform: scale(1); } }
+.sc-swatch i {
+  width: 24px; height: 24px; border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(var(--surface-rgb), .18);
+  animation: swatch-on 3.2s cubic-bezier(.33,1,.68,1) infinite;
+}
+/* Season colours, not warehouse colours. The first pass used navy, bone and
+   olive — accurate to a real range, and completely flat on screen. This tile
+   has one job: make "every colorway" land in a glance, so the colours are
+   the saturated end of a drop. Colour is the content here, which is the one
+   place a full spread of hues earns its keep. */
+.sc-swatch i:nth-child(1) { background: #2E5BFF; }                        /* cobalt   */
+.sc-swatch i:nth-child(2) { background: #FF2E63; animation-delay: .55s; } /* magenta  */
+.sc-swatch i:nth-child(3) { background: #FF7A1A; animation-delay: 1.1s; } /* tangerine*/
+.sc-swatch i:nth-child(4) { background: #C6F52E; animation-delay: 1.65s; }/* acid     */
+.sc-swatch i:nth-child(5) { background: #00C9A7; animation-delay: 2.2s; } /* jade     */
+@keyframes swatch-on {
+  0%, 100% { transform: scale(1) translateY(0); box-shadow: inset 0 0 0 1px rgba(var(--surface-rgb), .18); }
+  10%      { transform: scale(1.34) translateY(-4px);
+             box-shadow: inset 0 0 0 1px rgba(var(--surface-rgb), .18), 0 6px 16px -4px currentColor; }
+  34%      { transform: scale(1) translateY(0); box-shadow: inset 0 0 0 1px rgba(var(--surface-rgb), .18); }
+}
+/* the lift throws a shadow in the swatch's own colour */
+.sc-swatch i:nth-child(1) { color: #2E5BFF; }
+.sc-swatch i:nth-child(2) { color: #FF2E63; }
+.sc-swatch i:nth-child(3) { color: #FF7A1A; }
+.sc-swatch i:nth-child(4) { color: #C6F52E; }
+.sc-swatch i:nth-child(5) { color: #00C9A7; }
 /* turntable */
 .sc-turn { display: grid; place-items: center; perspective: 300px; }
 .sc-turn i { width: 30px; height: 38px; border-radius: 6px; border: 2.5px solid var(--acc); background: var(--acc-10); animation: turn-y 4s linear infinite; }
@@ -570,8 +613,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .cform .fl { font-size: 13px; font-weight: 500; color: var(--ink-3); letter-spacing: -.005em; display: block; margin-bottom: 7px; }
 .cform .fl .rq { color: var(--acc); margin-left: 3px; }
 .cform .fi {
-  width: 100%; background: rgba(var(--surface-rgb), .06);
-  border: 1px solid var(--glass-border); border-radius: 13px;
+  width: 100%;
+  /* Paper, not a wash. The dark theme's pale-on-black field inverted to a
+     dark-on-white one, which on a pale panel is a grey smudge with a
+     near-invisible edge. Light gives the field the paper colour and lets a
+     real border define it; dark keeps the lift, below. */
+  background: var(--paper-3);
+  border: 1px solid var(--line-2); border-radius: 13px;
   /* 16px is the floor: iOS auto-zooms the page on focus below it. */
   padding: 13px 15px; font-family: var(--sans); font-size: 16px; color: var(--ink);
   transition: border-color .25s ease, box-shadow .25s ease; }
@@ -642,6 +690,34 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 :root[data-theme="dark"] { --acc: var(--acc-bright); --grad-acc-ink: var(--grad-acc); }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { --acc: var(--acc-bright); --grad-acc-ink: var(--grad-acc); }
+}
+
+/* The field lifts against the dark ground, where a bordered white box glares. */
+:root[data-theme="dark"] .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
+:root[data-theme="dark"] .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
+  :root:not([data-theme="light"]) .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+}
+/* A browser that fills a field paints it itself and ignores background-color;
+   only an inset shadow and -webkit-text-fill-color reach it. */
+.cform .fi:-webkit-autofill, .cform .fi:-webkit-autofill:hover,
+.cform .fi:-webkit-autofill:focus, .cform .fi:autofill {
+  -webkit-text-fill-color: var(--ink); caret-color: var(--ink);
+  -webkit-box-shadow: inset 0 0 0 1000px var(--paper-3); box-shadow: inset 0 0 0 1000px var(--paper-3);
+  transition: background-color 9999s ease-in-out 0s; border-color: var(--line-2);
+}
+:root[data-theme="dark"] .cform .fi:-webkit-autofill,
+:root[data-theme="dark"] .cform .fi:autofill {
+  -webkit-box-shadow: inset 0 0 0 1000px #191727; box-shadow: inset 0 0 0 1000px #191727;
+  border-color: var(--glass-border);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cform .fi:-webkit-autofill,
+  :root:not([data-theme="light"]) .cform .fi:autofill {
+    -webkit-box-shadow: inset 0 0 0 1000px #191727; box-shadow: inset 0 0 0 1000px #191727;
+    border-color: var(--glass-border);
+  }
 }
 </style>
 </head>
@@ -717,7 +793,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
           <div class="sc sc-views" aria-hidden="true"><i></i><i></i><i></i></div>
         </div>
         <div class="tile glass-p rv rv-row"><span class="ti">02</span><h3>True fabric drape</h3><p>Weight, stretch and fall simulated from your material spec.</p><div class="sc sc-drape" aria-hidden="true"></div></div>
-        <div class="tile glass-p rv rv-row"><span class="ti">03</span><h3>Every colorway</h3><p>All colorways rendered from the same model — included.</p><div class="sc sc-swatch" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
+        <div class="tile glass-p rv rv-row"><span class="ti">03</span><h3>Every colorway</h3><p>All colorways rendered from the same model — included.</p><div class="sc sc-swatch" role="img" aria-label="Five colourways rendered from one build: cobalt, magenta, tangerine, acid green and jade"><i></i><i></i><i></i><i></i><i></i></div></div>
         <div class="tile glass-p rv rv-d1 rv-row"><span class="ti">04</span><h3>360° turntable video</h3><p>A rotating view for buyer presentations and content.</p><div class="sc sc-turn" aria-hidden="true"><i></i></div></div>
         <div class="tile glass-p rv rv-d1 rv-row"><span class="ti">05</span><h3>First render in 24h</h3><p>The clock starts the moment your brief lands.</p><div class="sc sc-clock" aria-hidden="true"><i></i></div></div>
         <div class="tile glass-p rv rv-d1 rv-row"><span class="ti">06</span><h3>Presentation deck</h3><p>A formatted PDF ready for factories or buyers.</p><div class="sc sc-deck" aria-hidden="true"><i></i><i></i><i></i></div></div>
@@ -757,7 +833,15 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
           <span class="t">Preparing your 3D sample…</span>
           <span class="bar"><i id="mv-bar"></i></span>
         </div>
-        <button type="button" class="mv-hint" id="mv-hint" hidden>Drag to rotate · Scroll to zoom</button>
+        <button type="button" class="mv-hint" id="mv-hint" hidden>
+          <svg class="mv-drag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 11V6.5a1.5 1.5 0 0 1 3 0V11"/>
+            <path d="M12 11V5.5a1.5 1.5 0 0 1 3 0V11"/>
+            <path d="M15 11V7.5a1.5 1.5 0 0 1 3 0V13a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-1a1.5 1.5 0 0 1 3 0"/>
+          </svg>
+          <span id="mv-hint-text">Drag to spin it</span>
+        </button>
         <p class="mv-cap">Built in CLO3D — the same sample your factory and buyers receive.</p>
       </div>
     </div>
@@ -923,7 +1007,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
               <optgroup label="Fashion design &amp; development">
                 <option value="tech-pack">Tech Pack</option>
                 <option value="3d-virtual-sampling" selected>3D Virtual Sampling</option>
-                <option value="seamless-pattern">Seamless Pattern</option>
+                <option value="seamless-pattern">Graphics &amp; Prints</option>
                 <option value="pattern-cad">Pattern CAD</option>
                 <option value="dobby-jacquard">Dobby &amp; Jacquard Design</option>
               </optgroup>
@@ -1062,8 +1146,15 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       setTimeout(function () { mvLoad.remove(); }, 600);
       if (mvHint) {
         mvHint.hidden = false;
-        mvHint.textContent = window.matchMedia('(hover: none)').matches
-          ? 'Touch and drag to rotate' : 'Drag to rotate · Scroll to zoom'; }
+        var hintText = document.getElementById('mv-hint-text');
+        /* Say the gesture the device actually has. */
+        if (hintText) hintText.textContent = window.matchMedia('(hover: none)').matches
+          ? 'Drag to spin it' : 'Drag to spin it · scroll to zoom';
+        /* Once they have taken hold of it the instruction has done its job. */
+        var dismiss = function () { mvHint.classList.add('off'); };
+        ['pointerdown', 'wheel', 'touchstart'].forEach(function (ev) {
+          mv.addEventListener(ev, dismiss, { once: true, passive: true }); });
+        mvHint.addEventListener('click', function () { mv.focus(); dismiss(); }); }
     });
     mv.addEventListener('error', function () {
       mvLoad.querySelector('.t').textContent = '3D preview unavailable on this device';

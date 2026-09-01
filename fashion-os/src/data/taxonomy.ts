@@ -152,9 +152,12 @@ export const SERVICES: Service[] = [
   },
   {
     id: 'seamless-pattern',
-    name: 'Seamless Pattern',
+    /* Renamed to what it actually sells. The id stays: it is the URL, and it
+       is the foreign key on every specialist offering and project already in
+       the database — renaming it would break both for no gain. */
+    name: 'Graphics & Prints',
     page: '/pages/services/seamless-pattern.html',
-    blurb: 'Repeat prints and textile artwork delivered as clean, print-ready production files.',
+    blurb: 'Surface pattern, colourways and apparel graphics, delivered as print-ready production files.',
     accent: 'var(--lg-pink)',
     specialties: ['Apparel prints', 'Repeat patterns', 'Textile prints', 'Home textiles', 'Print-ready files'],
     skills: ['Repeat design', 'Colour separation', 'Print production', 'Colourway development'],

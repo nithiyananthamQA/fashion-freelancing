@@ -17,7 +17,7 @@
   var SERVICES = [
     ['tech-pack', 'Tech pack'],
     ['3d-virtual-sampling', '3D sampling'],
-    ['seamless-pattern', 'Seamless print'],
+    ['seamless-pattern', 'Graphics & prints'],
     ['pattern-cad', 'Pattern (CAD)'],
     ['dobby-jacquard', 'Dobby & jacquard'],
     ['website', 'Website'],

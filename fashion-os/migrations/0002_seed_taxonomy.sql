@@ -48,8 +48,8 @@ INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('3d-virtual
 INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('3d-virtual-sampling--tool--blender', 'Blender', '3d-virtual-sampling', 'approved', '2026-01-01T00:00:00.000Z');
 INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('3d-virtual-sampling--tool--substance', 'Substance', '3d-virtual-sampling', 'approved', '2026-01-01T00:00:00.000Z');
 
--- ---------- Seamless Pattern ----------
-INSERT INTO service_categories (id, name, position) VALUES ('seamless-pattern', 'Seamless Pattern', 2);
+-- ---------- Graphics & Prints ----------
+INSERT INTO service_categories (id, name, position) VALUES ('seamless-pattern', 'Graphics & Prints', 2);
 INSERT INTO service_specialties (id, service_id, name, position) VALUES ('seamless-pattern--apparel-prints', 'seamless-pattern', 'Apparel prints', 0);
 INSERT INTO service_specialties (id, service_id, name, position) VALUES ('seamless-pattern--repeat-patterns', 'seamless-pattern', 'Repeat patterns', 1);
 INSERT INTO service_specialties (id, service_id, name, position) VALUES ('seamless-pattern--textile-prints', 'seamless-pattern', 'Textile prints', 2);

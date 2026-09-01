@@ -112,10 +112,15 @@
   --paper-2: #131024;
   --paper-3: rgba(var(--surface-rgb), .055);
   --ink:     #F4F2FA;
+  /* The ramp must be complete. --ink-2, --ink-6 and --ink-8 were absent, so
+     anything using them fell through to the light theme's near-black. */
+  --ink-2:   rgba(var(--ink-rgb), .92);
   --ink-3:   rgba(var(--ink-rgb), .84);
   --ink-4:   rgba(var(--ink-rgb), .62);
   --ink-5:   rgba(var(--ink-rgb), .56);
+  --ink-6:   rgba(var(--ink-rgb), .34);
   --ink-7:   rgba(var(--ink-rgb), .20);
+  --ink-8:   rgba(var(--ink-rgb), .12);
   --line:    rgba(var(--surface-rgb), .10);
   --line-2:  rgba(var(--surface-rgb), .16);
   --champagne: #8B5CF6; --champagne-2: #A78BFA; --champagne-50: rgba(139,92,246,.22);
@@ -155,10 +160,13 @@
     --paper-2: #131024;
     --paper-3: rgba(var(--surface-rgb), .055);
     --ink:     #F4F2FA;
+    --ink-2:   rgba(var(--ink-rgb), .92);
     --ink-3:   rgba(var(--ink-rgb), .84);
     --ink-4:   rgba(var(--ink-rgb), .62);
     --ink-5:   rgba(var(--ink-rgb), .56);
+    --ink-6:   rgba(var(--ink-rgb), .34);
     --ink-7:   rgba(var(--ink-rgb), .20);
+    --ink-8:   rgba(var(--ink-rgb), .12);
     --line:    rgba(var(--surface-rgb), .10);
     --line-2:  rgba(var(--surface-rgb), .16);
     --champagne: #8B5CF6; --champagne-2: #A78BFA; --champagne-50: rgba(139,92,246,.22);
@@ -810,4 +818,25 @@ button[aria-busy='true'] { opacity: .7; cursor: progress; }
             box-shadow: inset 0 0 0 1000px #191727;
     border-color: var(--glass-border);
   }
+}
+
+/* ------------------------------------------------------------
+   The call-to-action row
+   ------------------------------------------------------------
+   Two pill buttons side by side need 348px. A 390px phone leaves 2px of
+   slack, and anything narrower wraps — dropping one button onto its own
+   line where it sits off-centre against the other. That ragged break is
+   the alignment fault, and it happens on the most common phone widths.
+
+   Below 480px they stack and go full width, which is a deliberate shape
+   rather than an accident of wrapping. Above it, they sit centred on a
+   shared baseline with matching padding — they were 30px and 28px, which
+   is close enough to look like a mistake rather than a decision.
+   ------------------------------------------------------------ */
+.acts { align-items: center; }
+.acts > .btn-hot, .acts > .btn-glass, .acts > .btn-acc { padding-left: 30px; padding-right: 30px; }
+
+@media (max-width: 480px) {
+  .acts { flex-direction: column; align-items: stretch; width: 100%; gap: 10px; }
+  .acts > a, .acts > button { width: 100%; justify-content: center; }
 }

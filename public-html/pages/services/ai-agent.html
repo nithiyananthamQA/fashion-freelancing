@@ -282,7 +282,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .kit-c .ki { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--acc); }
 .kit-c h3 { font-family: var(--disp); font-size: 17px; font-weight: 700; margin: 10px 0 8px; }
 .kit-c p { font-size: 13.5px; color: var(--ink-4); line-height: 1.6; margin: 0; }
-.kit-c.tint { border-color: var(--acc-45) !important; background: linear-gradient(170deg, var(--acc-10), var(--glass)) !important; }
 @media (max-width: 900px) { .kit { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .kit { grid-template-columns: 1fr; } }
 
@@ -401,8 +400,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .cform .fl { font-size: 13px; font-weight: 500; color: var(--ink-3); letter-spacing: -.005em; display: block; margin-bottom: 7px; }
 .cform .fl .rq { color: var(--acc); margin-left: 3px; }
 .cform .fi {
-  width: 100%; background: rgba(var(--surface-rgb), .06);
-  border: 1px solid var(--glass-border); border-radius: 13px;
+  width: 100%;
+  /* Paper, not a wash. The dark theme's pale-on-black field inverted to a
+     dark-on-white one, which on a pale panel is a grey smudge with a
+     near-invisible edge. Light gives the field the paper colour and lets a
+     real border define it; dark keeps the lift, below. */
+  background: var(--paper-3);
+  border: 1px solid var(--line-2); border-radius: 13px;
   /* 16px is the floor: iOS auto-zooms the page on focus below it. */
   padding: 13px 15px; font-family: var(--sans); font-size: 16px; color: var(--ink);
   transition: border-color .25s ease, box-shadow .25s ease; }
@@ -523,6 +527,48 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { --acc: var(--acc-bright); --grad-acc-ink: var(--grad-acc); }
 }
+
+/* The field lifts against the dark ground, where a bordered white box glares. */
+:root[data-theme="dark"] .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
+:root[data-theme="dark"] .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
+  :root:not([data-theme="light"]) .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+}
+/* A browser that fills a field paints it itself and ignores background-color;
+   only an inset shadow and -webkit-text-fill-color reach it. */
+.cform .fi:-webkit-autofill, .cform .fi:-webkit-autofill:hover,
+.cform .fi:-webkit-autofill:focus, .cform .fi:autofill {
+  -webkit-text-fill-color: var(--ink); caret-color: var(--ink);
+  -webkit-box-shadow: inset 0 0 0 1000px var(--paper-3); box-shadow: inset 0 0 0 1000px var(--paper-3);
+  transition: background-color 9999s ease-in-out 0s; border-color: var(--line-2);
+}
+:root[data-theme="dark"] .cform .fi:-webkit-autofill,
+:root[data-theme="dark"] .cform .fi:autofill {
+  -webkit-box-shadow: inset 0 0 0 1000px #191727; box-shadow: inset 0 0 0 1000px #191727;
+  border-color: var(--glass-border);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cform .fi:-webkit-autofill,
+  :root:not([data-theme="light"]) .cform .fi:autofill {
+    -webkit-box-shadow: inset 0 0 0 1000px #191727; box-shadow: inset 0 0 0 1000px #191727;
+    border-color: var(--glass-border);
+  }
+}
+
+/* "What you get" responds to the reader.
+   One card per page carried a permanent accent tint, which spent the page's
+   accent on an item that is no more important than the eight beside it — and
+   nothing at all happened on hover. The tint now follows the pointer, so the
+   colour marks what the reader is actually looking at. */
+.kit-c { transition: border-color .2s var(--easing), background .2s var(--easing), transform .2s var(--easing); }
+.kit-c:hover {
+  border-color: var(--acc-45);
+  background: linear-gradient(170deg, var(--acc-10), var(--glass));
+  transform: translateY(-3px);
+}
+@media (prefers-reduced-motion: reduce) { .kit-c:hover { transform: none; } }
+@media (hover: none) { .kit-c:hover { transform: none; } }
 </style>
 </head>
 <body>
@@ -613,7 +659,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">05</span><h3>Returns &amp; exchanges</h3><p>Your rules, explained kindly — and escalated to you when someone's unhappy.</p></div>
         <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">06</span><h3>Order status</h3><p>"Where is my order?" answered without you opening a single tab.</p></div>
         <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">07</span><h3>Lead capture</h3><p>When someone's ready to buy or wants a restock alert, their details reach you, not a void.</p></div>
-        <div class="kit-c tint glass-p rv rv-d2 rv-row"><span class="ki">08</span><h3>Human handoff</h3><p>Frustration, refunds, anything complex — a person takes over with the full transcript.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">08</span><h3>Human handoff</h3><p>Frustration, refunds, anything complex — a person takes over with the full transcript.</p></div>
         <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">09</span><h3>Your voice</h3><p>Trained on how you actually talk to customers — reviewed by you before launch.</p></div>
       </div>
     </div>
@@ -773,7 +819,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
               <optgroup label="Fashion design &amp; development">
                 <option value="tech-pack">Tech Pack</option>
                 <option value="3d-virtual-sampling">3D Virtual Sampling</option>
-                <option value="seamless-pattern">Seamless Pattern</option>
+                <option value="seamless-pattern">Graphics &amp; Prints</option>
                 <option value="pattern-cad">Pattern CAD</option>
                 <option value="dobby-jacquard">Dobby &amp; Jacquard Design</option>
               </optgroup>

@@ -302,39 +302,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 /* ============================================================
    ANATOMY — inside the pack, tabbed
    ============================================================ */
-.ana { display: grid; grid-template-columns: 4fr 8fr; gap: 20px; align-items: start; }
-.ana-tabs { display: grid; gap: 8px; }
-.ana-tab {
-  display: flex; align-items: center; gap: 12px; text-align: left;
-  padding: 14px 16px; cursor: pointer;
-  background: var(--glass); border: 1px solid var(--glass-border); border-radius: 14px;
-  color: var(--ink-3); font-family: var(--sans); font-size: 14px; font-weight: 600;
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  transition: background .25s ease, border-color .25s ease, color .25s ease; }
-.ana-tab .tn { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; color: var(--ink-5); flex: none; }
-.ana-tab:hover { background: var(--glass-hover); }
-.ana-tab[aria-selected="true"] { background: var(--acc-16); border-color: var(--acc-45); color: var(--ink); }
-.ana-tab[aria-selected="true"] .tn { color: var(--acc); }
-.ana-panel { padding: 26px; min-height: 380px; display: none; }
-.ana-panel.active { display: block; }
-.ana-panel h3 { font-family: var(--disp); font-size: 20px; font-weight: 700; margin: 0 0 8px; }
-.ana-panel .why { font-size: 14px; color: var(--ink-4); line-height: 1.6; margin: 0 0 20px; max-width: 56ch; }
-.ana-panel .why b { color: var(--acc); font-weight: 600; }
 /* mini document page mock */
-.ana-mock {
-  border: 1px solid var(--line-2); border-radius: 14px; background: rgba(var(--surface-rgb), .04);
-  padding: 18px; display: grid; gap: 10px; }
-.ana-mock .ln { height: 8px; border-radius: 4px; background: rgba(var(--surface-rgb), .14); }
-.ana-mock .ln.acc { background: var(--acc-45); }
-.ana-mock .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-.ana-mock .cell { height: 44px; border-radius: 8px; background: rgba(var(--surface-rgb), .06); border: 1px dashed var(--line-2); }
-.ana-mock .cell.acc { border-color: var(--acc-45); background: var(--acc-10); }
 @media (max-width: 860px) {
-  .ana { grid-template-columns: 1fr; }
-  .ana-tabs { display: flex; overflow-x: auto; scrollbar-width: none; padding-bottom: 6px; }
-  .ana-tabs::-webkit-scrollbar { display: none; }
-  .ana-tab { flex: none; }
-  .ana-panel { min-height: 0; }
 }
 
 /* ============================================================
@@ -442,8 +411,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .cform .fl { font-size: 13px; font-weight: 500; color: var(--ink-3); letter-spacing: -.005em; display: block; margin-bottom: 7px; }
 .cform .fl .rq { color: var(--acc); margin-left: 3px; }
 .cform .fi {
-  width: 100%; background: rgba(var(--surface-rgb), .06);
-  border: 1px solid var(--glass-border); border-radius: 13px;
+  width: 100%;
+  /* Paper, not a wash. The dark theme's pale-on-black field inverted to a
+     dark-on-white one, which on a pale panel is a grey smudge with a
+     near-invisible edge. Light gives the field the paper colour and lets a
+     real border define it; dark keeps the lift, below. */
+  background: var(--paper-3);
+  border: 1px solid var(--line-2); border-radius: 13px;
   /* 16px is the floor: iOS auto-zooms the page on focus below it. */
   padding: 13px 15px; font-family: var(--sans); font-size: 16px; color: var(--ink);
   transition: border-color .25s ease, box-shadow .25s ease; }
@@ -527,6 +501,139 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .sheet { margin: 0; border-radius: 16px; overflow: hidden; background: #fff;
   border: 1px solid var(--line-2); box-shadow: var(--shadow-2, 0 18px 44px -20px rgba(0,0,0,.45)); }
 .sheet img { display: block; width: 100%; height: auto; }
+
+/* The field lifts against the dark ground, where a bordered white box glares. */
+:root[data-theme="dark"] .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
+:root[data-theme="dark"] .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
+  :root:not([data-theme="light"]) .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+}
+/* A browser that fills a field paints it itself and ignores background-color;
+   only an inset shadow and -webkit-text-fill-color reach it. */
+.cform .fi:-webkit-autofill, .cform .fi:-webkit-autofill:hover,
+.cform .fi:-webkit-autofill:focus, .cform .fi:autofill {
+  -webkit-text-fill-color: var(--ink); caret-color: var(--ink);
+  -webkit-box-shadow: inset 0 0 0 1000px var(--paper-3); box-shadow: inset 0 0 0 1000px var(--paper-3);
+  transition: background-color 9999s ease-in-out 0s; border-color: var(--line-2);
+}
+:root[data-theme="dark"] .cform .fi:-webkit-autofill,
+:root[data-theme="dark"] .cform .fi:autofill {
+  -webkit-box-shadow: inset 0 0 0 1000px #191727; box-shadow: inset 0 0 0 1000px #191727;
+  border-color: var(--glass-border);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cform .fi:-webkit-autofill,
+  :root:not([data-theme="light"]) .cform .fi:autofill {
+    -webkit-box-shadow: inset 0 0 0 1000px #191727; box-shadow: inset 0 0 0 1000px #191727;
+    border-color: var(--glass-border);
+  }
+}
+
+/* Packages. A three-column read rather than another card grid — the reader
+   is comparing, so the columns line up and the differences sit at the same
+   height in each. */
+.tiers { display: grid; gap: 14px; grid-template-columns: 1fr; }
+@media (min-width: 860px) { .tiers { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.tier { padding: 24px 22px; display: flex; flex-direction: column; gap: 14px; }
+.tier h3 { font-family: var(--disp); font-size: 17px; font-weight: 600; letter-spacing: -.01em; margin: 0; color: var(--ink); }
+.tier ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.tier li { position: relative; padding-left: 20px; font-size: 14px; line-height: 1.55; color: var(--ink-4); }
+/* a drawn tick, so what you get reads as included rather than as a bullet */
+.tier li::before {
+  content: ''; position: absolute; left: 2px; top: 5px; width: 6px; height: 11px;
+  border: solid var(--acc); border-width: 0 2px 2px 0; transform: rotate(43deg);
+}
+.tier .who {
+  margin: auto 0 0; padding-top: 14px; border-top: 1px solid var(--line);
+  font-size: 13.5px; line-height: 1.5; color: var(--ink-5);
+}
+
+/* A page from a real pack, in place of a drawn stand-in.
+   These are dense A4 documents. Shown whole they are unreadable at web size,
+   so each sits on paper at a fixed height with the top of the page showing —
+   enough to recognise what it is — and opens full size on click for anyone
+   who wants to read it. */
+/* The whole page, not a crop of it. These were cut to a 300px band showing
+   only the top — which hid the very thing the tab is describing. Each sheet
+   keeps its own proportions and is shown end to end. */
+
+@media (min-width: 900px) {
+  /* every second page turns over: the document leads, then the note does */
+}
+
+
+/* Inside the document.
+   One page at a time, chosen from a strip of tabs sitting on top of the
+   sheet — the way tabs sit on a physical file. The previous version put six
+   narrow buttons in a left-hand column against a large empty panel, so the
+   controls and the content competed and neither filled its space.
+
+   Now the tabs are a thin index across the top and the page below gets the
+   full width. Nothing is hidden that the reader has not chosen to skip. */
+/* Tabs down the left, the page on the right — the original arrangement.
+   What changed is what sits in the panel: a real page from a real pack,
+   whole, instead of a drawn stand-in cropped to a band. */
+.doc { display: grid; gap: 20px; align-items: start; }
+@media (min-width: 900px) { .doc { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+
+.dp-tabs { display: grid; gap: 8px; align-content: start; }
+@media (max-width: 899px) {
+  /* on a narrow screen the index becomes a scrolling row above the page, and
+     the descriptors would make each card far too wide to swipe */
+  .dp-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;
+    scrollbar-width: none; -ms-overflow-style: none; }
+  .dp-tabs::-webkit-scrollbar { display: none; }
+  .dp-tab { grid-template-columns: auto auto; white-space: nowrap; }
+  .dp-h { display: none; }
+}
+
+.dp-tab {
+  display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; text-align: left;
+  padding: 14px 16px; cursor: pointer;
+  background: var(--glass); border: 1px solid var(--glass-border); border-radius: 14px;
+  font-family: var(--sans); font-size: 14px; font-weight: 600;
+  color: var(--ink-3);
+  transition: color .2s ease, background .2s ease, border-color .2s ease;
+}
+.dp-tab:hover { color: var(--ink); background: var(--glass-hover); }
+.dp-tab:focus-visible { outline: 2px solid var(--champagne); outline-offset: 2px; }
+/* the open page is marked by a rail as well as by colour */
+.dp-tab.is-on {
+  color: var(--ink); background: var(--glass-hover);
+  border-color: var(--line-2); box-shadow: inset 3px 0 0 var(--acc);
+}
+.dp-n { grid-row: 1 / 3; align-self: start; padding-top: 2px;
+  font-family: var(--mono); font-size: 12px; color: var(--ink-5); }
+/* the descriptor is what gives the index its half of the row */
+.dp-h { grid-column: 2; font-size: 12.5px; font-weight: 400; line-height: 1.45; color: var(--ink-5); white-space: normal; }
+.dp-tab.is-on .dp-h { color: var(--ink-4); }
+.dp-tab.is-on .dp-n { color: var(--acc); }
+
+.dp-page { display: none; }
+.dp-page.is-on { display: block; }
+
+.dp-shot { margin: 0; }
+.dp-shot picture {
+  display: block; border-radius: 13px; overflow: hidden; background: #fff;
+  border: 1px solid var(--line-2);
+  box-shadow: 0 20px 44px -22px rgba(var(--shadow-rgb), .5);
+}
+/* the whole sheet, never a crop of it */
+.dp-shot img { display: block; width: 100%; height: auto; }
+
+.dp-say { margin-top: 16px; }
+.dp-say h3 { font-family: var(--disp); font-size: clamp(19px, 2vw, 23px); font-weight: 600; letter-spacing: -.015em; margin: 0 0 10px; color: var(--ink); }
+.dp-say p { margin: 0; font-size: 15px; line-height: 1.65; color: var(--ink-4); max-width: 62ch; }
+.dp-say p b { color: var(--ink-2); font-weight: 600; }
+
+/* Garment icons.
+   The supplied icon sheets are white shapes on transparency, which vanish on
+   the light theme and cannot be recoloured per theme. Drawn instead: one
+   stroke weight, one 24 grid, currentColor — so each icon takes the colour of
+   the card it sits in and works in both themes from one file. */
+.gar-i { width: 26px; height: 26px; margin: 0 auto 10px; display: block; color: var(--ink-5); transition: color .2s var(--easing); }
+.gar:hover .gar-i { color: var(--acc); }
 </style>
 </head>
 <body>
@@ -579,27 +686,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-
-  <section class="sec" aria-labelledby="gar-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv">Coverage</span>
-        <h2 class="h-display rv rv-display" id="gar-h">Any garment. Any factory. <span class="acc-t">Anywhere.</span></h2>
-      </div>
-      <div class="garments">
-        <div class="gar glass-p rv rv-row"><h4>Streetwear</h4><p>Hoodies · tees · caps</p></div>
-        <div class="gar glass-p rv rv-row"><h4>Activewear</h4><p>Leggings · sets · stretch</p></div>
-        <div class="gar glass-p rv rv-row"><h4>Denim</h4><p>Jeans · jackets · washes</p></div>
-        <div class="gar glass-p rv rv-row"><h4>Dresses &amp; wovens</h4><p>Drape-critical pieces</p></div>
-        <div class="gar glass-p rv rv-d1 rv-row"><h4>Outerwear</h4><p>Bombers · coats · parkas</p></div>
-        <div class="gar glass-p rv rv-d1 rv-row"><h4>Swim &amp; lingerie</h4><p>Fit-sensitive builds</p></div>
-        <div class="gar glass-p rv rv-d1 rv-row"><h4>Kidswear</h4><p>Compliance-aware specs</p></div>
-        <div class="gar glass-p rv rv-d1 rv-row"><h4>Accessories</h4><p>Bags · scarves · soft goods</p></div>
-      </div>
-      <p class="gar-strip rv rv-row">Written in <b>international factory-standard terminology</b> — understood in India, China, Turkey, Portugal and beyond, even when you don't share a language.</p>
-    </div>
-  </section>
-
   <section class="sec" id="anatomy" aria-labelledby="anatomy-h">
     <div class="wrap">
       <div class="sec-head">
@@ -607,45 +693,97 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <h2 class="h-display rv rv-display" id="anatomy-h">What's actually inside a <span class="acc-t">factory-ready</span> tech pack.</h2>
         <p class="sub rv">Six pages, each answering a question the factory would otherwise guess at.</p>
       </div>
-      <div class="ana rv">
-        <div class="ana-tabs" role="tablist" aria-label="Tech pack pages">
-          <button class="ana-tab" role="tab" aria-selected="true" aria-controls="ana-1" type="button"><span class="tn">P.1</span>Technical flats</button>
-          <button class="ana-tab" role="tab" aria-selected="false" aria-controls="ana-2" type="button"><span class="tn">P.2</span>Construction callouts</button>
-          <button class="ana-tab" role="tab" aria-selected="false" aria-controls="ana-3" type="button"><span class="tn">P.3</span>Bill of materials</button>
-          <button class="ana-tab" role="tab" aria-selected="false" aria-controls="ana-4" type="button"><span class="tn">P.4</span>Measurement spec</button>
-          <button class="ana-tab" role="tab" aria-selected="false" aria-controls="ana-5" type="button"><span class="tn">P.5</span>Colorways &amp; artwork</button>
-          <button class="ana-tab" role="tab" aria-selected="false" aria-controls="ana-6" type="button"><span class="tn">P.6</span>Labels &amp; packaging</button>
+      <div class="doc rv">
+        <div class="dp-tabs" role="tablist" aria-label="Pages in a tech pack">
+          <button class="dp-tab is-on" role="tab" type="button"
+                  aria-selected="true" aria-controls="dp-1" id="dpt-1"
+                  tabindex="0"><span class="dp-n">P.1</span>Technical flats<span class="dp-h">Front, back and details, drawn to scale</span></button>
+          <button class="dp-tab" role="tab" type="button"
+                  aria-selected="false" aria-controls="dp-2" id="dpt-2"
+                  tabindex="-1"><span class="dp-n">P.2</span>Construction callouts<span class="dp-h">Seams, stitches, finishes and tolerances</span></button>
+          <button class="dp-tab" role="tab" type="button"
+                  aria-selected="false" aria-controls="dp-3" id="dpt-3"
+                  tabindex="-1"><span class="dp-n">P.3</span>Bill of materials<span class="dp-h">Every fabric, trim and thread, referenced</span></button>
+          <button class="dp-tab" role="tab" type="button"
+                  aria-selected="false" aria-controls="dp-4" id="dpt-4"
+                  tabindex="-1"><span class="dp-n">P.4</span>Measurement spec<span class="dp-h">Points of measure across the size run</span></button>
+          <button class="dp-tab" role="tab" type="button"
+                  aria-selected="false" aria-controls="dp-5" id="dpt-5"
+                  tabindex="-1"><span class="dp-n">P.5</span>Colorways &amp; artwork<span class="dp-h">Pantone references and artwork placement</span></button>
+          <button class="dp-tab" role="tab" type="button"
+                  aria-selected="false" aria-controls="dp-6" id="dpt-6"
+                  tabindex="-1"><span class="dp-n">P.6</span>Labels &amp; packaging<span class="dp-h">Care labels, brand tags and packing</span></button>
         </div>
-        <div>
-          <div class="ana-panel glass-p active" id="ana-1" role="tabpanel">
+        <div class="dp-page is-on" id="dp-1" role="tabpanel" aria-labelledby="dpt-1">
+          <figure class="dp-shot">
+            <picture>
+              <source type="image/webp" srcset="../../assets/img/techpack/flats-polo-tee-800.webp 800w, ../../assets/img/techpack/flats-polo-tee-1400.webp 1400w" sizes="(max-width: 900px) 92vw, 58vw" />
+              <img src="../../assets/img/techpack/flats-polo-tee-1400.webp" loading="lazy" decoding="async" alt="Vector flat sketches of a polo tee, front and back, on a technical template with style, fabric and order fields." />
+            </picture>
+          </figure>
+          <div class="dp-say">
             <h3>Technical flats</h3>
-            <p class="why">Front, back and detail line drawings of your garment. <b>Why the factory needs it:</b> this is the picture they cut from — ambiguity here becomes a wrong sample later.</p>
-            <div class="ana-mock" aria-hidden="true"><span class="ln acc" style="width:40%"></span><div class="row"><span class="cell acc"></span><span class="cell"></span><span class="cell"></span></div><span class="ln" style="width:70%"></span><span class="ln" style="width:55%"></span></div>
+            <p>Front, back and detail line drawings of your garment. <b>Why the factory needs it:</b> this is the picture they cut from — ambiguity here becomes a wrong sample later.</p>
           </div>
-          <div class="ana-panel glass-p" id="ana-2" role="tabpanel">
+        </div>
+        <div class="dp-page" id="dp-2" role="tabpanel" aria-labelledby="dpt-2" hidden>
+          <figure class="dp-shot">
+            <picture>
+              <source type="image/webp" srcset="../../assets/img/techpack/flats-bodysuit-800.webp 800w, ../../assets/img/techpack/flats-bodysuit-1400.webp 1400w" sizes="(max-width: 900px) 92vw, 58vw" />
+              <img src="../../assets/img/techpack/flats-bodysuit-1400.webp" loading="lazy" decoding="async" alt="A baby bodysuit page with leader lines pinned to named construction points — DTM binding at the collar, double-needle stitch, binding strap and snap buttons." />
+            </picture>
+          </figure>
+          <div class="dp-say">
             <h3>Construction callouts</h3>
-            <p class="why">Seam types, stitch specs, finishes and tolerances, pointed at the exact spot on the garment. <b>Why the factory needs it:</b> construction is where quotes differ most — precise callouts mean precise prices.</p>
-            <div class="ana-mock" aria-hidden="true"><span class="ln" style="width:60%"></span><div class="row"><span class="cell"></span><span class="cell acc"></span><span class="cell"></span></div><span class="ln acc" style="width:45%"></span><span class="ln" style="width:66%"></span></div>
+            <p>Seam types, stitch specs, finishes and tolerances, pointed at the exact spot on the garment. <b>Why the factory needs it:</b> construction is where quotes differ most — precise callouts mean precise prices.</p>
           </div>
-          <div class="ana-panel glass-p" id="ana-3" role="tabpanel">
+        </div>
+        <div class="dp-page" id="dp-3" role="tabpanel" aria-labelledby="dpt-3" hidden>
+          <figure class="dp-shot">
+            <picture>
+              <source type="image/webp" srcset="../../assets/img/techpack/bom-fabrication-800.webp 800w, ../../assets/img/techpack/bom-fabrication-1400.webp 1400w" sizes="(max-width: 900px) 92vw, 58vw" />
+              <img src="../../assets/img/techpack/bom-fabrication-1400.webp" loading="lazy" decoding="async" alt="A fabrication block specifying body fabric as 100% cotton single jersey at 180 GSM, neck fabric as 1x1 rib at 220 GSM and neck binding at 140 GSM, each with its colour code." />
+            </picture>
+          </figure>
+          <div class="dp-say">
             <h3>Bill of materials</h3>
-            <p class="why">Every fabric, trim, thread, zip and button with references and quantities. <b>Why the factory needs it:</b> the BOM is what they source from — a missing trim stalls the whole order.</p>
-            <div class="ana-mock" aria-hidden="true"><span class="ln acc" style="width:35%"></span><span class="ln" style="width:80%"></span><span class="ln" style="width:74%"></span><span class="ln" style="width:68%"></span></div>
+            <p>Every fabric and trim named, with composition, weight and a colour reference against each. <b>Why the factory needs it:</b> the BOM is what they source from — a missing trim stalls the whole order.</p>
           </div>
-          <div class="ana-panel glass-p" id="ana-4" role="tabpanel">
-            <h3>Measurement spec &amp; grading</h3>
-            <p class="why">Full points of measure for every size in the run, with tolerances. <b>Why the factory needs it:</b> this is the difference between "fits like the sample" and a size run nobody can wear.</p>
-            <div class="ana-mock" aria-hidden="true"><div class="row"><span class="cell"></span><span class="cell"></span><span class="cell acc"></span></div><div class="row"><span class="cell"></span><span class="cell acc"></span><span class="cell"></span></div></div>
+        </div>
+        <div class="dp-page" id="dp-4" role="tabpanel" aria-labelledby="dpt-4" hidden>
+          <figure class="dp-shot">
+            <picture>
+              <source type="image/webp" srcset="../../assets/img/techpack/measurement-spec-800.webp 800w, ../../assets/img/techpack/measurement-spec-1400.webp 1400w" sizes="(max-width: 900px) 92vw, 58vw" />
+              <img src="../../assets/img/techpack/measurement-spec-1400.webp" loading="lazy" decoding="async" alt="A points-of-measure diagram with lettered measuring points, above a graded size table giving each measurement across the full size run." />
+            </picture>
+          </figure>
+          <div class="dp-say">
+            <h3>Measurement spec</h3>
+            <p>Full points of measure for every size in the run, with tolerances. <b>Why the factory needs it:</b> this is the difference between "fits like the sample" and a size run nobody can wear.</p>
           </div>
-          <div class="ana-panel glass-p" id="ana-5" role="tabpanel">
-            <h3>Colorways &amp; artwork placement</h3>
-            <p class="why">Every colorway with Pantone or fabric references, plus print/embroidery placement. <b>Why the factory needs it:</b> "that blue" is not a colour — a Pantone code is.</p>
-            <div class="ana-mock" aria-hidden="true"><div class="row"><span class="cell acc"></span><span class="cell"></span><span class="cell acc"></span></div><span class="ln" style="width:52%"></span><span class="ln acc" style="width:38%"></span></div>
+        </div>
+        <div class="dp-page" id="dp-5" role="tabpanel" aria-labelledby="dpt-5" hidden>
+          <figure class="dp-shot">
+            <picture>
+              <source type="image/webp" srcset="../../assets/img/techpack/colorways-800.webp 800w, ../../assets/img/techpack/colorways-1400.webp 1400w" sizes="(max-width: 900px) 92vw, 58vw" />
+              <img src="../../assets/img/techpack/colorways-1400.webp" loading="lazy" decoding="async" alt="A boys' printed tee page showing the print artwork, its placement and size, and the production colourways." />
+            </picture>
+          </figure>
+          <div class="dp-say">
+            <h3>Colorways &amp; artwork</h3>
+            <p>Every colorway with Pantone or fabric references, plus print and embroidery placement. <b>Why the factory needs it:</b> "that blue" is not a colour — a Pantone code is.</p>
           </div>
-          <div class="ana-panel glass-p" id="ana-6" role="tabpanel">
-            <h3>Labels, tags &amp; packaging</h3>
-            <p class="why">Care label content, brand label placement, hangtags and packing instructions. <b>Why the factory needs it:</b> compliance lives here — and so does the unboxing your customer sees.</p>
-            <div class="ana-mock" aria-hidden="true"><span class="ln" style="width:48%"></span><div class="row"><span class="cell"></span><span class="cell acc"></span><span class="cell"></span></div><span class="ln" style="width:64%"></span></div>
+        </div>
+        <div class="dp-page" id="dp-6" role="tabpanel" aria-labelledby="dpt-6" hidden>
+          <figure class="dp-shot">
+            <picture>
+              <source type="image/webp" srcset="../../assets/img/techpack/labels-accessories-800.webp 800w, ../../assets/img/techpack/labels-accessories-1400.webp 1400w" sizes="(max-width: 900px) 92vw, 58vw" />
+              <img src="../../assets/img/techpack/labels-accessories-1400.webp" loading="lazy" decoding="async" alt="An accessories block giving the main and size label at 5 cm with 7 mm margins, a 75 mm hangtag front and back, and a care label with wash instructions and fibre content." />
+            </picture>
+          </figure>
+          <div class="dp-say">
+            <h3>Labels &amp; packaging</h3>
+            <p>Care label content, brand label placement, hangtags and packing instructions. <b>Why the factory needs it:</b> compliance lives here — and so does the unboxing your customer sees.</p>
           </div>
         </div>
       </div>
@@ -663,6 +801,67 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <div class="step glass-p rv rv-d1"><span class="t">24h</span><div class="n">02</div><h3>Fixed quote</h3><p>One number in writing within 24 hours. No hourly surprises, no scope creep.</p></div>
         <div class="step glass-p rv rv-d2"><span class="t">Day 1–4</span><div class="n">03</div><h3>We build your pack</h3><p>Flats first — you sign off the drawing before we build specs, BOM and construction.</p></div>
         <div class="step glass-p rv rv-d3"><span class="t">Day 3–5</span><div class="n">04</div><h3>Revise &amp; deliver</h3><p>Two revision rounds included, then the factory-ready PDF and editable source — yours outright.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="gar-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker rv">Coverage</span>
+        <h2 class="h-display rv rv-display" id="gar-h">Any garment. Any factory. <span class="acc-t">Anywhere.</span></h2>
+      </div>
+      <div class="garments">
+        <div class="gar glass-p rv rv-row"><svg class="gar-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4 6 5 3 7l2 3 1.5-1V20h11V9L19 10l2-3-3-2-2-1a3 3 0 0 1-6 0Z"/><path d="M10 4a3 3 0 0 0 4 0"/></svg><h4>Streetwear</h4><p>Hoodies · tees · caps</p></div>
+        <div class="gar glass-p rv rv-row"><svg class="gar-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8l-1 7 1 11h-3l-1-8-1 8H8l1-11Z"/></svg><h4>Activewear</h4><p>Leggings · sets · stretch</p></div>
+        <div class="gar glass-p rv rv-row"><svg class="gar-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10v5l-1 13h-4l-1-9-1 9H6l1-13Z"/><path d="M7 8h10"/></svg><h4>Denim</h4><p>Jeans · jackets · washes</p></div>
+        <div class="gar glass-p rv rv-row"><svg class="gar-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l-1 4 4 14H6l4-14Z"/><path d="M10 7h4"/></svg><h4>Dresses &amp; wovens</h4><p>Drape-critical pieces</p></div>
+        <div class="gar glass-p rv rv-d1 rv-row"><svg class="gar-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4 4 6v6h3v9h10v-9h3V6l-4-2-2 3-2 3-2-3Z"/><path d="M12 10v11"/></svg><h4>Outerwear</h4><p>Bombers · coats · parkas</p></div>
+        <div class="gar glass-p rv rv-d1 rv-row"><svg class="gar-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6c3 0 5 2 8 2s5-2 8-2c0 6-3 9-8 12C7 15 4 12 4 6Z"/></svg><h4>Swim &amp; lingerie</h4><p>Fit-sensitive builds</p></div>
+        <div class="gar glass-p rv rv-d1 rv-row"><svg class="gar-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 5 6l1 4 2-1v10h8V9l2 1 1-4-4-2-2 2-2-2Z"/></svg><h4>Kidswear</h4><p>Compliance-aware specs</p></div>
+        <div class="gar glass-p rv rv-d1 rv-row"><svg class="gar-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><h4>Accessories</h4><p>Bags · scarves · soft goods</p></div>
+      </div>
+      <p class="gar-strip rv rv-row">Written in <b>international factory-standard terminology</b> — understood in India, China, Turkey, Portugal and beyond, even when you don't share a language.</p>
+    </div>
+  </section>
+
+    <section class="sec" aria-labelledby="pack-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker rv">Packages</span>
+        <h2 class="h-display rv rv-display" id="pack-h">Three ways to <span class="acc-t">buy it.</span></h2>
+        <p class="sub rv">Pick the one that matches where your collection is. Every package is quoted at a fixed price before any work starts.</p>
+      </div>
+
+      <div class="tiers">
+        <article class="tier glass-p rv rv-row">
+          <h3>Placement print pack</h3>
+          <ul>
+            <li>3 graphic concepts, 1 finalised placement</li>
+            <li>Print spec sheet</li>
+            <li>Pantone TCX callouts</li>
+          </ul>
+          <p class="who">Streetwear drops and basics brands</p>
+        </article>
+
+        <article class="tier glass-p rv rv-d1 rv-row">
+          <h3>All-over print suite</h3>
+          <ul>
+            <li>2 custom repeat tiles, 3 colorways each</li>
+            <li>Production-ready repeats, 300&nbsp;DPI or vector</li>
+          </ul>
+          <p class="who">Swimwear, activewear and kidswear</p>
+        </article>
+
+        <article class="tier glass-p rv rv-d2 rv-row">
+          <h3>Full collection bundle</h3>
+          <ul>
+            <li>4&ndash;6 prints or graphics</li>
+            <li>Complete trim package &mdash; tags and labels</li>
+            <li>Full factory tech sheets</li>
+          </ul>
+          <p class="who">Emerging brands and seasonal line launches</p>
+        </article>
       </div>
     </div>
   </section>
@@ -743,7 +942,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
               <optgroup label="Fashion design &amp; development">
                 <option value="tech-pack" selected>Tech Pack</option>
                 <option value="3d-virtual-sampling">3D Virtual Sampling</option>
-                <option value="seamless-pattern">Seamless Pattern</option>
+                <option value="seamless-pattern">Graphics &amp; Prints</option>
                 <option value="pattern-cad">Pattern CAD</option>
                 <option value="dobby-jacquard">Dobby &amp; Jacquard Design</option>
               </optgroup>
@@ -819,23 +1018,35 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       var r = el.getBoundingClientRect();
       if ((r.width || r.height) && r.top < window.innerHeight * 1.05) el.classList.add('in'); }); }, 700);
 
-  /* anatomy tabs */
-  var tabs = document.querySelectorAll('.ana-tab');
-  tabs.forEach(function (tab) {
-    tab.addEventListener('click', function () {
-      tabs.forEach(function (t) { t.setAttribute('aria-selected', t === tab ? 'true' : 'false'); });
-      document.querySelectorAll('.ana-panel').forEach(function (p) { p.classList.remove('active'); });
-      var panel = document.getElementById(tab.getAttribute('aria-controls'));
-      if (panel) panel.classList.add('active'); }); });
-  var tablist = document.querySelector('.ana-tabs');
-  if (tablist) {
-    tablist.addEventListener('keydown', function (e) {
-      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-      var arr = Array.prototype.slice.call(tabs);
-      var i = arr.findIndex(function (t) { return t.getAttribute('aria-selected') === 'true'; });
-      var next = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? (i + 1) % arr.length : (i - 1 + arr.length) % arr.length;
-      arr[next].click(); arr[next].focus();
-      e.preventDefault(); }); }
+
+  /* Document pages: one open at a time, arrow keys move between tabs. */
+  (function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.dp-tab'));
+    if (!tabs.length) return;
+    function open(tab) {
+      tabs.forEach(function (t) {
+        var on = t === tab;
+        t.classList.toggle('is-on', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        var panel = document.getElementById(t.getAttribute('aria-controls'));
+        if (panel) { panel.classList.toggle('is-on', on); panel.hidden = !on; }
+      });
+    }
+    tabs.forEach(function (t) { t.addEventListener('click', function () { open(t); }); });
+    document.querySelector('.dp-tabs').addEventListener('keydown', function (e) {
+      /* Move from where the focus is, not from what is open — a reader can
+         tab to a control without opening it, and the arrow key should carry
+         on from there. */
+      var i = tabs.indexOf(document.activeElement);
+      if (i === -1) i = tabs.findIndex(function (t) { return t.getAttribute('aria-selected') === 'true'; });
+      var n = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1
+            : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : -1;
+      if (n === -1) return;
+      n = (n + tabs.length) % tabs.length;
+      open(tabs[n]); tabs[n].focus(); e.preventDefault();
+    });
+  })();
 
   /* copy email */
   var mailBtn = document.getElementById('copy-mail');

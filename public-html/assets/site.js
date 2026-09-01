@@ -127,7 +127,7 @@
         <div class="tm-svcs">
           <a class="sub" href="${r("pages/services/tech-pack.html")}">Tech packs</a>
           <a class="sub" href="${r("pages/services/3d-virtual-sampling.html")}">3D sampling</a>
-          <a class="sub" href="${r("pages/services/seamless-pattern.html")}">Seamless patterns</a>
+          <a class="sub" href="${r("pages/services/seamless-pattern.html")}">Graphics &amp; prints</a>
           <a class="sub" href="${r("pages/services/pattern-cad.html")}">Pattern (CAD)</a>
           <a class="sub" href="${r("pages/services/dobby-jacquard.html")}">Dobby &amp; jacquard</a>
           <a class="sub" href="${r("pages/services/website.html")}">Websites</a>
@@ -161,7 +161,7 @@
       <h6>Design &amp; development</h6>
       <a role="menuitem" href="${r("pages/services/tech-pack.html")}">Tech packs</a>
       <a role="menuitem" href="${r("pages/services/3d-virtual-sampling.html")}">3D virtual sampling</a>
-      <a role="menuitem" href="${r("pages/services/seamless-pattern.html")}">Seamless patterns</a>
+      <a role="menuitem" href="${r("pages/services/seamless-pattern.html")}">Graphics &amp; prints</a>
       <a role="menuitem" href="${r("pages/services/pattern-cad.html")}">Pattern making (CAD)</a>
       <a role="menuitem" href="${r("pages/services/dobby-jacquard.html")}">Dobby &amp; jacquard</a>
     </div>
@@ -186,7 +186,7 @@
           </a>
           <p style="color:var(--ink-5);font-size:14px;max-width:340px;margin-top:14px;line-height:1.55;">
             Fashion Freelancing is a fashion design and production-services studio — factory-ready
-            tech packs, 3D virtual samples, digital patterns, seamless prints, woven designs,
+            tech packs, 3D virtual samples, digital patterns, graphics and prints, woven designs,
             AI product photography, marketplace listings, websites and brand design.
           </p>
           <p style="color:var(--ink-5);font-size:13px;max-width:340px;margin-top:10px;line-height:1.55;">
@@ -200,7 +200,7 @@
           <ul>
             <li><a href="${r("pages/services/tech-pack.html")}">Tech packs</a></li>
             <li><a href="${r("pages/services/3d-virtual-sampling.html")}">3D virtual sampling</a></li>
-            <li><a href="${r("pages/services/seamless-pattern.html")}">Seamless patterns</a></li>
+            <li><a href="${r("pages/services/seamless-pattern.html")}">Graphics &amp; prints</a></li>
             <li><a href="${r("pages/services/pattern-cad.html")}">Pattern making (CAD)</a></li>
             <li><a href="${r("pages/services/dobby-jacquard.html")}">Dobby &amp; jacquard</a></li>
           </ul>
@@ -532,10 +532,14 @@
     };
     setTimeout(sweep, 1200);
     window.addEventListener('load', () => setTimeout(sweep, 400));
-    // last resort: after this, show everything regardless of position
-    setTimeout(() => document.querySelectorAll('.rv:not(.in)').forEach((el) => {
-      if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('in');
-    }), 3500);
+    /* Last resort: reveal everything still hidden, wherever it sits.
+       This used to keep the viewport test, which meant a long section — six
+       full document pages down a 3,400px column — left everything below the
+       fold invisible for good when the observer never fired. A fail-safe
+       that only rescues what you can already see is not a fail-safe. */
+    setTimeout(() => {
+      document.querySelectorAll('.rv:not(.in)').forEach((el) => el.classList.add('in'));
+    }, 3500);
   }
 
   function wireThemeToggle() {

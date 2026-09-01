@@ -282,7 +282,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .kit-c .ki { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--acc); }
 .kit-c h3 { font-family: var(--disp); font-size: 17px; font-weight: 700; margin: 10px 0 8px; }
 .kit-c p { font-size: 13.5px; color: var(--ink-4); line-height: 1.6; margin: 0; }
-.kit-c.tint { border-color: var(--acc-45) !important; background: linear-gradient(170deg, var(--acc-10), var(--glass)) !important; }
 @media (max-width: 900px) { .kit { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .kit { grid-template-columns: 1fr; } }
 
@@ -401,8 +400,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .cform .fl { font-size: 13px; font-weight: 500; color: var(--ink-3); letter-spacing: -.005em; display: block; margin-bottom: 7px; }
 .cform .fl .rq { color: var(--acc); margin-left: 3px; }
 .cform .fi {
-  width: 100%; background: rgba(var(--surface-rgb), .06);
-  border: 1px solid var(--glass-border); border-radius: 13px;
+  width: 100%;
+  /* Paper, not a wash. The dark theme's pale-on-black field inverted to a
+     dark-on-white one, which on a pale panel is a grey smudge with a
+     near-invisible edge. Light gives the field the paper colour and lets a
+     real border define it; dark keeps the lift, below. */
+  background: var(--paper-3);
+  border: 1px solid var(--line-2); border-radius: 13px;
   /* 16px is the floor: iOS auto-zooms the page on focus below it. */
   padding: 13px 15px; font-family: var(--sans); font-size: 16px; color: var(--ink);
   transition: border-color .25s ease, box-shadow .25s ease; }
@@ -508,6 +512,111 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { --acc: var(--acc-bright); --grad-acc-ink: var(--grad-acc); }
 }
+
+/* The field lifts against the dark ground, where a bordered white box glares. */
+:root[data-theme="dark"] .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
+:root[data-theme="dark"] .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
+  :root:not([data-theme="light"]) .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+}
+/* A browser that fills a field paints it itself and ignores background-color;
+   only an inset shadow and -webkit-text-fill-color reach it. */
+.cform .fi:-webkit-autofill, .cform .fi:-webkit-autofill:hover,
+.cform .fi:-webkit-autofill:focus, .cform .fi:autofill {
+  -webkit-text-fill-color: var(--ink); caret-color: var(--ink);
+  -webkit-box-shadow: inset 0 0 0 1000px var(--paper-3); box-shadow: inset 0 0 0 1000px var(--paper-3);
+  transition: background-color 9999s ease-in-out 0s; border-color: var(--line-2);
+}
+:root[data-theme="dark"] .cform .fi:-webkit-autofill,
+:root[data-theme="dark"] .cform .fi:autofill {
+  -webkit-box-shadow: inset 0 0 0 1000px #191727; box-shadow: inset 0 0 0 1000px #191727;
+  border-color: var(--glass-border);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cform .fi:-webkit-autofill,
+  :root:not([data-theme="light"]) .cform .fi:autofill {
+    -webkit-box-shadow: inset 0 0 0 1000px #191727; box-shadow: inset 0 0 0 1000px #191727;
+    border-color: var(--glass-border);
+  }
+}
+
+/* "What you get" responds to the reader.
+   One card per page carried a permanent accent tint, which spent the page's
+   accent on an item that is no more important than the eight beside it — and
+   nothing at all happened on hover. The tint now follows the pointer, so the
+   colour marks what the reader is actually looking at. */
+.kit-c { transition: border-color .2s var(--easing), background .2s var(--easing), transform .2s var(--easing); }
+.kit-c:hover {
+  border-color: var(--acc-45);
+  background: linear-gradient(170deg, var(--acc-10), var(--glass));
+  transform: translateY(-3px);
+}
+@media (prefers-reduced-motion: reduce) { .kit-c:hover { transform: none; } }
+@media (hover: none) { .kit-c:hover { transform: none; } }
+
+
+/* Input, reel, output — one band.
+   Read off the reference: scattered images at varied sizes on either side of
+   a tall portrait reel, arrows underneath tying the three together. The
+   first attempt put a neat 2x2 grid beside a dashed box, which is rigid
+   where this wants to be a collage — the varied sizes are what stop it
+   reading as a spreadsheet. */
+.flow {
+  position: relative; display: grid; gap: 14px; align-items: center;
+  grid-template-columns: 1fr;
+  padding: clamp(20px, 3vw, 30px) clamp(16px, 3vw, 28px) clamp(46px, 5vw, 62px);
+  background: var(--glass); border: 1px solid var(--glass-border); border-radius: 18px;
+}
+@media (min-width: 900px) { .flow { grid-template-columns: 1fr auto 1fr; gap: 26px; } }
+
+.flow-side { position: relative; min-height: 210px; }
+.flow-lab {
+  position: absolute; top: -4px; z-index: 2;
+  font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--ink-5);
+}
+.flow-in .flow-lab { left: 4px; }
+.flow-out .flow-lab { right: 4px; }
+
+/* each card is its own size and sits at its own angle — the collage is the point */
+.flow .fi, .flow .fo {
+  position: absolute; margin: 0; overflow: hidden;
+  border-radius: 10px; background: #fff; border: 1px solid var(--line-2);
+  box-shadow: 0 12px 26px -14px rgba(var(--shadow-rgb), .5);
+}
+.flow .fi img, .flow .fo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.fi-a { width: 42%; height: 108px; left: 2%;  top: 26px;  transform: rotate(-3deg); }
+.fi-b { width: 30%; height: 76px;  left: 48%; top: 22px;  transform: rotate(2.5deg); }
+.fi-c { width: 34%; height: 92px;  left: 10%; top: 128px; transform: rotate(2deg); }
+.fi-d { width: 26%; height: 70px;  left: 50%; top: 118px; transform: rotate(-2deg); }
+
+.fo-a { width: 40%; height: 100px; right: 3%;  top: 26px;  transform: rotate(2.5deg); }
+.fo-b { width: 28%; height: 78px;  right: 46%; top: 34px;  transform: rotate(-2deg); }
+.fo-c { width: 36%; height: 88px;  right: 12%; top: 130px; transform: rotate(-3deg); }
+
+/* the reel is portrait, because that is the shape this output is used at */
+.flow-mid { display: flex; justify-content: center; }
+.flow-reel {
+  width: 172px; aspect-ratio: 3 / 4;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px;
+  border-radius: 13px; border: 1px dashed var(--line-2);
+  background: rgba(var(--surface-rgb), .03); color: var(--ink-5);
+  font-size: 12.5px; text-align: center; padding: 0 14px;
+}
+.flow-reel svg { width: 26px; height: 26px; }
+
+/* the arrows sit under everything and simply carry the eye across */
+.flow-link { position: absolute; left: 4%; right: 4%; bottom: 16px; width: 92%; height: 40px; overflow: visible;
+  stroke: var(--acc); stroke-width: 1.2; fill: none; opacity: .5; }
+.flow-link .hd { fill: var(--acc); stroke: none; }
+@media (max-width: 899px) {
+  /* stacked, the collage would overlap itself — a plain row is honest here */
+  .flow-side { min-height: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding-top: 22px; }
+  .flow .fi, .flow .fo { position: static; width: auto; height: 84px; transform: none; }
+  .flow-link { display: none; }
+}
 </style>
 </head>
 <body>
@@ -552,24 +661,39 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <span class="kicker rv">The transformation</span>
         <h2 class="h-display rv rv-display">Flat shot in. <span class="acc-t">On-model out.</span></h2>
       </div>
-      <div class="vwrap rv rv-media">
-        <div class="ba glass-p" aria-hidden="true">
-          <div class="ba-f">
-            <div class="ba-frame">
-              <svg viewBox="0 0 80 80" class="ba-ic"><path d="M25 14 L34 10 C34 15 46 15 46 10 L55 14 L62 26 L53 31 L53 68 L27 68 L27 31 L18 26 Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg>
-              <span class="ba-tag">Your flat shot</span>
-            </div>
-          </div>
-          <div class="ba-arrow"><span></span></div>
-          <div class="ba-f">
-            <div class="ba-frame lit">
-              <svg viewBox="0 0 80 80" class="ba-ic"><circle cx="40" cy="16" r="7" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M28 30 L40 26 L52 30 L58 48 L51 50 L49 42 L49 70 L31 70 L31 42 L29 50 L22 48 Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg>
-              <span class="ba-tag">On-model — same garment</span>
-            </div>
-          </div>
-          <span class="ba-chip">Placeholder frames — we never show AI fashion imagery as proof</span>
+      <div class="flow rv rv-media">
+        <div class="flow-side flow-in">
+          <span class="flow-lab">Your library</span>
+          <figure class="fi fi-a"><img src="../../assets/img/prints/placement-fish-tee-640.webp" loading="lazy" decoding="async" alt="A tee flat with its placement graphic." /></figure>
+          <figure class="fi fi-b"><img src="../../assets/img/woven/fabric-rolls-560.webp" loading="lazy" decoding="async" alt="Rolls of patterned fabric." /></figure>
+          <figure class="fi fi-c"><img src="../../assets/img/prints/placement-womens-tee-640.webp" loading="lazy" decoding="async" alt="A women's tee with its technical details." /></figure>
+          <figure class="fi fi-d"><img src="../../assets/img/prints/poppy-floral-640.webp" loading="lazy" decoding="async" alt="A poppy floral repeat." /></figure>
         </div>
-        <p class="td-cap">Your product photos go here. Ask for a one-garment test on your call.</p>
+
+        <div class="flow-mid">
+          <!-- The reel goes here. Portrait, because that is the shape this
+               output is actually used at. Left empty until there is real work
+               to show — an invented example is the one thing a buyer of AI
+               imagery is right to distrust. -->
+          <div class="flow-reel" role="img" aria-label="Space reserved for an example output reel.">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/>
+            </svg>
+            <span>Example reel coming</span>
+          </div>
+        </div>
+
+        <div class="flow-side flow-out">
+          <span class="flow-lab">What comes back</span>
+          <figure class="fo fo-a"><img src="../../assets/img/prints/placement-black-tee-640.webp" loading="lazy" decoding="async" alt="A black tee with its print artwork." /></figure>
+          <figure class="fo fo-b"><img src="../../assets/img/woven/jacquard-floral-560.webp" loading="lazy" decoding="async" alt="A close crop of woven cloth." /></figure>
+          <figure class="fo fo-c"><img src="../../assets/img/prints/kids-rainbow-640.webp" loading="lazy" decoding="async" alt="A children's repeat print." /></figure>
+        </div>
+
+        <svg class="flow-link" viewBox="0 0 1000 60" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M40 30 H430" /><path d="M420 22 L436 30 L420 38 z" class="hd" />
+          <path d="M570 30 H960" /><path d="M950 22 L966 30 L950 38 z" class="hd" />
+        </svg>
       </div>
     </div>
   </section>
@@ -619,7 +743,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <div class="kit-c glass-p rv rv-row"><span class="ki">02</span><h3>Consistent model &amp; light</h3><p>The same looks, poses and lighting across every SKU — the grid reads as one collection.</p></div>
         <div class="kit-c glass-p rv rv-row"><span class="ki">03</span><h3>Colourway coverage</h3><p>Every colour variant photographed — without re-shooting anything.</p></div>
         <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">04</span><h3>Channel-ready crops</h3><p>Ratios and resolutions for Shopify, Instagram and the marketplaces you name.</p></div>
-        <div class="kit-c tint glass-p rv rv-d1 rv-row"><span class="ki">05</span><h3>Human garment-fidelity QA</h3><p>Each image checked against the real product before you see it — documented.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">05</span><h3>Human garment-fidelity QA</h3><p>Each image checked against the real product before you see it — documented.</p></div>
         <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">06</span><h3>Disclosure guidance</h3><p>Where a platform requires an AI label, we tell you — before you publish.</p></div>
         <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">07</span><h3>Full usage rights</h3><p>Delivered images are yours to use across your channels, documented.</p></div>
         <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">08</span><h3>Restock speed</h3><p>New colour or returning SKU? New images in days — no studio calendar.</p></div>
@@ -762,7 +886,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
               <optgroup label="Fashion design &amp; development">
                 <option value="tech-pack">Tech Pack</option>
                 <option value="3d-virtual-sampling">3D Virtual Sampling</option>
-                <option value="seamless-pattern">Seamless Pattern</option>
+                <option value="seamless-pattern">Graphics &amp; Prints</option>
                 <option value="pattern-cad">Pattern CAD</option>
                 <option value="dobby-jacquard">Dobby &amp; Jacquard Design</option>
               </optgroup>

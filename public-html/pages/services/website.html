@@ -595,8 +595,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .cform .fl { font-size: 13px; font-weight: 500; color: var(--ink-3); letter-spacing: -.005em; display: block; margin-bottom: 7px; }
 .cform .fl .rq { color: var(--acc); margin-left: 3px; }
 .cform .fi {
-  width: 100%; background: rgba(var(--surface-rgb), .06);
-  border: 1px solid var(--glass-border); border-radius: 13px;
+  width: 100%;
+  /* Paper, not a wash. The dark theme's pale-on-black field inverted to a
+     dark-on-white one, which on a pale panel is a grey smudge with a
+     near-invisible edge. Light gives the field the paper colour and lets a
+     real border define it; dark keeps the lift, below. */
+  background: var(--paper-3);
+  border: 1px solid var(--line-2); border-radius: 13px;
   /* 16px is the floor: iOS auto-zooms the page on focus below it. */
   padding: 13px 15px; font-family: var(--sans); font-size: 16px; color: var(--ink);
   transition: border-color .25s ease, box-shadow .25s ease; }
@@ -667,6 +672,34 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 :root[data-theme="dark"] { --acc: var(--acc-bright); --grad-acc-ink: var(--grad-acc); }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { --acc: var(--acc-bright); --grad-acc-ink: var(--grad-acc); }
+}
+
+/* The field lifts against the dark ground, where a bordered white box glares. */
+:root[data-theme="dark"] .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
+:root[data-theme="dark"] .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
+  :root:not([data-theme="light"]) .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+}
+/* A browser that fills a field paints it itself and ignores background-color;
+   only an inset shadow and -webkit-text-fill-color reach it. */
+.cform .fi:-webkit-autofill, .cform .fi:-webkit-autofill:hover,
+.cform .fi:-webkit-autofill:focus, .cform .fi:autofill {
+  -webkit-text-fill-color: var(--ink); caret-color: var(--ink);
+  -webkit-box-shadow: inset 0 0 0 1000px var(--paper-3); box-shadow: inset 0 0 0 1000px var(--paper-3);
+  transition: background-color 9999s ease-in-out 0s; border-color: var(--line-2);
+}
+:root[data-theme="dark"] .cform .fi:-webkit-autofill,
+:root[data-theme="dark"] .cform .fi:autofill {
+  -webkit-box-shadow: inset 0 0 0 1000px #191727; box-shadow: inset 0 0 0 1000px #191727;
+  border-color: var(--glass-border);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cform .fi:-webkit-autofill,
+  :root:not([data-theme="light"]) .cform .fi:autofill {
+    -webkit-box-shadow: inset 0 0 0 1000px #191727; box-shadow: inset 0 0 0 1000px #191727;
+    border-color: var(--glass-border);
+  }
 }
 </style>
 </head>
@@ -989,7 +1022,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
               <optgroup label="Fashion design &amp; development">
                 <option value="tech-pack">Tech Pack</option>
                 <option value="3d-virtual-sampling">3D Virtual Sampling</option>
-                <option value="seamless-pattern">Seamless Pattern</option>
+                <option value="seamless-pattern">Graphics &amp; Prints</option>
                 <option value="pattern-cad">Pattern CAD</option>
                 <option value="dobby-jacquard">Dobby &amp; Jacquard Design</option>
               </optgroup>

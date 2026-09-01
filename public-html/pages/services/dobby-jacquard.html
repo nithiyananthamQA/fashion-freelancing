@@ -310,7 +310,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .kit-c .ki { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--acc); }
 .kit-c h3 { font-family: var(--disp); font-size: 17px; font-weight: 700; margin: 10px 0 8px; }
 .kit-c p { font-size: 13.5px; color: var(--ink-4); line-height: 1.6; margin: 0; }
-.kit-c.tint { border-color: var(--acc-45) !important; background: linear-gradient(170deg, var(--acc-10), var(--glass)) !important; }
 @media (max-width: 900px) { .kit { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .kit { grid-template-columns: 1fr; } }
 
@@ -429,8 +428,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .cform .fl { font-size: 13px; font-weight: 500; color: var(--ink-3); letter-spacing: -.005em; display: block; margin-bottom: 7px; }
 .cform .fl .rq { color: var(--acc); margin-left: 3px; }
 .cform .fi {
-  width: 100%; background: rgba(var(--surface-rgb), .06);
-  border: 1px solid var(--glass-border); border-radius: 13px;
+  width: 100%;
+  /* Paper, not a wash. The dark theme's pale-on-black field inverted to a
+     dark-on-white one, which on a pale panel is a grey smudge with a
+     near-invisible edge. Light gives the field the paper colour and lets a
+     real border define it; dark keeps the lift, below. */
+  background: var(--paper-3);
+  border: 1px solid var(--line-2); border-radius: 13px;
   /* 16px is the floor: iOS auto-zooms the page on focus below it. */
   padding: 13px 15px; font-family: var(--sans); font-size: 16px; color: var(--ink);
   transition: border-color .25s ease, box-shadow .25s ease; }
@@ -492,7 +496,23 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 /* ============================================================
    DOBBY/JACQUARD-SPECIFIC — interlacing loom hero + format wall
    ============================================================ */
-.loom { position: relative; overflow: hidden; min-height: clamp(320px, 48vh, 500px); border-radius: 20px; }
+/* The hero shows the cloth and the draft together.
+   It was warp lines, weft lines and a point-paper grid over glass — an
+   accurate diagram of the mechanism, and no fabric anywhere on a page
+   selling woven design. The photograph is the ground now and the draft sits
+   over it, so the hero reads as the draft becoming the cloth rather than as
+   a diagram on its own. The photograph is licensed stock, not our work —
+   see the note by .wv-shot. */
+.loom {
+  position: relative; overflow: hidden;
+  min-height: clamp(320px, 48vh, 500px); border-radius: 20px;
+  background-image: linear-gradient(rgba(var(--scrim-rgb), .35), rgba(var(--scrim-rgb), .35)),
+                    url("../../assets/img/woven/jacquard-floral-1000.webp");
+  background-size: cover; background-position: center;
+}
+/* the draft has to stay legible against a photograph rather than glass */
+.loom .loom-draft { mix-blend-mode: normal; }
+.loom-chip { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .loom-warp { position: absolute; inset: 0; display: flex; justify-content: space-evenly; }
 .loom-warp i { width: 3px; height: 100%; background: linear-gradient(180deg, rgba(241,84,63,.5), rgba(241,84,63,.14)); transform: scaleY(0); transform-origin: top; animation: lw-drop .9s ease forwards; }
 .loom-warp i:nth-child(odd) { animation-delay: .15s; }
@@ -561,6 +581,59 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { --acc: var(--acc-bright); --grad-acc-ink: var(--grad-acc); }
 }
+
+/* The field lifts against the dark ground, where a bordered white box glares. */
+:root[data-theme="dark"] .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
+:root[data-theme="dark"] .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
+  :root:not([data-theme="light"]) .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+}
+/* A browser that fills a field paints it itself and ignores background-color;
+   only an inset shadow and -webkit-text-fill-color reach it. */
+.cform .fi:-webkit-autofill, .cform .fi:-webkit-autofill:hover,
+.cform .fi:-webkit-autofill:focus, .cform .fi:autofill {
+  -webkit-text-fill-color: var(--ink); caret-color: var(--ink);
+  -webkit-box-shadow: inset 0 0 0 1000px var(--paper-3); box-shadow: inset 0 0 0 1000px var(--paper-3);
+  transition: background-color 9999s ease-in-out 0s; border-color: var(--line-2);
+}
+:root[data-theme="dark"] .cform .fi:-webkit-autofill,
+:root[data-theme="dark"] .cform .fi:autofill {
+  -webkit-box-shadow: inset 0 0 0 1000px #191727; box-shadow: inset 0 0 0 1000px #191727;
+  border-color: var(--glass-border);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cform .fi:-webkit-autofill,
+  :root:not([data-theme="light"]) .cform .fi:autofill {
+    -webkit-box-shadow: inset 0 0 0 1000px #191727; box-shadow: inset 0 0 0 1000px #191727;
+    border-color: var(--glass-border);
+  }
+}
+
+/* Woven cloth, photographed.
+   Nothing in the supplied library is woven fabric, and a page selling woven
+   design with no cloth on it asks the reader to take the whole thing on
+   trust. These are licensed stock photographs of real dobby and jacquard
+   structures, used to show what the two words mean — the alt text says
+   "the kind of structure a dobby loom produces", never "our work", because
+   they are not ours. Replace them the day there are mill photographs. */
+.wv-shot { margin: 0 0 18px; }
+.wv-shot picture { display: block; border-radius: 12px; overflow: hidden; border: 1px solid var(--line-2); }
+.wv-shot img { display: block; width: 100%; height: 200px; object-fit: cover; }
+
+/* "What you get" responds to the reader.
+   One card per page carried a permanent accent tint, which spent the page's
+   accent on an item that is no more important than the eight beside it — and
+   nothing at all happened on hover. The tint now follows the pointer, so the
+   colour marks what the reader is actually looking at. */
+.kit-c { transition: border-color .2s var(--easing), background .2s var(--easing), transform .2s var(--easing); }
+.kit-c:hover {
+  border-color: var(--acc-45);
+  background: linear-gradient(170deg, var(--acc-10), var(--glass));
+  transform: translateY(-3px);
+}
+@media (prefers-reduced-motion: reduce) { .kit-c:hover { transform: none; } }
+@media (hover: none) { .kit-c:hover { transform: none; } }
 </style>
 </head>
 <body>
@@ -598,7 +671,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
       <!-- right: the deliverable, previewed in the hero -->
       <div class="hero-view rv in rv-media" aria-hidden="true">
-    <div class="loom glass-p" aria-hidden="true">
+    <div class="loom glass-p" role="img"
+         aria-label="A navy jacquard woven with a light floral figure, overlaid with the warp, weft and point-paper draft that produces it.">
       <div class="loom-warp"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="loom-weft"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <div class="loom-draft">
@@ -627,7 +701,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">05</span><h3>Float check, documented</h3><p>Maximum float lengths verified per structure — the snag test happens in the file.</p></div>
         <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">06</span><h3>Warp &amp; weft colorways</h3><p>Variants engineered for weft-change economics — more range, fewer warps.</p></div>
         <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">07</span><h3>Blanket layout on request</h3><p>Multiple colorways arranged for a single sampling run.</p></div>
-        <div class="kit-c tint glass-p rv rv-d2 rv-row"><span class="ki">08</span><h3>Exclusive ownership</h3><p>Full rights transfer on final payment — never resold, never re-coloured for anyone else.</p></div>
+        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">08</span><h3>Exclusive ownership</h3><p>Full rights transfer on final payment — never resold, never re-coloured for anyone else.</p></div>
         <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">09</span><h3>Two revision rounds</h3><p>Structure, colour and motif adjustments — most designs approved in round one.</p></div>
       </div>
     </div>
@@ -640,7 +714,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <h2 class="h-display rv rv-display">From warp and weft to a <span class="acc-t">weave draft.</span></h2>
       </div>
       <div class="vwrap rv rv-media">
-        <div class="loom glass-p" aria-hidden="true">
+        <div class="loom glass-p" role="img"
+         aria-label="A navy jacquard woven with a light floral figure, overlaid with the warp, weft and point-paper draft that produces it.">
           <div class="loom-warp"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           <div class="loom-weft"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           <div class="loom-draft">
@@ -682,6 +757,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       </div>
       <div class="cmp2">
         <div class="cmp-col glass-p rv">
+          <figure class="wv-shot">
+            <picture>
+              <source type="image/webp" srcset="../../assets/img/woven/dobby-check-560.webp 560w, ../../assets/img/woven/dobby-check-1000.webp 1000w" sizes="(max-width: 820px) 92vw, 42vw" />
+              <img src="../../assets/img/woven/dobby-check-1000.webp" loading="lazy" decoding="async" alt="A woven check in brown and black — the kind of small geometric structure a dobby loom produces." />
+            </picture>
+          </figure>
           <h3>Dobby</h3>
           <ul>
             <li>Geometric textures, stripes, checks, small motifs</li>
@@ -691,6 +772,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
           </ul>
         </div>
         <div class="cmp-col lit glass-p rv rv-d1">
+          <figure class="wv-shot">
+            <picture>
+              <source type="image/webp" srcset="../../assets/img/woven/jacquard-damask-560.webp 560w, ../../assets/img/woven/jacquard-damask-1000.webp 1000w" sizes="(max-width: 820px) 92vw, 42vw" />
+              <img src="../../assets/img/woven/jacquard-damask-1000.webp" loading="lazy" decoding="async" alt="A gold damask woven on a dark ground — a figured jacquard, where every warp end is controlled to draw the pattern." />
+            </picture>
+          </figure>
           <h3>Jacquard</h3>
           <ul>
             <li>Every warp end controlled — pictorial designs, no repeat limit in the width of the harness</li>
@@ -709,6 +796,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <span class="kicker rv">Colorway economics</span>
         <h2 class="h-display rv rv-display" id="ce-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;">Change the weft, not <span class="acc-t">the warp.</span></h2>
         <p class="rv">At the mill, swapping weft yarns between colorways is quick and cheap. Re-beaming a new warp is neither. So we design your colorway range to pull as much variety as possible from weft changes alone — and when a colorway genuinely needs a new warp, we flag it before you commit, not after the mill invoices you.</p>
+        <figure class="wv-shot">
+            <picture>
+              <source type="image/webp" srcset="../../assets/img/woven/colorway-swatches-560.webp 560w, ../../assets/img/woven/colorway-swatches-1000.webp 1000w" sizes="(max-width: 820px) 92vw, 42vw" />
+              <img src="../../assets/img/woven/colorway-swatches-1000.webp" loading="lazy" decoding="async" alt="Two lengths of the same figured weave in different colours — green above, pink below — the same structure run in two colourways." />
+            </picture>
+          </figure>
         <p class="soft rv">This is the kind of decision that's invisible in a JPEG and very visible in your production cost.</p>
       </div>
     </div>
@@ -805,7 +898,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
               <optgroup label="Fashion design &amp; development">
                 <option value="tech-pack">Tech Pack</option>
                 <option value="3d-virtual-sampling">3D Virtual Sampling</option>
-                <option value="seamless-pattern">Seamless Pattern</option>
+                <option value="seamless-pattern">Graphics &amp; Prints</option>
                 <option value="pattern-cad">Pattern CAD</option>
                 <option value="dobby-jacquard" selected>Dobby &amp; Jacquard Design</option>
               </optgroup>
