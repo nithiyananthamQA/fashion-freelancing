@@ -1774,3 +1774,49 @@ select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ===== Line icons =========================================================
+   Two stroke-icon sets run across the site: the service tiles on the home
+   grid (.svc .icon) and the garment icons on the service pages (.gar-i).
+   Both are 24-grid drawings in currentColor, so both take one behaviour —
+   each icon draws itself on the first time it is scrolled to, then holds.
+   --ico-len is the shape's own measured path length, written by site.js;
+   the fallback covers a shape it could not measure. --ico-d staggers a row
+   so five tiles arriving together read as a sweep, not a flash. */
+@media (prefers-reduced-motion: no-preference) {
+  .svc .icon svg > *,
+  .gar-i > * {
+    stroke-dasharray: var(--ico-len, 140);
+    stroke-dashoffset: var(--ico-len, 140);
+  }
+  .svc .icon svg.ico-in > *,
+  .gar-i.ico-in > * {
+    animation: ico-draw .9s var(--easing) forwards;
+    animation-delay: var(--ico-d, 0ms);
+  }
+}
+@keyframes ico-draw { to { stroke-dashoffset: 0; } }
+
+/* Once drawn, an icon keeps breathing: a 2px rise and fall over seven
+   seconds, so a resting card is never quite still without ever asking to be
+   looked at. Each icon is handed a negative delay from its index, which drops
+   it in at a different point of the cycle — a row then drifts rather than
+   pulsing in step, which is what makes ten of these read as calm instead of
+   as a blinking grid.
+
+   The float runs on `translate` while hover runs on `scale`. They are separate
+   transform properties, so the animation and the hover transition compose
+   instead of one overriding the other — which is what would happen if both
+   went through the `transform` shorthand. */
+@media (prefers-reduced-motion: no-preference) {
+  .svc .icon svg.ico-in,
+  .gar-i.ico-in {
+    animation: ico-float 7s ease-in-out infinite;
+    animation-delay: calc(var(--ico-i, 0) * -0.9s);
+  }
+  .gar-i.ico-in { --ico-rise: -2px; }
+}
+@keyframes ico-float {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 var(--ico-rise, -1.5px); }
+}

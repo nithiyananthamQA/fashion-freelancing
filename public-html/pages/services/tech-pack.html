@@ -96,7 +96,21 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
   --grad-acc-ink: linear-gradient(115deg, #875400, #875400 55%, #875400);
   /* --acc follows the theme: the glowing hue on the dark ground,
      a darkened one on the pale ground so accent text stays readable */
-  --acc:   var(--acc-ink);
+  /* --acc is the brand hue, and is now the SAME in both themes. It fills
+     icon tiles, borders, rails and glows — none of which carry a contrast
+     duty — and it backs the chips, skip link and toggles that print
+     near-black text on top. Those were the worst of the old behaviour: a
+     near-black label on the darkened accent measured under 2:1.
+     Accent TEXT on the pale ground is the one job the brand hue cannot do
+     (it measures ~1.9:1 there), so that job moved to --acc-text. */
+  --acc: var(--acc-bright);
+  --acc-text: var(--acc-ink);
+  /* Headline accents are 32-82px, and WCAG asks only 3:1 of text that large.
+     --acc-text is tuned for small copy at ~6:1, which on a headline reads as
+     mud rather than as the brand. --acc-disp is the same hue taken only as
+     far down as 3:1 needs, so the headline keeps its colour. */
+  --acc-disp: #BC7909;
+  --acc-l-text: var(--acc-ink);   /* --acc-l is pale: unreadable as text on paper */
   --acc-l: #FFC163;
   --acc-deep: #D88A0F;
   --acc-10: rgba(245,166,35,.10);
@@ -105,7 +119,7 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
   --acc-45: rgba(245,166,35,.45);
   --grad-acc: linear-gradient(115deg, #FFC163, #F5A623 55%, #E8940D);
   /* nav chrome only */; }
-html { color-scheme: dark; scroll-behavior: smooth; }
+html { color-scheme: light dark; scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body {
   background: var(--paper); color: var(--ink);
@@ -155,7 +169,7 @@ main { position: relative; z-index: 3; }
 .topnav.is-scrolled { border-radius: 999px; }
 .topnav-links a { color: rgba(var(--ink-rgb), .66) !important; }
 .topnav-links a:hover, .topnav-links a.active { color: var(--ink) !important; }
-.topnav-burger span { background: #F4F2FA !important; }
+.topnav-burger span { background: var(--ink) !important; }
 .topnav .btn-primary, .topnav-mobile .btn-primary {
   background: var(--grad-hot) !important; color: var(--on-accent) !important;
   border-radius: 999px !important; border: 0 !important;
@@ -174,7 +188,7 @@ main { position: relative; z-index: 3; }
   border-bottom: 1px solid rgba(var(--surface-rgb), .08); }
 .topnav-mobile-links a:last-child { border-bottom: 0; }
 .topnav-burger { background: rgba(var(--surface-rgb), .07) !important; border: 1px solid rgba(var(--surface-rgb), .16) !important; }
-.topnav-burger.is-open span { background: #F4F2FA !important; }
+.topnav-burger.is-open span { background: var(--ink) !important; }
 .topnav .logo-img, .footer .logo-img {
   background: transparent;
   /* fully transparent artwork — no white stroke; card-style violet/pink light only */
@@ -190,7 +204,7 @@ main { position: relative; z-index: 3; }
   font-family: var(--mono); font-size: 12px; font-weight: 500;
   letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); }
 .h-display { font-family: var(--disp); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; color: var(--ink); }
-.acc-t { color: var(--acc); }
+.acc-t { color: var(--acc-disp); }
 .glass-p {
   background: var(--glass); border: 1px solid var(--glass-border);
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
@@ -245,18 +259,18 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .hero-copy { min-width: 0; }
 .hero-view { position: relative; min-width: 0; width: 100%; justify-self: end; }
 .hero-view > * { width: 100%; margin: 0; }
-.hero-split h1 { max-width: 15ch; font-size: clamp(36px, 4vw, 60px); margin-inline: 0; }
-.hero-split .sub { margin-left: 0; margin-right: 0; max-width: 46ch; }
-.hero-split .acts { justify-content: flex-start; }
-.hero-split .chips { justify-content: flex-start; }
-.hero-split .chips { flex-wrap: nowrap; gap: 8px; }
-.hero-split .chips span { white-space: nowrap; font-size: 13.5px; padding: 0; }
-@media (max-width: 1180px) { .hero-split .chips { flex-wrap: wrap; } }
+.hero .hero-split h1 { max-width: 15ch; font-size: clamp(36px, 4vw, 60px); margin-inline: 0; }
+.hero .hero-split .sub { margin-left: 0; margin-right: 0; max-width: 46ch; }
+.hero .hero-split .acts { justify-content: flex-start; }
+.hero .hero-split .chips { justify-content: flex-start; }
+.hero .hero-split .chips { flex-wrap: nowrap; gap: 8px; }
+.hero .hero-split .chips span { white-space: nowrap; font-size: 13.5px; padding: 0; }
+@media (max-width: 1180px) { .hero .hero-split .chips { flex-wrap: wrap; } }
 @media (max-width: 900px) {
   .hero-split { grid-template-columns: 1fr; text-align: center; gap: 20px; }
-  .hero-split h1 { margin-inline: auto; }
-  .hero-split .sub { margin-left: auto; margin-right: auto; }
-  .hero-split .acts, .hero-split .chips { justify-content: center; }
+  .hero .hero-split h1 { margin-inline: auto; }
+  .hero .hero-split .sub { margin-left: auto; margin-right: auto; }
+  .hero .hero-split .acts, .hero .hero-split .chips { justify-content: center; }
   .hero-view { justify-self: center; max-width: 420px; }
 }
 @media (max-width: 560px) {
@@ -290,13 +304,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .fear { padding: 26px 24px; }
 .fear .fi {
   font-family: var(--mono); font-size: 12px; letter-spacing: .04em; text-transform: uppercase;
-  color: var(--acc); }
+  color: var(--acc-text); }
 .fear h3 { font-family: var(--disp); font-size: 17.5px; font-weight: 700; margin: 12px 0 8px; }
 .fear p { font-size: 13.5px; color: var(--ink-4); line-height: 1.6; margin: 0; }
 .fear-close {
   text-align: center; margin-top: 30px;
   font-family: var(--disp); font-size: clamp(17px, 1.8vw, 22px); font-weight: 700; color: var(--ink); }
-.fear-close em { font-style: normal; color: var(--acc); }
+.fear-close em { font-style: normal; color: var(--acc-text); }
 @media (max-width: 820px) { .fears { grid-template-columns: 1fr; } }
 
 /* ============================================================
@@ -315,7 +329,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .gar h4 { font-family: var(--disp); font-size: 17px; font-weight: 700; letter-spacing: -.01em; margin: 0 0 6px; color: var(--ink); }
 .gar p { font-size: 13.5px; line-height: 1.5; color: var(--ink-4);  margin: 0; }
 .gar-strip { margin-top: 26px; text-align: center; font-size: 14px; color: var(--ink-4); line-height: 1.6; }
-.gar-strip b { color: var(--acc); font-weight: 600; }
+.gar-strip b { color: var(--acc-text); font-weight: 600; }
 @media (max-width: 820px) { .garments { grid-template-columns: repeat(2, 1fr); } }
 
 /* ============================================================
@@ -325,7 +339,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .step { padding: 26px 22px; position: relative; }
 .step .n {
   font-family: var(--disp); font-size: 34px; font-weight: 600; letter-spacing: -.025em;
-  color: var(--acc); margin-bottom: 12px; }
+  color: var(--acc-text); margin-bottom: 12px; }
 .step .t {
   font-family: var(--mono); font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase;
   color: var(--ink-5); position: absolute; top: 28px; right: 20px; }
@@ -360,7 +374,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .way h3 { font-family: var(--disp); font-size: 16.5px; font-weight: 700; margin: 0 0 10px; }
 .way p { font-size: 13.5px; color: var(--ink-4); line-height: 1.6; margin: 0; }
 .way.us { border-color: var(--acc-45) !important; background: linear-gradient(170deg, var(--acc-10), var(--glass)) !important; }
-.way.us h3 { color: var(--acc); }
+.way.us h3 { color: var(--acc-text); }
 @media (max-width: 820px) { .ways { grid-template-columns: 1fr; } }
 
 /* ============================================================
@@ -391,7 +405,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .faq-i {
   display: grid; place-items: center; flex: none;
   width: 28px; height: 28px; border-radius: 50%;
-  background: var(--acc-16); color: var(--acc);
+  background: var(--acc-16); color: var(--acc-text);
   font-family: var(--mono); font-size: 15px;
   transition: transform .35s var(--easing); }
 .faq-row.open .faq-i { transform: rotate(45deg); background: var(--acc); color: #1A1206; }
@@ -409,7 +423,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .cform .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .cform label { display: block; }
 .cform .fl { font-size: 13px; font-weight: 500; color: var(--ink-3); letter-spacing: -.005em; display: block; margin-bottom: 7px; }
-.cform .fl .rq { color: var(--acc); margin-left: 3px; }
+.cform .fl .rq { color: var(--acc-text); margin-left: 3px; }
 .cform .fi {
   width: 100%;
   /* Paper, not a wash. The dark theme's pale-on-black field inverted to a
@@ -427,7 +441,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F5A623' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 14px center; background-size: 14px;
   padding-right: 40px; }
-.cform select.fi option { background: #131024; color: var(--ink); }
+.cform select.fi option { background: var(--option-bg); color: var(--ink); }
 .cform textarea.fi { min-height: 110px; resize: vertical; }
 .cform .fi[aria-invalid="true"] { border-color: #FF7AB8; background: rgba(255,79,160,.08); }
 .cform-err { margin: 0; font-size: 13px; color: #FF7AB8; }
@@ -488,9 +502,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   .rv { transition-duration: .45s; }
 }
 
-:root[data-theme="dark"] { --acc: var(--acc-bright); --grad-acc-ink: var(--grad-acc); }
+:root[data-theme="dark"] { --acc: var(--acc-bright); --acc-text: var(--acc-bright); --acc-disp: var(--acc-bright); --acc-l-text: var(--acc-l); --grad-acc-ink: var(--grad-acc); }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --acc: var(--acc-bright); --grad-acc-ink: var(--grad-acc); }
+  :root:not([data-theme="light"]) { --acc: var(--acc-bright); --acc-text: var(--acc-bright); --acc-disp: var(--acc-bright); --acc-l-text: var(--acc-l); --grad-acc-ink: var(--grad-acc); }
 }
 
 /* The real deliverable, in place of the drawn stand-in.
@@ -575,7 +589,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
    What changed is what sits in the panel: a real page from a real pack,
    whole, instead of a drawn stand-in cropped to a band. */
 .doc { display: grid; gap: 20px; align-items: start; }
-@media (min-width: 900px) { .doc { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+/* The index is a list of six short labels; the page beside it is a dense
+   technical drawing that has to stay readable. So the index is capped at the
+   width its longest descriptor needs and the page takes everything left. */
+@media (min-width: 900px) { .doc { grid-template-columns: minmax(0, clamp(250px, 24vw, 320px)) minmax(0, 1fr); gap: 24px; } }
 
 .dp-tabs { display: grid; gap: 8px; align-content: start; }
 @media (max-width: 899px) {
@@ -608,7 +625,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 /* the descriptor is what gives the index its half of the row */
 .dp-h { grid-column: 2; font-size: 12.5px; font-weight: 400; line-height: 1.45; color: var(--ink-5); white-space: normal; }
 .dp-tab.is-on .dp-h { color: var(--ink-4); }
-.dp-tab.is-on .dp-n { color: var(--acc); }
+.dp-tab.is-on .dp-n { color: var(--acc-text); }
 
 .dp-page { display: none; }
 .dp-page.is-on { display: block; }
@@ -632,8 +649,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
    the light theme and cannot be recoloured per theme. Drawn instead: one
    stroke weight, one 24 grid, currentColor — so each icon takes the colour of
    the card it sits in and works in both themes from one file. */
-.gar-i { width: 26px; height: 26px; margin: 0 auto 10px; display: block; color: var(--ink-5); transition: color .2s var(--easing); }
-.gar:hover .gar-i { color: var(--acc); }
+/* Muted grey read as switched off against these cards, so the icon now
+   carries most of the card's own accent at rest and goes fully to it on
+   hover, where it also lifts with the card. */
+.gar-i { width: 30px; height: 30px; margin: 0 auto 12px; display: block;
+  color: color-mix(in srgb, var(--acc) 70%, var(--ink-4));
+  transition: color .25s var(--easing), scale .35s var(--easing); }
+.gar:hover .gar-i { color: var(--acc-text); scale: 1.12; }
 </style>
 </head>
 <body>
@@ -673,12 +695,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       <div class="hero-view rv in rv-media" aria-hidden="true">
     <figure class="sheet">
       <picture>
-        <source type="image/webp" srcset="../../assets/img/tech-sheet-polo-900.webp 900w, ../../assets/img/tech-sheet-polo-1600.webp 1600w" sizes="(max-width: 900px) 92vw, 46vw" />
-        <img src="../../assets/img/tech-sheet-polo-1600.png"
-             srcset="../../assets/img/tech-sheet-polo-900.png 900w, ../../assets/img/tech-sheet-polo-1600.png 1600w"
+        <source type="image/webp" srcset="../../assets/img/techpack/tech-pack-main-900.webp 900w, ../../assets/img/techpack/tech-pack-main-1600.webp 1600w" sizes="(max-width: 900px) 92vw, 46vw" />
+        <img src="../../assets/img/techpack/tech-pack-main-1600.png"
+             srcset="../../assets/img/techpack/tech-pack-main-900.png 900w, ../../assets/img/techpack/tech-pack-main-1600.png 1600w"
              sizes="(max-width: 900px) 92vw, 46vw"
-             width="3508" height="2481" loading="lazy" decoding="async"
-             alt="A tech pack sheet for a men's polo: the flat drawing marked up with construction callouts — neck taping, armhole safety stitch, edge and box stitch at the placket, turn-back hems and the bottom sideseam slit — above a header carrying customer, style number, season, size range and merchandiser." />
+             width="1600" height="1434" loading="lazy" decoding="async"
+             alt="A one-page tech pack summary for a men's polo: the flat drawing marked up with construction callouts — neck taping, armhole safety stitch, edge and box stitch at the placket, turn-back hems and the bottom sideseam slit — beside component details for the collar, yoke, cuff and hem, a fabrication and trim table, the labels and packaging specification, four production colourways, and sign-off blocks for the designer, engineer, merchandiser and factory." />
       </picture>
     </figure>
       </div>
@@ -717,8 +739,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <div class="dp-page is-on" id="dp-1" role="tabpanel" aria-labelledby="dpt-1">
           <figure class="dp-shot">
             <picture>
-              <source type="image/webp" srcset="../../assets/img/techpack/flats-polo-tee-800.webp 800w, ../../assets/img/techpack/flats-polo-tee-1400.webp 1400w" sizes="(max-width: 900px) 92vw, 58vw" />
-              <img src="../../assets/img/techpack/flats-polo-tee-1400.webp" loading="lazy" decoding="async" alt="Vector flat sketches of a polo tee, front and back, on a technical template with style, fabric and order fields." />
+              <source type="image/webp" srcset="../../assets/img/techpack/flats-800.webp 800w, ../../assets/img/techpack/flats-1400.webp 1400w, ../../assets/img/techpack/flats-2000.webp 2000w" sizes="(max-width: 720px) calc(100vw - 40px), (max-width: 899px) 80vw, calc(80vw - 274px)" />
+              <img src="../../assets/img/techpack/flats-1400.webp" width="1400" height="990" loading="lazy" decoding="async" alt="A technical flat sketch of a men’s polo, front and back, above a header carrying the customer, style number, style description, season, size range and merchandiser." />
             </picture>
           </figure>
           <div class="dp-say">
@@ -729,8 +751,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <div class="dp-page" id="dp-2" role="tabpanel" aria-labelledby="dpt-2" hidden>
           <figure class="dp-shot">
             <picture>
-              <source type="image/webp" srcset="../../assets/img/techpack/flats-bodysuit-800.webp 800w, ../../assets/img/techpack/flats-bodysuit-1400.webp 1400w" sizes="(max-width: 900px) 92vw, 58vw" />
-              <img src="../../assets/img/techpack/flats-bodysuit-1400.webp" loading="lazy" decoding="async" alt="A baby bodysuit page with leader lines pinned to named construction points — DTM binding at the collar, double-needle stitch, binding strap and snap buttons." />
+              <source type="image/webp" srcset="../../assets/img/techpack/construction-callout-800.webp 800w, ../../assets/img/techpack/construction-callout-1400.webp 1400w, ../../assets/img/techpack/construction-callout-2000.webp 2000w" sizes="(max-width: 720px) calc(100vw - 40px), (max-width: 899px) 80vw, calc(80vw - 274px)" />
+              <img src="../../assets/img/techpack/construction-callout-1400.webp" width="1400" height="990" loading="lazy" decoding="async" alt="The front view of the polo with leader lines pinned to named construction points — neck taping set onto the interior collar band, a 4T interior safety stitch at the armhole, edge stitch all round with a 3/4 inch box stitch at the bottom of the placket, single turn-back hems with 1/4 inch DNTS, and a bottom sideseam slit bartacked at the opening." />
             </picture>
           </figure>
           <div class="dp-say">
@@ -741,8 +763,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <div class="dp-page" id="dp-3" role="tabpanel" aria-labelledby="dpt-3" hidden>
           <figure class="dp-shot">
             <picture>
-              <source type="image/webp" srcset="../../assets/img/techpack/bom-fabrication-800.webp 800w, ../../assets/img/techpack/bom-fabrication-1400.webp 1400w" sizes="(max-width: 900px) 92vw, 58vw" />
-              <img src="../../assets/img/techpack/bom-fabrication-1400.webp" loading="lazy" decoding="async" alt="A fabrication block specifying body fabric as 100% cotton single jersey at 180 GSM, neck fabric as 1x1 rib at 220 GSM and neck binding at 140 GSM, each with its colour code." />
+              <source type="image/webp" srcset="../../assets/img/techpack/bill-of-materials-800.webp 800w, ../../assets/img/techpack/bill-of-materials-1400.webp 1400w, ../../assets/img/techpack/bill-of-materials-2000.webp 2000w" sizes="(max-width: 720px) calc(100vw - 40px), (max-width: 899px) 80vw, calc(80vw - 274px)" />
+              <img src="../../assets/img/techpack/bill-of-materials-1400.webp" width="1400" height="990" loading="lazy" decoding="async" alt="A bill of materials table naming every fabric and trim with a swatch, brand reference, material description, placement, quantity and supplier — the 170 GSM recycled poly-spandex body fabric, stretch tape, heat-transfer size and content label, Coats sewing thread, satin care label, poly bag, tissue, silica gel, chest print and placket buttons — each specified against two navy colorways." />
             </picture>
           </figure>
           <div class="dp-say">
@@ -753,8 +775,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <div class="dp-page" id="dp-4" role="tabpanel" aria-labelledby="dpt-4" hidden>
           <figure class="dp-shot">
             <picture>
-              <source type="image/webp" srcset="../../assets/img/techpack/measurement-spec-800.webp 800w, ../../assets/img/techpack/measurement-spec-1400.webp 1400w" sizes="(max-width: 900px) 92vw, 58vw" />
-              <img src="../../assets/img/techpack/measurement-spec-1400.webp" loading="lazy" decoding="async" alt="A points-of-measure diagram with lettered measuring points, above a graded size table giving each measurement across the full size run." />
+              <source type="image/webp" srcset="../../assets/img/techpack/measurement-chart-800.webp 800w, ../../assets/img/techpack/measurement-chart-1400.webp 1400w, ../../assets/img/techpack/measurement-chart-2000.webp 2000w" sizes="(max-width: 720px) calc(100vw - 40px), (max-width: 899px) 80vw, calc(80vw - 274px)" />
+              <img src="../../assets/img/techpack/measurement-chart-1400.webp" width="1400" height="991" loading="lazy" decoding="async" alt="A points-of-measure table giving a minus and plus tolerance and a graded measurement from S to 4XL for every point — front and back length from HPS, shoulder seam and slope, across front and back, chest, waist, sweep, neck width, neck depth, armhole drop, sleeve length and opening, hem height and placket." />
             </picture>
           </figure>
           <div class="dp-say">
@@ -765,8 +787,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <div class="dp-page" id="dp-5" role="tabpanel" aria-labelledby="dpt-5" hidden>
           <figure class="dp-shot">
             <picture>
-              <source type="image/webp" srcset="../../assets/img/techpack/colorways-800.webp 800w, ../../assets/img/techpack/colorways-1400.webp 1400w" sizes="(max-width: 900px) 92vw, 58vw" />
-              <img src="../../assets/img/techpack/colorways-1400.webp" loading="lazy" decoding="async" alt="A boys' printed tee page showing the print artwork, its placement and size, and the production colourways." />
+              <source type="image/webp" srcset="../../assets/img/techpack/colorways-artwork-800.webp 800w, ../../assets/img/techpack/colorways-artwork-1400.webp 1400w, ../../assets/img/techpack/colorways-artwork-2000.webp 2000w" sizes="(max-width: 720px) calc(100vw - 40px), (max-width: 899px) 80vw, calc(80vw - 274px)" />
+              <img src="../../assets/img/techpack/colorways-artwork-1400.webp" width="1400" height="990" loading="lazy" decoding="async" alt="Six production colourways of the polo — Heather Grey, Deep Navy, Mineral Black and Forest Sage against their Pantone TPX codes, plus a tropical floral print and a yarn-dyed stripe, each shown on the garment with its artwork repeat and colour chips." />
             </picture>
           </figure>
           <div class="dp-say">
@@ -777,13 +799,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <div class="dp-page" id="dp-6" role="tabpanel" aria-labelledby="dpt-6" hidden>
           <figure class="dp-shot">
             <picture>
-              <source type="image/webp" srcset="../../assets/img/techpack/labels-accessories-800.webp 800w, ../../assets/img/techpack/labels-accessories-1400.webp 1400w" sizes="(max-width: 900px) 92vw, 58vw" />
-              <img src="../../assets/img/techpack/labels-accessories-1400.webp" loading="lazy" decoding="async" alt="An accessories block giving the main and size label at 5 cm with 7 mm margins, a 75 mm hangtag front and back, and a care label with wash instructions and fibre content." />
+              <source type="image/webp" srcset="../../assets/img/techpack/labels-packaging-800.webp 800w, ../../assets/img/techpack/labels-packaging-1400.webp 1400w, ../../assets/img/techpack/labels-packaging-2000.webp 2000w" sizes="(max-width: 720px) calc(100vw - 40px), (max-width: 899px) 80vw, calc(80vw - 274px)" />
+              <img src="../../assets/img/techpack/labels-packaging-1400.webp" width="1400" height="990" loading="lazy" decoding="async" alt="Brand, size and care labels laid out with fibre content and wash-care symbols, beside a dieline for the garment carton with every panel and fold dimensioned." />
             </picture>
           </figure>
           <div class="dp-say">
             <h3>Labels &amp; packaging</h3>
-            <p>Care label content, brand label placement, hangtags and packing instructions. <b>Why the factory needs it:</b> compliance lives here — and so does the unboxing your customer sees.</p>
+            <p>Care label content, brand and size label placement, and the carton dieline your packer folds from. <b>Why the factory needs it:</b> compliance lives here — and so does the unboxing your customer sees.</p>
           </div>
         </div>
       </div>

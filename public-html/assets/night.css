@@ -90,9 +90,64 @@
   --ink-rgb:     17, 20, 24;
   --shadow-rgb:  20, 24, 30;
 
-  --glass:        rgba(var(--surface-rgb), .035);
-  --glass-hover:  rgba(var(--surface-rgb), .065);
+  /* A raised surface on a pale ground cannot be built by laying translucent
+     black over it. That greys the paper, flattens the card into the page and
+     is exactly why the light theme read as dirty next to the dark one, where
+     the same trick works because white over a dark ground genuinely glows.
+     Light has to lift the other way round: the card is white ON the warm
+     ground, and its edge and a soft shadow do the separating.
+     --surface-rgb itself stays dark ink — 105 borders and hairline rings
+     across the site depend on that — so only the surfaces flip. */
+  /* Every logo colour fails 4.5:1 on the pale ground — they run 1.4:1 to
+     3.3:1 — so accent TEXT in light takes a darkened counterpart of the
+     same hue, while decoration keeps the brand colour. These are the
+     exact values each service page already uses for its own accent
+     text, so a home card and the page it links to now agree. Dark
+     needs no split: the bright hue already carries there. */
+  --lg-orange-ink: #875400;
+  --lg-coral-ink: #BD1701;
+  --lg-green-ink: #166C34;
+  --lg-sky-ink: #0261A9;
+  --lg-yellow-ink: #6D5F02;
+  --lg-violet-ink: #602AFF;
+  --lg-teal-ink: #176A65;
+  --lg-pink-ink: #BB0059;
+  --lg-lime-ink: #4A680F;
+  --lg-peri-ink: #164EE7;
+  --lift-rgb: 255, 255, 255;   /* raised surfaces + bevels, both themes */
+  /* --paper-2 was defined and then never used, so every section on a page
+     shared one ground and the light theme read as a single flat sheet with
+     white cards floating on it. Dark gets away with that because its cards
+     glow; light has nothing to push against. Banding alternate sections
+     gives the page its rhythm back and makes a white card sit ON something.
+     Dark keeps one continuous ground, so its band is transparent. */
+  --band: var(--paper-2);
+
+  /* color-scheme tells the browser which way to paint the parts of a form
+     control we cannot reach: the native <select> popup, the caret, spinners,
+     scrollbars. Every page pinned it to `dark` in its own <style>, so on the
+     light theme Chrome kept drawing those internals dark against white
+     fields. It has to track the theme instead. `:root` outranks the pages'
+     `html` rule, so this wins without editing each one. */
+  color-scheme: light;
+  /* the native dropdown list: its ground is painted by the browser, so it
+     needs a real colour rather than a translucent surface token */
+  --option-bg: #FFFFFF;
+  /* Surfaces whose alpha has to differ by theme: on the dark ground a 6%
+     white wash is a visible lift, but on a pale ground the same wash is
+     invisible, so light needs near-opaque white and dark must keep its
+     originals exactly. */
+  --lit-1:       rgba(255, 255, 255, .92);   /* spotlit card, top stop    */
+  --lit-2:       rgba(255, 255, 255, .82);   /* spotlit card, bottom stop */
+  --bevel:       rgba(255, 255, 255, .60);   /* top inner highlight       */
+  --field:       rgba(255, 255, 255, .90);   /* form field well           */
+  --field-focus: #FFFFFF;
+  --glass:        rgba(255, 255, 255, .74);
+  --glass-hover:  #FFFFFF;
   --glass-border: rgba(var(--surface-rgb), .10);
+  /* the shadow is what a light card lifts with; dark needs none */
+  --glass-shadow:   0 1px 2px rgba(20, 24, 30, .04), 0 10px 24px -14px rgba(20, 24, 30, .18);
+  --glass-shadow-h: 0 2px 4px rgba(20, 24, 30, .05), 0 16px 34px -16px rgba(20, 24, 30, .24);
 
   --grad-hot: linear-gradient(90deg, #5468F5, #C8385C);
 
@@ -125,7 +180,26 @@
   --line-2:  rgba(var(--surface-rgb), .16);
   --champagne: #8B5CF6; --champagne-2: #A78BFA; --champagne-50: rgba(139,92,246,.22);
 
+  --lg-orange-ink: #F5A623;
+  --lg-coral-ink: #F1543F;
+  --lg-green-ink: #34C165;
+  --lg-sky-ink: #4AA8F0;
+  --lg-yellow-ink: #EFD84A;
+  --lg-violet-ink: #A78BFA;
+  --lg-teal-ink: #3EC8C0;
+  --lg-pink-ink: #FF6FB3;
+  --lg-lime-ink: #A8D84A;
+  --lg-peri-ink: #7E9BEA;
+  color-scheme: dark;
+  --option-bg: #131024;
+  --band: transparent;
   --surface-rgb: 255, 255, 255;   /* overlays are white over dark ground */
+  --lift-rgb: 255, 255, 255;
+  --lit-1:       rgba(255, 255, 255, .09);
+  --lit-2:       rgba(255, 255, 255, .06);
+  --bevel:       rgba(255, 255, 255, .18);
+  --field:       rgba(255, 255, 255, .06);
+  --field-focus: rgba(255, 255, 255, .08);
   --scrim-rgb:   16, 13, 32;
   --chip-violet: #E9E3FF;
   --chip-violet2: #DED4FF;
@@ -141,6 +215,8 @@
   --glass:        rgba(var(--surface-rgb), .055);
   --glass-hover:  rgba(var(--surface-rgb), .095);
   --glass-border: rgba(var(--surface-rgb), .14);
+  --glass-shadow:   none;
+  --glass-shadow-h: none;
   --grad-hot: linear-gradient(90deg, #8B5CF6, #FF4FA0);
 
   --ok:   #34C165;
@@ -171,7 +247,26 @@
     --line-2:  rgba(var(--surface-rgb), .16);
     --champagne: #8B5CF6; --champagne-2: #A78BFA; --champagne-50: rgba(139,92,246,.22);
   
+    --lg-orange-ink: #F5A623;
+    --lg-coral-ink: #F1543F;
+    --lg-green-ink: #34C165;
+    --lg-sky-ink: #4AA8F0;
+    --lg-yellow-ink: #EFD84A;
+    --lg-violet-ink: #A78BFA;
+    --lg-teal-ink: #3EC8C0;
+    --lg-pink-ink: #FF6FB3;
+    --lg-lime-ink: #A8D84A;
+    --lg-peri-ink: #7E9BEA;
+    color-scheme: dark;
+    --option-bg: #131024;
+    --band: transparent;
     --surface-rgb: 255, 255, 255;   /* overlays are white over dark ground */
+    --lift-rgb:    255, 255, 255;
+    --lit-1:       rgba(255, 255, 255, .09);
+    --lit-2:       rgba(255, 255, 255, .06);
+    --bevel:       rgba(255, 255, 255, .18);
+    --field:       rgba(255, 255, 255, .06);
+    --field-focus: rgba(255, 255, 255, .08);
     --scrim-rgb:   16, 13, 32;
     --chip-violet: #E9E3FF;
     --chip-violet2: #DED4FF;
@@ -187,6 +282,8 @@
     --glass:        rgba(var(--surface-rgb), .055);
     --glass-hover:  rgba(var(--surface-rgb), .095);
     --glass-border: rgba(var(--surface-rgb), .14);
+    --glass-shadow:   none;
+    --glass-shadow-h: none;
     --grad-hot: linear-gradient(90deg, #8B5CF6, #FF4FA0);
   
     --ok:   #34C165;
@@ -203,7 +300,7 @@
 @font-face { font-family: 'Inter-fb'; src: local('Arial'); size-adjust: 104%; ascent-override: 92%; descent-override: 23%; line-gap-override: 0%; }
 @font-face { font-family: 'PJS-fb'; src: local('Arial'); size-adjust: 105%; ascent-override: 96%; descent-override: 24%; line-gap-override: 0%; }
 
-html { color-scheme: dark; scroll-behavior: smooth; }
+html { color-scheme: light dark; scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
 body {
@@ -316,7 +413,7 @@ main { position: relative; z-index: 3; }
   :root:not([data-theme="light"]) .topnav-links a { color: rgba(var(--ink-rgb), .66) !important; }
 }
 .topnav-links a:hover, .topnav-links a.active { color: var(--ink) !important; }
-.topnav-burger span { background: #F4F2FA !important; }
+.topnav-burger span { background: var(--ink) !important; }
 /* Transparent logo artwork. On the dark ground a violet/pink light traces
    its shape so the dark strokes stay readable; on white there is nothing to
    rescue and the same glow reads as a smudge behind the mark, so light drops
@@ -357,7 +454,7 @@ main { position: relative; z-index: 3; }
 }
 .topnav-mobile-links a:last-child { border-bottom: 0; }
 .topnav-burger { background: rgba(var(--surface-rgb), .07) !important; border: 1px solid rgba(var(--surface-rgb), .16) !important; }
-.topnav-burger.is-open span { background: #F4F2FA !important; }
+.topnav-burger.is-open span { background: var(--ink) !important; }
 .footer { background: rgba(var(--surface-rgb), .03) !important; border-top: 1px solid var(--line) !important; }
 #site-footer * { background-color: transparent; }
 
@@ -402,6 +499,7 @@ main { position: relative; z-index: 3; }
 .glass-p {
   background: var(--glass);
   border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow, none);
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
   border-radius: 20px;
 }
@@ -535,7 +633,7 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible,
   background-repeat: no-repeat; background-position: right 14px center; background-size: 14px;
   padding-right: 40px;
 }
-.cform select.fi option { background: #131024; color: var(--ink); }
+.cform select.fi option { background: var(--option-bg); color: var(--ink); }
 .cform textarea.fi { min-height: 110px; resize: vertical; }
 
 /* File inputs default to an OS-styled button that ignores the design system.
@@ -840,3 +938,8 @@ button[aria-busy='true'] { opacity: .7; cursor: progress; }
   .acts { flex-direction: column; align-items: stretch; width: 100%; gap: 10px; }
   .acts > a, .acts > button { width: 100%; justify-content: center; }
 }
+
+/* Alternate sections take the deeper ground. Page sections declare no
+   background of their own, so this reaches every page through the one
+   stylesheet they all load. */
+.sec:nth-of-type(even) { background: var(--band, transparent); }

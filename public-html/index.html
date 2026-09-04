@@ -50,7 +50,7 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
      theme switch can reach it. */
   /* the five logo colours */
   --lg-orange: #F5A623; }
-html { color-scheme: dark; scroll-behavior: smooth; }
+html { color-scheme: light dark; scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body {
   background: var(--paper);
@@ -112,7 +112,7 @@ main { position: relative; z-index: 3; }
 .topnav-mobile { top: 88px !important; border-radius: 22px; left: 12px !important; right: 12px !important; border: 1px solid rgba(var(--surface-rgb), .12); }
 .topnav-links a { color: rgba(var(--ink-rgb), .66) !important; }
 .topnav-links a:hover, .topnav-links a.active { color: var(--ink) !important; }
-.topnav-burger span { background: #F4F2FA !important; }
+.topnav-burger span { background: var(--ink) !important; }
 /* the same logo.png, transparent — a white drop-shadow glow traces its
    shape so the dark strokes stay readable on the dark glass */
 .topnav .logo-img, .footer .logo-img {
@@ -140,7 +140,7 @@ main { position: relative; z-index: 3; }
   border-bottom: 1px solid rgba(var(--surface-rgb), .08); }
 .topnav-mobile-links a:last-child { border-bottom: 0; }
 .topnav-burger { background: rgba(var(--surface-rgb), .07) !important; border: 1px solid rgba(var(--surface-rgb), .16) !important; }
-.topnav-burger.is-open span { background: #F4F2FA !important; }
+.topnav-burger.is-open span { background: var(--ink) !important; }
 .footer { background: rgba(var(--surface-rgb), .03) !important; border-top: 1px solid var(--line) !important; }
 #site-footer * { background-color: transparent; }
 
@@ -270,12 +270,17 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
 .svc .top { display: flex; align-items: center; justify-content: space-between; }
 .svc .icon {
   display: flex; align-items: center; justify-content: center;
-  background: color-mix(in srgb, var(--acc) 16%, transparent);
-  color: var(--acc); }
+  background: color-mix(in srgb, var(--acc) 22%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 32%, transparent);
+  color: var(--acc);
+  transition: background .35s ease, box-shadow .35s ease; }
+/* the icon answers the pointer with a lift, not a spin */
+.svc .icon svg { transition: scale .4s var(--easing); }
+.svc:hover .icon svg, .svc.on .icon svg { scale: 1.1; }
 .svc .num { font-family: var(--mono); letter-spacing: .16em; color: var(--ink-5); }
 .svc h3 { font-family: var(--disp); font-weight: 700; letter-spacing: -.02em; color: var(--ink); }
 .svc p { color: var(--ink-4); margin: 0; }
-.svc .go { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--acc); }
+.svc .go { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--acc-text, var(--acc)); }
 .svc .go .ar { transition: transform .3s var(--easing); }
 .svc:hover .go .ar { transform: translateX(5px); }
 .svc .wm {
@@ -284,16 +289,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
   color: var(--acc); opacity: .09; pointer-events: none; }
 .svc.on .wm, .svc:hover .wm { opacity: .18; }
 /* ten unique logo colours — one per service, no repeats */
-.duo-grid .svc:nth-child(1) { --acc: var(--lg-orange); }
-.duo-grid .svc:nth-child(2) { --acc: var(--lg-sky); }
-.duo-grid .svc:nth-child(3) { --acc: var(--lg-green); }
-.duo-grid .svc:nth-child(4) { --acc: var(--lg-yellow); }
-.duo-grid .svc:nth-child(5) { --acc: var(--lg-coral); }
-.duo-g2 .svc:nth-child(1) { --acc: var(--lg-violet); }
-.duo-g2 .svc:nth-child(2) { --acc: var(--lg-teal); }
-.duo-g2 .svc:nth-child(3) { --acc: var(--lg-pink); }
-.duo-g2 .svc:nth-child(4) { --acc: var(--lg-lime); }
-.duo-g2 .svc:nth-child(5) { --acc: var(--lg-peri); }
+.duo-grid .svc:nth-child(1) { --acc: var(--lg-orange); --acc-text: var(--lg-orange-ink); }
+.duo-grid .svc:nth-child(2) { --acc: var(--lg-sky); --acc-text: var(--lg-sky-ink); }
+.duo-grid .svc:nth-child(3) { --acc: var(--lg-green); --acc-text: var(--lg-green-ink); }
+.duo-grid .svc:nth-child(4) { --acc: var(--lg-yellow); --acc-text: var(--lg-yellow-ink); }
+.duo-grid .svc:nth-child(5) { --acc: var(--lg-coral); --acc-text: var(--lg-coral-ink); }
+.duo-g2 .svc:nth-child(1) { --acc: var(--lg-violet); --acc-text: var(--lg-violet-ink); }
+.duo-g2 .svc:nth-child(2) { --acc: var(--lg-teal); --acc-text: var(--lg-teal-ink); }
+.duo-g2 .svc:nth-child(3) { --acc: var(--lg-pink); --acc-text: var(--lg-pink-ink); }
+.duo-g2 .svc:nth-child(4) { --acc: var(--lg-lime); --acc-text: var(--lg-lime-ink); }
+.duo-g2 .svc:nth-child(5) { --acc: var(--lg-peri); --acc-text: var(--lg-peri-ink); }
 
 .duo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
 /* compact card override inside the duo grid */
@@ -322,13 +327,15 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
   transform: translateY(-4px); }
 .duo-grid .svc.on {
   opacity: 1;
+  /* the lit card has to end up BRIGHTER than its neighbours: its wash was
+     dark ink, which made the spotlit card the dirtiest one on a pale page */
   background: linear-gradient(180deg,
-    color-mix(in srgb, var(--acc) 10%, rgba(var(--surface-rgb), .09)),
-    rgba(var(--surface-rgb), .06));
+    color-mix(in srgb, var(--acc) 10%, var(--lit-1)),
+    var(--lit-2));
   border-color: color-mix(in srgb, var(--acc) 75%, transparent);
   box-shadow:
     0 14px 44px -14px color-mix(in srgb, var(--acc) 45%, transparent),
-    inset 0 1px 0 rgba(var(--surface-rgb), .18);
+    inset 0 1px 0 var(--bevel);
   transform: translateY(-4px) scale(1.015);
   z-index: 2; }
 .duo-grid .svc.on .icon {
@@ -429,10 +436,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
 .cform .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .cform label { display: block; }
 .cform .fl { font-size: 13px; font-weight: 500; color: var(--ink-3); letter-spacing: -.005em; display: block; margin-bottom: 7px; }
-.cform .fl .rq { color: #FF4FA0; margin-left: 3px; }
+.cform .fl .rq { color: var(--bad); margin-left: 3px; }   /* #FF4FA0 measured 3.0:1 on the pale ground */
 .cform .fi {
   width: 100%;
-  background: rgba(var(--surface-rgb), .06);
+  background: var(--field);
   border: 1px solid var(--glass-border); border-radius: 13px;
   padding: 13px 15px;
   /* 16px is the floor: iOS auto-zooms the page on focus below it. */
@@ -443,12 +450,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
 .cform .fi:focus {
   outline: none; border-color: #8B5CF6;
   box-shadow: 0 0 0 3px rgba(139,92,246,.25);
-  background: rgba(var(--surface-rgb), .08); }
+  background: var(--field-focus); }
 .cform select.fi { -webkit-appearance: none; appearance: none; cursor: pointer;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A78BFA' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 14px center; background-size: 14px;
   padding-right: 40px; }
-.cform select.fi option { background: #131024; color: var(--ink); }
+.cform select.fi option { background: var(--option-bg); color: var(--ink); }
 .cform textarea.fi { min-height: 110px; resize: vertical; }
 .cform .fi[aria-invalid="true"] { border-color: #FF4FA0; background: rgba(255,79,160,.08); }
 .cform-err { margin: 0; font-size: 13px; color: #FF7AB8; }

@@ -40,14 +40,28 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
   --grad-acc-ink: linear-gradient(115deg, #602AFF, #602AFF 55%, #602AFF);
   /* --acc follows the theme: the glowing hue on the dark ground,
      a darkened one on the pale ground so accent text stays readable */
-  --acc: var(--acc-ink);
+  /* --acc is the brand hue, and is now the SAME in both themes. It fills
+     icon tiles, borders, rails and glows — none of which carry a contrast
+     duty — and it backs the chips, skip link and toggles that print
+     near-black text on top. Those were the worst of the old behaviour: a
+     near-black label on the darkened accent measured under 2:1.
+     Accent TEXT on the pale ground is the one job the brand hue cannot do
+     (it measures ~1.9:1 there), so that job moved to --acc-text. */
+  --acc: var(--acc-bright);
+  --acc-text: var(--acc-ink);
+  /* Headline accents are 32-82px, and WCAG asks only 3:1 of text that large.
+     --acc-text is tuned for small copy at ~6:1, which on a headline reads as
+     mud rather than as the brand. --acc-disp is the same hue taken only as
+     far down as 3:1 needs, so the headline keeps its colour. */
+  --acc-disp: #926FF9;
+  --acc-l-text: var(--acc-ink);   /* --acc-l is pale: unreadable as text on paper */
   --acc-l: #C4B5FD;
   --acc-10: rgba(167,139,250,.10);
   --acc-16: rgba(167,139,250,.16);
   --acc-30: rgba(167,139,250,.30);
   --acc-45: rgba(167,139,250,.45);
   --grad-acc: linear-gradient(115deg, #C4B5FD, #A78BFA 55%, #8B5CF6); }
-html { color-scheme: dark; scroll-behavior: smooth; }
+html { color-scheme: light dark; scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: clip; }
 ::selection { background: var(--acc); color: #140E2E; }
@@ -74,7 +88,7 @@ main { position: relative; z-index: 3; }
 .topnav.is-scrolled { border-radius: 999px; }
 .topnav-links a { color: rgba(var(--ink-rgb), .66) !important; }
 .topnav-links a:hover, .topnav-links a.active { color: var(--ink) !important; }
-.topnav-burger span { background: #F4F2FA !important; }
+.topnav-burger span { background: var(--ink) !important; }
 .topnav .btn-primary, .topnav-mobile .btn-primary { background: var(--grad-hot) !important; color: var(--on-accent) !important; border-radius: 999px !important; border: 0 !important; box-shadow: 0 8px 26px rgba(139,92,246,.4) !important; }
 .topnav-mobile { background: rgba(var(--scrim-rgb), .92) !important; top: 88px !important; border-radius: 22px; left: 12px !important; right: 12px !important; border: 1px solid rgba(var(--surface-rgb), .12); }
 .topnav-mobile-links a { color: rgba(var(--ink-rgb), .8) !important; }
@@ -90,7 +104,7 @@ main { position: relative; z-index: 3; }
   border-bottom: 1px solid rgba(var(--surface-rgb), .08); }
 .topnav-mobile-links a:last-child { border-bottom: 0; }
 .topnav-burger { background: rgba(var(--surface-rgb), .07) !important; border: 1px solid rgba(var(--surface-rgb), .16) !important; }
-.topnav-burger.is-open span { background: #F4F2FA !important; }
+.topnav-burger.is-open span { background: var(--ink) !important; }
 .topnav .logo-img, .footer .logo-img {
   background: transparent;
   /* fully transparent artwork — no white stroke; card-style violet/pink light only */
@@ -106,7 +120,7 @@ main { position: relative; z-index: 3; }
   font-family: var(--mono); font-size: 12px; font-weight: 500;
   letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); }
 .h-display { font-family: var(--disp); font-weight: 600; letter-spacing: -.025em; line-height: 1.12; color: var(--ink); }
-.acc-t { color: var(--acc); }
+.acc-t { color: var(--acc-disp); }
 .glass-p { background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 20px; }
 .btn-acc { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 15px 30px; min-height: 50px; border: 0; cursor: pointer;
   border-radius: 999px; background: var(--grad-acc); color: #140E2E; font-family: var(--sans); font-size: 14px; font-weight: 700; text-decoration: none;
@@ -142,7 +156,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 /* principles kit */
 .kit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .kit-c { padding: 26px 24px; }
-.kit-c .ki { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--acc); }
+.kit-c .ki { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--acc-text); }
 .kit-c h3 { font-family: var(--disp); font-size: 17px; font-weight: 700; margin: 10px 0 8px; }
 .kit-c p { font-size: 13.5px; color: var(--ink-4); line-height: 1.6; margin: 0; }
 @media (max-width: 900px) { .kit { grid-template-columns: repeat(2, 1fr); } }
@@ -180,9 +194,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   .rv { transition-duration: .45s; }
 }
 
-:root[data-theme="dark"] { --acc: var(--acc-bright); --grad-acc-ink: var(--grad-acc); }
+:root[data-theme="dark"] { --acc: var(--acc-bright); --acc-text: var(--acc-bright); --acc-disp: var(--acc-bright); --acc-l-text: var(--acc-l); --grad-acc-ink: var(--grad-acc); }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --acc: var(--acc-bright); --grad-acc-ink: var(--grad-acc); }
+  :root:not([data-theme="light"]) { --acc: var(--acc-bright); --acc-text: var(--acc-bright); --acc-disp: var(--acc-bright); --acc-l-text: var(--acc-l); --grad-acc-ink: var(--grad-acc); }
 }
 </style>
 </head>

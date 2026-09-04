@@ -42,7 +42,7 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
   /* --acc follows the theme: the glowing hue on the dark ground,
      a darkened one on the pale ground so accent text stays readable */
   --acc: var(--acc-ink); }
-html { color-scheme: dark; scroll-behavior: smooth; }
+html { color-scheme: light dark; scroll-behavior: smooth; }
 body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: clip; }
 /* pill nav chrome */
 .topnav { position: sticky; top: 12px !important; width: min(1180px, calc(100% - 28px)); margin: 12px auto 0; border-radius: 999px;
@@ -52,7 +52,7 @@ body { background: var(--paper); color: var(--ink); font-family: var(--sans); fo
 .topnav.is-scrolled { border-radius: 999px; }
 .topnav-links a { color: rgba(var(--ink-rgb), .66) !important; }
 .topnav-links a:hover, .topnav-links a.active { color: var(--ink) !important; }
-.topnav-burger span { background: #F4F2FA !important; }
+.topnav-burger span { background: var(--ink) !important; }
 .topnav .btn-primary, .topnav-mobile .btn-primary { background: var(--grad-hot) !important; color: var(--on-accent) !important; border-radius: 999px !important; border: 0 !important; box-shadow: 0 8px 26px rgba(139,92,246,.4) !important; }
 .topnav-mobile { background: rgba(var(--scrim-rgb), .92) !important; top: 88px !important; border-radius: 22px; left: 12px !important; right: 12px !important; border: 1px solid rgba(var(--surface-rgb), .12); }
 .topnav-mobile-links a { color: rgba(var(--ink-rgb), .8) !important; }
@@ -68,7 +68,7 @@ body { background: var(--paper); color: var(--ink); font-family: var(--sans); fo
   border-bottom: 1px solid rgba(var(--surface-rgb), .08); }
 .topnav-mobile-links a:last-child { border-bottom: 0; }
 .topnav-burger { background: rgba(var(--surface-rgb), .07) !important; border: 1px solid rgba(var(--surface-rgb), .16) !important; }
-.topnav-burger.is-open span { background: #F4F2FA !important; }
+.topnav-burger.is-open span { background: var(--ink) !important; }
 .topnav .logo-img, .footer .logo-img {
   background: transparent;
   /* fully transparent artwork — no white stroke; card-style violet/pink light only */

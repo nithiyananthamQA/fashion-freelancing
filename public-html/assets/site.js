@@ -453,6 +453,30 @@
     }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
     document.querySelectorAll('.reveal, .reveal-scale, [data-stagger]').forEach(el => io.observe(el));
 
+    // ---- Line icons draw themselves on, once, when first scrolled to ----
+    // Each shape is measured so the dash runs its own length exactly; a shape
+    // that cannot report one keeps the CSS fallback. Icons in the same row are
+    // staggered so a five-across grid reads as a sweep rather than a flash.
+    const icons = document.querySelectorAll('.svc .icon svg, .gar-i');
+    if (icons.length && !reduceMotion) {
+      icons.forEach((svg, i) => {
+        svg.style.setProperty('--ico-d', (i % 5) * 70 + 'ms');
+        svg.style.setProperty('--ico-i', i);
+        svg.querySelectorAll('path, circle, rect, line, polyline, polygon').forEach(shape => {
+          const len = shape.getTotalLength && shape.getTotalLength();
+          if (len) shape.style.setProperty('--ico-len', len);
+        });
+      });
+      const icoIO = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (!e.isIntersecting) return;
+          e.target.classList.add('ico-in');
+          icoIO.unobserve(e.target);
+        });
+      }, { threshold: 0.3 });
+      icons.forEach(el => icoIO.observe(el));
+    }
+
     // ---- Spotlight cursor glow on .spotlight cards ----
     if (!reduceMotion) {
       document.addEventListener('pointermove', (e) => {
