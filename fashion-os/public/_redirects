@@ -68,3 +68,9 @@
 /pages/blog-post.html / 301
 /pages/service        / 301
 /pages/service.html   / 301
+
+# --- Graphics & Prints page renamed from its old working name.
+#     The service id stays `seamless-pattern` (it is the database key);
+#     only the page URL changed. Both forms of the old URL are in the wild.
+/pages/services/seamless-pattern       /pages/services/graphics-prints 301
+/pages/services/seamless-pattern.html  /pages/services/graphics-prints 301

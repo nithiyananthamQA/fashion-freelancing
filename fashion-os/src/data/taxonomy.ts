@@ -156,7 +156,7 @@ export const SERVICES: Service[] = [
        is the foreign key on every specialist offering and project already in
        the database — renaming it would break both for no gain. */
     name: 'Graphics & Prints',
-    page: '/pages/services/seamless-pattern.html',
+    page: '/pages/services/graphics-prints.html',
     blurb: 'Surface pattern, colourways and apparel graphics, delivered as print-ready production files.',
     accent: 'var(--lg-pink)',
     specialties: ['Apparel prints', 'Repeat patterns', 'Textile prints', 'Home textiles', 'Print-ready files'],

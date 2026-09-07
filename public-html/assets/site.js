@@ -127,7 +127,7 @@
         <div class="tm-svcs">
           <a class="sub" href="${r("pages/services/tech-pack.html")}">Tech packs</a>
           <a class="sub" href="${r("pages/services/3d-virtual-sampling.html")}">3D sampling</a>
-          <a class="sub" href="${r("pages/services/seamless-pattern.html")}">Graphics &amp; prints</a>
+          <a class="sub" href="${r("pages/services/graphics-prints.html")}">Graphics &amp; prints</a>
           <a class="sub" href="${r("pages/services/pattern-cad.html")}">Pattern (CAD)</a>
           <a class="sub" href="${r("pages/services/dobby-jacquard.html")}">Dobby &amp; jacquard</a>
           <a class="sub" href="${r("pages/services/website.html")}">Websites</a>
@@ -161,7 +161,7 @@
       <h6>Design &amp; development</h6>
       <a role="menuitem" href="${r("pages/services/tech-pack.html")}">Tech packs</a>
       <a role="menuitem" href="${r("pages/services/3d-virtual-sampling.html")}">3D virtual sampling</a>
-      <a role="menuitem" href="${r("pages/services/seamless-pattern.html")}">Graphics &amp; prints</a>
+      <a role="menuitem" href="${r("pages/services/graphics-prints.html")}">Graphics &amp; prints</a>
       <a role="menuitem" href="${r("pages/services/pattern-cad.html")}">Pattern making (CAD)</a>
       <a role="menuitem" href="${r("pages/services/dobby-jacquard.html")}">Dobby &amp; jacquard</a>
     </div>
@@ -200,7 +200,7 @@
           <ul>
             <li><a href="${r("pages/services/tech-pack.html")}">Tech packs</a></li>
             <li><a href="${r("pages/services/3d-virtual-sampling.html")}">3D virtual sampling</a></li>
-            <li><a href="${r("pages/services/seamless-pattern.html")}">Graphics &amp; prints</a></li>
+            <li><a href="${r("pages/services/graphics-prints.html")}">Graphics &amp; prints</a></li>
             <li><a href="${r("pages/services/pattern-cad.html")}">Pattern making (CAD)</a></li>
             <li><a href="${r("pages/services/dobby-jacquard.html")}">Dobby &amp; jacquard</a></li>
           </ul>
