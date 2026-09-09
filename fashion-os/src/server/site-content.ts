@@ -105,8 +105,16 @@ const stripTags = (s: string) => s.replace(/<[^>]+>/g, '').trim();
 // --- storage -------------------------------------------------------------------
 
 export async function loadOverrides(ctx: Ctx, page: SitePage): Promise<Map<string, { kind: Kind; value: string }>> {
-  const rows = await all<{ key: string; kind: Kind; value: string }>(db(ctx), 'SELECT key, kind, value FROM site_content WHERE page = ?', page.path);
-  return new Map(rows.map((r) => [r.key, { kind: r.kind, value: r.value }]));
+  // The page must never depend on the content table being there. If the
+  // query fails — a migration not yet applied, a database hiccup — the page
+  // is served as designed and the edits reappear once the table is back.
+  try {
+    const rows = await all<{ key: string; kind: Kind; value: string }>(db(ctx), 'SELECT key, kind, value FROM site_content WHERE page = ?', page.path);
+    return new Map(rows.map((r) => [r.key, { kind: r.kind, value: r.value }]));
+  } catch (error) {
+    console.error('[site-content] overrides unavailable, serving the template:', error);
+    return new Map();
+  }
 }
 
 /** Only the inline tags a paragraph or heading on these pages actually uses. */
