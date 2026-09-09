@@ -6,7 +6,7 @@
 > `main` builds `fashion-os` and deploys. D1 `fashion_os` was migrated there
 > with all data; R2 `fashion-os-media` is enabled, so uploads are on.
 > `SITE_URL` points at the workers.dev URL until the custom domain is connected.
-> The old account's worker is retired.
+> The old account's worker has been deleted; its D1 database is kept for a while as a backup.
 
 The site is one Cloudflare **Worker** serving two things from one origin:
 
@@ -65,29 +65,36 @@ The bucket must stay **private**. Files are only ever read back through
 ## Secrets
 
 ```bash
-npx wrangler pages secret put RESEND_API_KEY    # optional, enables real email
+npx wrangler secret put RESEND_API_KEY    # optional, enables real email — or set it in the dashboard
 ```
 
-And set `MAIL_FROM` (e.g. `no-reply@fashionfreelancing.com`) in the Pages
-environment variables, alongside `SITE_URL`.
+And set `MAIL_FROM` (e.g. `no-reply@fashionfreelancing.com`) as a Worker
+variable in the dashboard, alongside `SITE_URL`.
 
 Without a mail provider the app still works: verification and reset messages are
 recorded in the `outbound_email` table and shown in `/workspace/admin`, so no
 flow dead-ends. Set both variables before real sign-ups.
 
-## Cloudflare Pages settings
+## Deploys: Workers Builds (GitHub)
+
+The worker is connected to `nithiyananthamQA/fashion-freelancing`. Every push
+to `main` builds and deploys. Project settings, should they ever need
+re-entering:
 
 | Setting | Value |
 |---|---|
-| **Production branch** | `main` |
-| **Framework preset** | `Astro` |
-| **Build command** | `npm install && npm run build` |
-| **Build output directory** | `dist` |
 | **Root directory** | `fashion-os` |
-| **Node version** | env var `NODE_VERSION` = `22` |
+| **Build command** | `npm run build` |
+| **Deploy command** | `npx wrangler deploy --config dist/server/wrangler.json` |
+| **Build variable** | `NODE_VERSION` = `22` |
+| **Non-production branch builds** | off |
 
 > The **root directory must be `fashion-os`** — the build runs there, and
 > `sync-public.mjs` reaches up to `../public-html`.
+
+`npm run deploy` from a laptop is no longer the path: it needs an API token
+for the hosting account in `CLOUDFLARE_API_TOKEN`, and without one wrangler
+falls back to whatever account is logged in locally.
 
 ## Making the first admin
 
