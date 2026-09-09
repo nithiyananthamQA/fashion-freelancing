@@ -1,5 +1,13 @@
 # Deploying to Cloudflare Workers
 
+> **Current hosting (since 2026-09-09):** the site runs in the Cloudflare account
+> `Freelancingfashion@gmail.com` (id `d798bbc8cbee648ce1697e580547335a`) and
+> deploys automatically from GitHub through Workers Builds — every push to
+> `main` builds `fashion-os` and deploys. D1 `fashion_os` was migrated there
+> with all data; R2 `fashion-os-media` is enabled, so uploads are on.
+> `SITE_URL` points at the workers.dev URL until the custom domain is connected.
+> The old account's worker is retired.
+
 The site is one Cloudflare **Worker** serving two things from one origin:
 
 - the **services website**, static files straight from the CDN

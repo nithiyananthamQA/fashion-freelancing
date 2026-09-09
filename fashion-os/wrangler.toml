@@ -19,25 +19,22 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "fashion_os"
-database_id = "b92771c6-d5ea-45c6-85c1-7fccfce10015"
+database_id = "9a5af7a9-a3c2-4a16-95f2-f1cfba149d37"
 migrations_dir = "migrations"
 
-# --- Object storage: NOT ENABLED ---
-# R2 needs billing details on the Cloudflare account, so it is deliberately
-# left out. Portfolio pieces are added as links (Behance, Figma, a live site,
-# Drive) instead of uploads, and the app checks for the binding before offering
-# a file field — see src/server/storage.ts.
-#
-# To turn uploads on later: create the bucket, then uncomment this block.
-# [[r2_buckets]]
-# binding = "MEDIA"
-# bucket_name = "fashion-os-media"
+# --- Object storage: portfolio pieces and project attachments ---
+# Enabled on the new account (R2 subscription added 2026-09-09). The app offers
+# a file field only when this binding exists — see src/server/storage.ts —
+# and every read back through /api/files re-checks authorization.
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "fashion-os-media"
 
 # No KV. Astro's session store is disabled in astro.config.mjs, and our own
 # sign-in sessions live in D1, so nothing needs a KV namespace.
 
 [vars]
-SITE_URL = "https://fashionfreelancing.com"
+SITE_URL = "https://fashion-freelancing.freelancingfashion.workers.dev"   # domain not connected yet; switch back when it is
 # Outbound mail: leave unset to queue verification / notification mail in the
 # outbound_email table instead of sending it (see src/server/mail.ts).
 # MAIL_FROM = "no-reply@fashionfreelancing.com"
