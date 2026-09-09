@@ -107,7 +107,15 @@ export function fieldsOf(page: SitePage, overrides: Map<string, { kind: Kind; va
     if (kicker) s.label = stripTags(kicker.value ?? kicker.original);
     else if (s.id === 'footer') s.label = 'Footer';
     else if (heading) s.label = stripTags(heading.value ?? heading.original).slice(0, 60);
-    else s.label = /^sec\d+$/.test(s.id) ? s.id.replace(/^sec/, 'Section ') : humanise(s.id);
+    else {
+      // no heading either: a call-to-action strip is best known by its button,
+      // then by its opening words
+      const button = s.fields.find((f) => /\.button-1$/.test(f.key));
+      const text = s.fields.find((f) => /\.text-1$/.test(f.key));
+      const from = button ?? text;
+      s.label = from ? stripTags(from.value ?? from.original).slice(0, 48).replace(/\s+\S*$/, (m) => (from === text ? '…' : m))
+        : /^sec\d+$/.test(s.id) ? s.id.replace(/^sec/, 'Section ') : humanise(s.id);
+    }
   }
   return [...sections.values()];
 }
