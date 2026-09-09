@@ -1,0 +1,8 @@
+---
+/** The homepage, rendered from its template with the editors' overrides applied. */
+export const prerender = false;
+import { notFoundResponse, renderSitePage } from '../server/site-content';
+const response = await renderSitePage(Astro, '/');
+if (response) return response;
+return notFoundResponse();
+---

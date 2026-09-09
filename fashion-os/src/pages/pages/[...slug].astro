@@ -1,0 +1,16 @@
+---
+/**
+ * The marketing pages that editors can change: /pages/about, /pages/help and
+ * every /pages/services/… page. Legal pages are still static files and never
+ * reach this route. A request for the old `.html` form is sent to the clean
+ * URL, as the asset layer used to do.
+ */
+export const prerender = false;
+import { notFoundResponse } from '../../server/site-content';
+import { renderSitePage } from '../../server/site-content';
+const slug = Astro.params.slug ?? '';
+if (slug.endsWith('.html')) return Astro.redirect(`/pages/${slug.slice(0, -5)}`, 301);
+const response = await renderSitePage(Astro, `/pages/${slug}`);
+if (response) return response;
+return notFoundResponse();
+---

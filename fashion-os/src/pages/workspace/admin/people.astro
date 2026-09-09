@@ -18,7 +18,7 @@
 export const prerender = false;
 
 import Workspace from '../../../layouts/Workspace.astro';
-import { all, db } from '../../../server/db';
+import { all, db, run } from '../../../server/db';
 import { guard, requireAdmin } from '../../../server/guards';
 import { accountStatusLabel, companyRoleLabel, profileStatusLabel, statusTone } from '../../../data/labels';
 import { adminNav } from '../../../data/workspace-nav';
@@ -26,6 +26,28 @@ import { adminNav } from '../../../data/workspace-nav';
 const gate = await guard(Astro, () => requireAdmin(Astro));
 if (gate.response) return gate.response;
 const admin = gate.value;
+
+/* Content editors are made and unmade here. The role opens /workspace/content
+   only; admin rights are never granted from a form. Sessions are cleared so
+   the change takes effect on the next sign-in, not the next click. */
+let flash: string | null = null;
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  if (String(form.get('action') ?? '') === 'role') {
+    const userId = String(form.get('userId') ?? '');
+    const role = String(form.get('role') ?? '') === 'editor' ? 'editor' : 'member';
+    const target = await all<{ id: string; name: string; is_admin: number }>(
+      db(Astro), "SELECT id, name, is_admin FROM users WHERE id = ? AND tenant IN (?, 'public')", userId, Astro.locals.tenant);
+    const person = target[0];
+    if (!person || person.is_admin === 1 || person.id === admin.id) {
+      flash = 'That account cannot be changed here.';
+    } else {
+      await run(db(Astro), 'UPDATE users SET role = ?, updated_at = ? WHERE id = ?', role, new Date().toISOString(), person.id);
+      await run(db(Astro), 'DELETE FROM sessions WHERE user_id = ?', person.id);
+      flash = role === 'editor' ? `${person.name} can now edit the site content.` : `${person.name} no longer has content access.`;
+    }
+  }
+}
 
 const database = db(Astro);
 const tenant = Astro.locals.tenant;
@@ -36,6 +58,7 @@ interface Person {
   email: string;
   status: string;
   is_admin: number;
+  role: string;
   email_verified_at: string | null;
   created_at: string;
   profile_id: string | null;
@@ -49,7 +72,7 @@ interface Person {
    that just signed up. */
 const people = await all<Person>(
   database,
-  `SELECT u.id, u.name, u.email, u.status, u.is_admin, u.email_verified_at, u.created_at,
+  `SELECT u.id, u.name, u.email, u.status, u.is_admin, u.role, u.email_verified_at, u.created_at,
           p.id AS profile_id, p.handle, p.status AS profile_status
      FROM users u
      LEFT JOIN specialist_profiles p ON p.user_id = u.id
@@ -108,6 +131,7 @@ function whatTheyCanDo(person: Person): string {
     parts.push(`${seat.company_name} — ${companyRoleLabel(seat.role)}${seat.job_title ? `, ${seat.job_title}` : ''}`);
   }
   if (person.is_admin === 1) parts.push('Runs this workspace');
+  if (person.role === 'editor') parts.push('Edits the site content');
   if (parts.length === 0) return 'Signed up, but has not applied as a specialist or joined a company yet.';
   return parts.join(' · ');
 }
@@ -125,7 +149,7 @@ const nav = adminNav();
   lede={people.length
     ? `${people.length} ${people.length === 1 ? 'account' : 'accounts'} · ${specialists} with a specialist profile · ${onCompany} on a company · ${admins} with admin rights.`
     : 'Everyone who can sign in here, and what each account is allowed to be.'}
-  flash={null}
+  flash={null} flash={flash}
 >
   {people.length === 0 ? (
     <div class="ws-empty">
@@ -153,6 +177,15 @@ const nav = adminNav();
                 <span class="pill-tone bad">{accountStatusLabel(person.status)}</span>
               )}
               {person.is_admin === 1 && <span class="pill-tone ok">Admin rights</span>}
+              {person.role === 'editor' && <span class="pill-tone">Content editor</span>}
+              {person.is_admin !== 1 && person.id !== admin.id && (
+                <form method="post" class="people-role">
+                  <input type="hidden" name="action" value="role" />
+                  <input type="hidden" name="userId" value={person.id} />
+                  <input type="hidden" name="role" value={person.role === 'editor' ? 'member' : 'editor'} />
+                  <button type="submit" class="link-t">{person.role === 'editor' ? 'Remove content access' : 'Make content editor'}</button>
+                </form>
+              )}
               {person.profile_status && (
                 <span class={tone(person.profile_status)}>{profileStatusLabel(person.profile_status)}</span>
               )}

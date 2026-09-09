@@ -85,7 +85,7 @@ re-entering:
 |---|---|
 | **Root directory** | `fashion-os` |
 | **Build command** | `npm run build` |
-| **Deploy command** | `npx wrangler deploy --config dist/server/wrangler.json` |
+| **Deploy command** | `npx wrangler d1 migrations apply fashion_os --remote && npx wrangler deploy --config dist/server/wrangler.json` |
 | **Build variable** | `NODE_VERSION` = `22` |
 | **Non-production branch builds** | off |
 
@@ -95,6 +95,29 @@ re-entering:
 `npm run deploy` from a laptop is no longer the path: it needs an API token
 for the hosting account in `CLOUDFLARE_API_TOKEN`, and without one wrangler
 falls back to whatever account is logged in locally.
+
+## Editable site content
+
+Every heading, paragraph, chip, button, image, page title and search
+description on the marketing pages (home, the ten service pages, about, help)
+is editable from the dashboard at `/workspace/content`.
+
+- **How it works.** `public-html` stays the design. `scripts/annotate-cms.mjs`
+  tags every editable element with a stable `data-cms` key (already done —
+  re-run it after adding a new page or section; existing keys never change).
+  The build copies those pages to `src/site-templates/` and the worker renders
+  them, filling each key from `site_content`. No row = the page's own text, so
+  a reset is a delete. `site_content_history` keeps every change for undo.
+- **Who.** Admins, and accounts with `role = 'editor'`, which opens
+  `/workspace/content` and nothing else. Grant or remove it on
+  *Workspace → People → "Make content editor"*, or from a terminal:
+  `node scripts/make-editor.mjs someone@brand.com "Their Name" --remote`
+  (creates the account and prints a one-time password).
+- **Images** upload to R2 under `site/…` and are served publicly from
+  `/media/site/…`; portfolio files stay private behind `/api/files`.
+- **Deploying schema changes.** Workers Builds only builds and deploys, so the
+  dashboard deploy command must apply migrations first:
+  `npx wrangler d1 migrations apply fashion_os --remote && npx wrangler deploy --config dist/server/wrangler.json`
 
 ## Making the first admin
 

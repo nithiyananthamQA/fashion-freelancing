@@ -68,14 +68,29 @@ console.log('[sync-public] syncing the services website into fashion-os/public â
 
 mkdirSync(dest, { recursive: true });
 
-// 1. homepage
-if (existsSync(join(publicHtml, 'index.html'))) {
-  cpSync(join(publicHtml, 'index.html'), join(dest, 'index.html'));
-}
-
-// 2. pages + assets
+// 1 + 2. pages + assets.
+//   The marketing pages are TEMPLATES now, not static files: the worker
+//   renders each one, filling every `data-cms` element from the database so
+//   editors can change copy and images from the dashboard. A file under
+//   public/ would be served by the asset layer before the worker ever ran,
+//   so those pages go to src/site-templates and are removed from public/.
+//   Legal pages and the 404 stay static.
 syncDir(join(publicHtml, 'pages'), join(dest, 'pages'));
 syncDir(join(publicHtml, 'assets'), join(dest, 'assets'));
+const templates = join(root, 'src', 'site-templates');
+mkdirSync(join(templates, 'pages', 'services'), { recursive: true });
+const EDITABLE = ['index.html', 'pages/about.html', 'pages/help.html',
+  ...readdirSync(join(publicHtml, 'pages', 'services')).filter((f) => f.endsWith('.html')).map((f) => `pages/services/${f}`)];
+for (const rel of EDITABLE) {
+  const from = join(publicHtml, rel);
+  if (!existsSync(from)) continue;
+  cpSync(from, join(templates, rel));
+  rmSync(join(dest, rel), { force: true });
+}
+rmSync(join(dest, 'pages', 'services'), { recursive: true, force: true });
+// the 404 page as a template too: worker routes answer unknown paths with it
+if (existsSync(join(publicHtml, 'pages', '404.html'))) cpSync(join(publicHtml, 'pages', '404.html'), join(templates, '404.html'));
+rmSync(join(dest, 'index.html'), { force: true });
 
 // 3. robots + sitemap
 for (const file of ['robots.txt', 'sitemap.xml']) {

@@ -1,0 +1,11 @@
+---
+/**
+ * Lowest-priority route: only reached when no page, API route or static file
+ * matched. /index.html goes to /, and anything else gets the site's 404 page.
+ */
+export const prerender = false;
+import { notFoundResponse } from '../server/site-content';
+const path = Astro.url.pathname;
+if (path === '/index.html') return Astro.redirect('/', 301);
+return notFoundResponse();
+---

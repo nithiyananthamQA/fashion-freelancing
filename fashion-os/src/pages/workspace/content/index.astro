@@ -1,0 +1,47 @@
+---
+/**
+ * /workspace/content — the pages an editor can change. One card per page,
+ * with how much of it has been edited and when; open a page to edit it
+ * section by section.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db } from '../../../server/db';
+import { guard, requireEditor } from '../../../server/guards';
+import { adminNav, editorNav } from '../../../data/workspace-nav';
+import { sitePages } from '../../../server/site-content';
+
+const gate = await guard(Astro, () => requireEditor(Astro));
+if (gate.response) return gate.response;
+const user = gate.value;
+
+const database = db(Astro);
+const edits = await all<{ page: string; n: number; last: string | null }>(
+  database, 'SELECT page, COUNT(*) AS n, MAX(updated_at) AS last FROM site_content GROUP BY page');
+const byPage = new Map(edits.map((e) => [e.page, e]));
+const pages = sitePages();
+const when = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+---
+<Workspace title="Site content" role={user.isAdmin ? 'admin' : 'editor'} current="/workspace/content"
+  items={user.isAdmin ? adminNav() : editorNav()} who={user.name}
+  heading="Site content" lede="Every heading, paragraph, button and image on the public pages. Open a page, change what it says, save — it is live the moment you do.">
+  <div class="cms-pages">
+    {pages.map((p) => { const e = byPage.get(p.path); return (
+      <a class="cms-page ws-card" href={`/workspace/content/${p.slug}`}>
+        <span class="cms-page-title">{p.title}</span>
+        <span class="cms-page-path">{p.path}</span>
+        <span class="cms-page-meta">{e ? `${e.n} change${e.n === 1 ? '' : 's'} · last ${when(e.last!)}` : 'Untouched — showing the original'}</span>
+      </a>
+    ); })}
+  </div>
+</Workspace>
+
+<style>
+  .cms-pages { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .cms-page { display: grid; gap: 4px; padding: 18px 18px 16px; text-decoration: none; color: inherit; }
+  .cms-page:hover { border-color: var(--champagne); }
+  .cms-page-title { font-family: var(--disp); font-weight: 700; font-size: 16px; color: var(--ink); }
+  .cms-page-path { font-family: var(--mono); font-size: 11.5px; color: var(--ink-5); }
+  .cms-page-meta { font-size: 12.5px; color: var(--ink-4); margin-top: 6px; }
+</style>

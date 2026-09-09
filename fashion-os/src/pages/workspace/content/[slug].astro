@@ -1,0 +1,162 @@
+---
+/**
+ * /workspace/content/<page> — one page, section by section, every field in
+ * reading order. Each section saves on its own. A field left equal to the
+ * page's original text is not stored at all, so "Reset" is just that. The
+ * page's recent changes sit at the bottom and any of them can be undone.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { db } from '../../../server/db';
+import { guard, requireEditor } from '../../../server/guards';
+import { adminNav, editorNav } from '../../../data/workspace-nav';
+import { fieldsOf, loadOverrides, pageBySlug, recentChanges, saveField, undoChange, type Field } from '../../../server/site-content';
+
+const gate = await guard(Astro, () => requireEditor(Astro));
+if (gate.response) return gate.response;
+const user = gate.value;
+
+const page = pageBySlug(Astro.params.slug ?? '');
+if (!page) return new Response(null, { status: 404 });
+const database = db(Astro);
+
+let flash: string | null = null;
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const action = String(form.get('action') ?? '');
+  const sections = fieldsOf(page, await loadOverrides(Astro, page));
+  const byKey = new Map<string, Field>(sections.flatMap((s) => s.fields.map((f) => [f.key, f])));
+  if (action === 'save') {
+    const sectionId = String(form.get('section') ?? '');
+    let saved = 0, reset = 0;
+    for (const f of sections.find((s) => s.id === sectionId)?.fields ?? []) {
+      const raw = f.kind === 'image'
+        ? JSON.stringify({ src: form.get(`src:${f.key}`) ?? '', alt: form.get(`alt:${f.key}`) ?? '' })
+        : form.get(`f:${f.key}`);
+      if (raw === null) continue;
+      const r = await saveField(Astro, page, f, String(raw), user.id);
+      if (r === 'saved') saved++; if (r === 'reset') reset++;
+    }
+    flash = saved || reset ? `Saved — ${saved} change${saved === 1 ? '' : 's'}${reset ? `, ${reset} put back to the original` : ''}. It is live now.` : 'Nothing changed.';
+  } else if (action === 'reset') {
+    const f = byKey.get(String(form.get('key') ?? ''));
+    if (f) { await saveField(Astro, page, f, '', user.id); flash = `${f.label} is back to the original.`; }
+  } else if (action === 'undo') {
+    flash = (await undoChange(Astro, page, String(form.get('change') ?? ''), user.id)) ? 'Undone.' : 'That change is no longer there.';
+  }
+}
+
+const sections = fieldsOf(page, await loadOverrides(Astro, page));
+const changes = await recentChanges(Astro, page);
+const edited = sections.reduce((n, s) => n + s.fields.filter((f) => f.value !== null).length, 0);
+const img = (f: Field) => { try { return JSON.parse(f.value ?? f.original) as { src: string; alt: string }; } catch { return { src: '', alt: '' }; } };
+const short = (s: string | null) => (s === null ? '— original —' : s.replace(/<[^>]+>/g, '').slice(0, 70) + (s.length > 70 ? '…' : ''));
+const when = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const multiline = (f: Field) => f.kind === 'html' || ['text', 'item', 'caption'].some((k) => f.key.includes(`.${k}-`));
+---
+<Workspace title={`Edit — ${page.title}`} role={user.isAdmin ? 'admin' : 'editor'} current="/workspace/content"
+  items={user.isAdmin ? adminNav() : editorNav()} who={user.name} heading={page.title}
+  lede={`${sections.length} sections · ${edited} field${edited === 1 ? '' : 's'} changed from the original.`} flash={flash}>
+
+  <p class="cms-top"><a href="/workspace/content">← All pages</a> · <a href={page.path} target="_blank" rel="noopener">View the live page ↗</a></p>
+  {/* Reset buttons live inside the section forms but submit this one, so a
+      reset can never be mistaken for a save. */}
+  <form method="post" id="cms-reset"><input type="hidden" name="action" value="reset" /></form>
+
+  {sections.map((s) => (
+    <form method="post" class="cms-section ws-card" id={`s-${s.id}`}>
+      <input type="hidden" name="action" value="save" />
+      <input type="hidden" name="section" value={s.id} />
+      <h2 class="cms-section-title">{s.label}<span class="cms-count">{s.fields.length} field{s.fields.length === 1 ? '' : 's'}</span></h2>
+      {s.fields.map((f) => (
+        <div class={`cms-field${f.value !== null ? ' is-changed' : ''}`}>
+          <div class="cms-field-head">
+            <span class="cms-label">{f.label}{f.value !== null && <em>edited</em>}</span>
+            {f.value !== null && <button type="submit" class="cms-reset" form="cms-reset" name="key" value={f.key}>Reset</button>}
+          </div>
+          {f.kind === 'image' ? (
+            <div class="cms-image">
+              <img src={img(f).src} alt="" class="cms-preview" />
+              <div class="cms-image-controls">
+                <input type="hidden" name={`src:${f.key}`} value={img(f).src} />
+                <label class="cms-upload">Replace image <input type="file" accept="image/*" data-upload={f.key} data-page={page.slug} /></label>
+                <label class="cms-alt">Alt text <input class="fi" type="text" name={`alt:${f.key}`} value={img(f).alt} /></label>
+                <span class="cms-hint">JPG, PNG or WebP, up to 25 MB. Replaces the image everywhere it appears in this slot.</span>
+              </div>
+            </div>
+          ) : multiline(f) ? (
+            <textarea class="fi" name={`f:${f.key}`} rows={Math.min(8, Math.max(2, Math.ceil((f.value ?? f.original).length / 90)))}>{f.value ?? f.original}</textarea>
+          ) : (
+            <input class="fi" type="text" name={`f:${f.key}`} value={f.value ?? f.original} />
+          )}
+          {f.kind === 'html' && <span class="cms-hint">Keeps bold, italics, links and the highlighted spans; other tags are removed on save.</span>}
+        </div>
+      ))}
+      <div class="cms-actions"><button type="submit" class="btn-hot">Save this section</button></div>
+    </form>
+  ))}
+
+  {changes.length > 0 && (
+    <section class="cms-section ws-card">
+      <h2 class="cms-section-title">Recent changes</h2>
+      <ul class="cms-history">
+        {changes.map((c) => (
+          <li>
+            <div><b>{c.key}</b> — {c.changed_by_name ?? 'someone'}, {when(c.changed_at)}</div>
+            <div class="cms-diff"><span>{short(c.old_value)}</span> → <span>{short(c.new_value)}</span></div>
+            <form method="post"><input type="hidden" name="action" value="undo" /><input type="hidden" name="change" value={c.id} /><button type="submit" class="cms-reset">Undo</button></form>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+</Workspace>
+
+<script>
+  // Replace-image: upload to R2 through the site, then point the field at the new URL.
+  document.querySelectorAll<HTMLInputElement>('input[data-upload]').forEach((input) => {
+    input.addEventListener('change', async () => {
+      const file = input.files?.[0]; if (!file) return;
+      const field = input.closest('.cms-field')!;
+      const hidden = field.querySelector<HTMLInputElement>('input[type=hidden][name^="src:"]')!;
+      const preview = field.querySelector<HTMLImageElement>('.cms-preview')!;
+      const hint = field.querySelector<HTMLElement>('.cms-hint')!;
+      hint.textContent = 'Uploading…';
+      const body = new FormData(); body.append('file', file); body.append('page', input.dataset.page!); body.append('key', input.dataset.upload!);
+      const res: { ok: boolean; url?: string; error?: string } = await fetch('/api/site-media', { method: 'POST', body }).then((r) => r.json() as Promise<{ ok: boolean; url?: string; error?: string }>).catch(() => ({ ok: false, error: 'Upload failed.' }));
+      if (!res.ok) { hint.textContent = res.error || 'Upload failed.'; return; }
+      hidden.value = res.url ?? ''; preview.src = res.url ?? ''; field.classList.add('is-changed');
+      hint.textContent = 'Uploaded — save this section to make it live.';
+    });
+  });
+</script>
+
+<style>
+  .cms-top { font-size: 13.5px; color: var(--ink-4); margin: 0 0 16px; }
+  .cms-section { padding: 22px 22px 18px; margin-bottom: 16px; }
+  .cms-section-title { font-family: var(--disp); font-size: 17px; font-weight: 700; margin: 0 0 14px; display: flex; align-items: baseline; gap: 10px; }
+  .cms-count { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--ink-5); font-weight: 400; }
+  .cms-field { padding: 12px 0; border-top: 1px solid var(--line); }
+  .cms-field.is-changed { box-shadow: inset 3px 0 0 var(--champagne); padding-left: 12px; }
+  .cms-field-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .cms-label { font-size: 12.5px; color: var(--ink-4); }
+  .cms-label em { font-style: normal; margin-left: 8px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--champagne-3); }
+  .cms-reset { background: none; border: 1px solid var(--line-2); border-radius: 999px; padding: 3px 10px; font-size: 12px; color: var(--ink-4); cursor: pointer; }
+  .cms-reset:hover { border-color: var(--champagne); color: var(--ink); }
+  .cms-field .fi { width: 100%; }
+  textarea.fi { resize: vertical; line-height: 1.5; }
+  .cms-image { display: grid; grid-template-columns: 180px 1fr; gap: 16px; align-items: start; }
+  .cms-preview { width: 180px; height: 120px; object-fit: contain; background: #fff; border: 1px solid var(--line-2); border-radius: 8px; }
+  .cms-image-controls { display: grid; gap: 8px; }
+  .cms-upload { display: inline-block; padding: 8px 14px; border: 1px solid var(--line-2); border-radius: 999px; font-size: 13px; cursor: pointer; width: max-content; }
+  .cms-upload input { display: none; }
+  .cms-alt { display: grid; gap: 4px; font-size: 12.5px; color: var(--ink-4); }
+  .cms-hint { font-size: 12px; color: var(--ink-5); }
+  .cms-actions { margin-top: 14px; }
+  .cms-history { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .cms-history li { display: grid; grid-template-columns: 1fr auto; gap: 4px 14px; font-size: 13px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+  .cms-history li form { grid-row: 1 / 3; }
+  .cms-diff { grid-column: 1; color: var(--ink-4); font-size: 12.5px; }
+  @media (max-width: 640px) { .cms-image { grid-template-columns: 1fr; } }
+</style>

@@ -13,8 +13,8 @@ try{var t=localStorage.getItem('ff-theme');if(t==='light'||t==='dark')d.setAttri
 if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>About Us - Fashion Freelancing</title>
-<meta name="description" content="Fashion Freelancing is a fashion design and production-services studio — one team for tech packs, 3D sampling, patterns, prints, AI photography, listings, websites and brand design. Fixed quotes, two revision rounds, full ownership." />
+<title data-cms="head.title">About Us - Fashion Freelancing</title>
+<meta name="description" data-cms="head.description" content="Fashion Freelancing is a fashion design and production-services studio — one team for tech packs, 3D sampling, patterns, prints, AI photography, listings, websites and brand design. Fixed quotes, two revision rounds, full ownership." />
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF0055'/%3E%3Cstop offset='1' stop-color='%236E56F0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='19' font-weight='600' fill='%23fff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -212,14 +212,14 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   <!-- 1. HERO -->
   <section class="hero" aria-label="About Fashion Freelancing">
     <div class="wrap hero-center">
-      <span class="kicker rv in">About us</span>
-      <h1 class="h-display rv in rv-display">One studio for the whole journey — <span class="acc-t">sketch to sale.</span></h1>
-      <p class="sub rv in">
+      <span class="kicker rv in" data-cms="about-us.kicker-1">About us</span>
+      <h1 class="h-display rv in rv-display" data-cms="about-us.heading-1">One studio for the whole journey — <span class="acc-t">sketch to sale.</span></h1>
+      <p class="sub rv in" data-cms="about-us.text-1">
         Fashion Freelancing is a fashion design and production-services studio. We sit between
         your idea and your factory, your store, your customer — and we speak the language of all three.
       </p>
       <div class="acts rv in">
-        <a href="../index.html#contact" class="btn-acc">Start a project</a>
+        <a href="../index.html#contact" class="btn-acc" data-cms="about-us.button-1">Start a project</a>
       </div>
     </div>
   </section>
@@ -228,11 +228,11 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   <section class="sec" aria-labelledby="story-h">
     <div class="wrap">
       <div class="story">
-        <span class="kicker rv">Why we exist</span>
-        <h2 class="h-display rv rv-display" id="story-h" style="font-size:clamp(26px,3.4vw,42px);margin-top:14px;">Fashion runs on handoffs. <span class="acc-t">Most of them leak.</span></h2>
-        <p class="rv">A designer sketches. A tech pack translates. A factory interprets. A photographer reshoots. A copywriter describes. Every handoff between those people is where money leaks — a measurement misread, a print that breaks in repeat, a listing nobody finds.</p>
-        <p class="rv">We built one team that does the whole chain, so the handoffs happen inside the studio instead of across ten freelancers' inboxes. The tech pack writer knows what the pattern maker needs. The 3D artist works from the same spec the factory will. The listing writer has the garment's real measurements.</p>
-        <p class="soft rv">That's the entire idea. One brief in, one delivery out.</p>
+        <span class="kicker rv" data-cms="why-we-exist.kicker-1">Why we exist</span>
+        <h2 class="h-display rv rv-display" id="story-h" style="font-size:clamp(26px,3.4vw,42px);margin-top:14px;" data-cms="why-we-exist.heading-1">Fashion runs on handoffs. <span class="acc-t">Most of them leak.</span></h2>
+        <p class="rv" data-cms="why-we-exist.text-1">A designer sketches. A tech pack translates. A factory interprets. A photographer reshoots. A copywriter describes. Every handoff between those people is where money leaks — a measurement misread, a print that breaks in repeat, a listing nobody finds.</p>
+        <p class="rv" data-cms="why-we-exist.text-2">We built one team that does the whole chain, so the handoffs happen inside the studio instead of across ten freelancers' inboxes. The tech pack writer knows what the pattern maker needs. The 3D artist works from the same spec the factory will. The listing writer has the garment's real measurements.</p>
+        <p class="soft rv" data-cms="why-we-exist.text-3">That's the entire idea. One brief in, one delivery out.</p>
       </div>
     </div>
   </section>
@@ -241,13 +241,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   <section class="sec" aria-labelledby="how-h">
     <div class="wrap">
       <div class="sec-head">
-        <span class="kicker rv">How we work</span>
-        <h2 class="h-display rv rv-display" id="how-h">Three steps. <span class="acc-t">No surprises.</span></h2>
+        <span class="kicker rv" data-cms="how-we-work.kicker-1">How we work</span>
+        <h2 class="h-display rv rv-display" id="how-h" data-cms="how-we-work.heading-1">Three steps. <span class="acc-t">No surprises.</span></h2>
       </div>
       <div class="steps">
-        <div class="step glass-p rv"><div class="n">01</div><h3>Send your brief</h3><p>A sketch, a tech pack, a link, a voice note — whatever you have. You get a fixed written quote within 24 hours: scope, price, delivery date.</p></div>
-        <div class="step glass-p rv rv-d1"><div class="n">02</div><h3>We build it</h3><p>One in-house team does the work. Two structured revision rounds are part of every package — not an upsell.</p></div>
-        <div class="step glass-p rv rv-d2"><div class="n">03</div><h3>You own it</h3><p>Final files, source files where quoted, and full ownership transfer on final payment. Take everything anywhere, anytime.</p></div>
+        <div class="step glass-p rv"><div class="n">01</div><h3 data-cms="how-we-work.heading-2">Send your brief</h3><p data-cms="how-we-work.text-1">A sketch, a tech pack, a link, a voice note — whatever you have. You get a fixed written quote within 24 hours: scope, price, delivery date.</p></div>
+        <div class="step glass-p rv rv-d1"><div class="n">02</div><h3 data-cms="how-we-work.heading-3">We build it</h3><p data-cms="how-we-work.text-2">One in-house team does the work. Two structured revision rounds are part of every package — not an upsell.</p></div>
+        <div class="step glass-p rv rv-d2"><div class="n">03</div><h3 data-cms="how-we-work.heading-4">You own it</h3><p data-cms="how-we-work.text-3">Final files, source files where quoted, and full ownership transfer on final payment. Take everything anywhere, anytime.</p></div>
       </div>
     </div>
   </section>
@@ -256,16 +256,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   <section class="sec" aria-labelledby="pr-h">
     <div class="wrap">
       <div class="sec-head">
-        <span class="kicker rv">What we hold ourselves to</span>
-        <h2 class="h-display rv rv-display" id="pr-h">The rules we don't <span class="acc-t">bend.</span></h2>
+        <span class="kicker rv" data-cms="what-we-hold-ourselves-to.kicker-1">What we hold ourselves to</span>
+        <h2 class="h-display rv rv-display" id="pr-h" data-cms="what-we-hold-ourselves-to.heading-1">The rules we don't <span class="acc-t">bend.</span></h2>
       </div>
       <div class="kit">
-        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3>Fixed quotes, honoured</h3><p>The number we quote is the number you pay. Scope changes get a new quote before work, never a surprise invoice after.</p></div>
-        <div class="kit-c glass-p rv rv-row"><span class="ki">02</span><h3>Two rounds, on purpose</h3><p>Unlimited revisions reward vague briefs and endless projects. Two structured rounds force the conversation that matters.</p></div>
-        <div class="kit-c glass-p rv rv-row"><span class="ki">03</span><h3>You own everything</h3><p>Designs, patterns, prints, source files — yours on final payment. We never resell or re-colour a client's work.</p></div>
-        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">04</span><h3>Factory language</h3><p>EPI and PPI, DXF and AAMA, GSM and grade rules — we write specs the way production people read them.</p></div>
-        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">05</span><h3>Honest proof only</h3><p>No fabricated testimonials, no borrowed brand logos, no invented numbers. If we can't show it honestly, we don't show it.</p></div>
-        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">06</span><h3>Confidential by default</h3><p>Unreleased collections stay unreleased. Client work never appears publicly without written permission. NDA on request.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3 data-cms="what-we-hold-ourselves-to.heading-2">Fixed quotes, honoured</h3><p data-cms="what-we-hold-ourselves-to.text-1">The number we quote is the number you pay. Scope changes get a new quote before work, never a surprise invoice after.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">02</span><h3 data-cms="what-we-hold-ourselves-to.heading-3">Two rounds, on purpose</h3><p data-cms="what-we-hold-ourselves-to.text-2">Unlimited revisions reward vague briefs and endless projects. Two structured rounds force the conversation that matters.</p></div>
+        <div class="kit-c glass-p rv rv-row"><span class="ki">03</span><h3 data-cms="what-we-hold-ourselves-to.heading-4">You own everything</h3><p data-cms="what-we-hold-ourselves-to.text-3">Designs, patterns, prints, source files — yours on final payment. We never resell or re-colour a client's work.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">04</span><h3 data-cms="what-we-hold-ourselves-to.heading-5">Factory language</h3><p data-cms="what-we-hold-ourselves-to.text-4">EPI and PPI, DXF and AAMA, GSM and grade rules — we write specs the way production people read them.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">05</span><h3 data-cms="what-we-hold-ourselves-to.heading-6">Honest proof only</h3><p data-cms="what-we-hold-ourselves-to.text-5">No fabricated testimonials, no borrowed brand logos, no invented numbers. If we can't show it honestly, we don't show it.</p></div>
+        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">06</span><h3 data-cms="what-we-hold-ourselves-to.heading-7">Confidential by default</h3><p data-cms="what-we-hold-ourselves-to.text-6">Unreleased collections stay unreleased. Client work never appears publicly without written permission. NDA on request.</p></div>
       </div>
     </div>
   </section>
@@ -274,8 +274,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   <section class="sec" aria-labelledby="dir-h">
     <div class="wrap">
       <div class="sec-head">
-        <span class="kicker rv">What we do</span>
-        <h2 class="h-display rv rv-display" id="dir-h">Ten services. <span class="acc-t">One team.</span></h2>
+        <span class="kicker rv" data-cms="what-we-do.kicker-1">What we do</span>
+        <h2 class="h-display rv rv-display" id="dir-h" data-cms="what-we-do.heading-1">Ten services. <span class="acc-t">One team.</span></h2>
       </div>
       <div class="svc-dir">
         <a class="svc-l rv" href="services/tech-pack.html"><b>Tech packs</b><span>factory-ready specs</span></a>
@@ -296,9 +296,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   <section class="sec" aria-label="Start a project">
     <div class="wrap">
       <div class="cta-band glass-p rv">
-        <h2 class="h-display">Tell us what you're making.</h2>
-        <p>A real person replies with a fixed quote within 24 hours.</p>
-        <a href="../index.html#contact" class="btn-acc">Start a project</a>
+        <h2 class="h-display" data-cms="start-a-project.heading-1">Tell us what you're making.</h2>
+        <p data-cms="start-a-project.text-1">A real person replies with a fixed quote within 24 hours.</p>
+        <a href="../index.html#contact" class="btn-acc" data-cms="start-a-project.button-1">Start a project</a>
       </div>
     </div>
   </section>

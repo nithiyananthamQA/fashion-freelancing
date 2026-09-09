@@ -62,6 +62,13 @@ export function requireSpecialist(ctx: Ctx): { user: SessionUser; profileId: str
   return { user: current, profileId: current.profileId };
 }
 
+/** A content editor or an admin. Like the admin pages, nobody else learns the route exists. */
+export function requireEditor(ctx: Ctx): SessionUser {
+  const current = user(ctx);
+  if (!current || !current.isEditor) throw new GuardRedirect(notFound());
+  return current;
+}
+
 export function requireAdmin(ctx: Ctx): SessionUser {
   const current = user(ctx);
   // A non-admin must not be able to discover that /workspace/admin exists.

@@ -231,11 +231,12 @@ export async function setPassword(
  */
 export function landingFor(
   next: string | null,
-  roles: { companyIds: string[]; profileId: string | null; isAdmin: boolean },
+  roles: { companyIds: string[]; profileId: string | null; isAdmin: boolean; role?: string },
 ): string {
   // Only same-origin paths — never redirect to an attacker-supplied host.
   if (next && next.startsWith('/') && !next.startsWith('//')) return next;
   if (roles.isAdmin) return '/workspace/admin';
+  if (roles.role === 'editor') return '/workspace/content';
   if (roles.profileId) return '/workspace/freelancer';
   if (roles.companyIds.length) return '/workspace/company';
   return '/specialists';

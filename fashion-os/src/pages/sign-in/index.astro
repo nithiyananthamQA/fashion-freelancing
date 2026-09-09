@@ -99,11 +99,12 @@ async function loadRoles(database: D1Database, userId: string) {
   const profile = await one<{ id: string }>(
     database, 'SELECT id FROM specialist_profiles WHERE user_id = ?', userId,
   );
-  const admin = await one<{ is_admin: number }>(database, 'SELECT is_admin FROM users WHERE id = ?', userId);
+  const admin = await one<{ is_admin: number; role: string }>(database, 'SELECT is_admin, role FROM users WHERE id = ?', userId);
   return {
     companyIds: company ? [company.company_id] : [],
     profileId: profile?.id ?? null,
     isAdmin: admin?.is_admin === 1,
+    role: admin?.role ?? 'member',
   };
 }
 

@@ -17,7 +17,7 @@ export interface NavItem {
 }
 
 interface Props {
-  role: 'freelancer' | 'company' | 'admin';
+  role: 'freelancer' | 'company' | 'admin' | 'editor';
   current: string;
   items: NavItem[];
   /** Shown under the role name — the person's or company's name. */
@@ -30,6 +30,7 @@ const ROLE_LABEL = {
   freelancer: 'Specialist',
   company: 'Company',
   admin: 'Operations',
+  editor: 'Site content',
 } as const;
 ---
 

@@ -42,8 +42,13 @@ export const companyNav = (c: Counts = {}): NavItem[] => [
   { href: '/workspace/company/settings',   label: 'Settings' },
 ];
 
+export const editorNav = (): NavItem[] => [
+  { href: '/workspace/content', label: 'Site content' },
+];
+
 export const adminNav = (c: Counts = {}): NavItem[] => [
   { href: '/workspace/admin',             label: 'Overview' },
+  { href: '/workspace/content',           label: 'Site content' },
   { href: '/workspace/admin/reviews',     label: 'Applications to review', count: c.reviews },
   { href: '/workspace/admin/moderation',  label: 'Moderation queue',       count: c.moderation },
   { href: '/workspace/admin/enquiries',   label: 'Project enquiries',      count: c.enquiries },

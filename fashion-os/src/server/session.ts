@@ -15,6 +15,9 @@ export interface SessionUser {
   email: string;
   name: string;
   isAdmin: boolean;
+  /** 'editor' may change the marketing pages' content and nothing else. */
+  role: 'member' | 'editor';
+  isEditor: boolean;
   emailVerified: boolean;
   /** Companies this account belongs to; empty for a freelancer-only account. */
   companyIds: string[];
@@ -29,6 +32,7 @@ interface UserRow {
   email: string;
   name: string;
   is_admin: number;
+  role: string;
   email_verified_at: string | null;
   status: string;
 }
@@ -74,7 +78,7 @@ export async function loadUser(ctx: Ctx, database: D1Database): Promise<SessionU
 
   const row = await one<UserRow & { expires_at: string }>(
     database,
-    `SELECT u.id, u.email, u.name, u.is_admin, u.email_verified_at, u.status, s.expires_at
+    `SELECT u.id, u.email, u.name, u.is_admin, u.role, u.email_verified_at, u.status, s.expires_at
        FROM sessions s JOIN users u ON u.id = s.user_id
       WHERE s.id = ?`,
     await sha256(token),
@@ -104,6 +108,8 @@ export async function loadUser(ctx: Ctx, database: D1Database): Promise<SessionU
     email: row.email,
     name: row.name,
     isAdmin: row.is_admin === 1,
+    role: row.role === 'editor' ? 'editor' : 'member',
+    isEditor: row.is_admin === 1 || row.role === 'editor',
     emailVerified: row.email_verified_at !== null,
     companyIds: memberships.map((m) => m.company_id),
     profileId: profile?.id ?? null,

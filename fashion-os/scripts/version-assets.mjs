@@ -11,7 +11,7 @@
  * Runs over the synced output, so the sources in public-html stay clean.
  */
 import { createHash } from 'node:crypto';
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -38,7 +38,8 @@ function* htmlFiles(dir) {
 }
 
 let rewritten = 0, refs = 0;
-for (const file of htmlFiles(publicDir)) {
+const templatesDir = join(root, 'src', 'site-templates');
+for (const file of [...htmlFiles(publicDir), ...(existsSync(templatesDir) ? htmlFiles(templatesDir) : [])]) {
   const before = readFileSync(file, 'utf8');
   let after = before;
   for (const [name, hash] of Object.entries(versions)) {
