@@ -64,11 +64,19 @@ const multiline = (f: Field) => f.kind === 'html' || ['text', 'item', 'caption']
       reset can never be mistaken for a save. */}
   <form method="post" id="cms-reset"><input type="hidden" name="action" value="reset" /></form>
 
+  <nav class="cms-index ws-card" aria-label="Sections on this page">
+    <span class="cms-index-title">Jump to a section</span>
+    {sections.map((s) => { const n = s.fields.filter((f) => f.value !== null).length; return (
+      <a href={`#s-${s.id}`}>{s.label}{n > 0 && <em>{n}</em>}</a>
+    ); })}
+  </nav>
+
   {sections.map((s) => (
-    <form method="post" class="cms-section ws-card" id={`s-${s.id}`}>
+    <details class="cms-section ws-card" id={`s-${s.id}`} open>
+      <summary class="cms-section-title">{s.label}<span class="cms-count">{s.fields.length} field{s.fields.length === 1 ? '' : 's'}{s.fields.some((f) => f.value !== null) && ' · edited'}</span></summary>
+    <form method="post" class="cms-form">
       <input type="hidden" name="action" value="save" />
       <input type="hidden" name="section" value={s.id} />
-      <h2 class="cms-section-title">{s.label}<span class="cms-count">{s.fields.length} field{s.fields.length === 1 ? '' : 's'}</span></h2>
       {s.fields.map((f) => (
         <div class={`cms-field${f.value !== null ? ' is-changed' : ''}`}>
           <div class="cms-field-head">
@@ -85,16 +93,28 @@ const multiline = (f: Field) => f.kind === 'html' || ['text', 'item', 'caption']
                 <span class="cms-hint">JPG, PNG or WebP, up to 25 MB. Replaces the image everywhere it appears in this slot.</span>
               </div>
             </div>
+          ) : f.kind === 'html' ? (
+            <div class="cms-richwrap" data-rich>
+              <div class="cms-toolbar" hidden>
+                <button type="button" data-cmd="bold" title="Bold"><b>B</b></button>
+                <button type="button" data-cmd="italic" title="Italic"><i>I</i></button>
+                <button type="button" data-cmd="highlight" title="Highlight in the accent colour"><span class="cms-hl">Highlight</span></button>
+                <button type="button" data-cmd="link" title="Link">Link</button>
+                <button type="button" data-cmd="clear" title="Remove formatting from the selection">Plain</button>
+              </div>
+              <textarea class="fi" name={`f:${f.key}`} rows={Math.min(8, Math.max(2, Math.ceil((f.value ?? f.original).length / 90)))}>{f.value ?? f.original}</textarea>
+            </div>
           ) : multiline(f) ? (
             <textarea class="fi" name={`f:${f.key}`} rows={Math.min(8, Math.max(2, Math.ceil((f.value ?? f.original).length / 90)))}>{f.value ?? f.original}</textarea>
           ) : (
             <input class="fi" type="text" name={`f:${f.key}`} value={f.value ?? f.original} />
           )}
-          {f.kind === 'html' && <span class="cms-hint">Keeps bold, italics, links and the highlighted spans; other tags are removed on save.</span>}
+          {f.kind === 'html' && <span class="cms-hint">Select words, then Bold, Italic, Highlight or Link. Highlight is the accent colour the page uses.</span>}
         </div>
       ))}
       <div class="cms-actions"><button type="submit" class="btn-hot">Save this section</button></div>
     </form>
+    </details>
   ))}
 
   {changes.length > 0 && (
@@ -114,6 +134,39 @@ const multiline = (f: Field) => f.kind === 'html' || ['text', 'item', 'caption']
 </Workspace>
 
 <script>
+  // Rich text for fields that carry inline markup. The textarea stays the
+  // real form field; an editable box mirrors it, so no JavaScript still works.
+  document.querySelectorAll<HTMLElement>('[data-rich]').forEach((wrap) => {
+    const ta = wrap.querySelector<HTMLTextAreaElement>('textarea')!;
+    const bar = wrap.querySelector<HTMLElement>('.cms-toolbar')!;
+    const box = document.createElement('div');
+    box.className = 'fi cms-rich'; box.contentEditable = 'true'; box.innerHTML = ta.value;
+    ta.hidden = true; bar.hidden = false; wrap.appendChild(box);
+    const sync = () => { ta.value = box.innerHTML; ta.dispatchEvent(new Event('input', { bubbles: true })); };
+    box.addEventListener('input', sync);
+    box.addEventListener('paste', (e) => { e.preventDefault(); document.execCommand('insertText', false, e.clipboardData?.getData('text/plain') ?? ''); });
+    bar.querySelectorAll<HTMLButtonElement>('button[data-cmd]').forEach((btn) => btn.addEventListener('click', () => {
+      box.focus();
+      const cmd = btn.dataset.cmd;
+      if (cmd === 'bold' || cmd === 'italic') document.execCommand(cmd);
+      else if (cmd === 'clear') document.execCommand('removeFormat');
+      else if (cmd === 'link') { const url = prompt('Link to (https://…)'); if (url) document.execCommand('createLink', false, url); }
+      else if (cmd === 'highlight') {
+        const sel = window.getSelection(); const text = sel?.toString();
+        if (text) document.execCommand('insertHTML', false, `<span class="acc-t">${text.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] as string))}</span>`);
+      }
+      sync();
+    }));
+  });
+
+  // Leaving with unsaved edits asks first; saving clears the flag.
+  let dirty = false;
+  document.querySelectorAll<HTMLFormElement>('form.cms-form').forEach((form) => {
+    form.addEventListener('input', () => { dirty = true; });
+    form.addEventListener('submit', () => { dirty = false; });
+  });
+  window.addEventListener('beforeunload', (e) => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
   // Replace-image: upload to R2 through the site, then point the field at the new URL.
   document.querySelectorAll<HTMLInputElement>('input[data-upload]').forEach((input) => {
     input.addEventListener('change', async () => {
@@ -134,8 +187,24 @@ const multiline = (f: Field) => f.kind === 'html' || ['text', 'item', 'caption']
 
 <style>
   .cms-top { font-size: 13.5px; color: var(--ink-4); margin: 0 0 16px; }
-  .cms-section { padding: 22px 22px 18px; margin-bottom: 16px; }
-  .cms-section-title { font-family: var(--disp); font-size: 17px; font-weight: 700; margin: 0 0 14px; display: flex; align-items: baseline; gap: 10px; }
+  .cms-index { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 14px 18px; margin-bottom: 16px; }
+  .cms-index-title { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-5); margin-right: 6px; }
+  .cms-index a { font-size: 13px; padding: 5px 11px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--ink-3); text-decoration: none; }
+  .cms-index a:hover { border-color: var(--champagne); color: var(--ink); }
+  .cms-index a em { font-style: normal; margin-left: 6px; font-family: var(--mono); font-size: 10.5px; color: var(--champagne-3); }
+  .cms-section { padding: 18px 22px 18px; margin-bottom: 16px; }
+  .cms-section-title { font-family: var(--disp); font-size: 17px; font-weight: 700; margin: 0; padding: 4px 0; display: flex; align-items: baseline; gap: 10px; cursor: pointer; list-style: none; }
+  .cms-section-title::-webkit-details-marker { display: none; }
+  .cms-section-title::before { content: '▾'; font-size: 13px; color: var(--ink-5); }
+  details:not([open]) > .cms-section-title::before { content: '▸'; }
+  .cms-form { margin-top: 10px; }
+  .cms-toolbar { display: flex; gap: 6px; margin-bottom: 6px; }
+  .cms-toolbar button { border: 1px solid var(--line-2); background: var(--paper-3); border-radius: 8px; padding: 4px 10px; font-size: 12.5px; cursor: pointer; color: var(--ink-3); }
+  .cms-toolbar button:hover { border-color: var(--champagne); color: var(--ink); }
+  .cms-hl { color: var(--champagne-3); font-weight: 600; }
+  .cms-rich { min-height: 44px; padding: 10px 12px; line-height: 1.5; }
+  .cms-rich .acc-t { color: var(--champagne-3); font-weight: 600; }
+  .cms-rich a { color: var(--champagne-3); text-decoration: underline; }
   .cms-count { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--ink-5); font-weight: 400; }
   .cms-field { padding: 12px 0; border-top: 1px solid var(--line); }
   .cms-field.is-changed { box-shadow: inset 3px 0 0 var(--champagne); padding-left: 12px; }

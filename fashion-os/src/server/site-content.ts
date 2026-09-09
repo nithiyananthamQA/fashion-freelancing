@@ -19,9 +19,15 @@ export interface SitePage { slug: string; path: string; file: string; title: str
 const SERVICE_SLUGS = ['tech-pack', '3d-virtual-sampling', 'graphics-prints', 'pattern-cad', 'dobby-jacquard',
   'website', 'ai-agent', 'ai-photography', 'ecom-listing', 'graphic-design'];
 
+/** The names editors know the pages by — the same ones the homepage cards use. */
+const PAGE_NAMES: Record<string, string> = {
+  home: 'Homepage', 'tech-pack': 'Tech Pack', '3d-virtual-sampling': '3D Virtual Sampling', 'graphics-prints': 'Graphics & Prints',
+  'pattern-cad': 'Pattern CAD', 'dobby-jacquard': 'Dobby & Jacquard', website: 'Website Development', 'ai-agent': 'AI Agent',
+  'ai-photography': 'AI Video & Photography', 'ecom-listing': 'E-Com Listing', 'graphic-design': 'Graphic Design', about: 'About', help: 'Help & FAQ',
+};
 function titleOf(html: string, fallback: string): string {
   const t = (html.match(/<title[^>]*>([^<]*)<\/title>/) || [])[1] || '';
-  return (t.split(/ — | \| /)[0] || fallback).trim();
+  return unescapeHtml(t.split(/ — | – | \| | - /)[0] || fallback).trim();
 }
 const template = (file: string): string | undefined => TEMPLATES[`/src/site-templates/${file}`];
 
@@ -33,7 +39,7 @@ export function sitePages(): SitePage[] {
     { slug: 'about', path: '/pages/about', file: 'pages/about.html', title: 'About' },
     { slug: 'help', path: '/pages/help', file: 'pages/help.html', title: 'Help' },
   ];
-  return pages.filter((p) => template(p.file)).map((p) => ({ ...p, title: p.slug === 'home' ? 'Homepage' : titleOf(template(p.file)!, p.title) }));
+  return pages.filter((p) => template(p.file)).map((p) => ({ ...p, title: PAGE_NAMES[p.slug] ?? titleOf(template(p.file)!, p.title) }));
 }
 export const pageBySlug = (slug: string) => sitePages().find((p) => p.slug === slug) ?? null;
 export const pageByPath = (path: string) => sitePages().find((p) => p.path === path) ?? null;
@@ -93,10 +99,15 @@ export function fieldsOf(page: SitePage, overrides: Map<string, { kind: Kind; va
     sections.set(sectionId, s);
   }
   // a section is named by its kicker when it has one
+  // a section is named by its kicker; failing that, by its first heading
   for (const s of sections.values()) {
+    if (s.id === 'head') continue;
     const kicker = s.fields.find((f) => /\.kicker-1$/.test(f.key));
+    const heading = s.fields.find((f) => /\.heading-1$/.test(f.key));
     if (kicker) s.label = stripTags(kicker.value ?? kicker.original);
     else if (s.id === 'footer') s.label = 'Footer';
+    else if (heading) s.label = stripTags(heading.value ?? heading.original).slice(0, 60);
+    else s.label = /^sec\d+$/.test(s.id) ? s.id.replace(/^sec/, 'Section ') : humanise(s.id);
   }
   return [...sections.values()];
 }
