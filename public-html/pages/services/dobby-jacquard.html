@@ -634,6 +634,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .wv-shot { margin: 0 0 18px; }
 .wv-shot picture { display: block; border-radius: 12px; overflow: hidden; border: 1px solid var(--line-2); }
 .wv-shot img { display: block; width: 100%; height: 200px; object-fit: cover; }
+/* "Which loom does your idea need?" — the swatches are square photographs,
+   and a 200px band showed a sliver of each weave. On desktop the band is as
+   tall as the screen allows while the section still fits one screen under
+   the nav (the rest of the section needs about 512px), and the heading
+   runs on one line to give the photographs that room. */
+@media (min-width: 821px) {
+  section[aria-labelledby="dj-h"] .sec-head { max-width: none; margin-bottom: 32px; }
+  section[aria-labelledby="dj-h"] .sec-head h2 { font-size: clamp(26px, min(3.2vw, 4.8svh), 44px); }
+  section[aria-labelledby="dj-h"] .wv-shot img { height: clamp(200px, calc(100vh - 616px), 480px); height: clamp(200px, calc(100svh - 616px), 480px); }
+}
 
 /* "What you get" responds to the reader.
    One card per page carried a permanent accent tint, which spent the page's
@@ -660,10 +670,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
 <div id="site-nav" data-current="agency"></div>
 
-<main id="main">
+<main id="main" class="screens">
 
   <!-- ============ 1. HERO — the weave draft, live ============ -->
-  <section class="hero" aria-label="Dobby and jacquard weave design — overview">
+  <section class="hero hero-run" aria-label="Dobby and jacquard weave design — overview">
     <div class="wrap hero-split">
       <div class="hero-copy">
         <span class="kicker rv in" data-cms="dobby-and-jacquard-design-done-f.kicker-1">Dobby &amp; jacquard design — done for you</span>
@@ -697,6 +707,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       </div>
       <span class="loom-chip">EPI 96 · PPI 72 · Ne 40/2</span>
     </div>
+      </div>
+    </div>
+
+    <!-- the running strip: shown only once the editor has added images -->
+    <div class="flat-run" role="region" aria-label="Woven design work — hover, focus or tap to pause" tabindex="0">
+      <div class="fr-view">
+        <div class="fr-track" role="list" data-cms-gallery="run" data-cms-label="Running strip"></div>
       </div>
     </div>
   </section>
@@ -921,7 +938,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
                 <option value="ai-agent">AI Agent</option>
                 <option value="ai-photography">AI Photography</option>
                 <option value="ecom-listing">E-Commerce Product Listing</option>
-                <option value="graphic-design">Graphic Design</option>
+                <option value="web-design">Web Design</option>
               </optgroup>
               <option value="multiple">A bit of everything — full project</option>
             </select>

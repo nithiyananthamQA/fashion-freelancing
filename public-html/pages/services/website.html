@@ -727,26 +727,73 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
 <div id="site-nav" data-current="agency"></div>
 
-<main id="main">
+<main id="main" class="screens">
 
   <!-- ============ 1. HERO ============ -->
-  <section class="hero" aria-label="Website development — overview">
-    <div class="wrap hero-center">
-      <span class="kicker rv in" data-cms="website-design-and-build-end-to-.kicker-1">Website design &amp; build — end to end</span>
-      <h1 class="h-display rv in rv-display" data-cms="website-design-and-build-end-to-.heading-1">A website that wins you <span class="acc-t">customers.</span></h1>
-      <p class="sub rv in" data-cms="website-design-and-build-end-to-.text-1">
-        We plan it, design it, write it, build it, and keep it running — for any business,
-        not just fashion. One team, one fixed price.
-      </p>
-      <div class="acts rv in">
-        <a href="#contact" class="btn-acc" data-cms="website-design-and-build-end-to-.button-1">Get my free quote</a>
-        <a href="#included" class="btn-glass" data-cms="website-design-and-build-end-to-.button-2">What's included ↓</a>
+  <section class="hero hero-run" aria-label="Website development — overview">
+    <div class="wrap hero-split">
+      <div class="hero-copy">
+        <span class="kicker rv in" data-cms="website-design-and-build-end-to-.kicker-1">Website design &amp; build — end to end</span>
+        <h1 class="h-display rv in rv-display" data-cms="website-design-and-build-end-to-.heading-1">A website that wins you <span class="acc-t">customers.</span></h1>
+        <p class="sub rv in" data-cms="website-design-and-build-end-to-.text-1">
+          We plan it, design it, write it, build it, and keep it running — for any business,
+          not just fashion. One team, one fixed price.
+        </p>
+        <div class="acts rv in">
+          <a href="#contact" class="btn-acc" data-cms="website-design-and-build-end-to-.button-1">Get my free quote</a>
+          <a href="#included" class="btn-glass" data-cms="website-design-and-build-end-to-.button-2">What's included ↓</a>
+        </div>
+        <div class="hero-stats glass-p rv in rv-figure">
+          <div class="hst"><b>24h</b><span>fixed written quote</span></div>
+          <div class="hst"><b>3–5<i>wks</i></b><span>idea to launch</span></div>
+          <div class="hst"><b>30<i>days</i></b><span>free fixes after launch</span></div>
+          <div class="hst"><b>100%</b><span>yours — site, code, content</span></div>
+        </div>
       </div>
-      <div class="hero-stats glass-p rv in rv-figure">
-        <div class="hst"><b>24h</b><span>fixed written quote</span></div>
-        <div class="hst"><b>3–5<i>wks</i></b><span>idea to launch</span></div>
-        <div class="hst"><b>30<i>days</i></b><span>free fixes after launch</span></div>
-        <div class="hst"><b>100%</b><span>yours — site, code, content</span></div>
+
+      <!-- right: the page's own demo, scaled by site.js to the room beside the copy -->
+      <div class="hero-view rv in rv-media">
+        <div class="fit-box"><div class="hero-fit" style="--fit-w: 360px">
+    <div class="phone-stage">
+      <div class="phone">
+        <div class="notch"><i></i></div>
+        <div class="scrs" id="demo-scrs">
+          <div class="scr active" data-s="1">
+            <div class="s-nav"><span class="lg"></span><b>Riverside Physio</b></div>
+            <h4 data-cms="try.heading-2">Feel better, faster.</h4>
+            <p class="s-sub" data-cms="try.text-2">Same-week appointments · trusted by locals</p>
+            <div class="s-img"></div>
+            <button class="tapbtn" data-go="2" type="button"><span class="pulse" aria-hidden="true"></span>Book a session</button>
+          </div>
+          <div class="scr" data-s="2">
+            <div class="s-nav"><span class="lg"></span><b>Pick a time</b></div>
+            <h4 data-cms="try.heading-3">Tomorrow</h4>
+            <p class="s-sub" data-cms="try.text-3">Tap any slot — it's yours.</p>
+            <div class="slotg">
+              <button class="slot" data-go="3" type="button">09:30</button>
+              <button class="slot" data-go="3" type="button">11:00</button>
+              <button class="slot" data-go="3" type="button">14:15</button>
+              <button class="slot" data-go="3" type="button">16:45</button>
+            </div>
+          </div>
+          <div class="scr" data-s="3">
+            <div class="s-nav"><span class="lg"></span><b>Riverside Physio</b></div>
+            <div class="ok-big">✓</div>
+            <p class="ok-t" data-cms="try.text-4">Booked.</p>
+            <p class="ok-s" data-cms="try.text-5">Confirmation sent · calendar updated · no phone call needed</p>
+            <button class="replay" data-go="1" type="button">↺ Replay the demo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- the running strip: shown only once the editor has added images -->
+    <div class="flat-run" role="region" aria-label="Websites we've built — hover, focus or tap to pause" tabindex="0">
+      <div class="fr-view">
+        <div class="fr-track" role="list" data-cms-gallery="run" data-cms-label="Running strip"></div>
       </div>
     </div>
   </section>
@@ -827,53 +874,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 2b. TAP-THROUGH DEMO ============ -->
-  <section class="sec" id="try" aria-labelledby="try-h">
-    <div class="wrap demo-wrap">
-      <div class="demo-copy">
-        <span class="kicker rv" data-cms="try.kicker-1">Try it</span>
-        <h3 class="rv" id="try-h" data-cms="try.heading-1">Tap it like your <span class="acc-t">customer would.</span></h3>
-        <p class="rv" data-cms="try.text-1">A small working demo of a site we'd build. Three taps and a visitor becomes a booking — that's the job of a good website.</p>
-        <ul class="steps-mini rv">
-          <li data-cms="try.item-1"><b>TAP 1</b> The visitor lands — one clear action, impossible to miss.</li>
-          <li data-cms="try.item-2"><b>TAP 2</b> They pick a time — no phone call, no waiting.</li>
-          <li data-cms="try.item-3"><b>TAP 3</b> Booked. Your business just worked while you didn't.</li>
-        </ul>
-      </div>
-      <div class="phone-stage rv rv-d1">
-        <div class="phone">
-          <div class="notch"><i></i></div>
-          <div class="scrs" id="demo-scrs">
-            <div class="scr active" data-s="1">
-              <div class="s-nav"><span class="lg"></span><b>Riverside Physio</b></div>
-              <h4 data-cms="try.heading-2">Feel better, faster.</h4>
-              <p class="s-sub" data-cms="try.text-2">Same-week appointments · trusted by locals</p>
-              <div class="s-img"></div>
-              <button class="tapbtn" data-go="2" type="button"><span class="pulse" aria-hidden="true"></span>Book a session</button>
-            </div>
-            <div class="scr" data-s="2">
-              <div class="s-nav"><span class="lg"></span><b>Pick a time</b></div>
-              <h4 data-cms="try.heading-3">Tomorrow</h4>
-              <p class="s-sub" data-cms="try.text-3">Tap any slot — it's yours.</p>
-              <div class="slotg">
-                <button class="slot" data-go="3" type="button">09:30</button>
-                <button class="slot" data-go="3" type="button">11:00</button>
-                <button class="slot" data-go="3" type="button">14:15</button>
-                <button class="slot" data-go="3" type="button">16:45</button>
-              </div>
-            </div>
-            <div class="scr" data-s="3">
-              <div class="s-nav"><span class="lg"></span><b>Riverside Physio</b></div>
-              <div class="ok-big">✓</div>
-              <p class="ok-t" data-cms="try.text-4">Booked.</p>
-              <p class="ok-s" data-cms="try.text-5">Confirmation sent · calendar updated · no phone call needed</p>
-              <button class="replay" data-go="1" type="button">↺ Replay the demo</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- ============ 4. CHAT PROCESS ============ -->
   <section class="sec" id="process" aria-labelledby="process-h">
@@ -1031,7 +1031,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
                 <option value="ai-agent">AI Agent</option>
                 <option value="ai-photography">AI Photography</option>
                 <option value="ecom-listing">E-Commerce Product Listing</option>
-                <option value="graphic-design">Graphic Design</option>
+                <option value="web-design">Web Design</option>
               </optgroup>
               <optgroup label="Fashion design &amp; development">
                 <option value="tech-pack">Tech Pack</option>

@@ -595,12 +595,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
 <div id="site-nav" data-current="agency"></div>
 
-<main id="main">
+<main id="main" class="screens">
 
   <!-- ============ 1. HERO — the 3AM conversation ============ -->
-  <section class="hero" aria-label="AI customer agent — overview">
-    <div class="wrap hero-center">
-      <div>
+  <section class="hero hero-run" aria-label="AI customer agent — overview">
+    <div class="wrap hero-split">
+      <div class="hero-copy">
         <span class="kicker rv in" data-cms="ai-customer-agent-built-for-your.kicker-1">AI customer agent — built for your store</span>
         <h1 class="h-display rv in rv-display" style="margin-top:14px;" data-cms="ai-customer-agent-built-for-your.heading-1">Answers every customer. At 3PM <span class="acc-t">and 3AM.</span></h1>
         <p class="sub rv in" data-cms="ai-customer-agent-built-for-your.text-1">
@@ -617,31 +617,32 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
           <span data-cms="ai-customer-agent-built-for-your.chip-3">Human handoff built in</span>
         </div>
       </div>
+
+      <!-- right: the page's own demo, scaled by site.js to the room beside the copy -->
+      <div class="hero-view rv in rv-media">
+        <div class="fit-box"><div class="hero-fit" style="--fit-w: 500px">
+      <div class="bot glass-p" aria-label="Example conversation" role="img">
+        <div class="bot-bar"><span class="bot-dot"></span>Your store · online<span class="bot-time">03:12 AM</span></div>
+        <div class="bot-log">
+          <p class="bm in-m" data-cms="see-it-answer.text-1">Hi! Do you have the linen shirt in M? And does it run small?</p>
+          <p class="bm out-m" data-cms="see-it-answer.text-2">Yes — M is in stock. It runs true to size, but if you're between M and L our customers usually size up. Chest for M is 104&nbsp;cm. Want the size chart?</p>
+          <p class="bm in-m" data-cms="see-it-answer.text-3">Perfect. How fast is delivery to Chennai?</p>
+          <p class="bm out-m" data-cms="see-it-answer.text-4">2–3 working days, free over the current threshold. I can hold your size while you decide — should I?</p>
+        </div>
+        <span class="bot-chip">Answered from your size chart — not a guess</span>
+      </div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- the running strip: shown only once the editor has added images -->
+    <div class="flat-run" role="region" aria-label="AI agent work — hover, focus or tap to pause" tabindex="0">
+      <div class="fr-view">
+        <div class="fr-track" role="list" data-cms-gallery="run" data-cms-label="Running strip"></div>
+      </div>
     </div>
   </section>
 
-  <!-- ============ THE VISUAL — its own section ============ -->
-  <section class="sec sec-visual" aria-label="See it answer">
-    <div class="wrap">
-      <div class="sec-head" style="margin-bottom:30px;">
-        <span class="kicker rv" data-cms="see-it-answer.kicker-1">See it answer</span>
-        <h2 class="h-display rv rv-display" data-cms="see-it-answer.heading-1">A 3 AM conversation, <span class="acc-t">handled.</span></h2>
-      </div>
-      <div class="vwrap rv rv-media">
-        <div class="bot glass-p" aria-label="Example conversation" role="img">
-          <div class="bot-bar"><span class="bot-dot"></span>Your store · online<span class="bot-time">03:12 AM</span></div>
-          <div class="bot-log">
-            <p class="bm in-m" data-cms="see-it-answer.text-1">Hi! Do you have the linen shirt in M? And does it run small?</p>
-            <p class="bm out-m" data-cms="see-it-answer.text-2">Yes — M is in stock. It runs true to size, but if you're between M and L our customers usually size up. Chest for M is 104&nbsp;cm. Want the size chart?</p>
-            <p class="bm in-m" data-cms="see-it-answer.text-3">Perfect. How fast is delivery to Chennai?</p>
-            <p class="bm out-m" data-cms="see-it-answer.text-4">2–3 working days, free over the current threshold. I can hold your size while you decide — should I?</p>
-          </div>
-          <span class="bot-chip">Answered from your size chart — not a guess</span>
-        </div>
-        <p class="td-cap" data-cms="see-it-answer.text-5">A real conversation shape — while you were asleep.</p>
-      </div>
-    </div>
-  </section>
 
   <!-- ============ 2. THE COST OF SILENCE ============ -->
   <section class="sec" aria-labelledby="cs-h">
@@ -842,7 +843,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
                 <option value="ai-agent" selected>AI Agent</option>
                 <option value="ai-photography">AI Photography</option>
                 <option value="ecom-listing">E-Commerce Product Listing</option>
-                <option value="graphic-design">Graphic Design</option>
+                <option value="web-design">Web Design</option>
               </optgroup>
               <option value="multiple">A bit of everything — full project</option>
             </select>

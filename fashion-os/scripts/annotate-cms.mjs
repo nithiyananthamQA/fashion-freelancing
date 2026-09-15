@@ -16,15 +16,36 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'public-html');
 const PAGES = ['index.html', 'pages/about.html', 'pages/help.html',
-  ...['3d-virtual-sampling','ai-agent','ai-photography','dobby-jacquard','ecom-listing','graphic-design',
-      'graphics-prints','pattern-cad','tech-pack','website'].map((s) => `pages/services/${s}.html`)];
+  ...['3d-virtual-sampling','ai-agent','ai-photography','dobby-jacquard','ecom-listing',
+      'graphics-prints','pattern-cad','tech-pack','web-design','website'].map((s) => `pages/services/${s}.html`)];
 
 const slug = (s) => s.toLowerCase().replace(/&amp;|&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 32);
 const strip = (s) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 const KIND = { h1: 'heading', h2: 'heading', h3: 'heading', h4: 'heading', h5: 'heading', p: 'text', li: 'item', figcaption: 'caption', dt: 'heading', dd: 'text' };
 const SPAN_KINDS = [['kicker', 'kicker'], ['dp-h', 'tab'], ['fl', 'label'], ['proof-lead', 'text']];
 
+/* A running-strip gallery is edited as one list in the dashboard, not as keyed
+   elements, so nothing inside it is ever tagged. Its <div>s nest, so the
+   matching close is found by depth rather than by a lazy regex. */
+function liftGalleries(html, holes) {
+  const open = /<div\b[^>]*\bdata-cms-gallery="[^"]*"[^>]*>/g;
+  let out = '', from = 0, m;
+  while ((m = open.exec(html))) {
+    const tag = /<\/?div\b[^>]*>/g;
+    tag.lastIndex = m.index + m[0].length;
+    let depth = 1, t;
+    while (depth && (t = tag.exec(html))) depth += t[0][1] === '/' ? -1 : 1;
+    const end = t ? t.index + t[0].length : html.length;
+    out += html.slice(from, m.index) + `@@GALLERY${holes.length}@@`;
+    holes.push(html.slice(m.index, end));
+    from = end; open.lastIndex = end;
+  }
+  return out + html.slice(from);
+}
+
 function annotate(html) {
+  const galleries = [];
+  html = liftGalleries(html, galleries);
   const used = new Set([...html.matchAll(/data-cms="([^"]+)"/g)].map((m) => m[1]));
   const sectionNames = new Set();
   const count = {};
@@ -78,6 +99,7 @@ function annotate(html) {
     inner = inner.replace(/@@HOLE(\d+)@@/g, (_, n) => holes[+n]);
     return `<${tag}${attrs}>${inner}</${tag}>`;
   });
+  html = html.replace(/@@GALLERY(\d+)@@/g, (_, n) => galleries[+n]);
   return { html, tagged };
 }
 

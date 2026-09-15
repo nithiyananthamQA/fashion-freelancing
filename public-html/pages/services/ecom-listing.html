@@ -591,12 +591,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
 <div id="site-nav" data-current="agency"></div>
 
-<main id="main">
+<main id="main" class="screens">
 
   <!-- ============ 1. HERO — the annotated listing ============ -->
-  <section class="hero" aria-label="E-commerce listing service — overview">
-    <div class="wrap hero-center">
-      <div>
+  <section class="hero hero-run" aria-label="E-commerce listing service — overview">
+    <div class="wrap hero-split">
+      <div class="hero-copy">
         <span class="kicker rv in" data-cms="listing-creation-done-for-you.kicker-1">Listing creation — done for you</span>
         <h1 class="h-display rv in rv-display" style="margin-top:14px;" data-cms="listing-creation-done-for-you.heading-1">Listings that get found. <span class="acc-t">Copy that gets bought.</span></h1>
         <p class="sub rv in" data-cms="listing-creation-done-for-you.text-1">
@@ -613,36 +613,37 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
           <span data-cms="listing-creation-done-for-you.chip-3">Bulk catalogs welcome</span>
         </div>
       </div>
+
+      <!-- right: the page's own demo, scaled by site.js to the room beside the copy -->
+      <div class="hero-view rv in rv-media">
+        <div class="fit-box"><div class="hero-fit" style="--fit-w: 560px">
+      <div class="lst glass-p" aria-hidden="true">
+        <div class="lst-card">
+          <div class="lst-img"><svg viewBox="0 0 60 60"><path d="M18 10 L25 7 C25 11 35 11 35 7 L42 10 L48 19 L41 23 L41 52 L19 52 L19 23 L12 19 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div>
+          <div class="lst-lines">
+            <span class="ll t"></span>
+            <span class="ll"></span>
+            <span class="ll s"></span>
+            <span class="ll s"></span>
+          </div>
+        </div>
+        <span class="lst-tag tg1">Keyword-researched title</span>
+        <span class="lst-tag tg2">Benefit-led bullets</span>
+        <span class="lst-tag tg3">Size &amp; fit content</span>
+        <span class="lst-tag tg4">Backend search terms</span>
+      </div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- the running strip: shown only once the editor has added images -->
+    <div class="flat-run" role="region" aria-label="Listing work — hover, focus or tap to pause" tabindex="0">
+      <div class="fr-view">
+        <div class="fr-track" role="list" data-cms-gallery="run" data-cms-label="Running strip"></div>
+      </div>
     </div>
   </section>
 
-  <!-- ============ THE VISUAL — its own section ============ -->
-  <section class="sec sec-visual" aria-label="The anatomy">
-    <div class="wrap">
-      <div class="sec-head" style="margin-bottom:30px;">
-        <span class="kicker rv" data-cms="the-anatomy.kicker-1">The anatomy</span>
-        <h2 class="h-display rv rv-display" data-cms="the-anatomy.heading-1">One listing, every part <span class="acc-t">working.</span></h2>
-      </div>
-      <div class="vwrap rv rv-media">
-        <div class="lst glass-p" aria-hidden="true">
-          <div class="lst-card">
-            <div class="lst-img"><svg viewBox="0 0 60 60"><path d="M18 10 L25 7 C25 11 35 11 35 7 L42 10 L48 19 L41 23 L41 52 L19 52 L19 23 L12 19 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div>
-            <div class="lst-lines">
-              <span class="ll t"></span>
-              <span class="ll"></span>
-              <span class="ll s"></span>
-              <span class="ll s"></span>
-            </div>
-          </div>
-          <span class="lst-tag tg1">Keyword-researched title</span>
-          <span class="lst-tag tg2">Benefit-led bullets</span>
-          <span class="lst-tag tg3">Size &amp; fit content</span>
-          <span class="lst-tag tg4">Backend search terms</span>
-        </div>
-        <p class="td-cap" data-cms="the-anatomy.text-1">Every labelled part is written, not left to the upload form's defaults.</p>
-      </div>
-    </div>
-  </section>
 
   <!-- ============ 2. WHY LISTINGS UNDERPERFORM ============ -->
   <section class="sec" aria-labelledby="lu-h">
@@ -861,7 +862,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
                 <option value="ai-agent">AI Agent</option>
                 <option value="ai-photography">AI Photography</option>
                 <option value="ecom-listing" selected>E-Commerce Product Listing</option>
-                <option value="graphic-design">Graphic Design</option>
+                <option value="web-design">Web Design</option>
               </optgroup>
               <option value="multiple">A bit of everything — full project</option>
             </select>

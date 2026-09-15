@@ -74,3 +74,9 @@
 #     only the page URL changed. Both forms of the old URL are in the wild.
 /pages/services/seamless-pattern       /pages/services/graphics-prints 301
 /pages/services/seamless-pattern.html  /pages/services/graphics-prints 301
+
+# --- Graphic Design became Web Design (2026-09-15). Unlike Graphics & Prints,
+#     the service id moved too (`graphic-design` -> `web-design`, migration
+#     0008). Both forms of the old URL are in the wild.
+/pages/services/graphic-design       /pages/services/web-design 301
+/pages/services/graphic-design.html  /pages/services/web-design 301

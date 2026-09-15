@@ -212,20 +212,23 @@ INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('ecom-listi
 INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('ecom-listing--tool--excel', 'Excel', 'ecom-listing', 'approved', '2026-01-01T00:00:00.000Z');
 INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('ecom-listing--tool--pim', 'PIM', 'ecom-listing', 'approved', '2026-01-01T00:00:00.000Z');
 
--- ---------- Graphic Design ----------
-INSERT INTO service_categories (id, name, position) VALUES ('graphic-design', 'Graphic Design', 9);
-INSERT INTO service_specialties (id, service_id, name, position) VALUES ('graphic-design--brand-identity', 'graphic-design', 'Brand identity', 0);
-INSERT INTO service_specialties (id, service_id, name, position) VALUES ('graphic-design--packaging', 'graphic-design', 'Packaging', 1);
-INSERT INTO service_specialties (id, service_id, name, position) VALUES ('graphic-design--social-media', 'graphic-design', 'Social media', 2);
-INSERT INTO service_specialties (id, service_id, name, position) VALUES ('graphic-design--campaign-assets', 'graphic-design', 'Campaign assets', 3);
-INSERT INTO service_specialties (id, service_id, name, position) VALUES ('graphic-design--lookbooks', 'graphic-design', 'Lookbooks', 4);
-INSERT INTO service_specialties (id, service_id, name, position) VALUES ('graphic-design--print-design', 'graphic-design', 'Print design', 5);
-INSERT INTO skills (id, name, service_id, status, created_at) VALUES ('graphic-design--skill--typography', 'Typography', 'graphic-design', 'approved', '2026-01-01T00:00:00.000Z');
-INSERT INTO skills (id, name, service_id, status, created_at) VALUES ('graphic-design--skill--art-direction', 'Art direction', 'graphic-design', 'approved', '2026-01-01T00:00:00.000Z');
-INSERT INTO skills (id, name, service_id, status, created_at) VALUES ('graphic-design--skill--layout', 'Layout', 'graphic-design', 'approved', '2026-01-01T00:00:00.000Z');
-INSERT INTO skills (id, name, service_id, status, created_at) VALUES ('graphic-design--skill--production-files', 'Production files', 'graphic-design', 'approved', '2026-01-01T00:00:00.000Z');
-INSERT INTO skills (id, name, service_id, status, created_at) VALUES ('graphic-design--skill--print-preparation', 'Print preparation', 'graphic-design', 'approved', '2026-01-01T00:00:00.000Z');
-INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('graphic-design--tool--figma', 'Figma', 'graphic-design', 'approved', '2026-01-01T00:00:00.000Z');
-INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('graphic-design--tool--adobe-illustrator', 'Adobe Illustrator', 'graphic-design', 'approved', '2026-01-01T00:00:00.000Z');
-INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('graphic-design--tool--adobe-photoshop', 'Adobe Photoshop', 'graphic-design', 'approved', '2026-01-01T00:00:00.000Z');
-INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('graphic-design--tool--adobe-indesign', 'Adobe InDesign', 'graphic-design', 'approved', '2026-01-01T00:00:00.000Z');
+-- ---------- Web Design ----------
+INSERT INTO service_categories (id, name, position) VALUES ('web-design', 'Web Design', 9);
+INSERT INTO service_specialties (id, service_id, name, position) VALUES ('web-design--brand-websites', 'web-design', 'Brand websites', 0);
+INSERT INTO service_specialties (id, service_id, name, position) VALUES ('web-design--online-store-design', 'web-design', 'Online store design', 1);
+INSERT INTO service_specialties (id, service_id, name, position) VALUES ('web-design--landing-pages', 'web-design', 'Landing pages', 2);
+INSERT INTO service_specialties (id, service_id, name, position) VALUES ('web-design--website-redesign', 'web-design', 'Website redesign', 3);
+INSERT INTO service_specialties (id, service_id, name, position) VALUES ('web-design--domain-hosting-setup', 'web-design', 'Domain & hosting setup', 4);
+INSERT INTO service_specialties (id, service_id, name, position) VALUES ('web-design--business-email-setup', 'web-design', 'Business email setup', 5);
+INSERT INTO skills (id, name, service_id, status, created_at) VALUES ('web-design--skill--ui-design', 'UI design', 'web-design', 'approved', '2026-01-01T00:00:00.000Z');
+INSERT INTO skills (id, name, service_id, status, created_at) VALUES ('web-design--skill--responsive-layout', 'Responsive layout', 'web-design', 'approved', '2026-01-01T00:00:00.000Z');
+INSERT INTO skills (id, name, service_id, status, created_at) VALUES ('web-design--skill--typography', 'Typography', 'web-design', 'approved', '2026-01-01T00:00:00.000Z');
+INSERT INTO skills (id, name, service_id, status, created_at) VALUES ('web-design--skill--domain-dns-setup', 'Domain & DNS setup', 'web-design', 'approved', '2026-01-01T00:00:00.000Z');
+INSERT INTO skills (id, name, service_id, status, created_at) VALUES ('web-design--skill--on-page-seo', 'On-page SEO', 'web-design', 'approved', '2026-01-01T00:00:00.000Z');
+INSERT INTO skills (id, name, service_id, status, created_at) VALUES ('web-design--skill--analytics-setup', 'Analytics setup', 'web-design', 'approved', '2026-01-01T00:00:00.000Z');
+INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('web-design--tool--figma', 'Figma', 'web-design', 'approved', '2026-01-01T00:00:00.000Z');
+INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('web-design--tool--webflow', 'Webflow', 'web-design', 'approved', '2026-01-01T00:00:00.000Z');
+INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('web-design--tool--framer', 'Framer', 'web-design', 'approved', '2026-01-01T00:00:00.000Z');
+INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('web-design--tool--wordpress', 'WordPress', 'web-design', 'approved', '2026-01-01T00:00:00.000Z');
+INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('web-design--tool--shopify', 'Shopify', 'web-design', 'approved', '2026-01-01T00:00:00.000Z');
+INSERT INTO tools (id, name, service_id, status, created_at) VALUES ('web-design--tool--google-workspace', 'Google Workspace', 'web-design', 'approved', '2026-01-01T00:00:00.000Z');

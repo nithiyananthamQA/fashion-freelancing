@@ -762,6 +762,10 @@ button[aria-busy='true'] { opacity: .7; cursor: progress; }
    learns anything, in either theme. The hero now sizes to its content,
    with a floor on desktop so a short one keeps some presence.
 
+   Landing pages (homepage, About, service pages) have since opted back into
+   a full first screen — see "Screen-sized sections" below. This block still
+   shapes the hero on Help and the legal pages.
+
    The page's own rule is more specific than a bare `.hero`, so these
    carry `!important` deliberately rather than by habit.
    ------------------------------------------------------------ */
@@ -827,6 +831,32 @@ button[aria-busy='true'] { opacity: .7; cursor: progress; }
 .sec { padding: calc(var(--u) * 4) 0 !important; }
 @media (max-width: 720px) {
   .sec { padding: calc(var(--u) * 3) 0 !important; }
+}
+
+/* ------------------------------------------------------------
+   Screen-sized heroes (landing pages)
+   ------------------------------------------------------------
+   Opt-in with <main class="screens">: the homepage, About and the service
+   pages. The hero fills the first screen under the nav with its content
+   centred. Sections below it keep their natural height: stretching a short
+   one such as "How it works" to a full screen only added empty space.
+
+   The app layout loads this file too, which is why this is opt-in.
+
+   svh, not vh: on phones vh is the height with the address bar hidden, so a
+   "full screen" overshoots whenever the bar shows. The vh line is the
+   fallback for browsers without svh.
+
+   Grid, not flex: the homepage hero is a plain block and the service
+   heroes are flex rows; a one-column grid centres both without changing
+   how their children size. minmax(0, 1fr) keeps a wide child (a rail, a
+   long word) from stretching the column past a phone's width. */
+.screens > .hero {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  min-height: calc(100vh - 104px) !important;
+  min-height: calc(100svh - 104px) !important;
 }
 
 /* "Sign in" sits with the nav links, not with the call to action: it is the
@@ -943,3 +973,96 @@ button[aria-busy='true'] { opacity: .7; cursor: progress; }
    background of their own, so this reaches every page through the one
    stylesheet they all load. */
 .sec:nth-of-type(even) { background: var(--band, transparent); }
+
+/* ------------------------------------------------------------
+   Running strip (hero foot, any landing page)
+   ------------------------------------------------------------
+   Images running along the foot of the hero, each in its own bay between
+   short hairlines. The editor manages the list in the dashboard (the
+   container carries data-cms-gallery); a strip with no images is not shown
+   at all. site.js clones the set once so the loop meets itself, and only
+   then starts it. It stops for the reader: hover or keyboard focus pauses it, a
+   tap pauses it and another lets it run on, and reduced motion never starts
+   it — the row scrolls by hand. */
+.flat-run {
+  position: relative;
+  height: clamp(77px, 10.4svh, 118px);   /* 20% under the first cut: a quiet line, not a shelf */
+  border-top: 1px solid var(--line); }
+.flat-run:focus-visible { outline: 2px solid var(--acc); outline-offset: -2px; }
+.fr-view {
+  height: 100%; overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
+.fr-track { display: flex; width: max-content; height: 100%; }
+.flat-run.is-running .fr-track { animation: fr-x var(--fr-dur, 80s) linear infinite; }
+.flat-run.is-running:focus-visible .fr-track,
+.flat-run.is-paused .fr-track { animation-play-state: paused; }
+@media (hover: hover) { .flat-run.is-running:hover .fr-track { animation-play-state: paused; } }
+@keyframes fr-x { to { transform: translate3d(-50%, 0, 0); } }
+.fr-item {
+  position: relative; flex: none; height: 100%;
+  display: flex; align-items: center;
+  padding: 0 clamp(26px, 3vw, 52px); }
+/* the divider: a short hairline between bays, not a full-height table rule */
+.fr-item::after {
+  content: ''; position: absolute; right: 0; top: 36%; bottom: 36%;
+  width: 1px; background: var(--line); }
+.fr-item img {
+  border-radius: 6px;
+  width: auto; height: 70%; max-width: none;
+  transition: transform .5s cubic-bezier(.16, 1, .3, 1); }
+@media (hover: hover) {
+  .fr-item:hover img { transform: translateY(-2px) scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fr-view { overflow-x: auto; scrollbar-width: none; -webkit-mask-image: none; mask-image: none; }
+  .fr-item img { transition: none; }
+}
+/* Line art (data-ink) is ink on a clear ground, so the dark theme only turns
+   the ink light. Photographs are left exactly as uploaded. */
+:root[data-theme="dark"] .flat-run[data-ink] .fr-item img { filter: invert(1); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .flat-run[data-ink] .fr-item img { filter: invert(1); }
+}
+/* nothing uploaded, nothing shown: no empty band at the foot of the hero */
+.flat-run:not(:has(.fr-item)) { display: none; }
+
+/* ------------------------------------------------------------
+   Split hero with a running strip (service pages)
+   ------------------------------------------------------------
+   Copy on the left, the page's own visual on the right and, once the
+   editor has added images, the running strip along the foot. On desktop
+   hero and strip share one screen under the nav: the strip takes its own
+   row, and a visual inside .fit-box is scaled by site.js to the room left.
+   Phones stack the copy over the visual. Pages tune on top of this — tech
+   pack sizes its sheet itself. */
+@media (min-width: 901px) {
+  .screens > .hero.hero-run {
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-content: stretch;
+    height: calc(100vh - 104px);
+    height: calc(100svh - 104px);
+    padding-bottom: 0 !important;
+  }
+  .hero-run > .hero-split {
+    display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); grid-template-rows: minmax(0, 1fr);
+    align-items: center; align-self: stretch; min-height: 0;
+    gap: clamp(24px, 4vw, 56px); width: 100%; text-align: left;
+  }
+  .hero-run .hero-copy { min-width: 0; }
+  .hero-run .hero-view {
+    position: relative; min-width: 0; min-height: 0; width: 100%; align-self: stretch;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hero-run .hero-split h1 { max-width: 16ch; margin-inline: 0; font-size: clamp(32px, min(4vw, 6.6svh), 60px); }
+  .hero-run .hero-split .sub { margin-left: 0; margin-right: 0; max-width: 46ch; }
+  .hero-run .hero-split .acts, .hero-run .hero-split .chips { justify-content: flex-start; }
+}
+@media (max-width: 900px) {
+  .hero-run > .hero-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .hero-run .hero-view { display: flex; justify-content: center; }
+}
+/* the visual keeps its design width and is scaled as one picture */
+.fit-box { position: relative; max-width: 100%; }
+.hero-fit { width: var(--fit-w, 600px); transform-origin: 0 0; }
+@media (max-width: 900px) { .hero-fit { width: min(var(--fit-w, 600px), 100%); } }

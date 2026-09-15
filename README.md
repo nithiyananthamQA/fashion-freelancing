@@ -37,7 +37,7 @@ for only at the point of value — **Request to hire**, **Save specialist** or
 
 Tech Pack · 3D Virtual Sampling · Seamless Pattern · Pattern CAD ·
 Dobby & Jacquard · Website Development · AI Agent · AI Video & Photography ·
-E-Commerce Listing · Graphic Design
+E-Commerce Listing · Web Design
 
 They are defined once, in [`fashion-os/src/data/taxonomy.ts`](fashion-os/src/data/taxonomy.ts) —
 service ids match the slugs of the ten public service pages, so a service page

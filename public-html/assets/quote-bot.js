@@ -24,7 +24,7 @@
     ['ai-agent', 'AI agent'],
     ['ai-photography', 'AI video & photography'],
     ['ecom-listing', 'E-com listings'],
-    ['graphic-design', 'Graphic design'],
+    ['web-design', 'Web design'],
     ['multiple', 'A bit of everything']
   ];
   var TIMELINES = [['asap', 'ASAP'], ['2-4w', 'In 2–4 weeks'], ['flexible', 'Flexible']];

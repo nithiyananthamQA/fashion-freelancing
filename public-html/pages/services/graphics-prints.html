@@ -704,10 +704,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
 <div id="site-nav" data-current="agency"></div>
 
-<main id="main">
+<main id="main" class="screens">
 
   <!-- ============ 1. HERO — the repeat demonstrates itself ============ -->
-  <section class="hero" aria-label="Graphics &amp; Prints service — overview">
+  <section class="hero hero-run" aria-label="Graphics &amp; Prints service — overview">
     <div class="wrap hero-split">
       <div class="hero-copy">
         <span class="kicker rv in" data-cms="graphics-and-prints-done-for-you.kicker-1">Graphics &amp; Prints — done for you</span>
@@ -734,6 +734,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       <div class="td-grid"></div>
       <span class="td-chip">Seam check · passed</span>
     </div>
+      </div>
+    </div>
+
+    <!-- the running strip: shown only once the editor has added images -->
+    <div class="flat-run" role="region" aria-label="Print and graphics work — hover, focus or tap to pause" tabindex="0">
+      <div class="fr-view">
+        <div class="fr-track" role="list" data-cms-gallery="run" data-cms-label="Running strip"></div>
       </div>
     </div>
   </section>
@@ -977,7 +984,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
                 <option value="ai-agent">AI Agent</option>
                 <option value="ai-photography">AI Photography</option>
                 <option value="ecom-listing">E-Commerce Product Listing</option>
-                <option value="graphic-design">Graphic Design</option>
+                <option value="web-design">Web Design</option>
               </optgroup>
               <option value="multiple">A bit of everything — full project</option>
             </select>

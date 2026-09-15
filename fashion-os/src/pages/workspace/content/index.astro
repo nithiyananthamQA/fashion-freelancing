@@ -1,8 +1,9 @@
 ---
 /**
- * /workspace/content — the pages an editor can change. One card per page,
- * with how much of it has been edited and when; open a page to edit it
- * section by section.
+ * /workspace/content — the pages an editor can change. The main pages come
+ * first, then the service pages; each card says whether the page still shows
+ * its original words or carries edits, and when it last changed. A search box
+ * narrows the list as you type.
  */
 export const prerender = false;
 
@@ -10,7 +11,7 @@ import Workspace from '../../../layouts/Workspace.astro';
 import { all, db } from '../../../server/db';
 import { guard, requireEditor } from '../../../server/guards';
 import { adminNav, editorNav } from '../../../data/workspace-nav';
-import { sitePages } from '../../../server/site-content';
+import { galleryEdits, sitePages } from '../../../server/site-content';
 
 const gate = await guard(Astro, () => requireEditor(Astro));
 if (gate.response) return gate.response;
@@ -20,28 +21,118 @@ const database = db(Astro);
 const edits = await all<{ page: string; n: number; last: string | null }>(
   database, 'SELECT page, COUNT(*) AS n, MAX(updated_at) AS last FROM site_content GROUP BY page');
 const byPage = new Map(edits.map((e) => [e.page, e]));
+// a saved image strip counts as one change to its page
+const strips = await galleryEdits(Astro);
 const pages = sitePages();
+const summary = (path: string) => {
+  const e = byPage.get(path), g = strips.get(path);
+  const n = (e?.n ?? 0) + (g?.n ?? 0);
+  const last = [e?.last, g?.last].filter((x): x is string => !!x).sort().pop();
+  return n && last ? { n, last } : null;
+};
 const when = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+const MAIN = ['home', 'about', 'help'];
+const groups = [
+  { title: 'Main pages', pages: pages.filter((p) => MAIN.includes(p.slug)) },
+  { title: 'Service pages', pages: pages.filter((p) => !MAIN.includes(p.slug)) },
+].filter((g) => g.pages.length);
+const editedCount = pages.filter((p) => summary(p.path)).length;
 ---
 <Workspace title="Site content" role={user.isAdmin ? 'admin' : 'editor'} current="/workspace/content"
   items={user.isAdmin ? adminNav() : editorNav()} who={user.name}
-  heading="Site content" lede="Every heading, paragraph, button and image on the public pages. Open a page, change what it says, save — it is live the moment you do.">
-  <div class="cms-pages">
-    {pages.map((p) => { const e = byPage.get(p.path); return (
-      <a class="cms-page ws-card" href={`/workspace/content/${p.slug}`}>
-        <span class="cms-page-title">{p.title}</span>
-        <span class="cms-page-path">{p.path}</span>
-        <span class="cms-page-meta">{e ? `${e.n} change${e.n === 1 ? '' : 's'} · last ${when(e.last!)}` : 'Untouched — showing the original'}</span>
-      </a>
-    ); })}
+  heading="Site content" lede="Pick a page to change its words and images. Everything you save goes live straight away — and any change can be undone.">
+
+  <div class="pl">
+    <div class="pl-bar">
+      <label class="pl-search">
+        <span class="visually-hidden">Find a page</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+        <input type="search" placeholder="Find a page" data-pl-search autocomplete="off" />
+      </label>
+      <p class="pl-summary" data-pl-summary role="status" aria-live="polite">{pages.length} pages · {editedCount} with edits</p>
+    </div>
+
+    {groups.map((group) => (
+      <section class="pl-group" aria-labelledby={`pl-${group.title.replace(/\W+/g, '-')}`} data-pl-group>
+        <h2 class="pl-group-title" id={`pl-${group.title.replace(/\W+/g, '-')}`}>{group.title}</h2>
+        <ul class="pl-cards">
+          {group.pages.map((p) => { const e = summary(p.path); return (
+            <li class="pl-card" data-pl-card data-name={p.title.toLowerCase()}>
+              <div class="pl-card-top">
+                <span class={`pl-pill${e ? ' is-edited' : ''}`}>{e ? 'Edited' : 'Original'}</span>
+                <a class="pl-live" href={p.path} target="_blank" rel="noopener" aria-label={`View ${p.title} live, in a new tab`}>View live <span aria-hidden="true">↗</span></a>
+              </div>
+              <a class="pl-open" href={`/workspace/content/${p.slug}`}>
+                <span class="pl-title">{p.title}</span>
+              </a>
+              <span class="pl-meta">{e ? `${e.n} change${e.n === 1 ? '' : 's'} · last on ${when(e.last)}` : 'No changes yet — showing the original'}</span>
+              <span class="pl-go" aria-hidden="true">Edit page <svg viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5" /></svg></span>
+            </li>
+          ); })}
+        </ul>
+      </section>
+    ))}
+    <p class="pl-empty" data-pl-empty hidden>No page matches that name.</p>
   </div>
 </Workspace>
 
-<style>
-  .cms-pages { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
-  .cms-page { display: grid; gap: 4px; padding: 18px 18px 16px; text-decoration: none; color: inherit; }
-  .cms-page:hover { border-color: var(--champagne); }
-  .cms-page-title { font-family: var(--disp); font-weight: 700; font-size: 16px; color: var(--ink); }
-  .cms-page-path { font-family: var(--mono); font-size: 11.5px; color: var(--ink-5); }
-  .cms-page-meta { font-size: 12.5px; color: var(--ink-4); margin-top: 6px; }
+<script>
+  const input = document.querySelector<HTMLInputElement>('[data-pl-search]');
+  const summary = document.querySelector<HTMLElement>('[data-pl-summary]')!;
+  const empty = document.querySelector<HTMLElement>('[data-pl-empty]')!;
+  const initial = summary.textContent;
+  input?.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    let shown = 0;
+    document.querySelectorAll<HTMLElement>('[data-pl-group]').forEach((group) => {
+      let inGroup = 0;
+      group.querySelectorAll<HTMLElement>('[data-pl-card]').forEach((card) => {
+        const match = !q || (card.dataset.name ?? '').includes(q);
+        card.hidden = !match;
+        if (match) inGroup++;
+      });
+      group.hidden = !inGroup;
+      shown += inGroup;
+    });
+    empty.hidden = shown > 0;
+    summary.textContent = q ? `${shown} page${shown === 1 ? '' : 's'} match` : initial;
+  });
+</script>
+
+<style is:global>
+  /* cards and groups set their own display, which would beat the browser's [hidden] rule */
+  .pl [hidden] { display: none !important; }
+  .pl { display: grid; gap: 26px; }
+  .pl-bar { display: flex; align-items: center; gap: 12px 18px; flex-wrap: wrap; }
+  .pl-search { position: relative; flex: 1; min-width: 220px; max-width: 420px; }
+  .pl-search svg { position: absolute; left: 12px; top: 50%; translate: 0 -50%; width: 17px; height: 17px; fill: none; stroke: var(--ink-5); stroke-width: 2; stroke-linecap: round; pointer-events: none; }
+  .pl-search input { width: 100%; min-height: 44px; padding: 0 14px 0 38px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--paper-3); color: var(--ink); font: 400 15px/1 var(--sans); }
+  .pl-search input:focus { outline: none; border-color: var(--champagne); box-shadow: 0 0 0 3px var(--champagne-50); }
+  .pl-summary { margin: 0; font-size: 13.5px; color: var(--ink-4); }
+  .pl-group { display: grid; gap: 12px; }
+  .pl-group-title { margin: 0; font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-5); }
+  .pl-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+  .pl-card { position: relative; display: grid; gap: 6px; padding: 16px 18px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--paper-3); transition: border-color .18s var(--easing), box-shadow .18s var(--easing), transform .18s var(--easing); }
+  .pl-card:hover { border-color: var(--champagne); box-shadow: 0 14px 34px -24px rgba(var(--shadow-rgb), .5); transform: translateY(-2px); }
+  .pl-card:focus-within { border-color: var(--champagne); }
+  .pl-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .pl-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font: 500 11.5px/1.3 var(--sans); color: var(--ink-4); background: rgba(var(--surface-rgb), .06); }
+  .pl-pill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--ink-6, #9A9CA5); }
+  .pl-pill.is-edited { color: var(--champagne-2); background: var(--champagne-50); }
+  .pl-pill.is-edited::before { background: var(--champagne); }
+  /* the live link sits above the card-wide edit link */
+  .pl-live { position: relative; z-index: 2; font-size: 12.5px; color: var(--ink-4); text-decoration: none; padding: 4px 2px; border-radius: 6px; }
+  .pl-live:hover { color: var(--champagne-2); text-decoration: underline; text-underline-offset: 3px; }
+  .pl-open { color: inherit; text-decoration: none; margin-top: 6px; }
+  .pl-open::after { content: ''; position: absolute; inset: 0; border-radius: 14px; }
+  .pl-open:focus-visible { outline: none; }
+  .pl-open:focus-visible::after { outline: 2px solid var(--champagne); outline-offset: 2px; }
+  .pl-live:focus-visible { outline: 2px solid var(--champagne); outline-offset: 2px; }
+  .pl-title { font: 700 17px/1.3 var(--disp); letter-spacing: -.012em; color: var(--ink); }
+  .pl-meta { font-size: 13px; color: var(--ink-4); line-height: 1.45; }
+  .pl-go { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font: 600 13px/1 var(--sans); color: var(--champagne-2); }
+  .pl-go svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .18s var(--easing); }
+  .pl-card:hover .pl-go svg { transform: translateX(3px); }
+  .pl-empty { margin: 0; font-size: 14px; color: var(--ink-4); }
+  @media (prefers-reduced-motion: reduce) { .pl-card, .pl-card:hover { transform: none; } }
 </style>

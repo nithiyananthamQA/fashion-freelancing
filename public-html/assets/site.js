@@ -134,7 +134,7 @@
           <a class="sub" href="${r("pages/services/ai-agent.html")}">AI agent</a>
           <a class="sub" href="${r("pages/services/ai-photography.html")}">AI video &amp; photography</a>
           <a class="sub" href="${r("pages/services/ecom-listing.html")}">E-com listings</a>
-          <a class="sub" href="${r("pages/services/graphic-design.html")}">Graphic design</a>
+          <a class="sub" href="${r("pages/services/web-design.html")}">Web design</a>
         </div>
       </nav>
       <a href="/sign-in" class="tm-signin">Sign in</a>
@@ -171,7 +171,7 @@
       <a role="menuitem" href="${r("pages/services/ai-agent.html")}">AI customer agent</a>
       <a role="menuitem" href="${r("pages/services/ai-photography.html")}">AI video &amp; photography</a>
       <a role="menuitem" href="${r("pages/services/ecom-listing.html")}">E-commerce listings</a>
-      <a role="menuitem" href="${r("pages/services/graphic-design.html")}">Graphic design</a>
+      <a role="menuitem" href="${r("pages/services/web-design.html")}">Web design</a>
     </div>
   </div>`;
 
@@ -187,7 +187,7 @@
           <p style="color:var(--ink-5);font-size:14px;max-width:340px;margin-top:14px;line-height:1.55;">
             Fashion Freelancing is a fashion design and production-services studio — factory-ready
             tech packs, 3D virtual samples, digital patterns, graphics and prints, woven designs,
-            AI product photography, marketplace listings, websites and brand design.
+            AI product photography, marketplace listings, website development and web design.
           </p>
           <p style="color:var(--ink-5);font-size:13px;max-width:340px;margin-top:10px;line-height:1.55;">
             Every quote is fixed before work starts. Two revision rounds included in every package.
@@ -213,7 +213,7 @@
             <li><a href="${r("pages/services/ai-agent.html")}">AI customer agent</a></li>
             <li><a href="${r("pages/services/ai-photography.html")}">AI video &amp; photography</a></li>
             <li><a href="${r("pages/services/ecom-listing.html")}">E-commerce listings</a></li>
-            <li><a href="${r("pages/services/graphic-design.html")}">Graphic design</a></li>
+            <li><a href="${r("pages/services/web-design.html")}">Web design</a></li>
           </ul>
         </details>
 
@@ -599,5 +599,60 @@
     } catch (e) { /* older Safari */ }
 
     paint();
+  }
+
+  // ---- Running strip (hero foot) ----
+  // The images are the page's own or the editor's list. Short lists are
+  // repeated until one run is wider than the strip, then the run is doubled
+  // so the loop meets itself; the speed is a steady ~26px a second however
+  // many images there are. Uploaded images carry no size, so the widths are
+  // read only once they have loaded. A tap pauses it and another lets it run
+  // on; hover and keyboard focus pause it in CSS; reduced motion leaves it
+  // still and scrollable by hand.
+  document.querySelectorAll('.flat-run').forEach((run) => {
+    const track = run.querySelector('.fr-track');
+    if (!track || !track.children.length) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const imgs = [...track.querySelectorAll('img')];
+    const loaded = imgs.map((img) => (img.complete ? Promise.resolve() : new Promise((done) => {
+      img.addEventListener('load', done, { once: true });
+      img.addEventListener('error', done, { once: true });
+    })));
+    Promise.all(loaded).then(() => {
+      const set = [...track.children];
+      const setWidth = track.scrollWidth;
+      if (!setWidth) return;
+      const copies = Math.max(0, Math.ceil(run.clientWidth / setWidth) - 1);
+      const clone = (item) => { const c = item.cloneNode(true); c.setAttribute('aria-hidden', 'true'); return c; };
+      for (let i = 0; i < copies; i++) set.forEach((item) => track.appendChild(clone(item)));
+      [...track.children].forEach((item) => track.appendChild(clone(item)));
+      run.style.setProperty('--fr-dur', Math.max(20, Math.round(track.scrollWidth / 2 / 26)) + 's');
+      run.classList.add('is-running');
+    });
+    run.addEventListener('click', () => run.classList.toggle('is-paused'));
+  });
+
+  // ---- Hero visual fit ----
+  // A page's own demo, set beside the hero copy, keeps its design width
+  // (.hero-fit) and is scaled down to the room its column has: the column's
+  // width and, on desktop, the height left in the one-screen hero. The box
+  // takes the scaled size, so nothing around it jumps.
+  const fitBoxes = document.querySelectorAll('.hero-run .fit-box');
+  if (fitBoxes.length) {
+    const fit = (box) => {
+      const inner = box.firstElementChild, view = box.parentElement;
+      if (!inner || !view) return;
+      box.style.width = ''; box.style.height = ''; inner.style.transform = '';
+      const w = inner.offsetWidth, h = inner.offsetHeight;
+      if (!w || !h) return;
+      const roomH = matchMedia('(min-width: 901px)').matches ? view.clientHeight - 24 : Infinity;
+      const scale = Math.min(1, view.clientWidth / w, roomH / h);
+      if (scale < 1) inner.style.transform = `scale(${scale})`;
+      box.style.width = `${Math.floor(w * scale)}px`;
+      box.style.height = `${Math.floor(h * scale)}px`;
+    };
+    const watch = new ResizeObserver(() => fitBoxes.forEach(fit));
+    fitBoxes.forEach((box) => { fit(box); watch.observe(box.parentElement.parentElement); });
+    window.addEventListener('load', () => fitBoxes.forEach(fit));
   }
 })();

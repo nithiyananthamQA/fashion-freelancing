@@ -7,9 +7,14 @@
  * element on that one page. No row means the page's own text — so the
  * default for every field is what the page already said, and a reset is a
  * delete. History keeps each change so any of them can be put back.
+ *
+ * An image strip is a list, not one element: its container carries
+ * `data-cms-gallery="<name>"`, the images inside it in the template are its
+ * default, and a row in `site_gallery` is the editor's whole list for it.
+ * Its changes share the page's history under the key `gallery.<name>`.
  */
 import type { Ctx } from './db';
-import { all, db, one, run } from './db';
+import { all, batch, db, one, run } from './db';
 import { newId, nowIso } from './ids';
 
 const TEMPLATES = import.meta.glob('/src/site-templates/**/*.html', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
@@ -17,13 +22,13 @@ const TEMPLATES = import.meta.glob('/src/site-templates/**/*.html', { query: '?r
 export interface SitePage { slug: string; path: string; file: string; title: string }
 
 const SERVICE_SLUGS = ['tech-pack', '3d-virtual-sampling', 'graphics-prints', 'pattern-cad', 'dobby-jacquard',
-  'website', 'ai-agent', 'ai-photography', 'ecom-listing', 'graphic-design'];
+  'website', 'ai-agent', 'ai-photography', 'ecom-listing', 'web-design'];
 
 /** The names editors know the pages by — the same ones the homepage cards use. */
 const PAGE_NAMES: Record<string, string> = {
   home: 'Homepage', 'tech-pack': 'Tech Pack', '3d-virtual-sampling': '3D Virtual Sampling', 'graphics-prints': 'Graphics & Prints',
   'pattern-cad': 'Pattern CAD', 'dobby-jacquard': 'Dobby & Jacquard', website: 'Website Development', 'ai-agent': 'AI Agent',
-  'ai-photography': 'AI Video & Photography', 'ecom-listing': 'E-Com Listing', 'graphic-design': 'Graphic Design', about: 'About', help: 'Help & FAQ',
+  'ai-photography': 'AI Video & Photography', 'ecom-listing': 'E-Com Listing', 'web-design': 'Web Design', about: 'About', help: 'Help & FAQ',
 };
 function titleOf(html: string, fallback: string): string {
   const t = (html.match(/<title[^>]*>([^<]*)<\/title>/) || [])[1] || '';
@@ -62,6 +67,7 @@ const humanise = (id: string) => id.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) 
 const escapeHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const unescapeHtml = (s: string) => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
 const attr = (attrs: string, name: string) => (attrs.match(new RegExp(`\\s${name}="([^"]*)"`)) || [])[1];
+const sectionOf = (key: string) => { const dot = key.indexOf('.'); return dot === -1 ? key : key.slice(0, dot); };
 
 /** Elements with a data-cms key, in document order, with their original content. */
 interface Hit { key: string; tag: string; start: number; end: number; open: string; attrs: string; inner: string }
@@ -84,9 +90,12 @@ export function fieldsOf(page: SitePage, overrides: Map<string, { kind: Kind; va
   const html = template(page.file) ?? '';
   const sections = new Map<string, Section>();
   const push = (s: Section, f: Field) => { s.fields.push(f); };
+  // whatever sits inside an image strip belongs to the strip's own list
+  const strips = galleryHits(html);
   for (const h of hits(html)) {
+    if (strips.some((g) => h.start >= g.openEnd && h.end <= g.close)) continue;
+    const sectionId = sectionOf(h.key);
     const dot = h.key.indexOf('.');
-    const sectionId = dot === -1 ? h.key : h.key.slice(0, dot);
     const kindName = (dot === -1 ? '' : h.key.slice(dot + 1)).replace(/-\d+$/, '');
     let kind: Kind; let original: string;
     if (h.tag === 'img') { kind = 'image'; original = JSON.stringify({ src: attr(h.attrs, 'src') ?? '', alt: attr(h.attrs, 'alt') ?? '' }); }
@@ -120,6 +129,149 @@ export function fieldsOf(page: SitePage, overrides: Map<string, { kind: Kind; va
   return [...sections.values()];
 }
 const stripTags = (s: string) => s.replace(/<[^>]+>/g, '').trim();
+
+// --- image strips -------------------------------------------------------------
+
+export interface GalleryItem { src: string; alt: string }
+export interface Gallery {
+  name: string;
+  /** the container's data-cms-label, for the editor */
+  label: string;
+  /** the section whose fields sit just before it — on a service page, the hero */
+  section: string | null;
+  /** the images the template puts there; empty when the strip is hidden until an editor adds some */
+  defaults: GalleryItem[];
+  /** the editor's list, if any */
+  items: GalleryItem[] | null;
+}
+/** A sanity limit on one list, not a design count. */
+export const GALLERY_MAX = 200;
+export const GALLERY_KEY = 'gallery.';
+const ALT_MAX = 200;
+
+/** Containers marked `data-cms-gallery`, with the span of their children. */
+interface GalleryHit { name: string; label: string; start: number; openEnd: number; close: number; end: number; inner: string }
+function galleryHits(html: string): GalleryHit[] {
+  const out: GalleryHit[] = [];
+  const re = /<([a-z][a-z0-9]*)\b([^>]*?\sdata-cms-gallery="([^"]+)"[^>]*)>/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html))) {
+    const tag = m[1] ?? '', attrs = m[2] ?? '', name = m[3] ?? '';
+    if (!tag || !name) continue;
+    const openEnd = m.index + m[0].length;
+    // the items are <div>s inside a <div>, so the first </div> is not the
+    // container's own: count depth until it closes
+    const tags = new RegExp(`<(/?)${tag}\\b[^>]*>`, 'gi');
+    tags.lastIndex = openEnd;
+    let depth = 1; let t: RegExpExecArray | null = null;
+    while (depth > 0 && (t = tags.exec(html))) depth += t[1] ? -1 : 1;
+    if (depth > 0 || !t) continue;
+    out.push({ name, label: unescapeHtml(attr(attrs, 'data-cms-label') ?? '') || humanise(name), start: m.index, openEnd, close: t.index, end: t.index + t[0].length, inner: html.slice(openEnd, t.index) });
+  }
+  return out;
+}
+
+/** Every image strip on a page, with its default and any saved list. */
+export function galleriesOf(page: SitePage, saved: Map<string, GalleryItem[]> = new Map()): Gallery[] {
+  const html = template(page.file) ?? '';
+  const strips = galleryHits(html);
+  const keyed = hits(html).filter((h) => sectionOf(h.key) !== 'head' && !strips.some((g) => h.start >= g.openEnd && h.end <= g.close));
+  return strips.map((g) => {
+    const near = keyed.filter((h) => h.end <= g.start).pop() ?? keyed.find((h) => h.start >= g.end);
+    const defaults = [...g.inner.matchAll(/<img\b([^>]*)>/g)]
+      .map((i) => ({ src: unescapeHtml(attr(i[1] ?? '', 'src') ?? ''), alt: unescapeHtml(attr(i[1] ?? '', 'alt') ?? '') }))
+      .filter((i) => i.src);
+    const items = saved.get(g.name);
+    return { name: g.name, label: g.label, section: near ? sectionOf(near.key) : null, defaults, items: items?.length ? items : null };
+  });
+}
+
+/** A stored list, read defensively: anything malformed is no images at all. */
+function readItems(value: string | null | undefined): GalleryItem[] {
+  if (!value) return [];
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.flatMap((x) => {
+      const e = (x ?? {}) as { src?: unknown; alt?: unknown };
+      return typeof e.src === 'string' && e.src ? [{ src: e.src, alt: typeof e.alt === 'string' ? e.alt : '' }] : [];
+    });
+  } catch {
+    return [];
+  }
+}
+
+export async function loadGalleries(ctx: Ctx, page: SitePage): Promise<Map<string, GalleryItem[]>> {
+  // Like overrides: a missing table or a failed query serves the page as designed.
+  try {
+    const rows = await all<{ gallery: string; items: string }>(db(ctx), 'SELECT gallery, items FROM site_gallery WHERE page = ?', page.path);
+    return new Map(rows.map((r) => [r.gallery, readItems(r.items)]));
+  } catch (error) {
+    console.error('[site-content] image strips unavailable, serving the template:', error);
+    return new Map();
+  }
+}
+
+/** Saved strips per page, for the page list. Best-effort for the same reason. */
+export async function galleryEdits(ctx: Ctx): Promise<Map<string, { n: number; last: string }>> {
+  try {
+    const rows = await all<{ page: string; n: number; last: string }>(db(ctx), 'SELECT page, COUNT(*) AS n, MAX(updated_at) AS last FROM site_gallery GROUP BY page');
+    return new Map(rows.map((r) => [r.page, { n: r.n, last: r.last }]));
+  } catch {
+    return new Map();
+  }
+}
+
+/** Images this app serves from editor uploads: /media/site/<page>/<file>. */
+const SITE_MEDIA = /^\/media\/site\/[a-z0-9-]+\/[A-Za-z0-9_.-]+$/;
+
+export type GallerySave = 'saved' | 'reset' | 'unchanged' | { error: string };
+
+/**
+ * Write a strip's whole list. Every image must be an upload or one of the
+ * page's own; an empty list, or exactly the page's own list, is a reset.
+ */
+export async function saveGallery(ctx: Ctx, page: SitePage, gallery: Gallery, raw: unknown, userId: string): Promise<GallerySave> {
+  if (!Array.isArray(raw)) return { error: 'The list of images could not be read. Reload the page and try again.' };
+  const own = new Set(gallery.defaults.map((i) => i.src));
+  const items: GalleryItem[] = [];
+  for (const entry of raw) {
+    const e = (entry ?? {}) as { src?: unknown; alt?: unknown };
+    const src = String(e.src ?? '').trim();
+    if (!src) continue;
+    if (!own.has(src) && !(SITE_MEDIA.test(src) && !src.includes('..'))) return { error: 'One of the images is not an upload from this site. Remove it and add the file again.' };
+    if (items.length === GALLERY_MAX) return { error: `A strip holds up to ${GALLERY_MAX} images. Remove some and save again.` };
+    items.push({ src, alt: String(e.alt ?? '').trim().slice(0, ALT_MAX) });
+  }
+  const value = JSON.stringify(items);
+  const current = gallery.items ? JSON.stringify(gallery.items) : null;
+  const isReset = !items.length || value === JSON.stringify(gallery.defaults);
+  if ((isReset && current === null) || (!isReset && value === current)) return 'unchanged';
+  await writeGallery(ctx, page, gallery.name, current, isReset ? null : value, userId);
+  return isReset ? 'reset' : 'saved';
+}
+
+/** Put a strip back to the page's own images (or hidden, when it has none). */
+export async function resetGallery(ctx: Ctx, page: SitePage, gallery: Gallery, userId: string): Promise<'reset' | 'unchanged'> {
+  if (!gallery.items) return 'unchanged';
+  await writeGallery(ctx, page, gallery.name, JSON.stringify(gallery.items), null, userId);
+  return 'reset';
+}
+
+/** The history row and the list change together or not at all. `next` null deletes the row. */
+async function writeGallery(ctx: Ctx, page: SitePage, name: string, previous: string | null, next: string | null, userId: string): Promise<void> {
+  const database = db(ctx);
+  const now = nowIso();
+  await batch(database, [
+    database.prepare('INSERT INTO site_content_history (id, page, key, old_value, new_value, changed_by, changed_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+      .bind(newId(), page.path, GALLERY_KEY + name, previous, next, userId, now),
+    next === null
+      ? database.prepare('DELETE FROM site_gallery WHERE page = ? AND gallery = ?').bind(page.path, name)
+      : database.prepare(`INSERT INTO site_gallery (page, gallery, items, updated_by, updated_at) VALUES (?, ?, ?, ?, ?)
+                          ON CONFLICT(page, gallery) DO UPDATE SET items = excluded.items, updated_by = excluded.updated_by, updated_at = excluded.updated_at`)
+          .bind(page.path, name, next, userId, now),
+  ]);
+}
 
 // --- storage -------------------------------------------------------------------
 
@@ -181,6 +333,13 @@ export const recentChanges = (ctx: Ctx, page: SitePage, limit = 12) => all<Chang
 export async function undoChange(ctx: Ctx, page: SitePage, changeId: string, userId: string): Promise<boolean> {
   const c = await one<Change>(db(ctx), 'SELECT id, key, old_value, new_value, changed_at FROM site_content_history WHERE id = ? AND page = ?', changeId, page.path);
   if (!c) return false;
+  // a strip's list lives in site_gallery; it must never be written as a field
+  if (c.key.startsWith(GALLERY_KEY)) {
+    const name = c.key.slice(GALLERY_KEY.length);
+    const current = await one<{ items: string }>(db(ctx), 'SELECT items FROM site_gallery WHERE page = ? AND gallery = ?', page.path, name);
+    await writeGallery(ctx, page, name, current?.items ?? null, c.old_value, userId);
+    return true;
+  }
   const now = nowIso();
   const current = await one<{ value: string }>(db(ctx), 'SELECT value FROM site_content WHERE page = ? AND key = ?', page.path, c.key);
   await run(db(ctx), 'INSERT INTO site_content_history (id, page, key, old_value, new_value, changed_by, changed_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -198,9 +357,9 @@ export async function undoChange(ctx: Ctx, page: SitePage, changeId: string, use
 // --- rendering -----------------------------------------------------------------
 
 /** The page as the visitor gets it: the template with every override applied. */
-export function renderPage(page: SitePage, overrides: Map<string, { kind: Kind; value: string }>): string {
+export function renderPage(page: SitePage, overrides: Map<string, { kind: Kind; value: string }>, galleries: Map<string, GalleryItem[]> = new Map()): string {
   let html = template(page.file) ?? '';
-  if (!overrides.size) return html;
+  if (!overrides.size && !galleries.size) return html;
   // apply from the end so earlier offsets stay valid
   for (const h of hits(html).reverse()) {
     const o = overrides.get(h.key); if (!o) continue;
@@ -230,6 +389,13 @@ export function renderPage(page: SitePage, overrides: Map<string, { kind: Kind; 
     }
     html = html.slice(0, h.start) + replacement + html.slice(h.end);
   }
+  // a strip with a saved list shows exactly that list; the container keeps its
+  // own tag, and with no list (or an empty one) the template's children stay
+  for (const g of galleryHits(html).reverse()) {
+    const items = galleries.get(g.name); if (!items?.length) continue;
+    const inner = items.map((i) => `<div class="fr-item fr-pic" role="listitem"><img src="${escapeHtml(i.src)}" alt="${escapeHtml(i.alt)}" decoding="async"></div>`).join('');
+    html = html.slice(0, g.openEnd) + inner + html.slice(g.close);
+  }
   return html;
 }
 
@@ -243,6 +409,7 @@ export function notFoundResponse(): Response {
 export async function renderSitePage(ctx: Ctx, path: string): Promise<Response | null> {
   const page = pageByPath(path);
   if (!page) return null;
-  const html = renderPage(page, await loadOverrides(ctx, page));
+  const [overrides, galleries] = await Promise.all([loadOverrides(ctx, page), loadGalleries(ctx, page)]);
+  const html = renderPage(page, overrides, galleries);
   return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache' } });
 }

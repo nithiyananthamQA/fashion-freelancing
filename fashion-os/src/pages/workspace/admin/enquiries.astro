@@ -106,7 +106,7 @@ const tone = (value: string) => {
 /** How to reach them and what they asked for, minus the fields left blank. */
 const context = (e: Enquiry): string[] => [
   e.email,
-  e.service === 'multiple' ? 'More than one service' : (getService(e.service)?.name ?? null),
+  e.service === 'multiple' ? 'More than one service' : (getService(e.service)?.name ?? e.service),
   e.timeline,
   leadSourceLabel(e.source),
   e.page ? `sent from ${e.page}` : null,

@@ -1,11 +1,13 @@
 /**
- * POST /api/site-media — an editor replaces an image on a marketing page.
+ * POST /api/site-media — an editor replaces an image on a marketing page, or
+ * adds one to an image strip (key `gallery.<name>`, one request per file).
  * The file is checked the same way portfolio uploads are (type sniffed, 25 MB
  * cap) and stored under `site/…`, the one prefix /media serves publicly.
  */
 import type { APIRoute } from 'astro';
 import { env } from '../../server/db';
 import { GuardRedirect, requireEditor } from '../../server/guards';
+import { GALLERY_KEY, galleriesOf, pageBySlug } from '../../server/site-content';
 import { ALLOWED_TYPES, checkUpload, putObject } from '../../server/storage';
 import { newId } from '../../server/ids';
 import { json } from '../../server/validate';
@@ -22,6 +24,11 @@ export const POST: APIRoute = async (ctx) => {
   const slug = String(form.get('page') ?? '').replace(/[^a-z0-9-]/g, '');
   const fieldKey = String(form.get('key') ?? '').replace(/[^a-z0-9.-]/g, '');
   if (!(file instanceof File) || !slug || !fieldKey) return json({ ok: false, error: 'Choose an image first.' }, 400);
+  // a strip takes any number of uploads, but only on a page that has that strip
+  if (fieldKey.startsWith(GALLERY_KEY)) {
+    const page = pageBySlug(slug);
+    if (!page || !galleriesOf(page).some((g) => GALLERY_KEY + g.name === fieldKey)) return json({ ok: false, error: 'That image strip is not on this page.' }, 400);
+  }
   if (!file.type.startsWith('image/')) return json({ ok: false, error: 'Only images can go here.' }, 400);
   const problem = await checkUpload(file);
   if (problem) return json({ ok: false, error: problem.message }, 400);

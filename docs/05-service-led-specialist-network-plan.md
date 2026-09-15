@@ -21,7 +21,7 @@ The current website must continue to sell the company-delivered services:
 - AI Agent
 - AI Video & Photography
 - E-Commerce Listing
-- Graphic Design
+- Web Design
 
 The new network is an optional route for clients who specifically need to hire an individual professional.
 
@@ -209,7 +209,7 @@ For example, `TypeScript`, `typescript`, and `TS` must resolve to one public tag
 | AI Agent | Customer support, lead generation, sales assistance, knowledge-base agent, automation | Prompt design, workflows, API work, Python, TypeScript, automation tools |
 | AI Video & Photography | Product imagery, lifestyle imagery, campaigns, short video, retouching | Art direction, image generation, retouching, motion, product consistency |
 | E-Commerce Listing | Shopify, Amazon, Myntra, Flipkart, catalog upload, SEO content, product attributes | Product data, SEO, marketplace requirements, bulk upload, catalog tools |
-| Graphic Design | Brand identity, packaging, social media, campaign assets, lookbooks, print design | Figma, Illustrator, Photoshop, InDesign, typography, production files |
+| Web Design | Brand websites, online store design, landing pages, website redesign, domain & hosting setup, business email setup | Figma, Webflow, Framer, WordPress, Shopify, Google Workspace, UI design, domain & DNS setup, analytics setup |
 
 ### 5.2 Website Development stack logic
 

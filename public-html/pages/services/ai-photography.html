@@ -643,12 +643,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
 <div id="site-nav" data-current="agency"></div>
 
-<main id="main">
+<main id="main" class="screens">
 
   <!-- ============ 1. HERO — flat shot to on-model ============ -->
-  <section class="hero" aria-label="AI fashion photography — overview">
-    <div class="wrap hero-center">
-      <div>
+  <section class="hero hero-run" aria-label="AI fashion photography — overview">
+    <div class="wrap hero-split">
+      <div class="hero-copy">
         <span class="kicker rv in" data-cms="ai-photography-human-checked.kicker-1">AI photography — human-checked</span>
         <h1 class="h-display rv in rv-display" style="margin-top:14px;" data-cms="ai-photography-human-checked.heading-1">On-model photos from the flat shots <span class="acc-t">you already have.</span></h1>
         <p class="sub rv in" data-cms="ai-photography-human-checked.text-1">
@@ -665,52 +665,56 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
           <span data-cms="ai-photography-human-checked.chip-3">Marketplace-safe</span>
         </div>
       </div>
+
+      <!-- right: the page's own demo, scaled by site.js to the room beside the copy -->
+      <div class="hero-view rv in rv-media">
+        <div class="fit-box"><div class="hero-fit" style="--fit-w: 780px">
+    <div class="flow">
+      <div class="flow-side flow-in">
+        <span class="flow-lab">Your library</span>
+        <figure class="fi fi-a"><img src="../../assets/img/prints/placement-adventure-640.webp" loading="lazy" decoding="async" alt="A tee flat with its placement graphics." / data-cms="the-transformation.image-1"></figure>
+        <figure class="fi fi-b"><img src="../../assets/img/woven/fabric-rolls-560.webp" loading="lazy" decoding="async" alt="Rolls of patterned fabric." / data-cms="the-transformation.image-2"></figure>
+        <figure class="fi fi-c"><img src="../../assets/img/prints/shorts-palm-stripe-640.webp" loading="lazy" decoding="async" alt="Swim shorts with their print repeat and colour references." / data-cms="the-transformation.image-3"></figure>
+        <figure class="fi fi-d"><img src="../../assets/img/prints/floral-repeat-640.webp" loading="lazy" decoding="async" alt="A painted floral repeat." / data-cms="the-transformation.image-4"></figure>
+      </div>
+
+      <div class="flow-mid">
+        <!-- The reel goes here. Portrait, because that is the shape this
+             output is actually used at. Left empty until there is real work
+             to show — an invented example is the one thing a buyer of AI
+             imagery is right to distrust. -->
+        <div class="flow-reel" role="img" aria-label="Space reserved for an example output reel.">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/>
+          </svg>
+          <span>Example reel coming</span>
+        </div>
+      </div>
+
+      <div class="flow-side flow-out">
+        <span class="flow-lab">What comes back</span>
+        <figure class="fo fo-a"><img src="../../assets/img/prints/shorts-coral-palm-640.webp" loading="lazy" decoding="async" alt="Coral shorts with their palm print artwork." / data-cms="the-transformation.image-5"></figure>
+        <figure class="fo fo-b"><img src="../../assets/img/woven/jacquard-floral-560.webp" loading="lazy" decoding="async" alt="A close crop of woven cloth." / data-cms="the-transformation.image-6"></figure>
+        <figure class="fo fo-c"><img src="../../assets/img/prints/tile-palm-coral-640.webp" loading="lazy" decoding="async" alt="A palm repeat print." / data-cms="the-transformation.image-7"></figure>
+      </div>
+
+      <svg class="flow-link" viewBox="0 0 1000 60" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M40 30 H430" /><path d="M420 22 L436 30 L420 38 z" class="hd" />
+        <path d="M570 30 H960" /><path d="M950 22 L966 30 L950 38 z" class="hd" />
+      </svg>
+    </div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- the running strip: shown only once the editor has added images -->
+    <div class="flat-run" role="region" aria-label="AI photography work — hover, focus or tap to pause" tabindex="0">
+      <div class="fr-view">
+        <div class="fr-track" role="list" data-cms-gallery="run" data-cms-label="Running strip"></div>
+      </div>
     </div>
   </section>
 
-  <!-- ============ THE VISUAL — its own section ============ -->
-  <section class="sec sec-visual" aria-label="The transformation">
-    <div class="wrap">
-      <div class="sec-head" style="margin-bottom:30px;">
-        <span class="kicker rv" data-cms="the-transformation.kicker-1">The transformation</span>
-        <h2 class="h-display rv rv-display" data-cms="the-transformation.heading-1">Flat shot in. <span class="acc-t">On-model out.</span></h2>
-      </div>
-      <div class="flow rv rv-media">
-        <div class="flow-side flow-in">
-          <span class="flow-lab">Your library</span>
-          <figure class="fi fi-a"><img src="../../assets/img/prints/placement-adventure-640.webp" loading="lazy" decoding="async" alt="A tee flat with its placement graphics." / data-cms="the-transformation.image-1"></figure>
-          <figure class="fi fi-b"><img src="../../assets/img/woven/fabric-rolls-560.webp" loading="lazy" decoding="async" alt="Rolls of patterned fabric." / data-cms="the-transformation.image-2"></figure>
-          <figure class="fi fi-c"><img src="../../assets/img/prints/shorts-palm-stripe-640.webp" loading="lazy" decoding="async" alt="Swim shorts with their print repeat and colour references." / data-cms="the-transformation.image-3"></figure>
-          <figure class="fi fi-d"><img src="../../assets/img/prints/floral-repeat-640.webp" loading="lazy" decoding="async" alt="A painted floral repeat." / data-cms="the-transformation.image-4"></figure>
-        </div>
-
-        <div class="flow-mid">
-          <!-- The reel goes here. Portrait, because that is the shape this
-               output is actually used at. Left empty until there is real work
-               to show — an invented example is the one thing a buyer of AI
-               imagery is right to distrust. -->
-          <div class="flow-reel" role="img" aria-label="Space reserved for an example output reel.">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/>
-            </svg>
-            <span>Example reel coming</span>
-          </div>
-        </div>
-
-        <div class="flow-side flow-out">
-          <span class="flow-lab">What comes back</span>
-          <figure class="fo fo-a"><img src="../../assets/img/prints/shorts-coral-palm-640.webp" loading="lazy" decoding="async" alt="Coral shorts with their palm print artwork." / data-cms="the-transformation.image-5"></figure>
-          <figure class="fo fo-b"><img src="../../assets/img/woven/jacquard-floral-560.webp" loading="lazy" decoding="async" alt="A close crop of woven cloth." / data-cms="the-transformation.image-6"></figure>
-          <figure class="fo fo-c"><img src="../../assets/img/prints/tile-palm-coral-640.webp" loading="lazy" decoding="async" alt="A palm repeat print." / data-cms="the-transformation.image-7"></figure>
-        </div>
-
-        <svg class="flow-link" viewBox="0 0 1000 60" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M40 30 H430" /><path d="M420 22 L436 30 L420 38 z" class="hd" />
-          <path d="M570 30 H960" /><path d="M950 22 L966 30 L950 38 z" class="hd" />
-        </svg>
-      </div>
-    </div>
-  </section>
 
   <!-- ============ 2. WHY CATALOGS STALL ============ -->
   <section class="sec" aria-labelledby="ps-h">
@@ -909,7 +913,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
                 <option value="ai-agent">AI Agent</option>
                 <option value="ai-photography" selected>AI Photography</option>
                 <option value="ecom-listing">E-Commerce Product Listing</option>
-                <option value="graphic-design">Graphic Design</option>
+                <option value="web-design">Web Design</option>
               </optgroup>
               <option value="multiple">A bit of everything — full project</option>
             </select>

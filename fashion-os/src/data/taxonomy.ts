@@ -231,14 +231,17 @@ export const SERVICES: Service[] = [
     tools: ['Shopify', 'Amazon Seller Central', 'Excel', 'PIM'],
   },
   {
-    id: 'graphic-design',
-    name: 'Graphic Design',
-    page: '/pages/services/graphic-design.html',
-    blurb: 'Identity, packaging and campaign assets built as a system, with production files included.',
+    id: 'web-design',
+    /* Was Graphic Design (`graphic-design`) until 2026-09-15. Unlike Graphics &
+       Prints, the id moved with the name: migration 0008 carries existing
+       offerings, portfolio items, projects and hire requests across. */
+    name: 'Web Design',
+    page: '/pages/services/web-design.html',
+    blurb: 'Complete brand websites — designed, live on your own domain, with hosting, email and analytics set up.',
     accent: 'var(--lg-peri)',
-    specialties: ['Brand identity', 'Packaging', 'Social media', 'Campaign assets', 'Lookbooks', 'Print design'],
-    skills: ['Typography', 'Art direction', 'Layout', 'Production files', 'Print preparation'],
-    tools: ['Figma', 'Adobe Illustrator', 'Adobe Photoshop', 'Adobe InDesign'],
+    specialties: ['Brand websites', 'Online store design', 'Landing pages', 'Website redesign', 'Domain & hosting setup', 'Business email setup'],
+    skills: ['UI design', 'Responsive layout', 'Typography', 'Domain & DNS setup', 'On-page SEO', 'Analytics setup'],
+    tools: ['Figma', 'Webflow', 'Framer', 'WordPress', 'Shopify', 'Google Workspace'],
   },
 ];
 

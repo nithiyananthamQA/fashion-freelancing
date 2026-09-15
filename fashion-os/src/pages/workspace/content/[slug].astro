@@ -1,17 +1,25 @@
 ---
 /**
- * /workspace/content/<page> — one page, section by section, every field in
- * reading order. Each section saves on its own. A field left equal to the
- * page's original text is not stored at all, so "Reset" is just that. The
- * page's recent changes sit at the bottom and any of them can be undone.
+ * /workspace/content/<page> — edit one marketing page.
+ *
+ * Every section of the page is a folded card, in reading order, with its
+ * fields labelled the way the page shows them ("Button 2", "Chip 3"). One
+ * form carries the whole page, so a single "Save changes" bar covers every
+ * edit — text, images and image strips. The script sends only what actually
+ * changed (it disables the untouched controls just before submit), so rich
+ * text nobody touched can never be rewritten by the browser's own
+ * re-serialisation. A field saved equal to the page's original is not stored
+ * at all, so a reset is a delete.
+ *
+ * Every post redirects back with a 303, so a reload never re-sends it; the
+ * redirect carries the confirmation and which sections were open.
  */
 export const prerender = false;
 
 import Workspace from '../../../layouts/Workspace.astro';
-import { db } from '../../../server/db';
 import { guard, requireEditor } from '../../../server/guards';
 import { adminNav, editorNav } from '../../../data/workspace-nav';
-import { fieldsOf, loadOverrides, pageBySlug, recentChanges, saveField, undoChange, type Field } from '../../../server/site-content';
+import { fieldsOf, galleriesOf, GALLERY_KEY, GALLERY_MAX, loadGalleries, loadOverrides, pageBySlug, recentChanges, resetGallery, saveField, saveGallery, undoChange, type Change, type Field, type Gallery, type Section } from '../../../server/site-content';
 
 const gate = await guard(Astro, () => requireEditor(Astro));
 if (gate.response) return gate.response;
@@ -19,213 +27,965 @@ const user = gate.value;
 
 const page = pageBySlug(Astro.params.slug ?? '');
 if (!page) return new Response(null, { status: 404 });
-const database = db(Astro);
 
-let flash: string | null = null;
+/** "Button 2" when a section has more than one button, "Button" when it has one. */
+function labeller(sections: Section[]) {
+  const names = new Map<string, string>();
+  for (const s of sections) {
+    const byLabel = new Map<string, Field[]>();
+    for (const f of s.fields) byLabel.set(f.label, [...(byLabel.get(f.label) ?? []), f]);
+    for (const [label, list] of byLabel) list.forEach((f, i) => names.set(f.key, list.length > 1 ? `${label} ${i + 1}` : label));
+  }
+  return (f: Field) => names.get(f.key) ?? f.label;
+}
+
+/** What a strip shows once it has no list of its own. */
+const stripBack = (g: Gallery) => g.defaults.length
+  ? `${g.label} is back to the page's own ${g.defaults.length} image${g.defaults.length === 1 ? '' : 's'}.`
+  : `${g.label} is back to the page default — hidden until you add images.`;
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
   const action = String(form.get('action') ?? '');
   const sections = fieldsOf(page, await loadOverrides(Astro, page));
-  const byKey = new Map<string, Field>(sections.flatMap((s) => s.fields.map((f) => [f.key, f])));
+  const strips = galleriesOf(page, await loadGalleries(Astro, page));
+  const labelOf = labeller(sections);
+  let done = '';
+
   if (action === 'save') {
-    const sectionId = String(form.get('section') ?? '');
     let saved = 0, reset = 0;
-    for (const f of sections.find((s) => s.id === sectionId)?.fields ?? []) {
+    const problems: string[] = [];
+    for (const f of sections.flatMap((s) => s.fields)) {
       const raw = f.kind === 'image'
-        ? JSON.stringify({ src: form.get(`src:${f.key}`) ?? '', alt: form.get(`alt:${f.key}`) ?? '' })
+        ? (form.has(`src:${f.key}`) ? JSON.stringify({ src: form.get(`src:${f.key}`) ?? '', alt: form.get(`alt:${f.key}`) ?? '' }) : null)
         : form.get(`f:${f.key}`);
-      if (raw === null) continue;
+      if (raw === null) continue;   // not sent: the editor did not touch it
       const r = await saveField(Astro, page, f, String(raw), user.id);
       if (r === 'saved') saved++; if (r === 'reset') reset++;
     }
-    flash = saved || reset ? `Saved — ${saved} change${saved === 1 ? '' : 's'}${reset ? `, ${reset} put back to the original` : ''}. It is live now.` : 'Nothing changed.';
+    for (const name of new Set(form.getAll('gpresent').map(String))) {
+      const g = strips.find((x) => x.name === name);
+      if (!g) { problems.push('An image strip is no longer on this page.'); continue; }
+      const srcs = form.getAll(`gsrc:${name}`).map(String), alts = form.getAll(`galt:${name}`).map(String);
+      const r = await saveGallery(Astro, page, g, srcs.map((src, i) => ({ src, alt: alts[i] ?? '' })), user.id);
+      if (typeof r === 'object') problems.push(`${g.label}: ${r.error}`);
+      else if (r === 'saved') saved++; else if (r === 'reset') reset++;
+    }
+    const good = saved || reset
+      ? `Saved ${plural(saved, 'change')}${reset ? `, ${reset} put back to the original` : ''}. It's live now.`
+      : '';
+    done = [good, problems.join(' ')].filter(Boolean).join(' ') || 'Nothing to save — no changes were made.';
   } else if (action === 'reset') {
-    const f = byKey.get(String(form.get('key') ?? ''));
-    if (f) { await saveField(Astro, page, f, '', user.id); flash = `${f.label} is back to the original.`; }
+    const key = String(form.get('key') ?? '');
+    const g = strips.find((x) => GALLERY_KEY + x.name === key);
+    const f = sections.flatMap((s) => s.fields).find((x) => x.key === key);
+    if (g) { await resetGallery(Astro, page, g, user.id); done = stripBack(g); }
+    else if (f) { await saveField(Astro, page, f, '', user.id); done = `${labelOf(f)} is back to the original.`; }
   } else if (action === 'undo') {
-    flash = (await undoChange(Astro, page, String(form.get('change') ?? ''), user.id)) ? 'Undone.' : 'That change is no longer there.';
+    done = (await undoChange(Astro, page, String(form.get('change') ?? ''), user.id)) ? 'Change undone. It\'s live now.' : 'That change is no longer there.';
   }
+
+  const query = new URLSearchParams();
+  if (done) query.set('done', done);
+  const open = String(form.get('open') ?? '').replace(/[^a-z0-9,_-]/gi, '');
+  if (open) query.set('open', open);
+  return Astro.redirect(`${Astro.url.pathname}${query.size ? `?${query}` : ''}`, 303);
 }
 
+const done = Astro.url.searchParams.get('done');
 const sections = fieldsOf(page, await loadOverrides(Astro, page));
+const strips = galleriesOf(page, await loadGalleries(Astro, page));
+const labelOf = labeller(sections);
+// a strip is edited with the section just before it on the page (on a
+// service page, the hero); one with no neighbour goes with the first section
+const firstBody = sections.find((s) => s.id !== 'head') ?? sections[0];
+const homeOf = (g: Gallery) => (g.section && sections.some((s) => s.id === g.section) ? g.section : firstBody?.id);
+const stripsIn = (id: string) => strips.filter((g) => homeOf(g) === id);
+const editedIn = (s: Section) => s.fields.filter((f) => f.value !== null).length + stripsIn(s.id).filter((g) => g.items).length;
+const edited = sections.reduce((n, s) => n + editedIn(s), 0);
+const requested = (Astro.url.searchParams.get('open') ?? '').split(',').filter((id) => sections.some((s) => s.id === id));
+const openIds = new Set(requested.length ? requested : firstBody ? [firstBody.id] : []);
 const changes = await recentChanges(Astro, page);
-const edited = sections.reduce((n, s) => n + s.fields.filter((f) => f.value !== null).length, 0);
+
+const kindOf = (f: Field) => (f.key.split('.')[1] ?? '').replace(/-\d+$/, '');
+const KIND_HINT: Record<string, string> = {
+  kicker: 'The small capitals above a heading.',
+  chip: 'A short point with a tick, under the buttons.',
+  button: 'Two to four words that say what happens on click.',
+  caption: 'The small line under a picture.',
+  label: 'The label a visitor reads before typing.',
+  tab: 'The name on a tab.',
+};
+const COUNTED: Record<string, { min: number; max: number; hint: string }> = {
+  'head.title': { min: 45, max: 60, hint: 'Shown in the browser tab and as the blue link on Google.' },
+  'head.description': { min: 120, max: 160, hint: 'The short text under the link on Google.' },
+};
 const img = (f: Field) => { try { return JSON.parse(f.value ?? f.original) as { src: string; alt: string }; } catch { return { src: '', alt: '' }; } };
-const short = (s: string | null) => (s === null ? '— original —' : s.replace(/<[^>]+>/g, '').slice(0, 70) + (s.length > 70 ? '…' : ''));
-const when = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-const multiline = (f: Field) => f.kind === 'html' || ['text', 'item', 'caption'].some((k) => f.key.includes(`.${k}-`));
+/** The page's own images use paths relative to the page, not to this editor. */
+const preview = (src: string) => { try { const u = new URL(src, `https://site.invalid${page.path}`); return u.pathname + u.search; } catch { return src; } };
+const plain = (s: string) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+const multiline = (f: Field) => f.kind === 'html' || ['text', 'item', 'caption'].includes(kindOf(f)) || (f.value ?? f.original).length > 90;
+const rows = (f: Field) => Math.min(8, Math.max(2, Math.ceil((f.value ?? f.original).length / 80)));
+const searchText = (f: Field) => (f.kind === 'image' ? img(f).alt : plain(f.value ?? f.original)).toLowerCase() + ' ' + labelOf(f).toLowerCase();
+
+const stripPill = (g: Gallery) => g.items ? `Live · ${plural(g.items.length, 'image')}` : g.defaults.length ? `Page default · ${plural(g.defaults.length, 'image')}` : 'Hidden · no images yet';
+const stripState = (g: Gallery) => g.items
+  ? 'Your images are live on the page. Drag to reorder, add more or remove some, then save.'
+  : g.defaults.length
+    ? 'The page\'s own images are showing. Change the list and save to use your own.'
+    : 'This strip stays hidden on the page until you add images.';
+
+// history reads as the field's name, not its storage key
+const fieldName = new Map(sections.flatMap((s) => s.fields.map((f) => [f.key, `${s.label} › ${labelOf(f)}`] as const)));
+const isStrip = (c: Change) => c.key.startsWith(GALLERY_KEY);
+const changeName = (c: Change) => isStrip(c)
+  ? strips.find((g) => GALLERY_KEY + g.name === c.key)?.label ?? 'Image strip'
+  : fieldName.get(c.key) ?? 'A field no longer on this page';
+const count = (s: string | null) => { try { return (JSON.parse(s ?? '[]') as unknown[]).length; } catch { return 0; } };
+const shortValue = (c: Change, s: string | null) => isStrip(c)
+  ? (s === null ? 'Page default' : plural(count(s), 'image'))
+  : s === null ? 'Original' : (() => { const t = plain(s.startsWith('{') ? (JSON.parse(s).alt ?? 'image') : s); return t.length > 60 ? t.slice(0, 60) + '…' : t || '(empty)'; })();
+const ago = (iso: string) => {
+  const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins} min ago`;
+  if (mins < 60 * 24) return `${Math.round(mins / 60)} h ago`;
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+};
 ---
 <Workspace title={`Edit — ${page.title}`} role={user.isAdmin ? 'admin' : 'editor'} current="/workspace/content"
   items={user.isAdmin ? adminNav() : editorNav()} who={user.name} heading={page.title}
-  lede={`${sections.length} sections · ${edited} field${edited === 1 ? '' : 's'} changed from the original.`} flash={flash}>
+  lede="Change any text or image, then save. Your changes go live the moment you save.">
 
-  <p class="cms-top"><a href="/workspace/content">← All pages</a> · <a href={page.path} target="_blank" rel="noopener">View the live page ↗</a></p>
-  {/* Reset buttons live inside the section forms but submit this one, so a
-      reset can never be mistaken for a save. */}
-  <form method="post" id="cms-reset"><input type="hidden" name="action" value="reset" /></form>
+  <div class="ed">
+    <div class="ed-top">
+      <a class="ed-back" href="/workspace/content"><span aria-hidden="true">←</span> All pages</a>
+      <div class="ed-top-actions">
+        <span class={`ed-pill${edited ? ' is-edited' : ''}`}>{edited ? `${plural(edited, 'edit')} live` : 'Showing the original'}</span>
+        <a class="ed-btn ed-btn-quiet" href={page.path} target="_blank" rel="noopener">View live page <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
 
-  <nav class="cms-index ws-card" aria-label="Sections on this page">
-    <span class="cms-index-title">Jump to a section</span>
-    {sections.map((s) => { const n = s.fields.filter((f) => f.value !== null).length; return (
-      <a href={`#s-${s.id}`}>{s.label}{n > 0 && <em>{n}</em>}</a>
-    ); })}
-  </nav>
+    {/* Reset and undo post on their own, never together with a save. */}
+    <form method="post" id="ed-reset" data-ed-leave><input type="hidden" name="action" value="reset" /><input type="hidden" name="open" value="" data-ed-open /></form>
 
-  {sections.map((s) => (
-    <details class="cms-section ws-card" id={`s-${s.id}`} open>
-      <summary class="cms-section-title">{s.label}<span class="cms-count">{s.fields.length} field{s.fields.length === 1 ? '' : 's'}{s.fields.some((f) => f.value !== null) && ' · edited'}</span></summary>
-    <form method="post" class="cms-form">
-      <input type="hidden" name="action" value="save" />
-      <input type="hidden" name="section" value={s.id} />
-      {s.fields.map((f) => (
-        <div class={`cms-field${f.value !== null ? ' is-changed' : ''}`}>
-          <div class="cms-field-head">
-            <span class="cms-label">{f.label}{f.value !== null && <em>edited</em>}</span>
-            {f.value !== null && <button type="submit" class="cms-reset" form="cms-reset" name="key" value={f.key}>Reset</button>}
-          </div>
-          {f.kind === 'image' ? (
-            <div class="cms-image">
-              <img src={img(f).src} alt="" class="cms-preview" />
-              <div class="cms-image-controls">
-                <input type="hidden" name={`src:${f.key}`} value={img(f).src} />
-                <label class="cms-upload">Replace image <input type="file" accept="image/*" data-upload={f.key} data-page={page.slug} /></label>
-                <label class="cms-alt">Alt text <input class="fi" type="text" name={`alt:${f.key}`} value={img(f).alt} /></label>
-                <span class="cms-hint">JPG, PNG or WebP, up to 25 MB. Replaces the image everywhere it appears in this slot.</span>
-              </div>
-            </div>
-          ) : f.kind === 'html' ? (
-            <div class="cms-richwrap" data-rich>
-              <div class="cms-toolbar" hidden>
-                <button type="button" data-cmd="bold" title="Bold"><b>B</b></button>
-                <button type="button" data-cmd="italic" title="Italic"><i>I</i></button>
-                <button type="button" data-cmd="highlight" title="Highlight in the accent colour"><span class="cms-hl">Highlight</span></button>
-                <button type="button" data-cmd="link" title="Link">Link</button>
-                <button type="button" data-cmd="clear" title="Remove formatting from the selection">Plain</button>
-              </div>
-              <textarea class="fi" name={`f:${f.key}`} rows={Math.min(8, Math.max(2, Math.ceil((f.value ?? f.original).length / 90)))}>{f.value ?? f.original}</textarea>
-            </div>
-          ) : multiline(f) ? (
-            <textarea class="fi" name={`f:${f.key}`} rows={Math.min(8, Math.max(2, Math.ceil((f.value ?? f.original).length / 90)))}>{f.value ?? f.original}</textarea>
-          ) : (
-            <input class="fi" type="text" name={`f:${f.key}`} value={f.value ?? f.original} />
-          )}
-          {f.kind === 'html' && <span class="cms-hint">Select words, then Bold, Italic, Highlight or Link. Highlight is the accent colour the page uses.</span>}
+    <div class="ed-layout">
+      <aside class="ed-rail" aria-label="Sections on this page">
+        <label class="ed-search">
+          <span class="visually-hidden">Find text on this page</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+          <input type="search" placeholder="Find text on this page" data-ed-search autocomplete="off" />
+        </label>
+        <p class="ed-search-note" data-ed-search-note role="status" aria-live="polite"></p>
+        <nav>
+          <ol class="ed-toc">
+            {sections.map((s) => (
+              <li><a href={`#s-${s.id}`} data-ed-jump={s.id}>
+                <span class="ed-toc-name">{s.label}</span>
+                {editedIn(s) > 0 && <span class="ed-toc-count" title={`${plural(editedIn(s), 'edit')} live`}>{editedIn(s)}</span>}
+                <span class="ed-toc-dirty" data-ed-toc-dirty hidden title="Unsaved changes"></span>
+              </a></li>
+            ))}
+          </ol>
+        </nav>
+        <div class="ed-rail-tools">
+          <button type="button" class="ed-link" data-ed-expand>Open all</button>
+          <button type="button" class="ed-link" data-ed-collapse>Close all</button>
         </div>
-      ))}
-      <div class="cms-actions"><button type="submit" class="btn-hot">Save this section</button></div>
-    </form>
-    </details>
-  ))}
+      </aside>
 
-  {changes.length > 0 && (
-    <section class="cms-section ws-card">
-      <h2 class="cms-section-title">Recent changes</h2>
-      <ul class="cms-history">
-        {changes.map((c) => (
-          <li>
-            <div><b>{c.key}</b> — {c.changed_by_name ?? 'someone'}, {when(c.changed_at)}</div>
-            <div class="cms-diff"><span>{short(c.old_value)}</span> → <span>{short(c.new_value)}</span></div>
-            <form method="post"><input type="hidden" name="action" value="undo" /><input type="hidden" name="change" value={c.id} /><button type="submit" class="cms-reset">Undo</button></form>
-          </li>
+      <form method="post" id="ed-form" class="ed-main" data-ed-form>
+        <input type="hidden" name="action" value="save" />
+        <input type="hidden" name="open" value="" data-ed-open />
+
+        {sections.map((s) => (
+          <details class="ed-section" id={`s-${s.id}`} open={openIds.has(s.id)} data-ed-section={s.id}>
+            <summary class="ed-section-head">
+              <span class="ed-chevron" aria-hidden="true"></span>
+              <span class="ed-section-name">{s.label}</span>
+              <span class="ed-section-meta">{plural(s.fields.length, 'field')}{stripsIn(s.id).length > 0 && ` · ${plural(stripsIn(s.id).length, 'image strip')}`}</span>
+              <span class="ed-pill is-dirty" data-ed-section-dirty hidden>Unsaved</span>
+              {editedIn(s) > 0 && <span class="ed-pill is-edited">{editedIn(s)} edited</span>}
+            </summary>
+
+            <div class="ed-section-body">
+              {s.fields.map((f) => {
+                const id = `fld-${f.key.replace(/[^a-z0-9]/gi, '-')}`;
+                const counted = COUNTED[f.key];
+                const hint = counted?.hint ?? KIND_HINT[kindOf(f)];
+                return (
+                  <div class={`ed-field${f.value !== null ? ' is-edited' : ''}${f.kind === 'image' ? ' is-image' : ''}`} data-ed-field data-ed-text={searchText(f)}>
+                    <div class="ed-field-head">
+                      <label class="ed-label" for={f.kind === 'image' ? `${id}-alt` : id}>{labelOf(f)}</label>
+                      {f.value !== null && <span class="ed-tag is-edited">Edited</span>}
+                      <span class="ed-tag is-dirty" data-ed-dirty hidden>Unsaved</span>
+                      <span class="ed-spacer"></span>
+                      <button type="button" class="ed-link" data-ed-revert hidden>Undo my typing</button>
+                      {f.value !== null && <button type="submit" class="ed-link" form="ed-reset" name="key" value={f.key} data-ed-confirm>Reset to original</button>}
+                    </div>
+
+                    {f.kind === 'image' ? (
+                      <div class="ed-image">
+                        <label class="ed-drop ed-drop-image" data-ed-image-drop>
+                          <img src={preview(img(f).src)} alt="" class="ed-image-preview" data-ed-image-preview />
+                          <span class="ed-drop-cta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" /></svg>Replace image</span>
+                          <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" class="ed-file" data-upload={f.key} data-page={page.slug} />
+                        </label>
+                        <input type="hidden" name={`src:${f.key}`} value={img(f).src} data-ed-src />
+                        <div class="ed-image-side">
+                          <label class="ed-sublabel" for={`${id}-alt`}>Image description</label>
+                          <input class="ed-input" id={`${id}-alt`} type="text" name={`alt:${f.key}`} value={img(f).alt} maxlength="300" />
+                          <p class="ed-hint" data-ed-upload-status>Read aloud to people who can't see the image, and used by Google. Drop a new picture on the preview or click it — JPG, PNG, WebP or AVIF up to 25 MB.</p>
+                        </div>
+                      </div>
+                    ) : f.kind === 'html' ? (
+                      <div class="ed-rich-wrap" data-rich>
+                        <div class="ed-toolbar" role="toolbar" aria-label={`Formatting for ${labelOf(f)}`} hidden>
+                          <button type="button" data-cmd="bold" aria-label="Bold"><b>B</b></button>
+                          <button type="button" data-cmd="italic" aria-label="Italic"><i>I</i></button>
+                          <button type="button" data-cmd="highlight" aria-label="Highlight in the page's accent colour"><span class="ed-hl">Highlight</span></button>
+                          <button type="button" data-cmd="link" aria-label="Add a link">Link</button>
+                          <button type="button" data-cmd="clear" aria-label="Remove formatting from the selection">Plain text</button>
+                        </div>
+                        <textarea class="ed-input" id={id} name={`f:${f.key}`} rows={rows(f)}>{f.value ?? f.original}</textarea>
+                      </div>
+                    ) : multiline(f) ? (
+                      <textarea class="ed-input" id={id} name={`f:${f.key}`} rows={rows(f)} data-autogrow>{f.value ?? f.original}</textarea>
+                    ) : (
+                      <input class="ed-input" id={id} type="text" name={`f:${f.key}`} value={f.value ?? f.original} />
+                    )}
+
+                    {(hint || counted || f.kind === 'html') && (
+                      <p class="ed-hint">
+                        {f.kind === 'html' ? 'Select words, then Bold, Italic, Highlight or Link. Highlight uses the page\'s accent colour.' : hint}
+                        {counted && <span class="ed-count" data-ed-count data-min={counted.min} data-max={counted.max}></span>}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+
+              {stripsIn(s.id).map((g) => (
+                <section class={`ed-strip${g.items ? ' is-edited' : ''}`} aria-labelledby={`g-${g.name}-title`}
+                  data-gallery={g.name} data-page={page.slug} data-defaults={g.defaults.length} data-max={GALLERY_MAX}>
+                  <input type="hidden" name="gpresent" value={g.name} data-g-present />
+                  <div class="ed-strip-head">
+                    <div class="ed-strip-intro">
+                      <h3 class="ed-strip-title" id={`g-${g.name}-title`}>{g.label}</h3>
+                      <p class="ed-hint" data-g-state>{stripState(g)}</p>
+                    </div>
+                    <span class={`ed-pill${g.items ? ' is-edited' : ''}`} data-g-pill>{stripPill(g)}</span>
+                    {g.items && <button type="submit" class="ed-link" form="ed-reset" name="key" value={GALLERY_KEY + g.name} data-ed-confirm>Reset to page default</button>}
+                  </div>
+
+                  <label class="ed-drop ed-drop-strip" data-g-drop>
+                    <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple class="ed-file" data-g-add />
+                    <span class="ed-drop-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" /><circle cx="9" cy="10" r="1.6" /><path d="m21 15-4.5-4.5L9 18" /></svg></span>
+                    <span class="ed-drop-title">Drop images here, or <u>browse your files</u></span>
+                    <span class="ed-hint">Add as many as you like · JPG, PNG, WebP or AVIF, up to 25 MB each · they run in the order below</span>
+                  </label>
+                  <p class="ed-g-status" data-g-status role="status" aria-live="polite"></p>
+
+                  <ol class="ed-grid" data-g-list aria-label={`Images in ${g.label}, in running order`}>
+                    {(g.items ?? g.defaults).map((it, i) => (
+                      <li class="ed-tile" draggable="true" data-g-tile>
+                        <div class="ed-tile-media">
+                          <img src={preview(it.src)} alt="" loading="lazy" draggable="false" />
+                          <span class="ed-tile-n" data-g-n>{i + 1}</span>
+                          <button type="button" class="ed-tile-x" data-remove aria-label={`Remove image ${i + 1}`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                        </div>
+                        <input type="hidden" name={`gsrc:${g.name}`} value={it.src} />
+                        <input class="ed-input ed-input-sm" type="text" name={`galt:${g.name}`} value={it.alt} maxlength="200" placeholder="Describe this image" aria-label={`Description of image ${i + 1}`} />
+                        <div class="ed-tile-moves">
+                          <button type="button" data-move="up" aria-label={`Move image ${i + 1} earlier`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
+                          <span class="ed-drag" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="1.3" /><circle cx="15" cy="7" r="1.3" /><circle cx="9" cy="12" r="1.3" /><circle cx="15" cy="12" r="1.3" /><circle cx="9" cy="17" r="1.3" /><circle cx="15" cy="17" r="1.3" /></svg>Drag</span>
+                          <button type="button" data-move="down" aria-label={`Move image ${i + 1} later`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg></button>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                  <template data-g-row>
+                    <li class="ed-tile" draggable="true" data-g-tile>
+                      <div class="ed-tile-media">
+                        <img src="" alt="" draggable="false" />
+                        <span class="ed-tile-n" data-g-n></span>
+                        <button type="button" class="ed-tile-x" data-remove aria-label="Remove image"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                      </div>
+                      <input type="hidden" name={`gsrc:${g.name}`} value="" />
+                      <input class="ed-input ed-input-sm" type="text" name={`galt:${g.name}`} value="" maxlength="200" placeholder="Describe this image" aria-label="Description of this image" />
+                      <div class="ed-tile-moves">
+                        <button type="button" data-move="up" aria-label="Move earlier"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg></button>
+                        <span class="ed-drag" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="1.3" /><circle cx="15" cy="7" r="1.3" /><circle cx="9" cy="12" r="1.3" /><circle cx="15" cy="12" r="1.3" /><circle cx="9" cy="17" r="1.3" /><circle cx="15" cy="17" r="1.3" /></svg>Drag</span>
+                        <button type="button" data-move="down" aria-label="Move later"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg></button>
+                      </div>
+                    </li>
+                  </template>
+                </section>
+              ))}
+            </div>
+          </details>
         ))}
-      </ul>
-    </section>
-  )}
+
+        <noscript><div class="ed-noscript"><button type="submit" class="ed-btn ed-btn-primary">Save changes</button></div></noscript>
+      </form>
+    </div>
+
+    {changes.length > 0 && (
+      <details class="ed-history">
+        <summary class="ed-section-head">
+          <span class="ed-chevron" aria-hidden="true"></span>
+          <span class="ed-section-name">Recent changes</span>
+          <span class="ed-section-meta">{plural(changes.length, 'change')} · undo any of them</span>
+        </summary>
+        <ul class="ed-history-list">
+          {changes.map((c) => (
+            <li>
+              <div class="ed-history-what">
+                <b>{changeName(c)}</b>
+                <span class="ed-history-diff"><span>{shortValue(c, c.old_value)}</span><span aria-hidden="true">→</span><span>{shortValue(c, c.new_value)}</span></span>
+                <span class="ed-hint">{c.changed_by_name ?? 'Someone'} · {ago(c.changed_at)}</span>
+              </div>
+              <form method="post" data-ed-leave>
+                <input type="hidden" name="action" value="undo" /><input type="hidden" name="change" value={c.id} /><input type="hidden" name="open" value="" data-ed-open />
+                <button type="submit" class="ed-btn ed-btn-quiet ed-btn-sm" data-ed-confirm>Undo</button>
+              </form>
+            </li>
+          ))}
+        </ul>
+      </details>
+    )}
+  </div>
+
+  <div class="ed-bar" data-ed-bar aria-hidden="true">
+    <div class="ed-bar-in">
+      <span class="ed-bar-dot" aria-hidden="true"></span>
+      <p class="ed-bar-text" data-ed-bar-text role="status" aria-live="polite">Unsaved changes</p>
+      <button type="button" class="ed-btn ed-btn-quiet" data-ed-discard>Discard</button>
+      <button type="submit" form="ed-form" class="ed-btn ed-btn-primary" data-ed-save>Save changes</button>
+    </div>
+  </div>
+
+  <div class="ed-toast" data-ed-toast role="status" aria-live="polite" hidden={!done}>
+    <span class="ed-toast-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg></span>
+    <span class="ed-toast-text" data-ed-toast-text>{done}</span>
+    <button type="button" class="ed-toast-undo" data-ed-toast-undo hidden>Undo</button>
+    <button type="button" class="ed-toast-x" data-ed-toast-close aria-label="Dismiss"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+  </div>
 </Workspace>
 
 <script>
-  // Rich text for fields that carry inline markup. The textarea stays the
-  // real form field; an editable box mirrors it, so no JavaScript still works.
-  document.querySelectorAll<HTMLElement>('[data-rich]').forEach((wrap) => {
-    const ta = wrap.querySelector<HTMLTextAreaElement>('textarea')!;
-    const bar = wrap.querySelector<HTMLElement>('.cms-toolbar')!;
-    const box = document.createElement('div');
-    box.className = 'fi cms-rich'; box.contentEditable = 'true'; box.innerHTML = ta.value;
-    ta.hidden = true; bar.hidden = false; wrap.appendChild(box);
-    const sync = () => { ta.value = box.innerHTML; ta.dispatchEvent(new Event('input', { bubbles: true })); };
-    box.addEventListener('input', sync);
-    box.addEventListener('paste', (e) => { e.preventDefault(); document.execCommand('insertText', false, e.clipboardData?.getData('text/plain') ?? ''); });
-    bar.querySelectorAll<HTMLButtonElement>('button[data-cmd]').forEach((btn) => btn.addEventListener('click', () => {
-      box.focus();
-      const cmd = btn.dataset.cmd;
-      if (cmd === 'bold' || cmd === 'italic') document.execCommand(cmd);
-      else if (cmd === 'clear') document.execCommand('removeFormat');
-      else if (cmd === 'link') { const url = prompt('Link to (https://…)'); if (url) document.execCommand('createLink', false, url); }
-      else if (cmd === 'highlight') {
-        const sel = window.getSelection(); const text = sel?.toString();
-        if (text) document.execCommand('insertHTML', false, `<span class="acc-t">${text.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] as string))}</span>`);
-      }
-      sync();
-    }));
-  });
+  const form = document.querySelector<HTMLFormElement>('[data-ed-form]');
+  const bar = document.querySelector<HTMLElement>('[data-ed-bar]')!;
+  const barText = document.querySelector<HTMLElement>('[data-ed-bar-text]')!;
+  const saveBtn = document.querySelector<HTMLButtonElement>('[data-ed-save]')!;
+  const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
-  // Leaving with unsaved edits asks first; saving clears the flag.
-  let dirty = false;
-  document.querySelectorAll<HTMLFormElement>('form.cms-form').forEach((form) => {
-    form.addEventListener('input', () => { dirty = true; });
-    form.addEventListener('submit', () => { dirty = false; });
-  });
-  window.addEventListener('beforeunload', (e) => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+  // ---------- toast -----------------------------------------------------------
+  const toastEl = document.querySelector<HTMLElement>('[data-ed-toast]')!;
+  const toastText = toastEl.querySelector<HTMLElement>('[data-ed-toast-text]')!;
+  const toastUndo = toastEl.querySelector<HTMLButtonElement>('[data-ed-toast-undo]')!;
+  let toastTimer = 0;
+  let undoAction: (() => void) | null = null;
+  const hideToast = () => { toastEl.classList.remove('is-on'); window.setTimeout(() => { if (!toastEl.classList.contains('is-on')) toastEl.hidden = true; }, 250); };
+  const toast = (message: string, undo?: () => void) => {
+    toastText.textContent = message;
+    undoAction = undo ?? null;
+    toastUndo.hidden = !undo;
+    toastEl.hidden = false;
+    requestAnimationFrame(() => toastEl.classList.add('is-on'));
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(hideToast, undo ? 8000 : 6000);
+  };
+  toastUndo.addEventListener('click', () => { undoAction?.(); undoAction = null; hideToast(); });
+  toastEl.querySelector('[data-ed-toast-close]')!.addEventListener('click', hideToast);
+  if (!toastEl.hidden) toast(toastText.textContent ?? '');
+  // the confirmation arrived in the address; take it out so a reload is clean
+  if (location.search) history.replaceState(null, '', location.pathname + location.hash);
 
-  // Replace-image: upload to R2 through the site, then point the field at the new URL.
-  document.querySelectorAll<HTMLInputElement>('input[data-upload]').forEach((input) => {
-    input.addEventListener('change', async () => {
-      const file = input.files?.[0]; if (!file) return;
-      const field = input.closest('.cms-field')!;
-      const hidden = field.querySelector<HTMLInputElement>('input[type=hidden][name^="src:"]')!;
-      const preview = field.querySelector<HTMLImageElement>('.cms-preview')!;
-      const hint = field.querySelector<HTMLElement>('.cms-hint')!;
-      hint.textContent = 'Uploading…';
-      const body = new FormData(); body.append('file', file); body.append('page', input.dataset.page!); body.append('key', input.dataset.upload!);
-      const res: { ok: boolean; url?: string; error?: string } = await fetch('/api/site-media', { method: 'POST', body }).then((r) => r.json() as Promise<{ ok: boolean; url?: string; error?: string }>).catch(() => ({ ok: false, error: 'Upload failed.' }));
-      if (!res.ok) { hint.textContent = res.error || 'Upload failed.'; return; }
-      hidden.value = res.url ?? ''; preview.src = res.url ?? ''; field.classList.add('is-changed');
-      hint.textContent = 'Uploaded — save this section to make it live.';
+  if (form) {
+    const sections = [...document.querySelectorAll<HTMLDetailsElement>('[data-ed-section]')];
+    const fields = [...form.querySelectorAll<HTMLElement>('[data-ed-field]')];
+    const strips = [...form.querySelectorAll<HTMLElement>('[data-gallery]')];
+    const uploading = new Set<Element>();
+
+    // ---------- rich text -------------------------------------------------------
+    // The textarea stays the real field; an editable box mirrors it.
+    form.querySelectorAll<HTMLElement>('[data-rich]').forEach((wrap) => {
+      const ta = wrap.querySelector<HTMLTextAreaElement>('textarea')!;
+      const tools = wrap.querySelector<HTMLElement>('.ed-toolbar')!;
+      const box = document.createElement('div');
+      box.className = 'ed-input ed-rich'; box.contentEditable = 'true'; box.innerHTML = ta.value;
+      box.setAttribute('role', 'textbox'); box.setAttribute('aria-multiline', 'true');
+      const label = form.querySelector(`label[for="${ta.id}"]`); if (label) box.setAttribute('aria-label', label.textContent ?? '');
+      ta.hidden = true; tools.hidden = false; wrap.appendChild(box);
+      (ta as HTMLTextAreaElement & { mirror?: HTMLElement }).mirror = box;
+      const sync = () => { ta.value = box.innerHTML; ta.dispatchEvent(new Event('input', { bubbles: true })); };
+      box.addEventListener('input', sync);
+      box.addEventListener('paste', (e) => { e.preventDefault(); document.execCommand('insertText', false, e.clipboardData?.getData('text/plain') ?? ''); });
+      tools.querySelectorAll<HTMLButtonElement>('button[data-cmd]').forEach((btn) => btn.addEventListener('click', () => {
+        box.focus();
+        const cmd = btn.dataset.cmd;
+        if (cmd === 'bold' || cmd === 'italic') document.execCommand(cmd);
+        else if (cmd === 'clear') document.execCommand('removeFormat');
+        else if (cmd === 'link') { const url = prompt('Link to (https://…)'); if (url) document.execCommand('createLink', false, url); }
+        else if (cmd === 'highlight') {
+          const text = window.getSelection()?.toString();
+          if (text) document.execCommand('insertHTML', false, `<span class="acc-t">${text.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c] as string))}</span>`);
+        }
+        sync();
+      }));
     });
-  });
+
+    // ---------- auto-growing text and length guides ------------------------------
+    const grow = (ta: HTMLTextAreaElement) => { ta.style.height = 'auto'; ta.style.height = `${ta.scrollHeight + 2}px`; };
+    form.querySelectorAll<HTMLTextAreaElement>('textarea[data-autogrow]').forEach((ta) => { grow(ta); ta.addEventListener('input', () => grow(ta)); });
+    sections.forEach((d) => d.addEventListener('toggle', () => { if (d.open) d.querySelectorAll<HTMLTextAreaElement>('textarea[data-autogrow]').forEach(grow); }));
+    form.querySelectorAll<HTMLElement>('[data-ed-count]').forEach((out) => {
+      const input = out.closest('[data-ed-field]')!.querySelector<HTMLInputElement | HTMLTextAreaElement>('.ed-input')!;
+      const min = Number(out.dataset.min), max = Number(out.dataset.max);
+      const paint = () => {
+        const n = input.value.length;
+        out.textContent = `${n} characters · aim for ${min}–${max}`;
+        out.classList.toggle('is-good', n >= min && n <= max);
+        out.classList.toggle('is-long', n > max);
+      };
+      paint(); input.addEventListener('input', paint);
+    });
+
+    // ---------- what has changed ---------------------------------------------------
+    // Each field remembers what it held when the page loaded; each strip
+    // remembers its rows. "Changed" is always measured against those.
+    type Control = HTMLInputElement | HTMLTextAreaElement;
+    const controlsOf = (field: HTMLElement) => [...field.querySelectorAll<Control>('input[name], textarea[name]')];
+    const initial = new Map<Control, string>();
+    fields.forEach((field) => controlsOf(field).forEach((c) => initial.set(c, c.value)));
+    const fieldChanged = (field: HTMLElement) => controlsOf(field).some((c) => c.value !== initial.get(c));
+
+    const listOf = (strip: HTMLElement) => strip.querySelector<HTMLOListElement>('[data-g-list]')!;
+    const tilesOf = (strip: HTMLElement) => [...listOf(strip).querySelectorAll<HTMLLIElement>('[data-g-tile]')];
+    const signature = (strip: HTMLElement) => JSON.stringify(tilesOf(strip).map((li) => [
+      li.querySelector<HTMLInputElement>('input[name^="gsrc:"]')!.value, li.querySelector<HTMLInputElement>('input[name^="galt:"]')!.value]));
+    const stripStart = new Map<HTMLElement, { sig: string; rows: Node[] }>();
+    strips.forEach((strip) => stripStart.set(strip, { sig: signature(strip), rows: tilesOf(strip).map((li) => li.cloneNode(true)) }));
+    const stripChanged = (strip: HTMLElement) => signature(strip) !== stripStart.get(strip)!.sig;
+
+    let dirtyCount = 0;
+    const refresh = () => {
+      dirtyCount = 0;
+      const dirtySections = new Set<string>();
+      fields.forEach((field) => {
+        const changed = fieldChanged(field);
+        field.classList.toggle('is-dirty', changed);
+        field.querySelector<HTMLElement>('[data-ed-dirty]')!.hidden = !changed;
+        const revert = field.querySelector<HTMLElement>('[data-ed-revert]'); if (revert) revert.hidden = !changed;
+        if (changed) { dirtyCount++; dirtySections.add(field.closest<HTMLElement>('[data-ed-section]')!.dataset.edSection!); }
+      });
+      strips.forEach((strip) => {
+        const changed = stripChanged(strip);
+        strip.classList.toggle('is-dirty', changed);
+        if (changed) { dirtyCount++; dirtySections.add(strip.closest<HTMLElement>('[data-ed-section]')!.dataset.edSection!); }
+      });
+      sections.forEach((d) => { d.querySelector<HTMLElement>('[data-ed-section-dirty]')!.hidden = !dirtySections.has(d.dataset.edSection!); });
+      document.querySelectorAll<HTMLAnchorElement>('[data-ed-jump]').forEach((a) => { a.querySelector<HTMLElement>('[data-ed-toc-dirty]')!.hidden = !dirtySections.has(a.dataset.edJump!); });
+      const on = dirtyCount > 0;
+      bar.classList.toggle('is-on', on);
+      bar.setAttribute('aria-hidden', on ? 'false' : 'true');
+      barText.textContent = uploading.size ? 'Uploading images…' : `${plural(dirtyCount, 'unsaved change')}${dirtySections.size > 1 ? ` in ${dirtySections.size} sections` : ''}`;
+      saveBtn.disabled = uploading.size > 0;
+    };
+    form.addEventListener('input', refresh);
+
+    // "Undo my typing" puts one field back to how it loaded
+    form.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-ed-revert]');
+      if (!btn) return;
+      const field = btn.closest<HTMLElement>('[data-ed-field]')!;
+      controlsOf(field).forEach((c) => {
+        c.value = initial.get(c) ?? '';
+        const mirror = (c as Control & { mirror?: HTMLElement }).mirror; if (mirror) mirror.innerHTML = c.value;
+        if (c instanceof HTMLTextAreaElement && c.dataset.autogrow !== undefined) grow(c);
+      });
+      const preview = field.querySelector<HTMLImageElement>('[data-ed-image-preview]');
+      const src = field.querySelector<HTMLInputElement>('[data-ed-src]');
+      if (preview && src) preview.src = preview.dataset.initial ?? preview.src;
+      refresh();
+      field.querySelector<HTMLElement>('.ed-input, .ed-rich')?.focus();
+    });
+
+    // Discard puts everything back
+    document.querySelector('[data-ed-discard]')!.addEventListener('click', () => {
+      if (!confirm(`Discard ${plural(dirtyCount, 'unsaved change')}? This can't be undone.`)) return;
+      fields.forEach((field) => controlsOf(field).forEach((c) => {
+        c.value = initial.get(c) ?? '';
+        const mirror = (c as Control & { mirror?: HTMLElement }).mirror; if (mirror) mirror.innerHTML = c.value;
+      }));
+      form.querySelectorAll<HTMLImageElement>('[data-ed-image-preview]').forEach((p) => { if (p.dataset.initial) p.src = p.dataset.initial; });
+      form.querySelectorAll<HTMLTextAreaElement>('textarea[data-autogrow]').forEach(grow);
+      strips.forEach((strip) => { listOf(strip).replaceChildren(...stripStart.get(strip)!.rows.map((n) => n.cloneNode(true))); renumber(strip); });
+      refresh();
+      toast('Changes discarded.');
+    });
+
+    // The open sections survive the round trip.
+    const openList = () => sections.filter((d) => d.open).map((d) => d.dataset.edSection).join(',');
+    let leaving = false;
+    form.addEventListener('submit', (e) => {
+      if (uploading.size) { e.preventDefault(); toast('Wait for the images to finish uploading, then save.'); return; }
+      if (!dirtyCount) { e.preventDefault(); toast('Nothing to save yet — change something first.'); return; }
+      // send only what changed
+      fields.forEach((field) => { if (!fieldChanged(field)) controlsOf(field).forEach((c) => { c.disabled = true; }); });
+      strips.forEach((strip) => { if (!stripChanged(strip)) strip.querySelectorAll<HTMLInputElement>('input[name]').forEach((c) => { c.disabled = true; }); });
+      form.querySelectorAll<HTMLInputElement>('[data-ed-open]').forEach((i) => { i.value = openList(); });
+      saveBtn.textContent = 'Saving…'; saveBtn.disabled = true;
+      leaving = true;
+    });
+    document.querySelectorAll<HTMLFormElement>('form[data-ed-leave]').forEach((f) => f.addEventListener('submit', (e) => {
+      const btn = (e as SubmitEvent).submitter as HTMLButtonElement | null;
+      if (dirtyCount && btn?.dataset.edConfirm !== undefined && !confirm(`You have ${plural(dirtyCount, 'unsaved change')}. Continuing reloads the page and they will be lost.`)) { e.preventDefault(); return; }
+      f.querySelectorAll<HTMLInputElement>('[data-ed-open]').forEach((i) => { i.value = openList(); });
+      leaving = true;
+    }));
+    // buttons inside the big form that submit the reset form: their confirm lives here
+    form.querySelectorAll<HTMLButtonElement>('button[form="ed-reset"]').forEach((btn) => btn.addEventListener('click', (e) => {
+      if (dirtyCount && !confirm(`You have ${plural(dirtyCount, 'unsaved change')}. Resetting reloads the page and they will be lost.`)) { e.preventDefault(); return; }
+      document.querySelectorAll<HTMLInputElement>('#ed-reset [data-ed-open]').forEach((i) => { i.value = openList(); });
+      leaving = true;
+    }));
+    window.addEventListener('beforeunload', (e) => { if (dirtyCount && !leaving) { e.preventDefault(); e.returnValue = ''; } });
+
+    // ---------- sections: jump, open all, find -----------------------------------
+    document.querySelectorAll<HTMLAnchorElement>('[data-ed-jump]').forEach((a) => a.addEventListener('click', (e) => {
+      const d = document.getElementById(`s-${a.dataset.edJump}`) as HTMLDetailsElement | null;
+      if (!d) return;
+      e.preventDefault(); d.open = true;
+      d.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      d.querySelector<HTMLElement>('summary')!.focus({ preventScroll: true });
+    }));
+    document.querySelector('[data-ed-expand]')?.addEventListener('click', () => sections.forEach((d) => { d.open = true; }));
+    document.querySelector('[data-ed-collapse]')?.addEventListener('click', () => sections.forEach((d) => { d.open = false; }));
+    const toc = [...document.querySelectorAll<HTMLAnchorElement>('[data-ed-jump]')];
+    if ('IntersectionObserver' in window) {
+      const seen = new IntersectionObserver((entries) => entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        toc.forEach((a) => a.classList.toggle('is-here', a.dataset.edJump === (en.target as HTMLElement).dataset.edSection));
+      }), { rootMargin: '-30% 0px -60% 0px' });
+      sections.forEach((d) => seen.observe(d));
+    }
+    const search = document.querySelector<HTMLInputElement>('[data-ed-search]');
+    const note = document.querySelector<HTMLElement>('[data-ed-search-note]')!;
+    const remembered = new Map<HTMLDetailsElement, boolean>();
+    search?.addEventListener('input', () => {
+      const q = search.value.trim().toLowerCase();
+      if (q && !remembered.size) sections.forEach((d) => remembered.set(d, d.open));
+      let hits = 0;
+      sections.forEach((d) => {
+        let inSection = 0;
+        d.querySelectorAll<HTMLElement>('[data-ed-field]').forEach((field) => {
+          const text = (field.dataset.edText ?? '') + ' ' + controlsOf(field).map((c) => c.value.toLowerCase()).join(' ');
+          const match = !q || text.includes(q);
+          field.hidden = !match;
+          if (match && q) inSection++;
+        });
+        d.querySelectorAll<HTMLElement>('[data-gallery]').forEach((strip) => { strip.hidden = !!q; });
+        d.hidden = !!q && !inSection;
+        if (q) d.open = inSection > 0;
+        hits += inSection;
+      });
+      if (!q) { remembered.forEach((open, d) => { d.open = open; }); remembered.clear(); }
+      note.textContent = q ? (hits ? `${plural(hits, 'field')} match “${search.value.trim()}”` : `No text on this page matches “${search.value.trim()}”`) : '';
+    });
+
+    // ---------- uploads --------------------------------------------------------------
+    type Upload = { ok: boolean; url?: string; error?: string };
+    const upload = (file: File, page: string, key: string): Promise<Upload> => {
+      const body = new FormData(); body.append('file', file); body.append('page', page); body.append('key', key);
+      return fetch('/api/site-media', { method: 'POST', body }).then((r) => r.json() as Promise<Upload>).catch(() => ({ ok: false, error: 'Upload failed — check your connection.' }));
+    };
+    const images = (list: FileList | File[] | null | undefined) => [...(list ?? [])].filter((f) => f.type.startsWith('image/'));
+    const dropTarget = (zone: HTMLElement, onFiles: (files: File[]) => void) => {
+      zone.addEventListener('dragover', (e) => { if (e.dataTransfer?.types.includes('Files')) { e.preventDefault(); zone.classList.add('is-over'); } });
+      zone.addEventListener('dragleave', (e) => { if (!zone.contains(e.relatedTarget as Node)) zone.classList.remove('is-over'); });
+      zone.addEventListener('drop', (e) => {
+        if (!e.dataTransfer?.files.length) return;
+        e.preventDefault(); zone.classList.remove('is-over');
+        onFiles(images(e.dataTransfer.files));
+      });
+    };
+
+    // a single image field: upload, then point the field at the new file
+    form.querySelectorAll<HTMLInputElement>('input[data-upload]').forEach((input) => {
+      const field = input.closest<HTMLElement>('[data-ed-field]')!;
+      const src = field.querySelector<HTMLInputElement>('[data-ed-src]')!;
+      const preview = field.querySelector<HTMLImageElement>('[data-ed-image-preview]')!;
+      const status = field.querySelector<HTMLElement>('[data-ed-upload-status]')!;
+      const zone = field.querySelector<HTMLElement>('[data-ed-image-drop]')!;
+      preview.dataset.initial = preview.src;
+      const take = async (file: File | undefined) => {
+        if (!file) return;
+        uploading.add(field); zone.classList.add('is-busy'); status.textContent = `Uploading ${file.name}…`; refresh();
+        const res = await upload(file, input.dataset.page!, input.dataset.upload!);
+        uploading.delete(field); zone.classList.remove('is-busy');
+        if (!res.ok || !res.url) { status.textContent = res.error || 'Upload failed.'; refresh(); return; }
+        src.value = res.url; preview.src = res.url;
+        status.textContent = 'New image ready — save changes to put it live.';
+        refresh();
+      };
+      input.addEventListener('change', () => { take(input.files?.[0]); input.value = ''; });
+      dropTarget(zone, (files) => take(files[0]));
+    });
+
+    // ---------- image strips ------------------------------------------------------------
+    // camera and chat-app file names ("IMG_2031", "WhatsApp Image 2026-09-05 …") say nothing about the picture
+    const altFrom = (name: string) => {
+      const base = name.replace(/\.[a-z0-9]+$/i, '').replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+      return /\d{3,}|^(img|dsc|dcim|image|photo|screenshot|pxl|whatsapp)\b/i.test(base) ? '' : base.charAt(0).toUpperCase() + base.slice(1);
+    };
+    function renumber(strip: HTMLElement) {
+      const all = tilesOf(strip);
+      all.forEach((li, i) => {
+        li.querySelector('[data-g-n]')!.textContent = String(i + 1);
+        li.querySelector<HTMLButtonElement>('[data-move="up"]')!.disabled = i === 0;
+        li.querySelector<HTMLButtonElement>('[data-move="down"]')!.disabled = i === all.length - 1;
+        li.querySelector('[data-remove]')!.setAttribute('aria-label', `Remove image ${i + 1}`);
+        li.querySelector('[data-move="up"]')!.setAttribute('aria-label', `Move image ${i + 1} earlier`);
+        li.querySelector('[data-move="down"]')!.setAttribute('aria-label', `Move image ${i + 1} later`);
+        li.querySelector('input[name^="galt:"]')!.setAttribute('aria-label', `Description of image ${i + 1}`);
+      });
+      const defaults = Number(strip.dataset.defaults);
+      const pill = strip.querySelector<HTMLElement>('[data-g-pill]')!;
+      const state = strip.querySelector<HTMLElement>('[data-g-state]')!;
+      if (stripChanged(strip)) {
+        pill.textContent = all.length ? `Not saved · ${plural(all.length, 'image')}` : 'Not saved · empty';
+        state.textContent = all.length
+          ? 'Save changes to put this list live, in this order.'
+          : defaults ? `Saving an empty strip puts the page's own ${plural(defaults, 'image')} back.` : 'Saving an empty strip hides it on the page again.';
+      }
+    }
+
+    strips.forEach((strip) => {
+      const list = listOf(strip);
+      const row = strip.querySelector<HTMLTemplateElement>('template[data-g-row]')!;
+      const status = strip.querySelector<HTMLElement>('[data-g-status]')!;
+      const add = strip.querySelector<HTMLInputElement>('[data-g-add]')!;
+      const max = Number(strip.dataset.max);
+      renumber(strip);
+
+      const addFiles = async (files: File[]) => {
+        if (!files.length) return;
+        const room = max - tilesOf(strip).length;
+        const take = files.slice(0, Math.max(0, room));
+        if (files.length > take.length) status.textContent = `A strip holds up to ${max} images — ${plural(files.length - take.length, 'file')} left out.`;
+        // a placeholder tile per file, so progress shows where the image will land
+        const pending = take.map((file) => {
+          const li = document.createElement('li');
+          li.className = 'ed-tile is-uploading';
+          li.innerHTML = '<div class="ed-tile-media"><span class="ed-spinner" aria-hidden="true"></span></div><span class="ed-tile-note"></span>';
+          li.querySelector('.ed-tile-note')!.textContent = file.name;
+          list.appendChild(li);
+          uploading.add(li);
+          return { file, li };
+        });
+        refresh();
+        let added = 0; const failed: string[] = [];
+        // three at a time: quick for a big batch without flooding the connection
+        const queue = [...pending];
+        const worker = async () => {
+          for (let job = queue.shift(); job; job = queue.shift()) {
+            const res = await upload(job.file, strip.dataset.page!, `gallery.${strip.dataset.gallery}`);
+            uploading.delete(job.li);
+            if (!res.ok || !res.url) {
+              failed.push(job.file.name);
+              job.li.classList.replace('is-uploading', 'is-failed');
+              job.li.querySelector('.ed-tile-media')!.innerHTML = '<span class="ed-tile-fail">Not added</span>';
+              job.li.querySelector('.ed-tile-note')!.textContent = `${job.file.name}: ${res.error || 'upload failed'}`;
+              window.setTimeout(() => job.li.remove(), 9000);
+              continue;
+            }
+            const tile = row.content.firstElementChild!.cloneNode(true) as HTMLLIElement;
+            tile.querySelector<HTMLImageElement>('img')!.src = res.url;
+            tile.querySelector<HTMLInputElement>('input[name^="gsrc:"]')!.value = res.url;
+            tile.querySelector<HTMLInputElement>('input[name^="galt:"]')!.value = altFrom(job.file.name);
+            job.li.replaceWith(tile);
+            added++;
+            renumber(strip); refresh();
+          }
+        };
+        await Promise.all([worker(), worker(), worker()]);
+        renumber(strip); refresh();
+        status.textContent = [
+          added ? `Added ${plural(added, 'image')}. Give each a short description, then save changes.` : '',
+          failed.length ? `${plural(failed.length, 'file')} could not be added: ${failed.join(', ')}.` : '',
+        ].filter(Boolean).join(' ');
+      };
+      add.addEventListener('change', () => { const files = images(add.files); add.value = ''; addFiles(files); });
+      dropTarget(strip.querySelector<HTMLElement>('[data-g-drop]')!, addFiles);
+      dropTarget(list, addFiles);
+
+      // move and remove
+      list.addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
+        const li = btn?.closest<HTMLLIElement>('[data-g-tile]');
+        if (!btn || !li || btn.disabled) return;
+        if (btn.dataset.move) {
+          const up = btn.dataset.move === 'up';
+          const other = up ? li.previousElementSibling : li.nextElementSibling;
+          if (!other) return;
+          list.insertBefore(up ? li : other, up ? other : li);
+          renumber(strip); refresh();
+          (btn.disabled ? li.querySelector<HTMLButtonElement>(`[data-move="${up ? 'down' : 'up'}"]`)! : btn).focus();
+          status.textContent = `Moved to position ${tilesOf(strip).indexOf(li) + 1}.`;
+        } else if (btn.hasAttribute('data-remove')) {
+          const at = tilesOf(strip).indexOf(li);
+          const focusNext = (li.nextElementSibling ?? li.previousElementSibling) as HTMLElement | null;
+          li.remove();
+          renumber(strip); refresh();
+          (focusNext?.querySelector<HTMLButtonElement>('[data-remove]') ?? add).focus();
+          toast('Image removed.', () => {
+            const tiles = tilesOf(strip);
+            list.insertBefore(li, tiles[at] ?? null);
+            renumber(strip); refresh();
+          });
+        }
+      });
+
+      // drag to reorder (mouse and pen); the arrow buttons do the same by keyboard and touch
+      let dragged: HTMLLIElement | null = null;
+      list.addEventListener('dragstart', (e) => {
+        dragged = (e.target as HTMLElement).closest<HTMLLIElement>('[data-g-tile]');
+        if (!dragged) return;
+        dragged.classList.add('is-dragging');
+        e.dataTransfer!.effectAllowed = 'move';
+        e.dataTransfer!.setData('text/plain', '');
+      });
+      list.addEventListener('dragover', (e) => {
+        if (!dragged) return;
+        e.preventDefault();
+        const over = (e.target as HTMLElement).closest<HTMLLIElement>('[data-g-tile]');
+        if (!over || over === dragged) return;
+        const r = over.getBoundingClientRect();
+        const after = (e.clientX - r.left) / r.width > .5;
+        list.insertBefore(dragged, after ? over.nextSibling : over);
+      });
+      list.addEventListener('dragend', () => {
+        if (!dragged) return;
+        dragged.classList.remove('is-dragging');
+        status.textContent = `Moved to position ${tilesOf(strip).indexOf(dragged) + 1}.`;
+        dragged = null;
+        renumber(strip); refresh();
+      });
+    });
+
+    refresh();
+  }
 </script>
 
-<style>
-  .cms-top { font-size: 13.5px; color: var(--ink-4); margin: 0 0 16px; }
-  .cms-index { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 14px 18px; margin-bottom: 16px; }
-  .cms-index-title { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-5); margin-right: 6px; }
-  .cms-index a { font-size: 13px; padding: 5px 11px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--ink-3); text-decoration: none; }
-  .cms-index a:hover { border-color: var(--champagne); color: var(--ink); }
-  .cms-index a em { font-style: normal; margin-left: 6px; font-family: var(--mono); font-size: 10.5px; color: var(--champagne-3); }
-  .cms-section { padding: 18px 22px 18px; margin-bottom: 16px; }
-  .cms-section-title { font-family: var(--disp); font-size: 17px; font-weight: 700; margin: 0; padding: 4px 0; display: flex; align-items: baseline; gap: 10px; cursor: pointer; list-style: none; }
-  .cms-section-title::-webkit-details-marker { display: none; }
-  .cms-section-title::before { content: '▾'; font-size: 13px; color: var(--ink-5); }
-  details:not([open]) > .cms-section-title::before { content: '▸'; }
-  .cms-form { margin-top: 10px; }
-  .cms-toolbar { display: flex; gap: 6px; margin-bottom: 6px; }
-  .cms-toolbar button { border: 1px solid var(--line-2); background: var(--paper-3); border-radius: 8px; padding: 4px 10px; font-size: 12.5px; cursor: pointer; color: var(--ink-3); }
-  .cms-toolbar button:hover { border-color: var(--champagne); color: var(--ink); }
-  .cms-hl { color: var(--champagne-3); font-weight: 600; }
-  .cms-rich { min-height: 44px; padding: 10px 12px; line-height: 1.5; }
-  .cms-rich .acc-t { color: var(--champagne-3); font-weight: 600; }
-  .cms-rich a { color: var(--champagne-3); text-decoration: underline; }
-  .cms-count { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--ink-5); font-weight: 400; }
-  .cms-field { padding: 12px 0; border-top: 1px solid var(--line); }
-  .cms-field.is-changed { box-shadow: inset 3px 0 0 var(--champagne); padding-left: 12px; }
-  .cms-field-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .cms-label { font-size: 12.5px; color: var(--ink-4); }
-  .cms-label em { font-style: normal; margin-left: 8px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--champagne-3); }
-  .cms-reset { background: none; border: 1px solid var(--line-2); border-radius: 999px; padding: 3px 10px; font-size: 12px; color: var(--ink-4); cursor: pointer; }
-  .cms-reset:hover { border-color: var(--champagne); color: var(--ink); }
-  .cms-field .fi { width: 100%; }
-  textarea.fi { resize: vertical; line-height: 1.5; }
-  .cms-image { display: grid; grid-template-columns: 180px 1fr; gap: 16px; align-items: start; }
-  .cms-preview { width: 180px; height: 120px; object-fit: contain; background: #fff; border: 1px solid var(--line-2); border-radius: 8px; }
-  .cms-image-controls { display: grid; gap: 8px; }
-  .cms-upload { display: inline-block; padding: 8px 14px; border: 1px solid var(--line-2); border-radius: 999px; font-size: 13px; cursor: pointer; width: max-content; }
-  .cms-upload input { display: none; }
-  .cms-alt { display: grid; gap: 4px; font-size: 12.5px; color: var(--ink-4); }
-  .cms-hint { font-size: 12px; color: var(--ink-5); }
-  .cms-actions { margin-top: 14px; }
-  .cms-history { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-  .cms-history li { display: grid; grid-template-columns: 1fr auto; gap: 4px 14px; font-size: 13px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
-  .cms-history li form { grid-row: 1 / 3; }
-  .cms-diff { grid-column: 1; color: var(--ink-4); font-size: 12.5px; }
-  @media (max-width: 640px) { .cms-image { grid-template-columns: 1fr; } }
+<style is:global>
+  /* ---------- page editor ---------- */
+  /* Most pieces here set their own display, which would beat the browser's
+     rule for [hidden] — so the script's show and hide would silently fail. */
+  .ed [hidden], .ed-bar [hidden], .ed-toast[hidden], .ed-toast [hidden] { display: none !important; }
+  .ed { --ed-radius: 14px; --ed-ring: 0 0 0 3px var(--champagne-50); padding-bottom: 96px; }
+  .ed-layout > *, .ed-rail, .ed-main, .ed-section, .ed-strip { min-width: 0; }
+  .ed-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: -6px 0 22px; }
+  .ed-back { font-size: 14px; color: var(--ink-4); text-decoration: none; display: inline-flex; gap: 6px; align-items: center; padding: 6px 0; }
+  .ed-back:hover { color: var(--ink); }
+  .ed-top-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .ed-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 40px; padding: 0 16px; border-radius: 999px; cursor: pointer;
+    font: 600 14px/1 var(--sans); text-decoration: none; white-space: nowrap;
+    transition: background .18s var(--easing), border-color .18s var(--easing), color .18s var(--easing), box-shadow .18s var(--easing);
+  }
+  .ed-btn-sm { min-height: 34px; padding: 0 13px; font-size: 13px; }
+  .ed-btn-quiet { background: var(--paper-3); color: var(--ink-2); border: 1px solid var(--line-2); }
+  .ed-btn-quiet:hover { border-color: var(--champagne); color: var(--ink); }
+  .ed-btn-primary { background: var(--champagne); color: #fff; border: 1px solid transparent; box-shadow: 0 6px 18px -8px var(--champagne); }
+  .ed-btn-primary:hover { background: var(--champagne-2); }
+  .ed-btn[disabled] { opacity: .55; cursor: not-allowed; }
+  .ed-btn:focus-visible, .ed-link:focus-visible, .ed-toc a:focus-visible, .ed-section-head:focus-visible, .ed-tile button:focus-visible, .ed-toast button:focus-visible { outline: 2px solid var(--champagne); outline-offset: 2px; }
+  .ed-link { background: none; border: 0; padding: 4px 2px; font: 500 13px/1.2 var(--sans); color: var(--champagne-2); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); }
+  .ed-link:hover { text-decoration-color: currentColor; }
+
+  .ed-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font: 500 12px/1.2 var(--sans); color: var(--ink-4); background: rgba(var(--surface-rgb), .06); border: 1px solid var(--line); white-space: nowrap; }
+  .ed-pill.is-edited { color: var(--champagne-2); background: var(--champagne-50); border-color: transparent; }
+  .ed-pill.is-dirty { color: #8A5A00; background: rgba(245, 166, 35, .16); border-color: transparent; }
+  :root[data-theme="dark"] .ed-pill.is-dirty { color: #F5C25B; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ed-pill.is-dirty { color: #F5C25B; } }
+
+  .ed-layout { display: grid; gap: 22px; align-items: start; }
+  @media (min-width: 1200px) { .ed-layout { grid-template-columns: 230px minmax(0, 1fr); } }
+
+  /* ---------- section rail ---------- */
+  /* one column pinned to the rail's width: without it the track grows to the
+     sideways-scrolling section row on a phone and pushes the page wide */
+  .ed-rail { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: var(--ed-radius); background: var(--paper-3); }
+  @media (min-width: 1200px) { .ed-rail { position: sticky; top: calc(var(--nav-h, 72px) + 24px); max-height: calc(100vh - var(--nav-h, 72px) - 48px); overflow: auto; } }
+  .ed-search { position: relative; display: block; }
+  .ed-search svg { position: absolute; left: 11px; top: 50%; translate: 0 -50%; width: 16px; height: 16px; fill: none; stroke: var(--ink-5); stroke-width: 2; stroke-linecap: round; pointer-events: none; }
+  .ed-search input { width: 100%; min-height: 40px; padding: 0 12px 0 34px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--paper); color: var(--ink); font: 400 14px/1 var(--sans); }
+  .ed-search input:focus { outline: none; border-color: var(--champagne); box-shadow: var(--ed-ring); }
+  .ed-search-note { margin: 0; font-size: 12.5px; color: var(--ink-4); }
+  .ed-search-note:empty { display: none; }
+  .ed-toc { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .ed-toc a { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 9px; font-size: 13.5px; line-height: 1.3; color: var(--ink-4); text-decoration: none; }
+  .ed-toc a:hover { background: rgba(var(--surface-rgb), .05); color: var(--ink); }
+  .ed-toc a.is-here { background: var(--champagne-50); color: var(--ink); box-shadow: inset 2px 0 0 var(--champagne); }
+  .ed-toc-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ed-toc-count { flex: none; min-width: 20px; padding: 1px 6px; border-radius: 999px; background: var(--champagne-50); color: var(--champagne-2); font: 600 11px/1.5 var(--mono); text-align: center; }
+  .ed-toc-dirty { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #F5A623; }
+  .ed-rail-tools { display: flex; gap: 14px; padding: 6px 4px 0; border-top: 1px solid var(--line); }
+  @media (max-width: 1199px) {
+    .ed-toc { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+    .ed-toc a { border: 1px solid var(--line); white-space: nowrap; }
+    .ed-toc-name { overflow: visible; }
+  }
+
+  /* ---------- sections ---------- */
+  .ed-main { display: grid; gap: 12px; min-width: 0; }
+  .ed-section, .ed-history { border: 1px solid var(--line); border-radius: var(--ed-radius); background: var(--paper-3); scroll-margin-top: calc(var(--nav-h, 72px) + 20px); transition: border-color .2s var(--easing); }
+  .ed-section[open] { border-color: var(--line-2); box-shadow: 0 1px 2px rgba(var(--shadow-rgb), .04), 0 12px 30px -22px rgba(var(--shadow-rgb), .3); }
+  .ed-section-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 16px 18px; cursor: pointer; list-style: none; border-radius: var(--ed-radius); }
+  .ed-section-head::-webkit-details-marker { display: none; }
+  .ed-section-head:hover .ed-section-name { color: var(--champagne-2); }
+  .ed-chevron { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; background: rgba(var(--surface-rgb), .06); flex: none; }
+  .ed-chevron::before { content: ''; width: 7px; height: 7px; border: solid var(--ink-4); border-width: 0 2px 2px 0; transform: rotate(-45deg); margin-left: -2px; transition: transform .2s var(--easing); }
+  details[open] > summary .ed-chevron::before { transform: rotate(45deg); margin: -3px 0 0; }
+  .ed-section-name { font: 700 16px/1.3 var(--disp); color: var(--ink); letter-spacing: -.01em; }
+  .ed-section-meta { font-size: 12.5px; color: var(--ink-5); flex: 1; }
+  .ed-section-body { padding: 4px 18px 18px; border-top: 1px solid var(--line); }
+
+  /* ---------- fields ---------- */
+  .ed-field { position: relative; padding: 16px 0 14px; border-top: 1px solid var(--line); }
+  .ed-field:first-child { border-top: 0; }
+  .ed-field.is-edited::before, .ed-field.is-dirty::before, .ed-strip.is-edited::before, .ed-strip.is-dirty::before { content: ''; position: absolute; left: -18px; top: 14px; bottom: 14px; width: 3px; border-radius: 0 3px 3px 0; background: var(--champagne); }
+  .ed-field.is-dirty::before, .ed-strip.is-dirty::before { background: #F5A623; }
+  .ed-field-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; min-height: 26px; flex-wrap: wrap; }
+  .ed-label { font: 600 13.5px/1.3 var(--sans); color: var(--ink-2); }
+  .ed-spacer { flex: 1; }
+  .ed-tag { font: 600 10.5px/1.6 var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 0 7px; border-radius: 6px; color: var(--champagne-2); background: var(--champagne-50); }
+  .ed-tag.is-dirty { color: #8A5A00; background: rgba(245, 166, 35, .16); }
+  :root[data-theme="dark"] .ed-tag.is-dirty { color: #F5C25B; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ed-tag.is-dirty { color: #F5C25B; } }
+
+  .ed-input {
+    display: block; width: 100%; padding: 11px 13px; border-radius: 10px;
+    border: 1px solid var(--line-2); background: var(--paper); color: var(--ink);
+    font: 400 15px/1.55 var(--sans); transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .ed-input:hover { border-color: rgba(var(--surface-rgb), .3); }
+  .ed-input:focus, .ed-rich:focus { outline: none; border-color: var(--champagne); box-shadow: var(--ed-ring); }
+  textarea.ed-input { resize: vertical; min-height: 64px; }
+  .ed-input-sm { padding: 7px 9px; font-size: 13px; border-radius: 8px; }
+  .ed-rich { min-height: 64px; cursor: text; }
+  .ed-rich .acc-t, .ed-hl { color: var(--champagne-2); font-weight: 600; }
+  .ed-rich a { color: var(--champagne-2); text-decoration: underline; }
+  .ed-toolbar { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .ed-toolbar button { min-height: 32px; padding: 0 11px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--paper); color: var(--ink-3); font-size: 13px; cursor: pointer; }
+  .ed-toolbar button:hover { border-color: var(--champagne); color: var(--ink); }
+  .ed-hint { margin: 7px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--ink-5); }
+  .ed-count { display: inline-block; margin-left: 8px; font-family: var(--mono); font-size: 11.5px; color: #8A5A00; }
+  .ed-count.is-good { color: var(--ok, #1E7A47); }
+  .ed-count.is-long { color: var(--bad, #C8385C); }
+
+  /* ---------- a single image ---------- */
+  .ed-file { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+  .ed-drop { position: relative; display: grid; place-items: center; cursor: pointer; border: 1.5px dashed var(--line-2); border-radius: 12px; background: var(--paper); transition: border-color .15s ease, background .15s ease; }
+  .ed-drop:hover, .ed-drop.is-over { border-color: var(--champagne); background: var(--champagne-50); }
+  .ed-drop:focus-within { outline: 2px solid var(--champagne); outline-offset: 2px; }
+  .ed-image { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 18px; align-items: start; }
+  .ed-drop-image { aspect-ratio: 4 / 3; overflow: hidden; background: #fff; }
+  .ed-image-preview { width: 100%; height: 100%; object-fit: contain; }
+  .ed-drop-cta { position: absolute; left: 50%; bottom: 10px; translate: -50% 0; display: inline-flex; gap: 6px; align-items: center; padding: 7px 12px; border-radius: 999px; background: rgba(17, 20, 24, .78); color: #fff; font-size: 12.5px; font-weight: 600; white-space: nowrap; opacity: .92; }
+  .ed-drop-cta svg, .ed-drop-icon svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .ed-drop.is-busy::after { content: 'Uploading…'; position: absolute; inset: 0; display: grid; place-items: center; background: rgba(255, 255, 255, .8); color: #111; font-weight: 600; }
+  .ed-sublabel { display: block; font: 600 13px/1.3 var(--sans); color: var(--ink-3); margin-bottom: 6px; }
+
+  /* ---------- image strip ---------- */
+  .ed-strip { position: relative; margin-top: 8px; padding: 18px 0 4px; border-top: 1px solid var(--line); }
+  .ed-strip-head { display: flex; align-items: flex-start; gap: 10px 14px; flex-wrap: wrap; margin-bottom: 14px; }
+  .ed-strip-intro { flex: 1; min-width: 220px; }
+  .ed-strip-title { margin: 0; font: 700 15.5px/1.3 var(--disp); color: var(--ink); }
+  .ed-strip-intro .ed-hint { margin-top: 4px; }
+  .ed-drop-strip { gap: 6px; padding: 26px 16px; text-align: center; }
+  .ed-drop-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--champagne-50); color: var(--champagne-2); }
+  .ed-drop-icon svg { width: 22px; height: 22px; }
+  .ed-drop-title { font: 600 15px/1.3 var(--sans); color: var(--ink); }
+  .ed-drop-title u { color: var(--champagne-2); text-underline-offset: 3px; }
+  .ed-drop-strip .ed-hint { margin: 0; }
+  .ed-g-status { margin: 10px 0 0; font-size: 13px; color: var(--ink-3); }
+  .ed-g-status:empty { display: none; }
+  .ed-grid { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); }
+  .ed-grid:empty { display: none; }
+  .ed-tile { display: grid; gap: 8px; padding: 8px; border: 1px solid var(--line-2); border-radius: 12px; background: var(--paper); transition: box-shadow .15s ease, border-color .15s ease, opacity .15s ease; }
+  .ed-tile:hover { border-color: rgba(var(--surface-rgb), .3); }
+  .ed-tile.is-dragging { opacity: .45; border-style: dashed; }
+  .ed-tile-media { position: relative; aspect-ratio: 4 / 3; border-radius: 8px; overflow: hidden; background: #fff; display: grid; place-items: center; }
+  .ed-tile-media img { width: 100%; height: 100%; object-fit: contain; }
+  .ed-tile-n { position: absolute; left: 6px; top: 6px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: rgba(17, 20, 24, .78); color: #fff; font: 600 11.5px/22px var(--mono); text-align: center; }
+  .ed-tile-x { position: absolute; right: 6px; top: 6px; width: 28px; height: 28px; border-radius: 50%; border: 0; display: grid; place-items: center; background: rgba(17, 20, 24, .78); color: #fff; cursor: pointer; opacity: 0; transition: opacity .15s ease, background .15s ease; }
+  .ed-tile:hover .ed-tile-x, .ed-tile:focus-within .ed-tile-x { opacity: 1; }
+  @media (hover: none) { .ed-tile-x { opacity: 1; } }
+  .ed-tile-x:hover { background: #C8385C; }
+  .ed-tile-x svg, .ed-tile-moves svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .ed-tile-moves { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  .ed-tile-moves button { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--paper-3); color: var(--ink-3); display: grid; place-items: center; cursor: pointer; }
+  .ed-tile-moves button:hover:not([disabled]) { border-color: var(--champagne); color: var(--ink); }
+  .ed-tile-moves button[disabled] { opacity: .35; cursor: default; }
+  .ed-drag { display: inline-flex; align-items: center; gap: 2px; font-size: 11.5px; color: var(--ink-5); cursor: grab; }
+  .ed-drag svg { width: 14px; height: 14px; fill: currentColor; stroke: none; }
+  @media (hover: none) { .ed-drag { visibility: hidden; } }
+  .ed-tile.is-uploading .ed-tile-media, .ed-tile.is-failed .ed-tile-media { background: rgba(var(--surface-rgb), .05); }
+  .ed-tile-note { font-size: 12px; color: var(--ink-4); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ed-tile.is-failed { border-color: #C8385C; }
+  .ed-tile.is-failed .ed-tile-note { white-space: normal; color: var(--bad, #C8385C); }
+  .ed-tile-fail { font-size: 12.5px; font-weight: 600; color: var(--bad, #C8385C); }
+  .ed-spinner { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--champagne-50); border-top-color: var(--champagne); animation: ed-spin .8s linear infinite; }
+  @keyframes ed-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .ed-spinner { animation-duration: 2.4s; } }
+
+  /* ---------- history ---------- */
+  .ed-history { margin-top: 22px; }
+  .ed-history-list { list-style: none; margin: 0; padding: 0 18px 12px; border-top: 1px solid var(--line); }
+  .ed-history-list li { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .ed-history-list li:first-child { border-top: 0; }
+  .ed-history-what { display: grid; gap: 3px; min-width: 0; font-size: 13.5px; color: var(--ink-2); }
+  .ed-history-what .ed-hint { margin: 0; }
+  .ed-history-diff { display: flex; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--ink-4); }
+  .ed-history-diff span:first-child { text-decoration: line-through; text-decoration-color: rgba(var(--surface-rgb), .35); }
+
+  /* ---------- save bar and toast ---------- */
+  .ed-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: flex; justify-content: center; padding: 0 16px calc(16px + env(safe-area-inset-bottom, 0px)); pointer-events: none; transform: translateY(120%); transition: transform .3s var(--easing); }
+  .ed-bar.is-on { transform: none; }
+  .ed-bar-in { pointer-events: auto; display: flex; align-items: center; gap: 12px; width: min(720px, 100%); padding: 10px 10px 10px 18px; border-radius: 999px; background: #15161C; color: #fff; box-shadow: 0 18px 50px -12px rgba(0, 0, 0, .45); }
+  .ed-bar-dot { width: 9px; height: 9px; border-radius: 50%; background: #F5A623; flex: none; box-shadow: 0 0 0 4px rgba(245, 166, 35, .22); }
+  .ed-bar-text { flex: 1; margin: 0; font: 500 14px/1.3 var(--sans); }
+  .ed-bar .ed-btn-quiet { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .28); }
+  .ed-bar .ed-btn-quiet:hover { border-color: #fff; }
+  .ed-bar .ed-btn-primary { background: #fff; color: #15161C; box-shadow: none; }
+  .ed-bar .ed-btn-primary:hover { background: #E9E9F0; }
+  @media (max-width: 560px) { .ed-bar-in { border-radius: 18px; flex-wrap: wrap; } .ed-bar-text { flex-basis: calc(100% - 30px); } .ed-bar .ed-btn { flex: 1; } }
+  @media (prefers-reduced-motion: reduce) { .ed-bar { transition: none; } }
+
+  .ed-toast { position: fixed; left: 50%; top: calc(var(--nav-h, 72px) + 28px); z-index: 70; display: flex; align-items: center; gap: 10px; width: max-content; max-width: min(560px, calc(100% - 32px)); padding: 10px 10px 10px 12px; border-radius: 14px; background: var(--paper-3); color: var(--ink); border: 1px solid var(--line-2); box-shadow: 0 18px 50px -16px rgba(var(--shadow-rgb), .45); translate: -50% -12px; opacity: 0; transition: opacity .25s var(--easing), translate .25s var(--easing); }
+  .ed-toast.is-on { opacity: 1; translate: -50% 0; }
+  :root[data-theme="dark"] .ed-toast { background: #1C1B2A; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ed-toast { background: #1C1B2A; } }
+  .ed-toast-icon { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: rgba(52, 193, 101, .16); color: var(--ok, #1E7A47); flex: none; }
+  .ed-toast-icon svg, .ed-toast-x svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .ed-toast-text { font-size: 14px; line-height: 1.4; }
+  .ed-toast-undo { border: 0; background: var(--champagne-50); color: var(--champagne-2); font: 600 13px/1 var(--sans); padding: 8px 12px; border-radius: 999px; cursor: pointer; }
+  .ed-toast-x { border: 0; background: none; color: var(--ink-5); width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; }
+  .ed-toast-x:hover { color: var(--ink); background: rgba(var(--surface-rgb), .06); }
+
+  .ed-noscript { position: sticky; bottom: 16px; display: flex; justify-content: flex-end; }
+
+  @media (max-width: 720px) {
+    .ed-image { grid-template-columns: 1fr; }
+    .ed-section-head { padding: 14px; }
+    .ed-section-body { padding: 4px 14px 14px; }
+    .ed-field.is-edited::before, .ed-field.is-dirty::before, .ed-strip.is-edited::before, .ed-strip.is-dirty::before { left: -14px; }
+    .ed-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  }
 </style>
