@@ -39,11 +39,11 @@ export interface Service {
   specialties: string[];
   skills: string[];
   tools: string[];
-  /** Only Website Development declares roles today (§5.2). */
+  /** Only Web Development declares roles today (§5.2). */
   roles?: ServiceRole[];
   stack?: StackOption[];
   /**
-   * True when a role and a specialty are the same choice. Website Development's
+   * True when a role and a specialty are the same choice. Web Development's
    * specialties ARE its roles, so asking both would put the identical list on
    * two consecutive screens. The role screen answers it once and writes the
    * matching specialty itself.
@@ -69,12 +69,12 @@ const STACK: StackOption[] = [
   { id: 'fw-vue', name: 'Vue', group: 'frameworks', appliesTo: ['frontend', 'fullstack', 'ecommerce', 'ui-implementation'] },
   { id: 'fw-angular', name: 'Angular', group: 'frameworks', appliesTo: ['frontend', 'fullstack', 'ui-implementation'] },
   { id: 'fw-svelte', name: 'Svelte', group: 'frameworks', appliesTo: ['frontend', 'fullstack', 'ecommerce', 'ui-implementation'] },
-  { id: 'sty-tailwind', name: 'Tailwind CSS', group: 'styling', appliesTo: ['frontend', 'fullstack', 'ecommerce', 'shopify', 'ui-implementation'] },
-  { id: 'sty-css', name: 'CSS', group: 'styling', appliesTo: ['frontend', 'fullstack', 'ecommerce', 'shopify', 'ui-implementation'] },
+  { id: 'sty-tailwind', name: 'Tailwind CSS', group: 'styling', appliesTo: ['web-designer', 'frontend', 'fullstack', 'ecommerce', 'shopify', 'ui-implementation'] },
+  { id: 'sty-css', name: 'CSS', group: 'styling', appliesTo: ['web-designer', 'frontend', 'fullstack', 'ecommerce', 'shopify', 'ui-implementation'] },
   { id: 'sty-sass', name: 'Sass', group: 'styling', appliesTo: ['frontend', 'fullstack', 'ecommerce', 'shopify', 'ui-implementation'] },
-  { id: 'cap-responsive', name: 'Responsive design', group: 'capabilities', appliesTo: ['frontend', 'fullstack', 'ecommerce', 'shopify', 'ui-implementation'] },
-  { id: 'cap-accessibility', name: 'Accessibility', group: 'capabilities', appliesTo: ['frontend', 'fullstack', 'ecommerce', 'shopify', 'ui-implementation'] },
-  { id: 'cap-performance', name: 'Performance optimization', group: 'capabilities', appliesTo: ['frontend', 'fullstack', 'ecommerce', 'shopify', 'ui-implementation'] },
+  { id: 'cap-responsive', name: 'Responsive design', group: 'capabilities', appliesTo: ['web-designer', 'frontend', 'fullstack', 'ecommerce', 'shopify', 'ui-implementation'] },
+  { id: 'cap-accessibility', name: 'Accessibility', group: 'capabilities', appliesTo: ['web-designer', 'frontend', 'fullstack', 'ecommerce', 'shopify', 'ui-implementation'] },
+  { id: 'cap-performance', name: 'Performance optimization', group: 'capabilities', appliesTo: ['web-designer', 'frontend', 'fullstack', 'ecommerce', 'shopify', 'ui-implementation'] },
   { id: 'cap-component-systems', name: 'Component systems', group: 'capabilities', appliesTo: ['frontend', 'fullstack', 'ui-implementation'] },
 
   // --- Backend ---
@@ -109,16 +109,30 @@ const STACK: StackOption[] = [
   { id: 'cap-offline-sync', name: 'Offline & sync', group: 'capabilities', appliesTo: ['mobile'] },
 
   // --- Commerce platforms ---
-  { id: 'fw-shopify', name: 'Shopify', group: 'frameworks', appliesTo: ['ecommerce', 'shopify', 'fullstack', 'integrations'] },
-  { id: 'fw-woocommerce', name: 'WooCommerce', group: 'frameworks', appliesTo: ['ecommerce', 'fullstack'] },
+  { id: 'fw-shopify', name: 'Shopify', group: 'frameworks', appliesTo: ['web-designer', 'ecommerce', 'shopify', 'fullstack', 'integrations'] },
+  { id: 'fw-woocommerce', name: 'WooCommerce', group: 'frameworks', appliesTo: ['web-designer', 'ecommerce', 'fullstack'] },
   { id: 'fw-liquid', name: 'Liquid', group: 'frameworks', appliesTo: ['shopify', 'ecommerce'] },
+
+  // --- Site builders and site setup (the Web Designer role, from the former
+  //     Web Design service — its skills became these, migration 0010) ---
+  { id: 'fw-webflow', name: 'Webflow', group: 'frameworks', appliesTo: ['web-designer', 'frontend'] },
+  { id: 'fw-framer', name: 'Framer', group: 'frameworks', appliesTo: ['web-designer', 'frontend'] },
+  { id: 'fw-wordpress', name: 'WordPress', group: 'frameworks', appliesTo: ['web-designer', 'frontend', 'backend', 'fullstack', 'ecommerce'] },
+  { id: 'cap-ui-design', name: 'UI design', group: 'capabilities', appliesTo: ['web-designer', 'frontend', 'ui-implementation'] },
+  { id: 'cap-typography', name: 'Typography', group: 'capabilities', appliesTo: ['web-designer'] },
+  { id: 'cap-on-page-seo', name: 'On-page SEO', group: 'capabilities', appliesTo: ['web-designer', 'frontend', 'fullstack', 'ecommerce'] },
+  { id: 'cap-analytics-setup', name: 'Analytics setup', group: 'capabilities', appliesTo: ['web-designer', 'frontend', 'fullstack', 'ecommerce'] },
+  { id: 'cap-domain-dns', name: 'Domain & DNS setup', group: 'capabilities', appliesTo: ['web-designer', 'backend', 'fullstack'] },
+  { id: 'cap-business-email', name: 'Business email setup', group: 'capabilities', appliesTo: ['web-designer'] },
 ];
 
 /**
- * Website Development roles (§5.2). Full-stack shows both the frontend and the
- * backend groups so the freelancer never types the same thing twice.
+ * Web Development roles (§5.2). Full-stack shows both the frontend and the
+ * backend groups so the freelancer never types the same thing twice. Web
+ * Designer is the former Web Design service, folded in by migration 0010.
  */
-const WEBSITE_ROLES: ServiceRole[] = [
+const WEB_ROLES: ServiceRole[] = [
+  { id: 'web-designer', name: 'Web Designer', groups: ['frameworks', 'styling', 'capabilities'] },
   { id: 'frontend', name: 'Frontend Developer', groups: ['languages', 'frameworks', 'styling', 'capabilities'] },
   { id: 'backend', name: 'Backend Developer', groups: ['languages', 'frameworks', 'databases', 'capabilities'] },
   { id: 'fullstack', name: 'Full-stack Developer', groups: ['languages', 'frameworks', 'styling', 'databases', 'capabilities'] },
@@ -184,19 +198,22 @@ export const SERVICES: Service[] = [
     tools: ['NedGraphics', 'ArahWeave', 'Pointcarre', 'EAT'],
   },
   {
-    id: 'website',
-    name: 'Website Development',
-    page: '/pages/services/website.html',
-    blurb: 'Storefronts, brand sites and the systems behind them — built, integrated and shipped.',
-    accent: 'var(--lg-violet)',
-    specialties: WEBSITE_ROLES.map((role) => role.name),
+    /* Website Development (`website`) and Web Design (`web-design`) became one
+       service on 2026-09-18. Migration 0010 moves every offering, portfolio
+       item, project and hire request from both ids to this one. */
+    id: 'web-development',
+    name: 'Web Development',
+    page: '/pages/services/web-development.html',
+    blurb: 'Brand sites, stores and web apps — designed, built and live on your own domain, with everything behind them set up.',
+    accent: 'var(--lg-peri)',
+    specialties: WEB_ROLES.map((role) => role.name),
     /* Empty on purpose. For this service the stack IS the skill set (§5.1), and
        its `capabilities` group already covers API development, authentication,
        payments and the rest — listing them here too asked the same question
        twice. Services WITHOUT a stack carry their competencies in `skills`. */
     skills: [],
-    tools: ['Git', 'Figma', 'Vercel', 'Cloudflare', 'Docker'],
-    roles: WEBSITE_ROLES,
+    tools: ['Git', 'Figma', 'Vercel', 'Cloudflare', 'Docker', 'Webflow', 'Framer', 'WordPress', 'Shopify', 'Google Workspace'],
+    roles: WEB_ROLES,
     stack: STACK,
     specialtyFromRole: true,
   },
@@ -231,17 +248,14 @@ export const SERVICES: Service[] = [
     tools: ['Shopify', 'Amazon Seller Central', 'Excel', 'PIM'],
   },
   {
-    id: 'web-design',
-    /* Was Graphic Design (`graphic-design`) until 2026-09-15. Unlike Graphics &
-       Prints, the id moved with the name: migration 0008 carries existing
-       offerings, portfolio items, projects and hire requests across. */
-    name: 'Web Design',
-    page: '/pages/services/web-design.html',
-    blurb: 'Complete brand websites — designed, live on your own domain, with hosting, email and analytics set up.',
-    accent: 'var(--lg-peri)',
-    specialties: ['Brand websites', 'Online store design', 'Landing pages', 'Website redesign', 'Domain & hosting setup', 'Business email setup'],
-    skills: ['UI design', 'Responsive layout', 'Typography', 'Domain & DNS setup', 'On-page SEO', 'Analytics setup'],
-    tools: ['Figma', 'Webflow', 'Framer', 'WordPress', 'Shopify', 'Google Workspace'],
+    id: 'digital-marketing',
+    name: 'Digital Marketing & SEO',
+    page: '/pages/services/digital-marketing.html',
+    blurb: 'Found on Google, seen on Instagram — SEO, ads and content measured in enquiries and sales, not likes.',
+    accent: 'var(--lg-violet)',
+    specialties: ['SEO', 'Local SEO', 'Google Ads', 'Meta Ads', 'Social media', 'Content marketing', 'Email & WhatsApp marketing', 'Analytics & reporting'],
+    skills: ['Keyword research', 'Technical SEO', 'Campaign setup', 'Audience targeting', 'Copywriting', 'Conversion tracking', 'Reporting'],
+    tools: ['Google Search Console', 'Google Analytics', 'Google Ads', 'Meta Ads Manager', 'Semrush', 'Ahrefs', 'Mailchimp', 'Canva'],
   },
 ];
 
@@ -251,6 +265,16 @@ export const SERVICES: Service[] = [
 
 export const SERVICE_BY_ID = new Map(SERVICES.map((s) => [s.id, s]));
 
+/** Service ids that no longer exist, and the service that took their place.
+ *  Old links (`/specialists?service=website`) still land on the right filter. */
+export const RETIRED_SERVICE_IDS: Record<string, string> = {
+  website: 'web-development',
+  'web-design': 'web-development',
+  'graphic-design': 'web-development',
+};
+export const currentServiceId = (id: string | null | undefined): string | null =>
+  id ? RETIRED_SERVICE_IDS[id] ?? id : null;
+
 export const getService = (id: string | null | undefined): Service | undefined =>
   id ? SERVICE_BY_ID.get(id) : undefined;
 
@@ -258,7 +282,7 @@ export const specialtyId = (serviceId: string, name: string): string => `${servi
 export const skillId = (serviceId: string, name: string): string => `${serviceId}--skill--${slug(name)}`;
 export const toolId = (serviceId: string, name: string): string => `${serviceId}--tool--${slug(name)}`;
 
-/** Stack options a given Website Development role should be asked about (§5.2). */
+/** Stack options a given Web Development role should be asked about (§5.2). */
 export function stackForRole(service: Service, roleId: string): Record<string, StackOption[]> {
   const role = service.roles?.find((r) => r.id === roleId);
   if (!role || !service.stack) return {};

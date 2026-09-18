@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'public-html');
 const PAGES = ['index.html', 'pages/about.html', 'pages/help.html',
   ...['3d-virtual-sampling','ai-agent','ai-photography','dobby-jacquard','ecom-listing',
-      'graphics-prints','pattern-cad','tech-pack','web-design','website'].map((s) => `pages/services/${s}.html`)];
+      'graphics-prints','pattern-cad','tech-pack','web-development','digital-marketing'].map((s) => `pages/services/${s}.html`)];
 
 const slug = (s) => s.toLowerCase().replace(/&amp;|&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 32);
 const strip = (s) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();

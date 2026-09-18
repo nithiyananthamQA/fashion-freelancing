@@ -22,13 +22,13 @@ const TEMPLATES = import.meta.glob('/src/site-templates/**/*.html', { query: '?r
 export interface SitePage { slug: string; path: string; file: string; title: string }
 
 const SERVICE_SLUGS = ['tech-pack', '3d-virtual-sampling', 'graphics-prints', 'pattern-cad', 'dobby-jacquard',
-  'website', 'ai-agent', 'ai-photography', 'ecom-listing', 'web-design'];
+  'web-development', 'ai-agent', 'ai-photography', 'ecom-listing', 'digital-marketing'];
 
 /** The names editors know the pages by — the same ones the homepage cards use. */
 const PAGE_NAMES: Record<string, string> = {
   home: 'Homepage', 'tech-pack': 'Tech Pack', '3d-virtual-sampling': '3D Virtual Sampling', 'graphics-prints': 'Graphics & Prints',
-  'pattern-cad': 'Pattern CAD', 'dobby-jacquard': 'Dobby & Jacquard', website: 'Website Development', 'ai-agent': 'AI Agent',
-  'ai-photography': 'AI Video & Photography', 'ecom-listing': 'E-Com Listing', 'web-design': 'Web Design', about: 'About', help: 'Help & FAQ',
+  'pattern-cad': 'Pattern CAD', 'dobby-jacquard': 'Dobby & Jacquard', 'web-development': 'Web Development', 'ai-agent': 'AI Agent',
+  'ai-photography': 'AI Video & Photography', 'ecom-listing': 'E-Com Listing', 'digital-marketing': 'Digital Marketing & SEO', about: 'About', help: 'Help & FAQ',
 };
 function titleOf(html: string, fallback: string): string {
   const t = (html.match(/<title[^>]*>([^<]*)<\/title>/) || [])[1] || '';

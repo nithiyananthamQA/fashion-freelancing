@@ -60,8 +60,8 @@ function d1(sql) {
 
 /* ---------- the people ----------
    Written to exercise the filters: different services, availabilities, rates,
-   languages and locations, plus one Website Development specialist so the
-   role/stack path has real data behind it. */
+   languages and locations, plus two Web Development specialists — a developer
+   and a designer — so the role/stack path has real data behind it. */
 const PEOPLE = [
   {
     name: 'Elena Rossi', handle: 'elena-rossi', service: 'tech-pack',
@@ -94,7 +94,7 @@ const PEOPLE = [
     ],
   },
   {
-    name: 'Maya Sen', handle: 'maya-sen', service: 'website', role: 'fullstack',
+    name: 'Maya Sen', handle: 'maya-sen', service: 'web-development', role: 'fullstack',
     headline: 'Full-stack e-commerce developer for fashion brands',
     bio: 'I build fast, thoughtful commerce experiences from storefront through to the operations behind them.\n\nMost of my work is replatforming brands that outgrew a template, without losing the traffic or the team’s sanity.',
     years: 7, languages: ['English', 'Hindi'], location: 'Bengaluru, India', timezone: 'IST (UTC+5:30)',
@@ -124,14 +124,14 @@ const PEOPLE = [
     ],
   },
   {
-    name: 'Nora Berg', handle: 'nora-berg', service: 'web-design',
+    name: 'Nora Berg', handle: 'nora-berg', service: 'web-development', role: 'web-designer',
     headline: 'Web designer who launches brand sites on their own domain',
     bio: 'I design websites for independent labels and set up everything behind them — domain, hosting, business email and analytics — so launch day is one day, not a month of loose ends.\n\nEvery account is registered to the brand, and I hand over a login document and a recorded walkthrough, so the site survives after I leave.',
     years: 10, languages: ['English', 'Swedish'], location: 'Stockholm, Sweden', timezone: 'CET (UTC+1)',
     availability: 'this_month', rateMin: 900, rateMax: 4500, currency: 'EUR',
     rateModel: ['fixed', 'retainer'], size: 'medium', workLocation: 'remote',
-    specialties: ['Brand websites', 'Domain & hosting setup'],
-    skills: ['UI design', 'Typography', 'Domain & DNS setup'],
+    specialties: ['Web Designer'],
+    stack: ['cap-ui-design', 'cap-typography', 'cap-domain-dns', 'cap-business-email', 'fw-webflow', 'fw-shopify', 'cap-responsive'],
     tools: ['Figma', 'Webflow', 'Shopify'],
     portfolio: [
       ['Accessories brand site', 'Designed and launched a nine-page Webflow site on the label’s own domain, with email and analytics set up.'],

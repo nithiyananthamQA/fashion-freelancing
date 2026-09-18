@@ -75,8 +75,13 @@
 /pages/services/seamless-pattern       /pages/services/graphics-prints 301
 /pages/services/seamless-pattern.html  /pages/services/graphics-prints 301
 
-# --- Graphic Design became Web Design (2026-09-15). Unlike Graphics & Prints,
-#     the service id moved too (`graphic-design` -> `web-design`, migration
-#     0008). Both forms of the old URL are in the wild.
-/pages/services/graphic-design       /pages/services/web-design 301
-/pages/services/graphic-design.html  /pages/services/web-design 301
+# --- Graphic Design became Web Design (2026-09-15), and Web Design and
+#     Website Development became one service, Web Development (2026-09-18,
+#     migration 0010). Every old address goes straight to the merged page,
+#     so no visitor or crawler follows a chain. Both URL forms are in the wild.
+/pages/services/graphic-design       /pages/services/web-development 301
+/pages/services/graphic-design.html  /pages/services/web-development 301
+/pages/services/web-design           /pages/services/web-development 301
+/pages/services/web-design.html      /pages/services/web-development 301
+/pages/services/website              /pages/services/web-development 301
+/pages/services/website.html         /pages/services/web-development 301

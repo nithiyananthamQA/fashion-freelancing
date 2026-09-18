@@ -287,7 +287,7 @@ export async function saveSpecialties(
 }
 
 /**
- * Set the role for a service that declares them (Website Development, §5.2).
+ * Set the role for a service that declares them (Web Development, §5.2).
  * The role decides which technology-stack groups the next screen asks about,
  * so it is chosen on its own before any stack question is shown.
  */

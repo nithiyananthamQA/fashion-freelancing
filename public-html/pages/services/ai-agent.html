@@ -628,7 +628,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     content: ''; position: absolute; left: 12%; top: 23px; height: 1px; width: 0;
     background: var(--grad-acc); transition: width 1.4s cubic-bezier(.33, 1, .68, 1) .2s; }
   .weeks.rail.in::after { width: 76%; }
-  .weeks.rail .week { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 0; border-top: 0; text-align: center; justify-items: center; align-items: start; }
+  .weeks.rail .week { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 0; border-top: 0; text-align: center; justify-items: center; align-items: start; align-content: start; }
   .weeks.rail .week .wn {
     position: relative; z-index: 1; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%;
     font-family: var(--mono); font-size: 13px; letter-spacing: 0; color: var(--acc-text); -webkit-text-stroke: 0;
@@ -1189,11 +1189,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
                 <option value="dobby-jacquard">Dobby &amp; Jacquard Design</option>
               </optgroup>
               <optgroup label="AI, website &amp; digital production">
-                <option value="website">Website Development</option>
+                <option value="web-development">Web Development</option>
                 <option value="ai-agent" selected>AI Agent</option>
                 <option value="ai-photography">AI Photography</option>
                 <option value="ecom-listing">E-Commerce Product Listing</option>
-                <option value="web-design">Web Design</option>
+                <option value="digital-marketing">Digital Marketing &amp; SEO</option>
               </optgroup>
               <option value="multiple">A bit of everything — full project</option>
             </select>

@@ -4,7 +4,7 @@
  *
  * Seven steps with a visible count, per-step save (so it autosaves by design),
  * validation, and save-and-return. Only relevant questions are shown: a Pattern
- * CAD applicant never sees Website Development stack fields, because the field
+ * CAD applicant never sees Web Development stack fields, because the field
  * set is derived from the services chosen in step 2.
  *
  * No bank or tax details are collected here — payout setup is separate and
@@ -178,7 +178,7 @@ if (Astro.request.method === 'POST') {
     }
 
     /* ---------- Step 3a: role, for services that have one ----------
-       Only Website Development declares roles today. The role decides which
+       Only Web Development declares roles today. The role decides which
        stack groups exist, so asking it first means the next screen shows a
        backend developer nothing about Tailwind. */
     if (step === 3 && form.get('stage') === 'role') {
@@ -240,7 +240,7 @@ if (Astro.request.method === 'POST') {
           toolIds.push(await proposeCustomTag(database, 'tools', service.id, custom, user.id));
         }
 
-        // Website Development carries its competencies in the stack, so that is
+        // Web Development carries its competencies in the stack, so that is
         // what must be answered; every other service answers Skills.
         if (service.stack) {
           if (!stackIds.length) errors[`stack_${service.id}`] = `Choose at least one thing you work with in ${service.name}.`;
@@ -441,7 +441,7 @@ const chosenServices = offerings
   .map((offering) => getService(offering.service_id))
   .filter((service): service is NonNullable<typeof service> => Boolean(service));
 
-/* Website Development's specialties ARE its roles, so it is answered on the
+/* Web Development's specialties ARE its roles, so it is answered on the
    role screen instead. Only services that still have a distinct specialty
    question appear on 2b — and if none do, 2b is skipped entirely. */
 const specialtyServices = chosenServices.filter((service) => !service.specialtyFromRole);

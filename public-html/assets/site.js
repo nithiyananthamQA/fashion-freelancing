@@ -130,11 +130,11 @@
           <a class="sub" href="${r("pages/services/graphics-prints.html")}">Graphics &amp; prints</a>
           <a class="sub" href="${r("pages/services/pattern-cad.html")}">Pattern (CAD)</a>
           <a class="sub" href="${r("pages/services/dobby-jacquard.html")}">Dobby &amp; jacquard</a>
-          <a class="sub" href="${r("pages/services/website.html")}">Websites</a>
+          <a class="sub" href="${r("pages/services/web-development.html")}">Web development</a>
           <a class="sub" href="${r("pages/services/ai-agent.html")}">AI agent</a>
           <a class="sub" href="${r("pages/services/ai-photography.html")}">AI video &amp; photography</a>
           <a class="sub" href="${r("pages/services/ecom-listing.html")}">E-com listings</a>
-          <a class="sub" href="${r("pages/services/web-design.html")}">Web design</a>
+          <a class="sub" href="${r("pages/services/digital-marketing.html")}">Digital marketing &amp; SEO</a>
         </div>
       </nav>
       <a href="/sign-in" class="tm-signin">Sign in</a>
@@ -167,11 +167,11 @@
     </div>
     <div class="nsp-col">
       <h6>AI &amp; digital</h6>
-      <a role="menuitem" href="${r("pages/services/website.html")}">Website development</a>
+      <a role="menuitem" href="${r("pages/services/web-development.html")}">Web development</a>
       <a role="menuitem" href="${r("pages/services/ai-agent.html")}">AI customer agent</a>
       <a role="menuitem" href="${r("pages/services/ai-photography.html")}">AI video &amp; photography</a>
       <a role="menuitem" href="${r("pages/services/ecom-listing.html")}">E-commerce listings</a>
-      <a role="menuitem" href="${r("pages/services/web-design.html")}">Web design</a>
+      <a role="menuitem" href="${r("pages/services/digital-marketing.html")}">Digital marketing &amp; SEO</a>
     </div>
   </div>`;
 
@@ -187,7 +187,7 @@
           <p style="color:var(--ink-5);font-size:14px;max-width:340px;margin-top:14px;line-height:1.55;">
             Fashion Freelancing is a fashion design and production-services studio — factory-ready
             tech packs, 3D virtual samples, digital patterns, graphics and prints, woven designs,
-            AI product photography, marketplace listings, website development and web design.
+            AI product photography, marketplace listings, web development and digital marketing.
           </p>
           <p style="color:var(--ink-5);font-size:13px;max-width:340px;margin-top:10px;line-height:1.55;">
             Every quote is fixed before work starts. Two revision rounds included in every package.
@@ -209,11 +209,11 @@
         <details class="footer-acc">
           <summary class="footer-acc-head"><h5>AI &amp; digital</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
           <ul>
-            <li><a href="${r("pages/services/website.html")}">Website development</a></li>
+            <li><a href="${r("pages/services/web-development.html")}">Web development</a></li>
             <li><a href="${r("pages/services/ai-agent.html")}">AI customer agent</a></li>
             <li><a href="${r("pages/services/ai-photography.html")}">AI video &amp; photography</a></li>
             <li><a href="${r("pages/services/ecom-listing.html")}">E-commerce listings</a></li>
-            <li><a href="${r("pages/services/web-design.html")}">Web design</a></li>
+            <li><a href="${r("pages/services/digital-marketing.html")}">Digital marketing &amp; SEO</a></li>
           </ul>
         </details>
 

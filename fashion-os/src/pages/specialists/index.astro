@@ -31,7 +31,7 @@ const [{ cards, total }, counts, skills, tools] = await Promise.all([
   optionsFor(database, 'tools', filters.serviceId),
 ]);
 
-/* A service whose competencies live in its stack (Website Development) has no
+/* A service whose competencies live in its stack (Web Development) has no
    skills list, so the rail offers the stack instead — otherwise its most
    useful filters would be missing. */
 const stackOptions = service?.stack ?? [];

@@ -20,11 +20,11 @@
     ['seamless-pattern', 'Graphics & prints'],
     ['pattern-cad', 'Pattern (CAD)'],
     ['dobby-jacquard', 'Dobby & jacquard'],
-    ['website', 'Website'],
+    ['web-development', 'Web development'],
     ['ai-agent', 'AI agent'],
     ['ai-photography', 'AI video & photography'],
     ['ecom-listing', 'E-com listings'],
-    ['web-design', 'Web design'],
+    ['digital-marketing', 'Digital marketing & SEO'],
     ['multiple', 'A bit of everything']
   ];
   var TIMELINES = [['asap', 'ASAP'], ['2-4w', 'In 2–4 weeks'], ['flexible', 'Flexible']];

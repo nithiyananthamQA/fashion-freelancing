@@ -6,7 +6,7 @@
  * functions rather than in the pages, so a new page cannot leak a draft.
  */
 import { all, inClause, one, readList } from '../db';
-import { getService, SERVICES } from '../../data/taxonomy';
+import { currentServiceId, getService, SERVICES } from '../../data/taxonomy';
 
 export const PAGE_SIZE = 12;
 
@@ -70,7 +70,7 @@ export function readFilters(url: URL): DirectoryFilters {
     const value = Number(url.searchParams.get(key));
     return Number.isFinite(value) && value > 0 ? Math.floor(value) : null;
   };
-  const serviceId = url.searchParams.get('service');
+  const serviceId = currentServiceId(url.searchParams.get('service'));
   return {
     q: (url.searchParams.get('q') ?? '').trim().slice(0, 120),
     serviceId: serviceId && getService(serviceId) ? serviceId : null,

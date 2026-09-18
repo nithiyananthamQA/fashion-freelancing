@@ -88,6 +88,12 @@ for (const rel of EDITABLE) {
   rmSync(join(dest, rel), { force: true });
 }
 rmSync(join(dest, 'pages', 'services'), { recursive: true, force: true });
+// a service page removed from public-html must not live on as a template
+for (const file of readdirSync(join(templates, 'pages', 'services'))) {
+  if (file.endsWith('.html') && !existsSync(join(publicHtml, 'pages', 'services', file))) {
+    rmSync(join(templates, 'pages', 'services', file), { force: true });
+  }
+}
 // the 404 page as a template too: worker routes answer unknown paths with it
 if (existsSync(join(publicHtml, 'pages', '404.html'))) cpSync(join(publicHtml, 'pages', '404.html'), join(templates, '404.html'));
 rmSync(join(dest, 'index.html'), { force: true });

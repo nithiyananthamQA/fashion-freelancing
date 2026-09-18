@@ -21,7 +21,7 @@ import { loadCandidates, rank } from '../../server/matching';
 import { PUBLIC_TENANT } from '../../server/tenant';
 import { optionsFor, specialtyLookup, stackLookup } from '../../server/repo/specialists';
 import {
-  ENGAGEMENT, EXPERIENCE_BANDS, SERVICES, WORK_LOCATION, getService, specialtyId,
+  ENGAGEMENT, EXPERIENCE_BANDS, SERVICES, WORK_LOCATION, currentServiceId, getService, specialtyId,
 } from '../../data/taxonomy';
 
 const database = db(Astro);
@@ -40,7 +40,7 @@ let submitted: FormData | null = null;
 let published: { id: string; title: string; invited: { name: string; handle: string | null; reason: string }[] } | null = null;
 
 /* The service drives every conditional field below, so it is read first. */
-const selectedServiceId = Astro.url.searchParams.get('service') ?? draftValue(draft, 'service');
+const selectedServiceId = currentServiceId(Astro.url.searchParams.get('service')) ?? draftValue(draft, 'service');
 const service = getService(selectedServiceId);
 const [skillOptions, toolOptions] = await Promise.all([
   optionsFor(database, 'skills', service?.id ?? null),
@@ -410,7 +410,7 @@ const dm = (key: string): string[] => {
                     {service.stack && (
                       <fieldset class="fieldset" style="margin-bottom:0;">
                         <legend>Technology stack</legend>
-                        <p class="hint">Only relevant for Website Development. Leave blank if you have no preference.</p>
+                        <p class="hint">Only relevant for Web Development. Leave blank if you have no preference.</p>
                         <div class="opts">
                           {service.stack.map((option) => (
                             <label class="opt">
