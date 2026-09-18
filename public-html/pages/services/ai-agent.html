@@ -188,6 +188,59 @@ main { position: relative; z-index: 3; }
 .footer { background: rgba(var(--surface-rgb), .03) !important; border-top: 1px solid var(--line) !important; }
 #site-footer * { background-color: transparent; }
 
+
+/* ============================================================
+   TRY IT — the hero transcript becomes a 10-second trial.
+   Namespaced `ag-` so styles.css cannot reach it.
+   ============================================================ */
+.ag-ask { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+.ag-ask-l {
+  width: 100%; margin: 0 0 2px; font-family: var(--mono); font-size: 10px;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-6); }
+.ag-chip {
+  padding: 8px 12px; border-radius: 999px; cursor: pointer; text-align: left;
+  background: rgba(var(--surface-rgb), .07); color: var(--ink-3);
+  border: 1px solid rgba(var(--surface-rgb), .16);
+  font-family: var(--sans); font-size: 12.5px; font-weight: 500; line-height: 1.2;
+  transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease; }
+.ag-chip:hover:not([disabled]) { border-color: var(--acc); color: var(--ink); transform: translateY(-1px); }
+.ag-chip[disabled] { opacity: .45; cursor: default; }
+.ag-chip.is-used { border-color: var(--acc-30, rgba(62,200,192,.3)); color: var(--ink-5); }
+/* the reply being composed */
+.ag-typing { display: inline-flex; gap: 4px; align-items: center; }
+.ag-typing i {
+  width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: .45;
+  animation: ag-blink 1.2s infinite ease-in-out; }
+.ag-typing i:nth-child(2) { animation-delay: .18s; }
+.ag-typing i:nth-child(3) { animation-delay: .36s; }
+@keyframes ag-blink { 0%, 60%, 100% { opacity: .25; transform: translateY(0); } 30% { opacity: .9; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .ag-typing i { animation: none; opacity: .6; } }
+.ag-reset {
+  background: none; border: 0; cursor: pointer; padding: 0; margin-left: auto;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-6); text-decoration: underline; text-underline-offset: 3px; }
+.ag-reset:hover { color: var(--acc-text); }
+
+/* the voice test, as two conversations rather than two lists */
+.ag-cmp { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(14px, 1.8vw, 24px); }
+@media (max-width: 760px) { .ag-cmp { grid-template-columns: 1fr; } }
+.ag-cmp > div { padding: clamp(16px, 1.8vw, 22px); border-radius: 18px;
+  background: var(--glass); border: 1px solid var(--glass-border); }
+.ag-cmp > div.lit { border-color: var(--acc-30, rgba(62,200,192,.3)); }
+.ag-cmp h3 { font-family: var(--disp); font-size: 16px; font-weight: 700; letter-spacing: -.02em;
+  margin: 0 0 14px; color: var(--ink); }
+.ag-cmp .lit h3 { color: var(--acc-text); }
+.ag-thread { display: flex; flex-direction: column; gap: 9px; }
+.ag-b {
+  max-width: 88%; padding: 10px 13px; border-radius: 16px; font-size: 13.5px; line-height: 1.45; }
+.ag-b.them { align-self: flex-start; border-bottom-left-radius: 5px;
+  background: rgba(var(--surface-rgb), .08); color: var(--ink-3); }
+.ag-b.us { align-self: flex-end; border-bottom-right-radius: 5px;
+  background: rgba(var(--surface-rgb), .06); color: var(--ink-4); }
+.ag-cmp .lit .ag-b.us { background: var(--acc-16, rgba(62,200,192,.16)); color: var(--ink-2, var(--ink)); }
+.ag-why { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line);
+  font-size: 12.5px; line-height: 1.5; color: var(--ink-5); }
+
 /* ---- Atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
@@ -629,7 +682,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
           <p class="bm in-m" data-cms="see-it-answer.text-3">Perfect. How fast is delivery to Chennai?</p>
           <p class="bm out-m" data-cms="see-it-answer.text-4">2–3 working days, free over the current threshold. I can hold your size while you decide — should I?</p>
         </div>
-        <span class="bot-chip">Answered from your size chart — not a guess</span>
+        <span class="bot-chip" id="ag-src">Answered from your size chart — not a guess</span>
+        <div class="ag-ask" id="ag-ask">
+          <p class="ag-ask-l">Ask it something <button type="button" class="ag-reset" id="ag-reset" hidden>Start over</button></p>
+        </div>
       </div>
         </div></div>
       </div>
@@ -704,24 +760,26 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <span class="kicker rv" data-cms="the-voice-test.kicker-1">The voice test</span>
         <h2 class="h-display rv rv-display" id="vc-h" data-cms="the-voice-test.heading-1">Your customers can smell <span class="acc-t">a generic bot.</span></h2>
       </div>
-      <div class="cmp2">
-        <div class="cmp-col glass-p rv">
-          <h3 data-cms="the-voice-test.heading-2">Off-the-shelf chatbot</h3>
-          <ul>
-            <li data-cms="the-voice-test.item-1">"I'm sorry, I didn't understand your query. Please rephrase."</li>
-            <li data-cms="the-voice-test.item-2">Canned scripts written for every store, so they fit none</li>
-            <li data-cms="the-voice-test.item-3">Answers from generic templates — wrong for your policies</li>
-            <li data-cms="the-voice-test.item-4">Dead ends with no way to reach a human</li>
-          </ul>
+      <div class="ag-cmp">
+        <div class="rv">
+          <h3>Off-the-shelf chatbot</h3>
+          <div class="ag-thread">
+            <p class="ag-b them">Is the linen shirt true to size?</p>
+            <p class="ag-b us">I'm sorry, I didn't understand your query. Please rephrase.</p>
+            <p class="ag-b them">Can I speak to someone?</p>
+            <p class="ag-b us">Please visit our Help Centre for more information.</p>
+          </div>
+          <p class="ag-why">Canned scripts written for every store, so they fit none — and a dead end with no way to reach a person.</p>
         </div>
-        <div class="cmp-col lit glass-p rv rv-d1">
-          <h3 data-cms="the-voice-test.heading-3">Your agent</h3>
-          <ul>
-            <li data-cms="the-voice-test.item-5">"Between M and L? Our linen runs roomy — most people take M."</li>
-            <li data-cms="the-voice-test.item-6">Trained on your real replies, in your phrasing and language</li>
-            <li data-cms="the-voice-test.item-7">Answers only from your approved policies and product facts</li>
-            <li data-cms="the-voice-test.item-8">Knows exactly when to say "let me get a person for you"</li>
-          </ul>
+        <div class="lit rv rv-d1">
+          <h3>Your agent</h3>
+          <div class="ag-thread">
+            <p class="ag-b them">Is the linen shirt true to size?</p>
+            <p class="ag-b us">Between M and L? Our linen runs roomy — most people take M. Chest on M is 104&nbsp;cm.</p>
+            <p class="ag-b them">Can I speak to someone?</p>
+            <p class="ag-b us">Of course — passing you to Priya now, with this chat attached so you don't repeat yourself.</p>
+          </div>
+          <p class="ag-why">Trained on your real replies and answering only from your approved policies — and it knows when to hand over.</p>
         </div>
       </div>
       <p class="cmp-note rv" data-cms="the-voice-test.text-1">You review real sample conversations and correct the tone before any customer meets it.</p>
@@ -924,6 +982,90 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         if (en[0].isIntersecting) { chat.classList.add('play'); obs.disconnect(); }
       }, { threshold: 0.15 }).observe(chat); } else { chat.classList.add('play'); }
   }
+
+
+  /* The hero transcript is a real trial: a preset question appends, the agent
+     "thinks", then its reply types out. Answers are fixed copy — this is a
+     scripted demo, not a live model, and it never claims otherwise. */
+  (function () {
+    var log = document.querySelector('.bot-log');
+    var ask = document.getElementById('ag-ask');
+    var src = document.getElementById('ag-src');
+    var reset = document.getElementById('ag-reset');
+    if (!log || !ask) return;
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var start = log.innerHTML, startSrc = src ? src.textContent : '';
+
+    var QA = [
+      { q: 'Where is my order?',
+        a: 'Order #4471 left Tiruppur yesterday and is with the courier — due Thursday. Want the tracking link?',
+        s: 'Answered from your order system — live status' },
+      { q: 'Can I return this?',
+        a: 'Yes — 14 days from delivery, unworn with tags. I can start it now if you give me the order number.',
+        s: 'Answered from your returns policy — not a guess' },
+      { q: 'Do you ship to Dubai?',
+        a: 'We do. Dubai is 4–6 working days, duties paid at checkout, and returns are free within 14 days.',
+        s: 'Answered from your shipping table — not a guess' }
+    ];
+
+    QA.forEach(function (item, i) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'ag-chip'; b.textContent = item.q;
+      b.addEventListener('click', function () { play(item, b); });
+      ask.appendChild(b);
+    });
+
+    function bubble(cls, text) {
+      var p = document.createElement('p');
+      p.className = 'bm ' + cls;
+      p.textContent = text;
+      log.appendChild(p);
+      log.scrollTop = log.scrollHeight;
+      return p;
+    }
+
+    var busy = false;
+    function play(item, chip) {
+      if (busy) return;
+      busy = true;
+      chip.disabled = true; chip.classList.add('is-used');
+      if (reset) reset.hidden = false;
+      bubble('in-m', item.q);
+
+      var out = bubble('out-m', '');
+      out.innerHTML = '<span class="ag-typing"><i></i><i></i><i></i></span>';
+
+      var think = reduced ? 0 : 550;
+      setTimeout(function () {
+        out.textContent = '';
+        if (reduced) { out.textContent = item.a; done(); return; }
+        var n = 0;
+        var t = setInterval(function () {
+          n += 2;
+          out.textContent = item.a.slice(0, n);
+          log.scrollTop = log.scrollHeight;
+          if (n >= item.a.length) { clearInterval(t); done(); }
+        }, 16);
+      }, think);
+
+      function done() {
+        if (src) src.textContent = item.s;
+        busy = false;
+      }
+    }
+
+    if (reset) {
+      reset.addEventListener('click', function () {
+        log.innerHTML = start;
+        if (src) src.textContent = startSrc;
+        ask.querySelectorAll('.ag-chip').forEach(function (c) {
+          c.disabled = false; c.classList.remove('is-used');
+        });
+        reset.hidden = true;
+        busy = false;
+      });
+    }
+  })();
 
   /* copy email */
   var mailBtn = document.getElementById('copy-mail');

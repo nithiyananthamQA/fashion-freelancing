@@ -874,21 +874,21 @@ button[aria-busy='true'] { opacity: .7; cursor: progress; }
 /* Dark keeps the lifted-glass field: against a near-black ground a pale wash
    reads as a surface you can type on, where a bordered white box would glare. */
 :root[data-theme="dark"] .cform .fi {
-  background: rgba(var(--surface-rgb), .06);
+  background-color: rgba(var(--surface-rgb), .06);
   border-color: var(--glass-border);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .cform .fi {
-    background: rgba(var(--surface-rgb), .06);
+    background-color: rgba(var(--surface-rgb), .06);
     border-color: var(--glass-border);
   }
 }
 
 /* On the dark ground the field lifts slightly when focused, which is what a
    pale wash does well there. */
-:root[data-theme="dark"] .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+:root[data-theme="dark"] .cform .fi:focus { background-color: rgba(var(--surface-rgb), .09); }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+  :root:not([data-theme="light"]) .cform .fi:focus { background-color: rgba(var(--surface-rgb), .09); }
 }
 
 /* ------------------------------------------------------------

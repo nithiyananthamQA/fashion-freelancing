@@ -199,6 +199,50 @@ main { position: relative; z-index: 3; }
 .footer { background: rgba(var(--surface-rgb), .03) !important; border-top: 1px solid var(--line) !important; }
 #site-footer * { background-color: transparent; }
 
+
+/* ============================================================
+   OUR WORKS — one card per project, built on the same lifted
+   surface the rest of the site uses. Namespaced `ow-` because
+   styles.css already owns generic names like .card and .tier.
+   ============================================================ */
+.ow-grid {
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(12px, 1.3vw, 18px); max-width: 1400px; margin-inline: auto; }
+@media (max-width: 1100px) { .ow-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 680px)  { .ow-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ow-card {
+  position: relative; display: flex; flex-direction: column; min-width: 0;
+  border-radius: 18px; padding: clamp(14px, 1.5vw, 20px);
+  background: var(--glass); border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow, none);
+  transition: transform .4s var(--easing), border-color .3s ease, background .3s ease; }
+@media (hover: hover) {
+  .ow-card:hover { transform: translateY(-4px); border-color: var(--acc-30); background: var(--glass-hover); } }
+/* the logo sits on its own plate so light and dark marks both read */
+.ow-shot {
+  height: 92px; display: block; margin-bottom: 14px; overflow: hidden;
+  border-radius: 12px; background: rgba(var(--surface-rgb), .06);
+  border: 1px solid rgba(var(--surface-rgb), .08); padding: 12px; }
+.ow-shot img {
+  display: block; width: 100% !important; height: 100% !important;
+  max-width: 100%; max-height: 100%; object-fit: contain; object-position: center; }
+.ow-card h3 {
+  font-family: var(--disp); font-size: 15.5px; font-weight: 700; letter-spacing: -.02em;
+  margin: 0; color: var(--ink); }
+.ow-card p { margin: 5px 0 0; font-size: 12.5px; line-height: 1.45; color: var(--ink-5); }
+.ow-live {
+  margin-top: 12px; display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+  padding: 5px 10px; border-radius: 999px; text-decoration: none;
+  background: var(--acc-16, rgba(167,139,250,.16)); color: var(--acc-text);
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
+  transition: background .2s ease; }
+.ow-live:hover { background: var(--acc-30, rgba(167,139,250,.3)); }
+.ow-live i { width: 5px; height: 5px; border-radius: 50%; background: var(--acc); display: inline-block; }
+.ow-note {
+  max-width: 1400px; margin: clamp(14px, 1.6vw, 20px) auto 0; padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 13.5px; line-height: 1.6; color: var(--ink-5); }
+
 /* ---- Atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
@@ -904,6 +948,71 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
           <div class="week"><span class="wn" aria-hidden="true">W4</span><div><h3 data-cms="process.heading-5">You launch</h3><p data-cms="process.text-5">We go live and stay with you — 30 days of fixes and tweaks included.</p></div></div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ OUR WORKS ============ -->
+  <section class="sec" id="works" aria-labelledby="works-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker rv">Our works</span>
+        <h2 class="h-display rv rv-display" id="works-h">Sites and apps we have <span class="acc-t">already built.</span></h2>
+        <p class="sub rv">A spread of what we ship — storefronts, booking sites, dashboards and apps.</p>
+      </div>
+      <div class="ow-grid">
+        <article class="ow-card rv rv-row">
+          <div class="ow-shot"><img src="../../assets/img/works/market-spider.webp" alt="Market Spider logo" loading="lazy" decoding="async" width="240" height="92"></div>
+          <h3>Market Spider</h3>
+          <p>Market research &amp; trading desk</p>
+          <a class="ow-live" href="https://market-spider.marketspiderfirebase.workers.dev" target="_blank" rel="noopener"><i aria-hidden="true"></i>Visit live site</a>
+        </article>
+        <article class="ow-card rv rv-row rv-d1">
+          <div class="ow-shot"><img src="../../assets/img/works/slade-in-studio.webp" alt="Slade In Studio logo" loading="lazy" decoding="async" width="240" height="92"></div>
+          <h3>Slade In Studio</h3>
+          <p>Studio &amp; portfolio site</p>
+        </article>
+        <article class="ow-card rv rv-row rv-d2">
+          <div class="ow-shot"><img src="../../assets/img/works/ivy-crew.webp" alt="Ivy Crew logo" loading="lazy" decoding="async" width="240" height="92"></div>
+          <h3>Ivy Crew</h3>
+          <p>Apparel brand storefront</p>
+        </article>
+        <article class="ow-card rv rv-row rv-d3">
+          <div class="ow-shot"><img src="../../assets/img/works/mhf.webp" alt="MHF logo" loading="lazy" decoding="async" width="240" height="92"></div>
+          <h3>MHF</h3>
+          <p>Textile printing &amp; production</p>
+        </article>
+        <article class="ow-card rv rv-row">
+          <div class="ow-shot"><img src="../../assets/img/works/uzhavan-fresh.webp" alt="Uzhavan Fresh logo" loading="lazy" decoding="async" width="240" height="92"></div>
+          <h3>Uzhavan Fresh</h3>
+          <p>Milk &amp; grocery delivery app</p>
+        </article>
+        <article class="ow-card rv rv-row rv-d1">
+          <div class="ow-shot"><img src="../../assets/img/works/condition-compass.webp" alt="Condition Compass logo" loading="lazy" decoding="async" width="240" height="92"></div>
+          <h3>Condition Compass</h3>
+          <p>Health assessment platform</p>
+        </article>
+        <article class="ow-card rv rv-row rv-d2">
+          <div class="ow-shot"><img src="../../assets/img/works/ontime-call-taxi.webp" alt="On Time Call Taxi logo" loading="lazy" decoding="async" width="240" height="92"></div>
+          <h3>On Time Call Taxi</h3>
+          <p>Local taxi booking site</p>
+        </article>
+        <article class="ow-card rv rv-row rv-d3">
+          <div class="ow-shot"><img src="../../assets/img/works/mycyclesafe.svg" alt="MyCycleSafe AI logo" loading="lazy" decoding="async" width="240" height="92"></div>
+          <h3>MyCycleSafe AI</h3>
+          <p>Cycling safety assistant</p>
+        </article>
+        <article class="ow-card rv rv-row">
+          <div class="ow-shot"><img src="../../assets/img/works/fitness-gym.webp" alt="Fitness Gym logo" loading="lazy" decoding="async" width="240" height="92"></div>
+          <h3>Fitness Gym</h3>
+          <p>Gym &amp; membership site</p>
+        </article>
+        <article class="ow-card rv rv-row rv-d1">
+          <div class="ow-shot"><img src="../../assets/img/works/trading-ai.svg" alt="Trading AI logo" loading="lazy" decoding="async" width="240" height="92"></div>
+          <h3>Trading AI</h3>
+          <p>Trading signal dashboard</p>
+        </article>
+      </div>
+      <p class="ow-note rv">Live links are added as each client approves them for public listing.</p>
     </div>
   </section>
 

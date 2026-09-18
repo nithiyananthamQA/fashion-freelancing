@@ -188,6 +188,50 @@ main { position: relative; z-index: 3; }
 .footer { background: rgba(var(--surface-rgb), .03) !important; border-top: 1px solid var(--line) !important; }
 #site-footer * { background-color: transparent; }
 
+
+/* ============================================================
+   WORK GALLERY — this page leads with the work, not the brief.
+   Namespaced `wg-`; styles.css owns .card and friends.
+   ============================================================ */
+.wg-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(14px, 1.6vw, 22px); max-width: 1320px; margin-inline: auto; }
+@media (max-width: 980px) { .wg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .wg-grid { grid-template-columns: minmax(0, 1fr); } }
+.wg-card {
+  position: relative; display: block; overflow: hidden; text-decoration: none;
+  border-radius: 20px; background: var(--glass); border: 1px solid var(--glass-border);
+  transition: transform .45s var(--easing), border-color .3s ease, box-shadow .45s ease; }
+@media (hover: hover) {
+  .wg-card:hover { transform: translateY(-5px); border-color: var(--acc-30, rgba(126,155,234,.35));
+    box-shadow: 0 26px 60px -26px rgba(var(--shadow-rgb), .8); } }
+.wg-card:focus-visible { outline: 3px solid var(--acc); outline-offset: 3px; }
+/* the plate the mark sits on, with a tint that shifts on hover */
+.wg-plate {
+  position: relative; aspect-ratio: 16 / 10; display: grid; place-items: center; padding: 26px;
+  background:
+    radial-gradient(120% 100% at 50% 0%, rgba(var(--surface-rgb), .10), transparent 70%),
+    rgba(var(--surface-rgb), .05);
+  border-bottom: 1px solid var(--glass-border); overflow: hidden; }
+.wg-plate img {
+  max-width: 62%; max-height: 58%; width: auto !important; height: auto !important; object-fit: contain;
+  transition: transform .5s var(--easing); }
+@media (hover: hover) { .wg-card:hover .wg-plate img { transform: scale(1.06); } }
+/* what we did — slides up over the plate on hover, always readable on focus */
+.wg-reveal {
+  position: absolute; inset: auto 0 0 0; padding: 14px 16px;
+  background: linear-gradient(to top, rgba(10,9,18,.92), rgba(10,9,18,.72) 60%, transparent);
+  color: #F2F1F7; font-size: 12.5px; line-height: 1.45;
+  transform: translateY(101%); transition: transform .45s var(--easing); }
+@media (hover: hover) { .wg-card:hover .wg-reveal { transform: translateY(0); } }
+.wg-card:focus-visible .wg-reveal { transform: translateY(0); }
+@media (hover: none) { .wg-reveal { position: static; transform: none; background: none; color: var(--ink-5); padding: 0 16px 14px; } }
+.wg-body { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 14px 16px 16px; }
+.wg-body h3 { font-family: var(--disp); font-size: 16px; font-weight: 700; letter-spacing: -.02em; margin: 0; color: var(--ink); }
+.wg-body span { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-6); white-space: nowrap; }
+.wg-live { color: var(--acc-text); }
+@media (prefers-reduced-motion: reduce) {
+  .wg-card, .wg-plate img, .wg-reveal { transition: none; }
+  .wg-reveal { transform: none; } }
+
 /* ---- Atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
@@ -691,7 +735,83 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 3. SCOPE ============ -->
+    <!-- ============ THE WORK ============ -->
+  <section class="sec" id="work" aria-labelledby="work-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker rv">Selected work</span>
+        <h2 class="h-display rv rv-display" id="work-h">Design we have <span class="acc-t">actually shipped.</span></h2>
+        <p class="sub rv">Hover a card — or focus it — to see what the job involved.</p>
+      </div>
+      <div class="wg-grid">
+        <a class="wg-card rv rv-card" href="https://market-spider.marketspiderfirebase.workers.dev" target="_blank" rel="noopener">
+          <div class="wg-plate">
+            <img src="../../assets/img/works/market-spider.webp" alt="Market Spider logo" loading="lazy" decoding="async" width="300" height="180">
+            <p class="wg-reveal">Dashboard UI, data tables and a marketing site that explains a complex product simply.</p>
+          </div>
+          <div class="wg-body"><h3>Market Spider</h3><span class="wg-live">Live</span></div>
+        </a>
+        <article class="wg-card rv rv-card rv-d1" tabindex="0">
+          <div class="wg-plate">
+            <img src="../../assets/img/works/slade-in-studio.webp" alt="Slade In Studio logo" loading="lazy" decoding="async" width="300" height="180">
+            <p class="wg-reveal">Editorial layout and a portfolio grid built to let the photography carry the page.</p>
+          </div>
+          <div class="wg-body"><h3>Slade In Studio</h3><span>Studio site</span></div>
+        </article>
+        <article class="wg-card rv rv-card rv-d2" tabindex="0">
+          <div class="wg-plate">
+            <img src="../../assets/img/works/ivy-crew.webp" alt="Ivy Crew logo" loading="lazy" decoding="async" width="300" height="180">
+            <p class="wg-reveal">Product pages, size guidance and a checkout path tuned for a small clothing label.</p>
+          </div>
+          <div class="wg-body"><h3>Ivy Crew</h3><span>Apparel storefront</span></div>
+        </article>
+        <article class="wg-card rv rv-card" tabindex="0">
+          <div class="wg-plate">
+            <img src="../../assets/img/works/mhf.webp" alt="MHF logo" loading="lazy" decoding="async" width="300" height="180">
+            <p class="wg-reveal">A plain-spoken site for a printing business — capability, process and a quote form.</p>
+          </div>
+          <div class="wg-body"><h3>MHF</h3><span>Textile production</span></div>
+        </article>
+        <article class="wg-card rv rv-card rv-d1" tabindex="0">
+          <div class="wg-plate">
+            <img src="../../assets/img/works/uzhavan-fresh.webp" alt="Uzhavan Fresh logo" loading="lazy" decoding="async" width="300" height="180">
+            <p class="wg-reveal">Ordering flow and subscription screens for daily milk and grocery delivery.</p>
+          </div>
+          <div class="wg-body"><h3>Uzhavan Fresh</h3><span>Delivery app</span></div>
+        </article>
+        <article class="wg-card rv rv-card rv-d2" tabindex="0">
+          <div class="wg-plate">
+            <img src="../../assets/img/works/condition-compass.webp" alt="Condition Compass logo" loading="lazy" decoding="async" width="300" height="180">
+            <p class="wg-reveal">Assessment flow, results screens and a calm reading experience for sensitive content.</p>
+          </div>
+          <div class="wg-body"><h3>Condition Compass</h3><span>Health platform</span></div>
+        </article>
+        <article class="wg-card rv rv-card" tabindex="0">
+          <div class="wg-plate">
+            <img src="../../assets/img/works/ontime-call-taxi.webp" alt="On Time Call Taxi logo" loading="lazy" decoding="async" width="300" height="180">
+            <p class="wg-reveal">One-thumb booking on a phone — the whole site built around a single action.</p>
+          </div>
+          <div class="wg-body"><h3>On Time Call Taxi</h3><span>Booking site</span></div>
+        </article>
+        <article class="wg-card rv rv-card rv-d1" tabindex="0">
+          <div class="wg-plate">
+            <img src="../../assets/img/works/mycyclesafe.svg" alt="MyCycleSafe AI logo" loading="lazy" decoding="async" width="300" height="180">
+            <p class="wg-reveal">Interface for a cycling safety tool: alerts, routes and a clear settings model.</p>
+          </div>
+          <div class="wg-body"><h3>MyCycleSafe AI</h3><span>Safety assistant</span></div>
+        </article>
+        <article class="wg-card rv rv-card rv-d2" tabindex="0">
+          <div class="wg-plate">
+            <img src="../../assets/img/works/fitness-gym.webp" alt="Fitness Gym logo" loading="lazy" decoding="async" width="300" height="180">
+            <p class="wg-reveal">Class timetable, membership tiers and a join flow that does not lose people.</p>
+          </div>
+          <div class="wg-body"><h3>Fitness Gym</h3><span>Membership site</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+<!-- ============ 3. SCOPE ============ -->
   <section class="sec" id="kit" aria-labelledby="kit-h">
     <div class="wrap">
       <div class="sec-head">

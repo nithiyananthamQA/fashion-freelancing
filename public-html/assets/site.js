@@ -448,10 +448,18 @@
     }
 
     // ---- Reveal-on-scroll (.reveal, .reveal-scale, [data-stagger]) ----
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-    document.querySelectorAll('.reveal, .reveal-scale, [data-stagger]').forEach(el => io.observe(el));
+    // The CSS hides all three of these outright, so a browser without
+    // IntersectionObserver would show a blank page forever. Reveal them
+    // immediately instead — no animation is a far better failure than no page.
+    const HIDDEN = '.reveal, .reveal-scale, [data-stagger]';
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+      document.querySelectorAll(HIDDEN).forEach(el => io.observe(el));
+    } else {
+      document.querySelectorAll(HIDDEN).forEach(el => el.classList.add('in'));
+    }
 
     // ---- Line icons draw themselves on, once, when first scrolled to ----
     // Each shape is measured so the dash runs its own length exactly; a shape
@@ -546,9 +554,12 @@
    * page looks broken. This sweeps up anything still hidden shortly after load,
    * and again once everything has loaded.
    */
+  const FAILSAFE_HIDDEN =
+    '.rv:not(.in), .reveal:not(.in), .reveal-scale:not(.in), [data-stagger]:not(.in)';
+
   function revealFailsafe() {
     const sweep = () => {
-      document.querySelectorAll('.rv:not(.in)').forEach((el) => {
+      document.querySelectorAll(FAILSAFE_HIDDEN).forEach((el) => {
         const box = el.getBoundingClientRect();
         // in view now, or the observer has plainly not done its job
         if (box.top < window.innerHeight * 1.4) el.classList.add('in');
@@ -562,7 +573,7 @@
        fold invisible for good when the observer never fired. A fail-safe
        that only rescues what you can already see is not a fail-safe. */
     setTimeout(() => {
-      document.querySelectorAll('.rv:not(.in)').forEach((el) => el.classList.add('in'));
+      document.querySelectorAll(FAILSAFE_HIDDEN).forEach((el) => el.classList.add('in'));
     }, 3500);
   }
 

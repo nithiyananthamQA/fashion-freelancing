@@ -13,7 +13,7 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title data-cms="head.title">AI Fashion Photography — On-Model Photos from Flat Shots - Fashion Freelancing</title>
-<meta name="description" data-cms="head.description" content="On-model product photos generated from the flat shots you already have — human-checked for garment fidelity, consistent across your catalog, and marketplace-safe. Fixed quote in 24 hours." />
+<meta name="description" data-cms="head.description" content="On-model product photos generated from the flat shots you already have — human-checked for garment fidelity, consistent across your catalog, with marketplace guidance. Fixed quote in 24 hours." />
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF0055'/%3E%3Cstop offset='1' stop-color='%236E56F0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='19' font-weight='600' fill='%23fff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" />
 
@@ -33,7 +33,7 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <script>
 (function () {
   var T = 'AI Fashion Photography — On-Model Photos from Flat Shots - Fashion Freelancing';
-  var D = 'On-model product photos generated from the flat shots you already have — human-checked for garment fidelity, consistent across your catalog, and marketplace-safe. Fixed quote in 24 hours.';
+  var D = 'On-model product photos generated from the flat shots you already have — human-checked for garment fidelity, consistent across your catalog, with marketplace guidance. Fixed quote in 24 hours.';
   var baseUrl = location.origin + location.pathname;
   var can = document.createElement('link');
   can.rel = 'canonical'; can.href = baseUrl;
@@ -74,13 +74,13 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 #site-nav { min-height: 92px; }
 @media (max-width: 720px) { #site-nav { min-height: 90px; } }
 /* ============================================================
-   NIGHT GLASS — 3D Virtual Sampling. Single accent: SKY #FF6FB3.
+   NIGHT GLASS — AI Video & Photography. Single accent: PINK #FF6FB3.
    ============================================================ */
 :root {
   /* Page-specific tokens only. The shared palette lives in
      assets/styles.css (light) and assets/night.css (dark) so the
      theme switch can reach it. */
-  /* THE page colour — sky only */
+  /* THE page colour — pink only */
   --acc-bright: #FF6FB3;
   --acc-ink: #BB0059;
   --grad-acc-ink: linear-gradient(115deg, #BB0059, #BB0059 55%, #BB0059);
@@ -116,7 +116,7 @@ body {
   font-family: var(--sans); font-size: 16px; line-height: 1.55;
   -webkit-font-smoothing: antialiased; overflow-x: clip; }
 ::selection { background: var(--acc); color: #200814; }
-.wrap { width: 100%; max-width: none; margin: 0 auto; padding: 0 10vw; }
+.wrap { width: 100%; max-width: 1480px; margin: 0 auto; padding: 0 clamp(20px, 4.4vw, 76px); }
 .skip-link {
   position: fixed; top: -100px; left: 20px; z-index: 10001;
   background: var(--acc); color: #200814; padding: 12px 20px;
@@ -188,6 +188,122 @@ main { position: relative; z-index: 3; }
 .footer { background: rgba(var(--surface-rgb), .03) !important; border-top: 1px solid var(--line) !important; }
 #site-footer * { background-color: transparent; }
 
+
+/* ============================================================
+   BEFORE / AFTER — the category-standard proof for a visual
+   service. Namespaced `ba-` so styles.css cannot reach it.
+   ============================================================ */
+.ba-wrap { max-width: 620px; margin-inline: auto; }
+.ba {
+  position: relative; border-radius: 20px; overflow: hidden; touch-action: pan-y;
+  border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow, none);
+  aspect-ratio: 4 / 5; background: var(--card-2); cursor: ew-resize; user-select: none; }
+.ba img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+/* the supplied artwork sits under; the finished frame is revealed over it */
+.ba .after { clip-path: inset(0 0 0 var(--split, 50%)); }
+.ba-line {
+  position: absolute; top: 0; bottom: 0; left: var(--split, 50%); width: 2px;
+  background: var(--acc); box-shadow: 0 0 0 1px rgba(0,0,0,.18); pointer-events: none; }
+.ba-grip {
+  position: absolute; top: 50%; left: var(--split, 50%); width: 46px; height: 46px;
+  transform: translate(-50%, -50%); border-radius: 50%;
+  background: var(--acc); color: #1A1206; display: grid; place-items: center;
+  box-shadow: 0 8px 24px -8px rgba(0,0,0,.5); pointer-events: none;
+  font-size: 15px; font-family: var(--mono); }
+.ba-tag {
+  position: absolute; top: 14px; padding: 6px 12px; border-radius: 999px;
+  background: rgba(20,18,26,.72); color: #fff; backdrop-filter: blur(8px);
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+  pointer-events: none; }
+.ba-tag.l { left: 14px; }
+.ba-tag.r { right: 14px; }
+.ba:focus-visible { outline: 3px solid var(--acc); outline-offset: 3px; }
+.ba-cap {
+  display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; justify-content: space-between;
+  margin-top: 12px; font-size: 13px; color: var(--ink-5); }
+.ba-cap b { color: var(--ink-4); font-weight: 500; }
+.ba-note {
+  margin: 4px 0 0; font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-4); }
+/* what comes back, kept as a tight strip under the proof */
+
+
+/* ============================================================
+   HERO — the copy sits above, the delivered work fills the rest
+   of the first screen. Same budget as the tech pack hero.
+   ============================================================ */
+@media (min-width: 900px) {
+  .hero.hero-run {
+    min-height: calc(100vh - 104px) !important;
+    min-height: calc(100svh - 104px) !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    padding: 0 !important; }
+  .hero.hero-run > .wrap { align-self: center; padding-block: clamp(12px, 1.8vw, 26px); }
+  .hero.hero-run .flat-run { align-self: end; }
+}
+/* copy on top, the demo beneath it — one column, not a split.
+   The copy takes only the height it needs; the demo takes every pixel left,
+   edge to edge, so the first screen is mostly the work rather than margin. */
+@media (min-width: 900px) {
+  /* the page gutter is 10vw, which left 144px dead on each side of the hero */
+  .hero.hero-run > .wrap { padding-inline: clamp(24px, 3vw, 56px); max-width: none;
+    align-self: stretch; padding-block: clamp(8px, 1.4vh, 18px) 0; }
+  .hero.hero-run .hero-split {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: auto minmax(0, 1fr);
+    justify-items: stretch; align-items: stretch; align-content: stretch;
+    min-height: 0; gap: clamp(12px, 2vh, 24px); }
+  /* Two lines of headline, one row of actions. The copy used to stack
+     buttons and proof chips on separate rows, which spent ~40px of the first
+     screen on air and left the pictures under it at thumbnail size. */
+  .hero.hero-run .hero-split { gap: clamp(12px, 1.8vh, 20px); }
+  .hero.hero-run .hero-copy { max-width: none; margin-inline: auto; text-align: center; }
+  .hero.hero-run .hero-copy h1 { max-width: 22ch; margin-inline: auto; text-wrap: balance;
+    font-size: clamp(32px, min(3.7vw, 5.8svh), 54px); }
+  .hero.hero-run .hero-copy .sub { max-width: 68ch; margin-inline: auto; margin-top: clamp(8px, 1.2vh, 14px); text-wrap: pretty; }
+  .hero.hero-run .act-row {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 12px clamp(18px, 2.2vw, 32px); margin-top: clamp(14px, 2.2vh, 24px); }
+  .hero.hero-run .act-row .acts,
+  .hero.hero-run .act-row .chips { margin-top: 0 !important; justify-content: center; }
+
+  /* the demo spans the page and fills the rest of the screen */
+  .hero.hero-run .fit-box, .hero.hero-run .hero-fit {
+    width: 100% !important; max-width: none; height: 100% !important; }
+  .hero.hero-run .hero-fit { transform: none !important; }
+  .hero.hero-run .hero-view { width: 100%; min-height: 0; align-self: stretch; display: block; }
+
+  /* The band: two picture columns and the mark between them. The gap is not
+     a gutter any more — it is where the arrows live, library -> mark -> frames,
+     so the flow reads at the height of the pictures instead of in a strip
+     under them. network.css caps a same-named wizard .flow at 780px — not this one. */
+  .hero.hero-run .flow {
+    --fx-gap: clamp(44px, 4.6vw, 80px);
+    --fx-hub: clamp(200px, 17vw, 270px);
+    width: 100%; max-width: none; height: 100%; margin: 0;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: stretch; gap: 0;
+    padding: clamp(42px, 5.4vh, 54px) clamp(18px, 2vw, 32px) clamp(18px, 2.6vh, 30px); }
+  .hero.hero-run .flow-side { height: 100%; min-height: 0; }
+  .hero.hero-run .flow-mid {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    padding-inline: var(--fx-gap); }
+  .hero.hero-run .flow-reel { width: var(--fx-hub); font-size: 13.5px; }
+
+  /* Left: the library as a 2x2 that fills its column edge to edge.
+     Right: one tall lead frame on the outside, two stacked towards the mark,
+     so both sides carry the same weight and neither has a hole in it. */
+  .hero.hero-run .fi-a { --cx: 25%;   --cy: 27%; --w: 47%; --h: 48%; --r: -2deg; }
+  .hero.hero-run .fi-b { --cx: 74.5%; --cy: 28%; --w: 46%; --h: 52%; --r: 2deg; }
+  .hero.hero-run .fi-c { --cx: 25.5%; --cy: 76%; --w: 47%; --h: 40%; --r: 1.5deg; }
+  .hero.hero-run .fi-d { --cx: 74%;   --cy: 78%; --w: 45%; --h: 38%; --r: -2deg; }
+  .hero.hero-run .fo-a { --cx: 71%;   --cy: 50%; --w: 56%; --h: 94%; --r: 1.5deg; }
+  .hero.hero-run .fo-b { --cx: 21%;   --cy: 26%; --w: 40%; --h: 47%; --r: -2deg; }
+  .hero.hero-run .fo-c { --cx: 21%;   --cy: 75%; --w: 40%; --h: 47%; --r: 2deg; }
+}
+
 /* ---- Atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
@@ -215,11 +331,15 @@ main { position: relative; z-index: 3; }
   font-family: var(--sans); font-size: 14px; font-weight: 500; text-decoration: none;
   transition: background .25s ease, transform .25s var(--easing); }
 .btn-glass:hover { background: var(--glass-hover); transform: translateY(-2px); }
-a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; }
+/* A pink ring alone measured 2.44:1 on the light ground. The ink ring carries
+   the 3:1 non-text contrast; the pink sits inside it and keeps the brand cue. */
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible,
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--ink); outline-offset: 3px;
+  box-shadow: 0 0 0 5px var(--acc-28); border-radius: 4px; }
 .rv { transition: opacity .7s var(--easing), transform .7s var(--easing); }
 .rv-on .rv { opacity: 0; transform: translateY(24px); }
 .rv-on .rv.in { opacity: 1; transform: none; }
-.rv-d1 { transition-delay: .08s; } .rv-d2 { transition-delay: .16s; } .rv-d3 { transition-delay: .24s; }
 @media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; transition: none; } }
 .sec { position: relative; padding: calc(var(--u) * 12) 0; }
 @media (max-width: 720px) {
@@ -238,13 +358,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   min-height: calc(100vh - 104px);
   display: flex; align-items: center;
   padding: calc(var(--u) * 5) 0; }
-.hero-center { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
-.sec-visual { padding-top: 0; }
-.sec-visual .vwrap { width: min(100%, 780px); margin: 0 auto; }
 /* visual animations wait until the section scrolls into view */
-.sec-visual .vwrap:not(.in) *,
-.sec-visual .vwrap:not(.in) *::before,
-.sec-visual .vwrap:not(.in) *::after { animation-play-state: paused !important; }
 .hero h1 { font-size: clamp(42px, 5.5vw, 76px); max-width: 18ch; margin-inline: auto; }
 .hero .sub { max-width: 62ch; margin: 22px auto 0; font-size: clamp(15px, 1.25vw, 17.5px); line-height: 1.65; color: var(--ink-4); }
 .hero .acts { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 30px; justify-content: center; }
@@ -264,91 +378,19 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 /* ============================================================
    WHY — a sampling round, compared (no money)
    ============================================================ */
-.cmp2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.cmp2 .col { padding: 28px 26px; }
-.cmp2 .tag {
-  display: inline-block; padding: 7px 15px; border-radius: 999px;
-  font-family: var(--mono); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; }
-.cmp2 .without .tag { background: rgba(var(--surface-rgb), .08); color: var(--ink-4); border: 1px solid var(--line-2); }
-.cmp2 .with { border-color: var(--acc-45) !important; background: linear-gradient(170deg, var(--acc-10), var(--glass)) !important; }
-.cmp2 .with .tag { background: var(--grad-acc); color: #200814; }
-.cmp2 ul { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 13px; }
-.cmp2 li { display: grid; gap: 2px; padding-left: 22px; position: relative; font-size: 13.5px; color: var(--ink-4); line-height: 1.5; }
-.cmp2 li b { color: var(--ink); font-family: var(--disp); font-size: 14.5px; }
-.cmp2 li::before { content: ''; position: absolute; left: 0; top: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--ink-7); }
-.cmp2 .with li::before { background: var(--acc); }
 /* comparison columns (cmp-col was unstyled — the alignment bug) */
-.cmp-col { padding: 28px 26px; }
-.cmp-col h3 { font-family: var(--disp); font-size: 19px; font-weight: 700; margin: 0 0 6px; }
-.cmp-col.lit { border-color: var(--acc-45) !important; background: linear-gradient(170deg, var(--acc-10), var(--glass)) !important; }
-.cmp-col.lit li::before { background: var(--acc); }
-.cmp-note {
-  text-align: center; margin-top: 26px;
-  font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--ink-5); }
-@media (max-width: 820px) { .cmp2 { grid-template-columns: 1fr; } }
 
 /* ============================================================
    REVIEW KIT — what every sample includes
    ============================================================ */
-.kit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.kit-c { padding: 26px 24px; }
-.kit-c .ki { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--acc-text); }
-.kit-c h3 { font-family: var(--disp); font-size: 17px; font-weight: 700; margin: 10px 0 8px; }
-.kit-c p { font-size: 13.5px; color: var(--ink-4); line-height: 1.6; margin: 0; }
-@media (max-width: 900px) { .kit { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px) { .kit { grid-template-columns: 1fr; } }
 
 /* ============================================================
    INDUSTRY PROOF band
    ============================================================ */
-.pb-stat { text-align: center; padding: 10px; }
-.pb-stat b {
-  display: block; font-family: var(--disp); font-weight: 600;
-  font-size: clamp(30px, 3.4vw, 48px); letter-spacing: -.025em;
-  background: var(--grad-acc-ink, var(--grad-acc)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.pb-stat span { display: block; margin-top: 8px; font-size: 12.5px; color: var(--ink-4); line-height: 1.5; max-width: 30ch; margin-left: auto; margin-right: auto; }
-.pb-note {
-  text-align: center; margin-top: 20px;
-  font-family: var(--mono); font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase;
-  color: var(--ink-5); }
 
 /* ============================================================
    CHAT + weeks (a real sampling round)
    ============================================================ */
-.chat-wrap { display: grid; grid-template-columns: 6fr 6fr; gap: clamp(30px, 4vw, 60px); align-items: center; }
-.chat { padding: calc(var(--u) * 3); display: grid; gap: 12px; max-width: 520px; }
-.chat .day { text-align: center; font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); padding: 4px 0; }
-.msg {
-  max-width: 82%; padding: 12px 16px; border-radius: 18px;
-  font-size: 14.5px; line-height: 1.5;
-  opacity: 0; transform: translateY(14px) scale(.96);
-  transition: opacity .5s var(--easing), transform .5s var(--easing); }
-.chat.play .msg { opacity: 1; transform: none; }
-.msg.them { background: rgba(255,255,255,.1); color: var(--ink); border-bottom-left-radius: 6px; justify-self: start; }
-.msg.us { background: var(--grad-acc); color: #200814; font-weight: 500; border-bottom-right-radius: 6px; justify-self: end; }
-.msg.us .tick { font-size: 11px; opacity: .7; margin-left: 6px; }
-.chat.play .msg:nth-of-type(1) { transition-delay: .2s; }
-.chat.play .msg:nth-of-type(2) { transition-delay: 1s; }
-.chat.play .msg:nth-of-type(3) { transition-delay: 1.9s; }
-.chat.play .msg:nth-of-type(4) { transition-delay: 2.8s; }
-.chat.play .msg:nth-of-type(5) { transition-delay: 3.7s; }
-.msg .mini { display: block; margin-top: 10px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(7,21,35,.3); background: #fff; }
-.msg .mini .mb { display: flex; gap: 4px; padding: 6px 8px; background: #F1F0F7; border-bottom: 1px solid rgba(20,19,43,.08); }
-.msg .mini .mb i { width: 5px; height: 5px; border-radius: 50%; background: #C9C7D8; }
-.msg .mini .mc { display: block; padding: 10px; }
-.msg .mini .mc .a { display: block; height: 8px; width: 60%; border-radius: 4px; background: #14132B; }
-.msg .mini .mc .b { display: block; height: 5px; width: 85%; border-radius: 3px; background: #FBD3E6; margin-top: 7px; }
-.msg .mini .mc .c { display: block; height: 12px; width: 34%; border-radius: 999px; background: linear-gradient(135deg, #FF9DCB, #E04893); margin-top: 9px; }
-.msg .cap { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; opacity: .75; margin-top: 8px; }
-.chat .done {
-  justify-self: center; display: inline-flex; align-items: center; gap: 8px;
-  font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--acc-text); background: var(--acc-10); border: 1px solid var(--acc-30);
-  padding: 8px 16px; border-radius: 999px;
-  opacity: 0; transform: translateY(10px);
-  transition: opacity .5s var(--easing) 4.4s, transform .5s var(--easing) 4.4s; }
-.chat.play .done { opacity: 1; transform: none; }
 .weeks { display: grid; }
 .week { display: grid; grid-template-columns: 74px 1fr; gap: 20px; align-items: baseline; padding: calc(var(--u) * 3) 0; border-top: 1px solid var(--line); }
 .week:first-child { border-top: 0; }
@@ -372,19 +414,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .weeks.rv-steps.armed.in .week:nth-child(2) { transition-delay: .28s; }
 .weeks.rv-steps.armed.in .week:nth-child(3) { transition-delay: .46s; }
 .weeks.rv-steps.armed.in .week:nth-child(4) { transition-delay: .64s; }
-.weeks.rv-steps.armed.in .week:nth-child(5) { transition-delay: .82s; }
 @media (prefers-reduced-motion: reduce) {
   .weeks.rv-steps.armed .week { opacity: 1 !important; transform: none !important; transition: none !important; }
 }
-@media (max-width: 980px) { .chat-wrap { grid-template-columns: 1fr; } .chat { max-width: 100%; } }
-@media (prefers-reduced-motion: reduce) { .msg, .chat .done { opacity: 1 !important; transform: none !important; transition: none !important; } }
 
 /* ============================================================
    ACCURACY + PROOF SLOTS + FAQ + CONTACT
    ============================================================ */
-.acc-honest { max-width: 780px; margin: 0 auto; text-align: center; }
-.acc-honest p { font-size: 15px; color: var(--ink-3); line-height: 1.7; margin: 14px 0 0; }
-.acc-honest .soft { color: var(--ink-4); font-size: 14px; }
 
 .faq-list { max-width: 820px; margin: 0 auto; display: grid; gap: 12px; }
 .faq-row { border-radius: 16px; overflow: hidden; transition: border-color .3s ease; }
@@ -419,21 +455,20 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
      dark-on-white one, which on a pale panel is a grey smudge with a
      near-invisible edge. Light gives the field the paper colour and lets a
      real border define it; dark keeps the lift, below. */
-  background: var(--paper-3);
-  border: 1px solid var(--line-2); border-radius: 13px;
+  background-color: var(--field); border: 1px solid var(--field-edge); border-radius: 13px;
   /* 16px is the floor: iOS auto-zooms the page on focus below it. */
   padding: 13px 15px; font-family: var(--sans); font-size: 16px; color: var(--ink);
   transition: border-color .25s ease, box-shadow .25s ease; }
 .cform .fi::placeholder { color: var(--ink-5); }
-.cform .fi:focus { outline: none; border-color: var(--acc); box-shadow: 0 0 0 3px var(--acc-16); }
+.cform .fi:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--acc-28); }
 .cform select.fi { -webkit-appearance: none; appearance: none; cursor: pointer;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF6FB3' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 14px center; background-size: 14px;
   padding-right: 40px; }
-.cform select.fi option { background: #131024; color: var(--ink); }
-.cform textarea.fi { min-height: 110px; resize: vertical; }
-.cform .fi[aria-invalid="true"] { border-color: #FF7AB8; background: rgba(255,79,160,.08); }
-.cform-err { margin: 0; font-size: 13px; color: #FF7AB8; }
+.cform select.fi option { background: var(--field-option); color: var(--ink); }
+.cform textarea.fi { min-height: 140px; resize: vertical; }
+.cform .fi[aria-invalid="true"] { border-color: var(--err); box-shadow: inset 0 0 0 1px var(--err); }
+.cform-err { margin: 0; font-size: 13px; font-weight: 500; color: var(--err); }
 .cside { padding: clamp(22px, 3vw, 32px); }
 .cside h3 { font-family: var(--disp); font-size: 20px; font-weight: 700; margin: 12px 0 14px; }
 .cside ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; }
@@ -460,12 +495,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   -webkit-mask-composite: xor; mask-composite: exclude;
   pointer-events: none; }
 .cside .mail {
-  display: inline-flex; align-items: center; gap: 10px; margin-top: 22px;
+  display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 22px; max-width: 100%;
   padding: 10px 17px; border-radius: 999px; cursor: pointer;
   background: var(--glass); border: 1px solid var(--glass-border);
   font-family: var(--mono); font-size: 12px; color: var(--ink-3);
   transition: border-color .25s ease, color .25s ease; }
 .cside .mail:hover { border-color: var(--acc-45); color: var(--ink); }
+.cside .mail .nowrap { white-space: nowrap; }
 
 .sticky-cta {
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
@@ -479,45 +515,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .sticky-cta .btn-acc { width: 100%; min-height: 46px; }
 @media (max-width: 720px) { .sticky-cta { display: block; } }
 
-/* ============================================================
-   AI-PHOTOGRAPHY-SPECIFIC — before/after placeholder hero
-   ============================================================ */
-.ba { position: relative; overflow: hidden; min-height: clamp(320px, 48vh, 500px); border-radius: 20px; display: flex; align-items: center; justify-content: center; gap: 18px; padding: 28px 22px 64px; }
-.ba-f { flex: 1; max-width: 200px; }
-.ba-frame {
-  aspect-ratio: 3 / 4; border-radius: 14px; border: 1.5px dashed rgba(var(--surface-rgb), .22);
-  background: rgba(var(--surface-rgb), .035);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-  color: var(--ink-4); padding: 14px;
-  animation: ba-in .8s .3s ease both; }
-.ba-frame.lit { border-color: var(--acc-30); background: rgba(255,111,179,.06); color: var(--acc-l-text); animation-delay: 1s; }
-.ba-ic { width: 64px; height: 64px; }
-.ba-tag { font-family: var(--mono); font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase; text-align: center; }
-.ba-arrow { position: relative; width: 54px; height: 2px; background: linear-gradient(90deg, rgba(var(--surface-rgb), .25), var(--acc)); animation: ba-in .6s .8s ease both; }
-.ba-arrow span { position: absolute; right: -1px; top: 50%; width: 9px; height: 9px; border-top: 2px solid var(--acc); border-right: 2px solid var(--acc); transform: translateY(-50%) rotate(45deg); }
-@keyframes ba-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-@media (prefers-reduced-motion: reduce) { .ba-frame, .ba-arrow { animation: none; opacity: 1; transform: none; } }
-.ba-chip {
-  position: absolute; left: 50%; bottom: 16px; translate: -50% 0;
-  display: inline-flex; align-items: center; gap: 8px; width: max-content; max-width: 94%;
-  padding: 9px 18px; border-radius: 999px; text-align: center;
-  background: rgba(var(--scrim-rgb), .75); border: 1px solid var(--acc-30);
-  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-  font-family: var(--mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--acc-l-text); }
-.ba-chip::before { content: ''; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--acc); }
-.td-cap {
-  text-align: center; margin: 12px 0 0;
-  font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
-  color: var(--ink-4); }
-@media (max-width: 460px) { .ba { gap: 10px; padding: 22px 12px 64px; } .ba-arrow { width: 30px; } }
-
 
 /* mobile performance: lighter effect cost, lazy below-fold rendering — same visuals */
 @media (max-width: 720px) {
   .blob { filter: blur(60px); }
-  .b4, .b5 { display: none; }
-  .glass-p { -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px); }
   .topnav { -webkit-backdrop-filter: saturate(160%) blur(12px) !important; backdrop-filter: saturate(160%) blur(12px) !important; }
   .rv { transition-duration: .45s; }
 }
@@ -527,19 +528,25 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   :root:not([data-theme="light"]) { --acc: var(--acc-bright); --acc-text: var(--acc-bright); --acc-disp: var(--acc-bright); --acc-l-text: var(--acc-l); --grad-acc-ink: var(--grad-acc); }
 }
 
-/* The field lifts against the dark ground, where a bordered white box glares. */
-:root[data-theme="dark"] .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
-:root[data-theme="dark"] .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+/* The field lifts against the dark ground, where a bordered white box glares.
+   These are tokens now, not rules: the old element-level overrides used the
+   `background` shorthand — which reset the select's chevron image — and
+   outranked .cform .fi[aria-invalid], so an invalid field looked fine. */
+:root { --field: var(--paper-3); --field-edge: rgba(var(--shadow-rgb), .28);
+        --field-option: #FFFFFF; --err: #C4143F; }
+:root[data-theme="dark"] { --field: rgba(255,255,255,.07); --field-edge: rgba(255,255,255,.22);
+        --field-option: #131024; --err: #FF9EC6; }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
-  :root:not([data-theme="light"]) .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+  :root:not([data-theme="light"]) { --field: rgba(255,255,255,.07); --field-edge: rgba(255,255,255,.22);
+        --field-option: #131024; --err: #FF9EC6; }
 }
+.cform .fi:focus { background-color: var(--field); }
 /* A browser that fills a field paints it itself and ignores background-color;
    only an inset shadow and -webkit-text-fill-color reach it. */
 .cform .fi:-webkit-autofill, .cform .fi:-webkit-autofill:hover,
 .cform .fi:-webkit-autofill:focus, .cform .fi:autofill {
   -webkit-text-fill-color: var(--ink); caret-color: var(--ink);
-  -webkit-box-shadow: inset 0 0 0 1000px var(--paper-3); box-shadow: inset 0 0 0 1000px var(--paper-3);
+  -webkit-box-shadow: inset 0 0 0 1000px var(--field); box-shadow: inset 0 0 0 1000px var(--field);
   transition: background-color 9999s ease-in-out 0s; border-color: var(--line-2);
 }
 :root[data-theme="dark"] .cform .fi:-webkit-autofill,
@@ -560,77 +567,598 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
    accent on an item that is no more important than the eight beside it — and
    nothing at all happened on hover. The tint now follows the pointer, so the
    colour marks what the reader is actually looking at. */
-.kit-c { transition: border-color .2s var(--easing), background .2s var(--easing), transform .2s var(--easing); }
-.kit-c:hover {
-  border-color: var(--acc-45);
-  background: linear-gradient(170deg, var(--acc-10), var(--glass));
-  transform: translateY(-3px);
-}
-@media (prefers-reduced-motion: reduce) { .kit-c:hover { transform: none; } }
-@media (hover: none) { .kit-c:hover { transform: none; } }
 
 
-/* Input, reel, output — one band.
-   Read off the reference: scattered images at varied sizes on either side of
-   a tall portrait reel, arrows underneath tying the three together. The
-   first attempt put a neat 2x2 grid beside a dashed box, which is rigid
-   where this wants to be a collage — the varied sizes are what stop it
-   reading as a spreadsheet. */
+/* Input, mark, output — one band.
+   Scattered images at varied sizes on either side of the studio mark,
+   arrows underneath tying the three together. The varied sizes are what
+   stop it reading as a spreadsheet. */
 .flow {
+  --fx-gap: 26px; --fx-hub: clamp(200px, 24vw, 280px);
   position: relative; display: grid; gap: 14px; align-items: center;
   grid-template-columns: 1fr;
   padding: clamp(20px, 3vw, 30px) clamp(16px, 3vw, 28px) clamp(46px, 5vw, 62px);
   background: var(--glass); border: 1px solid var(--glass-border); border-radius: 18px;
 }
-@media (min-width: 900px) { .flow { grid-template-columns: 1fr auto 1fr; gap: 26px; } }
+@media (min-width: 900px) { .flow { grid-template-columns: 1fr auto 1fr; gap: var(--fx-gap); } }
 
 .flow-side { position: relative; min-height: 210px; }
 .flow-lab {
-  position: absolute; top: -4px; z-index: 2;
-  font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em;
-  text-transform: uppercase; color: var(--ink-5);
-}
-.flow-in .flow-lab { left: 4px; }
-.flow-out .flow-lab { right: 4px; }
+  position: absolute; top: -30px; z-index: 2;
+  display: flex; align-items: baseline; gap: 10px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink-4); }
+.flow-lab b { font-weight: 500; }
+.flow-lab i { font-style: normal; letter-spacing: .08em; color: var(--ink-5); }
+.flow-lab i::before { content: '·'; margin-right: 10px; color: var(--acc); }
+.flow-in .flow-lab { left: 2px; }
+.flow-out .flow-lab { right: 2px; }
 
-/* each card is its own size and sits at its own angle — the collage is the point */
+/* Each card is placed by its CENTRE, not its corner. That is what lets a
+   card fly to the mark: the point it travels to is a point, and the same
+   translate(-50%,-50%) holds at every frame of the trip. */
 .flow .fi, .flow .fo {
   position: absolute; margin: 0; overflow: hidden;
+  left: var(--cx); top: var(--cy); width: var(--w); height: var(--h);
+  transform: translate(-50%, -50%) rotate(var(--r, 0deg));
   border-radius: 10px; background: #fff; border: 1px solid var(--line-2);
   box-shadow: 0 12px 26px -14px rgba(var(--shadow-rgb), .5);
 }
 .flow .fi img, .flow .fo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* a garment shot flat is shown whole; an on-model frame is cropped */
+.flow .fi-a img, .flow .fi-c img { object-fit: contain; }
 
-.fi-a { width: 42%; height: 108px; left: 2%;  top: 26px;  transform: rotate(-3deg); }
-.fi-b { width: 30%; height: 76px;  left: 48%; top: 22px;  transform: rotate(2.5deg); }
-.fi-c { width: 34%; height: 92px;  left: 10%; top: 128px; transform: rotate(2deg); }
-.fi-d { width: 26%; height: 70px;  left: 50%; top: 118px; transform: rotate(-2deg); }
+.fi-a { --cx: 27%; --cy: 30%; --w: 52%; --h: 132px; --r: -2.5deg; }
+.fi-b { --cx: 76%; --cy: 27%; --w: 42%; --h: 118px; --r: 2.5deg; }
+.fi-c { --cx: 26%; --cy: 76%; --w: 50%; --h: 104px; --r: 2deg; }
+.fi-d { --cx: 76%; --cy: 76%; --w: 42%; --h: 104px; --r: -2.5deg; }
 
-.fo-a { width: 40%; height: 100px; right: 3%;  top: 26px;  transform: rotate(2.5deg); }
-.fo-b { width: 28%; height: 78px;  right: 46%; top: 34px;  transform: rotate(-2deg); }
-.fo-c { width: 36%; height: 88px;  right: 12%; top: 130px; transform: rotate(-3deg); }
+.fo-a { --cx: 74%; --cy: 38%; --w: 46%; --h: 168px; --r: 2deg; }
+.fo-b { --cx: 27%; --cy: 24%; --w: 42%; --h: 100px; --r: -2.5deg; }
+.fo-c { --cx: 28%; --cy: 76%; --w: 38%; --h: 120px; --r: -2deg; }
 
-/* the reel is portrait, because that is the shape this output is used at */
+/* the middle slot is portrait, because that is the shape this output is used at */
 .flow-mid { display: flex; justify-content: center; }
 .flow-reel {
-  width: 172px; aspect-ratio: 3 / 4;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px;
-  border-radius: 13px; border: 1px dashed var(--line-2);
+  position: relative; width: var(--fx-hub);
+  display: grid; place-items: center;
+  border-radius: 16px; border: 1px solid var(--line-2);
   background: rgba(var(--surface-rgb), .03); color: var(--ink-5);
-  font-size: 12.5px; text-align: center; padding: 0 14px;
+  font-size: 12.5px; text-align: center; padding: clamp(18px, 2vw, 26px) clamp(16px, 1.6vw, 22px);
 }
-.flow-reel svg { width: 26px; height: 26px; }
 
 /* the arrows sit under everything and simply carry the eye across */
-.flow-link { position: absolute; left: 4%; right: 4%; bottom: 16px; width: 92%; height: 40px; overflow: visible;
-  stroke: var(--acc); stroke-width: 1.2; fill: none; opacity: .5; }
-.flow-link .hd { fill: var(--acc); stroke: none; }
+.act-row { display: contents; }
+.fx-fan { display: none; }
+@media (min-width: 900px) {
+  /* the flow, drawn in the gap: three rails converge on the mark from the
+     library and fan out again to the frames, with light running along them */
+  .hero.hero-run .fx-fan {
+    display: block; position: absolute; top: 8%; height: 84%;
+    width: var(--fx-gap); overflow: visible; fill: none; }
+  .hero.hero-run .fx-fan-in { left: 0; }
+  .hero.hero-run .fx-fan-out { right: 0; }
+  .fx-fan path { vector-effect: non-scaling-stroke; stroke-linecap: round; }
+  .fx-fan .rail { stroke: var(--acc); stroke-width: 1.2; opacity: .22; }
+  .fx-fan .pulse { stroke: var(--acc); stroke-width: 2.4; stroke-dasharray: 6 150;
+    animation: fx-run 2.4s cubic-bezier(.5, 0, .5, 1) infinite; }
+  .fx-fan .pulse.p2 { animation-delay: .8s; }
+  .fx-fan .pulse.p3 { animation-delay: 1.6s; }
+  .fx-fan-out .pulse { animation-delay: 1.2s; }
+  .fx-fan-out .pulse.p2 { animation-delay: 2s; }
+  .fx-fan-out .pulse.p3 { animation-delay: 2.8s; }
+}
+@keyframes fx-run { from { stroke-dashoffset: 6; } to { stroke-dashoffset: -150; } }
 @media (max-width: 899px) {
   /* stacked, the collage would overlap itself — a plain row is honest here */
-  .flow-side { min-height: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding-top: 22px; }
-  .flow .fi, .flow .fo { position: static; width: auto; height: 84px; transform: none; }
-  .flow-link { display: none; }
+  .flow-side { min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-top: 22px; }
+  .flow .fi, .flow .fo { position: static; width: auto; height: 84px; transform: none; animation: none; }
 }
+
+/* ============================================================
+   REVAMP — the tech pack's surface system, in this page's pink,
+   and the section shape read off the reference site: a ruled mono
+   kicker, one two-line heading, one supporting line, then the work.
+   Nothing here prices the service; the ask is always the same form.
+   ============================================================ */
+:root {
+  --card: rgba(var(--surface-rgb), .045);
+  --card-2: rgba(var(--surface-rgb), .075);
+  --edge: rgba(var(--surface-rgb), .10);
+  --edge-2: rgba(var(--surface-rgb), .16);
+  --r: 20px; --r-sm: 14px;
+  --lift: 0 1px 0 rgba(var(--lift-rgb), .07) inset, 0 20px 50px -24px rgba(var(--shadow-rgb), .6);
+  --lift-h: 0 1px 0 rgba(var(--lift-rgb), .10) inset, 0 28px 64px -26px rgba(var(--shadow-rgb), .75);
+  --seam: clamp(46px, 5.6vw, 78px);
+  --acc-08: rgba(255,111,179,.08);
+  --acc-14: rgba(255,111,179,.14);
+  --acc-28: rgba(255,111,179,.28);
+}
+/* the light theme lifts with white sheets and a real shadow, like the tech pack */
+:root:not([data-theme="dark"]) { --card: #FFFFFF; --card-2: #FFFFFF; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --card: rgba(255,255,255,.045); --card-2: rgba(255,255,255,.075); }
+}
+
+/* one rhythm at every seam */
+.sec { padding: var(--seam) 0; }
+@media (max-width: 720px) { .sec { padding: calc(var(--seam) * .78) 0; } }
+/* a panel is a lifted sheet now, not a blurred pane */
+.glass-p {
+  background: var(--card); border: 1px solid var(--edge);
+  border-radius: var(--r); box-shadow: var(--lift);
+  backdrop-filter: none; -webkit-backdrop-filter: none; }
+
+/* ---- section head: ruled kicker, one heading, one line ---- */
+.sec-head { max-width: 48ch; margin: 0 0 clamp(26px, 3vw, 42px); text-align: left; }
+.sec-head .kicker { display: inline-flex; align-items: center; gap: 10px; }
+.sec-head .kicker::before { content: ''; width: 26px; height: 1px; background: var(--acc); flex: none; }
+.sec-head h2 { font-size: clamp(28px, 3.4vw, 46px); margin-top: 16px; }
+.sec-head .sub { max-width: 56ch; }
+.sec-head.mid { margin-inline: auto; text-align: center; }
+.sec-head.mid .sub { margin-inline: auto; }
+.sec-head.mid .kicker::after { content: ''; width: 26px; height: 1px; background: var(--acc); flex: none; }
+
+/* ---- the card used by "why" and "rights": number, icon, claim ---- */
+
+/* ---- how it works: one rail, five beats, left to right ---- */
+@media (min-width: 900px) {
+  .weeks.rail { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(18px, 2vw, 30px); position: relative; }
+  .weeks.rail::before {
+    content: ''; position: absolute; left: 12%; right: 12%; top: 23px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--edge-2) 10%, var(--edge-2) 90%, transparent); }
+  .weeks.rail .week {
+    grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 0;
+    border-top: 0; text-align: center; justify-items: center; align-items: start; }
+  .weeks.rail .week .wn {
+    position: relative; z-index: 1; display: grid; place-items: center;
+    width: 46px; height: 46px; border-radius: 50%;
+    font-family: var(--mono); font-size: 13px; letter-spacing: 0;
+    color: var(--acc-text); -webkit-text-stroke: 0;
+    background: var(--card); border: 1px solid var(--edge-2); box-shadow: var(--lift); }
+  .weeks.rail .week:hover .wn { border-color: var(--acc-28); }
+  .weeks.rail .week p { max-width: 32ch; margin-inline: auto; }
+}
+
+/* ---- the fidelity promise reads as a statement, not a card grid ---- */
+
+/* ---- shoot real / generate: two columns, one of them lit ---- */
+
+/* ---- the delivered kit under the before/after ---- */
+
+/* ---- FAQ: hairlines, not boxes ---- */
+.faq-list { max-width: 880px; gap: 0; }
+.faq-row {
+  background: none !important; border: 0 !important; box-shadow: none !important;
+  border-radius: 0; border-top: 1px solid var(--edge) !important; }
+.faq-row:last-child { border-bottom: 1px solid var(--edge) !important; }
+.faq-row.open { border-top-color: var(--acc-45) !important; }
+.faq-row.open .faq-q { color: var(--ink); }
+.faq-q { padding: 21px 6px; font-size: 15.5px; }
+.faq-i { width: 24px; height: 24px; background: none; color: var(--acc-text); font-size: 19px; }
+.faq-row.open .faq-i { background: none; color: var(--acc-text); }
+.faq-a { padding: 0 6px 22px; }
+
+/* ---- the ask: one panel, lit from above, no price anywhere ---- */
+.contact-panel { background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift); }
+.contact-panel::after {
+  content: ''; position: absolute; left: -10%; right: -10%; top: -55%; height: 100%;
+  background: radial-gradient(52% 100% at 50% 100%, var(--acc-14), transparent 72%);
+  pointer-events: none; }
+.contact-panel > * { position: relative; z-index: 1; }
+.cform { background: var(--card-2) !important; border: 1px solid var(--edge) !important; box-shadow: none; }
+.cside { background: none !important; border: 0 !important; box-shadow: none !important; padding-top: 0; }
+.cside .ic {
+  display: grid; place-items: center; width: 42px; height: 42px; margin: 16px 0 0;
+  border-radius: 12px; background: var(--acc-14); color: var(--acc-text); }
+.cside .ic svg { width: 20px; height: 20px; }
+.cside .mail { background: var(--card-2); border: 1px solid var(--edge); }
+
+/* ---- the specialist strip sits quieter than the ask above it ---- */
+.svc-net { background: none !important; border: 1px dashed var(--edge-2) !important; box-shadow: none !important; }
+
+/* ---- bullets inside a card: what the buyer actually gets ---- */
+
+/* ---- the four things we commit to, under the steps ---- */
+.assure {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(12px, 1.4vw, 18px); margin-top: clamp(30px, 4vw, 52px); }
+.assure > div {
+  padding: clamp(18px, 2vw, 26px); border-radius: var(--r-sm);
+  background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift); text-align: center; }
+.assure b {
+  display: block; font-family: var(--disp); font-weight: 600; letter-spacing: -.03em;
+  font-size: clamp(28px, 3.2vw, 42px);
+  color: var(--ink); font-variant-numeric: tabular-nums; }
+.assure span { display: block; margin-top: 8px; font-size: 12.5px; line-height: 1.45; color: var(--ink-4); }
+@media (max-width: 760px) { .assure { grid-template-columns: 1fr 1fr; } }
+
+/* ---- the hero's middle slot carries the studio mark, not a placeholder ---- */
+.flow-reel {
+  min-width: 0; border: 1px solid var(--edge-2); border-style: solid;
+  background: var(--card-2); box-shadow: var(--lift); }
+
+
+/* ============================================================
+   CHAPTER GATES — the page descends through four zones:
+   the bottleneck, the method, the proof, the ask. A gate is a
+   full-bleed band that changes the ground under the reader, and
+   no two sections inside a zone share a shape.
+   Accent discipline: pink marks the heading phrase, the primary
+   action and the live control. Nothing else. Structure is carried
+   by --edge and the mid inks, the way the tech pack carries it.
+   ============================================================ */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-family: var(--mono); font-size: 11.5px; font-weight: 500;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--ink-5); }
+.eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--edge-2); flex: none; }
+
+/* a head that is not a centred stack: statement left, note right */
+.head-split {
+  display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr);
+  gap: clamp(20px, 4vw, 64px); align-items: end;
+  margin-bottom: clamp(30px, 4vw, 54px); }
+.head-split h2 { font-size: clamp(30px, 3.9vw, 54px); margin: 18px 0 0; max-width: 18ch; text-wrap: balance; }
+.head-note { margin: 0 0 6px; font-size: 15px; line-height: 1.65; color: var(--ink-4); max-width: 42ch; text-wrap: pretty; }
+@media (max-width: 860px) { .head-split { grid-template-columns: 1fr; align-items: start; } .head-split h2 { max-width: 20ch; } }
+
+/* the gate itself: full-bleed band, its own ground */
+.gate { position: relative; }
+.gate::before {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  left: 50%; width: 100vw; transform: translateX(-50%);
+  background: rgba(var(--surface-rgb), .035);
+  border-block: 1px solid var(--edge); }
+:root[data-theme="light"] .gate::before { background: rgba(var(--shadow-rgb), .025); }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .gate::before { background: rgba(var(--shadow-rgb), .025); } }
+
+/* ---------- 01 · LEDGER — rows, not cards ---------- */
+
+/* ---------- 02 · EDITORIAL SPREADS — 62/38, alternating ---------- */
+
+/* the empty frame: designed, labelled, aspect-locked, ready for a real photo */
+
+/* ---------- 03 · VIEWER — pill tabs drive one stage ---------- */
+/* plain block: the reader keeps their scroll, the tabs do the paging */
+/* the bar reports how far through the five states the reader is */
+
+/* ---------- 04 · STAGE — the before/after runs edge to edge ---------- */
+.stage { padding-block: clamp(46px, 5.6vw, 84px); }
+.stage .ba-wrap { max-width: 520px; }
+/* the claim beside the proof, so the section is one screen tall */
+.ba-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
+  gap: clamp(26px, 4vw, 64px); align-items: center; }
+.ba-say h2 { font-size: clamp(26px, 3vw, 40px); margin: 16px 0 0; }
+.ba-say .head-note { max-width: 46ch; }
+.ba-pts { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 12px; max-width: 48ch; }
+.ba-pts li { position: relative; padding-left: 20px; font-size: 13.5px; line-height: 1.6; color: var(--ink-4); }
+.ba-pts li::before { content: ''; position: absolute; left: 0; top: 9px; width: 6px; height: 6px; border-radius: 50%; background: var(--acc); }
+.ba-pts b { color: var(--ink); font-weight: 600; }
+@media (max-width: 900px) { .ba-split { grid-template-columns: 1fr; } .stage .ba-wrap { max-width: 440px; } }
+
+/* ---------- 05 · RAIL — the process, with a line that fills ---------- */
+@media (min-width: 900px) {
+  .weeks.rail::after {
+    content: ''; position: absolute; left: 12%; top: 23px; height: 1px; width: 0;
+    background: var(--grad-acc); transition: width 1.4s cubic-bezier(.33, 1, .68, 1) .2s; }
+  .weeks.rail.in::after { width: 76%; }
+}
+@media (prefers-reduced-motion: reduce) { .weeks.rail::after { transition: none; width: 76%; } }
+
+/* ---------- 06 · MASONRY — work, filtered by chip ---------- */
+
+/* ---------- 07 · FIT — who this is for, and who it is not ---------- */
+
+/* ---------- 08 · STRIP — rights, said once, in a line ---------- */
+
+/* ---------- the pink spotlight, the way the tech pack washes amber ---------- */
+.spot { position: relative; }
+.spot::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 0%), var(--acc-14), transparent 62%);
+  opacity: 0; transition: opacity .35s ease; }
+.spot:hover::after, .spot:focus-within::after { opacity: 1; }
+
+/* ---------- motion, varied per archetype (design-law §5) ---------- */
+.rv-on .rv-words > span { opacity: 0; transform: translateY(.42em); display: inline-block; transition: opacity .5s ease, transform .6s cubic-bezier(.16, 1, .3, 1); }
+.rv-on .rv-words.in > span { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .rv-on .rv-drift, .rv-on .rv-wipe, .rv-on .rv-words > span {
+    opacity: 1 !important; transform: none !important; clip-path: none !important; transition: none !important; }
+}
+
+/* ---------- 01 · what you get — six cards, the frame each one produces on top ----------
+   The picture is the claim; the three lines under it are the spec. Nothing longer
+   belongs here, because nothing longer gets read at this point on the page. */
+.dl-head {
+  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+  gap: clamp(18px, 3vw, 54px); align-items: end;
+  margin-bottom: clamp(22px, 2.6vw, 34px); }
+.dl-head h2 { font-size: clamp(28px, 3.3vw, 44px); margin: 14px 0 0; }
+.dl-head .head-note { margin: 0; max-width: 46ch; }
+@media (max-width: 860px) { .dl-head { grid-template-columns: 1fr; align-items: start; } }
+
+.offer { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(12px, 1.4vw, 18px); }
+@media (max-width: 1000px) { .offer { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px)  { .offer { grid-template-columns: 1fr; } }
+
+.off {
+  position: relative; display: flex; flex-direction: column; overflow: hidden;
+  border-radius: var(--r); background: var(--card); border: 1px solid var(--edge);
+  box-shadow: var(--lift); padding: 0 clamp(18px, 1.6vw, 22px) clamp(20px, 1.9vw, 26px);
+  transition: transform .4s var(--easing), box-shadow .4s var(--easing), border-color .4s var(--easing); }
+/* a low accent wash, so the card has a floor and the bullets have something to sit on */
+.off::after {
+  content: ''; position: absolute; inset: auto -20% -40% -20%; height: 60%; z-index: 0;
+  background: radial-gradient(60% 100% at 50% 100%, var(--acc-08), transparent 70%);
+  pointer-events: none; opacity: 0; transition: opacity .45s ease; }
+.off > * { position: relative; z-index: 1; }
+.off-img {
+  position: relative; z-index: 0; margin: 0 calc(-1 * clamp(18px, 1.6vw, 22px)) -14px;
+  aspect-ratio: 4 / 3; overflow: hidden; background: var(--card-2); }
+.off-img img {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+  transition: transform .7s var(--easing);
+  /* the picture dissolves into the card instead of stopping at a hard edge,
+     and a mask does it in whatever colour the card happens to be */
+  -webkit-mask-image: linear-gradient(to bottom, #000 56%, rgba(0,0,0,.35) 84%, transparent 99%);
+  mask-image: linear-gradient(to bottom, #000 56%, rgba(0,0,0,.35) 84%, transparent 99%); }
+
+.off-n {
+  display: block; margin-top: 4px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .16em; color: var(--ink-5);
+  font-variant-numeric: tabular-nums; }
+.off-ic {
+  display: grid; place-items: center; width: 38px; height: 38px; margin: 12px 0 14px;
+  border-radius: 11px; background: var(--grad-acc); color: #200814;
+  box-shadow: 0 8px 20px -10px rgba(255,111,179,.8); }
+.off-ic svg { width: 19px; height: 19px; }
+.off h3 {
+  font-family: var(--disp); font-size: clamp(16px, 1.5vw, 18px); font-weight: 700;
+  letter-spacing: -.02em; margin: 0 0 12px; color: var(--ink); }
+.off ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.off li { position: relative; padding-left: 16px; font-size: 13px; line-height: 1.5; color: var(--ink-4); }
+.off li::before {
+  content: ''; position: absolute; left: 0; top: 8px; width: 5px; height: 5px;
+  border-radius: 50%; background: var(--acc); }
+@media (hover: hover) {
+  .off:hover { transform: translateY(-4px); box-shadow: var(--lift-h); border-color: var(--acc-28); }
+  .off:hover::after { opacity: 1; }
+  .off:hover .off-img img { transform: scale(1.05); }
+}
+
+/* ---- the spec every delivery meets ---- */
+.dl-spec-head { margin: clamp(30px, 3.4vw, 46px) 0 clamp(14px, 1.6vw, 20px); }
+.dl-spec-head h3 { font-size: clamp(20px, 2.2vw, 28px); margin: 12px 0 0; }
+.dl-spec {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(10px, 1.1vw, 14px); }
+@media (max-width: 1000px) { .dl-spec { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px)  { .dl-spec { grid-template-columns: 1fr; } }
+.dl-spec li {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center;
+  padding: clamp(12px, 1.2vw, 16px); border-radius: var(--r-sm);
+  background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift);
+  transition: transform .3s var(--easing), border-color .3s ease; }
+.dl-ic {
+  display: grid; place-items: center; width: 34px; height: 34px;
+  border-radius: 10px; background: var(--acc-14); color: var(--acc-text); }
+.dl-ic svg { width: 17px; height: 17px; }
+.dl-spec b { display: block; font-family: var(--disp); font-size: 13.5px; font-weight: 700; letter-spacing: -.01em; color: var(--ink); }
+.dl-spec span { display: block; margin-top: 3px; font-size: 12px; line-height: 1.45; color: var(--ink-5); }
+@media (hover: hover) { .dl-spec li:hover { transform: translateY(-2px); border-color: var(--acc-28); } }
+
+/* cards arrive with a short lift rather than the page-wide fade */
+.rv-on .rv-card { opacity: 0; transform: translateY(18px) scale(.985); transition: opacity .5s ease, transform .6s cubic-bezier(.16, 1, .3, 1); }
+.rv-on .rv-card.in { opacity: 1; transform: none; }
+
+/* a frame that carries a picture stops advertising that it is empty */
+
+/* the page is short now — the seams can breathe without stretching it */
+:root { --seam: clamp(40px, 4.6vw, 64px); }
+
+/* ============================================================
+   THE HERO EXCHANGE — the collage stays exactly where it was.
+   What is new: the studio mark sits in the middle slot, the
+   library files peel off the left stack and fly into it, and the
+   three delivered frames on the right cycle forward on the same
+   clock. All of it is transform/opacity, so it costs one
+   compositor layer per flier and nothing per frame.
+   ============================================================ */
+
+/* ---- middle slot: the mark the files land in ----
+   The frame IS the card, so its own centre is the point the files fly to.
+   The caption hangs below it and therefore never shifts that centre. */
+.flow-reel { animation: fx-beat 3.5s .6s ease-in-out infinite; }
+.fx-mark { position: relative; z-index: 2; display: block; width: 100%; }
+.fx-mark img { display: block; width: 100%; height: auto; }
+/* the mark takes the delivery: a short swell and an accent halo, once a file lands */
+@keyframes fx-beat {
+  0%, 74%, 100% { transform: scale(1); box-shadow: var(--lift); }
+  80%  { transform: scale(1.045); box-shadow: 0 0 0 7px var(--acc-08), var(--lift); }
+  88%  { transform: scale(1); box-shadow: var(--lift); }
+}
+
+/* ---- the files in transit ----
+   The card you can see is the card that travels. It shrinks into the mark,
+   teleports home while it is invisible, then fades back onto the stack. */
+.flow-in .fi {
+  animation: fi-fly 14s var(--d, 0s) cubic-bezier(.5, .02, .3, 1) infinite;
+}
+.fi-a { --d: .6s; } .fi-b { --d: 4.1s; } .fi-c { --d: 7.6s; } .fi-d { --d: 11.1s; }
+@keyframes fi-fly {
+  /* the trip happens at the START of each card's cycle, so the first card is
+     moving 0.6s after load — it used to sit still for nine seconds first */
+  0%      { left: var(--cx); top: var(--cy); opacity: 1; z-index: 6;
+            transform: translate(-50%, -50%) rotate(var(--r)) scale(1); }
+  4%      { left: var(--cx); top: var(--cy); opacity: 1; z-index: 6;
+            transform: translate(-50%, -50%) rotate(0deg) scale(.94); }
+  /* the mark sits one gap and half a hub to the right of this column */
+  16%     { left: calc(100% + var(--fx-gap) + var(--fx-hub) / 2); top: 50%; opacity: .85;
+            transform: translate(-50%, -50%) rotate(0deg) scale(.26); }
+  20%     { left: calc(100% + var(--fx-gap) + var(--fx-hub) / 2); top: 50%; opacity: 0;
+            transform: translate(-50%, -50%) rotate(0deg) scale(.12); }
+  20.01%  { left: var(--cx); top: var(--cy); opacity: 0; z-index: 1;
+            transform: translate(-50%, -50%) rotate(var(--r)) scale(.9); }
+  28%, 100% { left: var(--cx); top: var(--cy); opacity: 1; z-index: 1;
+            transform: translate(-50%, -50%) rotate(var(--r)) scale(1); }
+}
+
+/* ---- right: the three delivered frames come forward in turn ---- */
+.flow-reel-tag {
+  position: absolute; top: calc(100% + 14px); left: 50%; translate: -50% 0;
+  z-index: 2; width: max-content; max-width: 24ch; padding: 0; background: none; border: 0;
+  font-family: var(--mono); font-size: 10.5px; line-height: 1.55; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-5); text-align: center; }
+.flow-out .fo { animation: fo-turn 10.5s ease-in-out infinite; }
+.flow-out .fo-a { animation-delay: 0s; }
+.flow-out .fo-b { animation-delay: 3.5s; }
+.flow-out .fo-c { animation-delay: 7s; }
+@keyframes fo-turn {
+  /* the payoff is never dimmed — the frame in turn just gets a ring */
+  0%, 30%, 100% { box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 18px 36px -18px rgba(var(--shadow-rgb), .45); }
+  6%, 24% { box-shadow: 0 0 0 2px var(--acc), 0 22px 44px -18px rgba(255,111,179,.6); }
+}
+
+@media (max-width: 899px) {
+  .flow-reel { width: min(72vw, 260px); gap: 12px; justify-items: stretch; }
+  /* stacked, an absolutely-placed caption lands on the row below it —
+     and its width:max-content was widening the grid column past the card */
+  .flow-reel-tag { position: static; translate: none; width: auto; max-width: none; }
+  .flow-mid { margin-block: 6px 14px; }
+  /* four inputs read as 2x2, not a row of three with an orphan */
+  .flow-in { grid-template-columns: repeat(2, 1fr) !important; }
+  /* stacked, the column header is the first row of its grid, not a float above it */
+  .flow-side { padding-top: 0; }
+  .flow-lab { position: static; grid-column: 1 / -1; margin-bottom: 2px; }
+  .flow-out .flow-lab { justify-content: flex-end; }
+
+  /* ---- the phone run: the flow goes DOWN the screen, not across it ----
+     Library on top, the mark in the middle, the frames underneath. Each input
+     card drops into the mark on the same 14s clock as desktop; the trip is a
+     transform (translate + scale), so it stays on the compositor on a phone.
+     --tx/--ty are measured by script: card centre -> mark centre. */
+  .flow-in  { position: relative; z-index: 3; }
+  .flow-mid { position: relative; z-index: 2; margin-block: 0; padding-block: 34px; }
+  .flow-out { position: relative; z-index: 1; }
+  .flow .fi { height: clamp(100px, 28vw, 140px); padding: 5px; background: #FFFFFF; border-radius: 12px; }
+  .flow .fi img { border-radius: 8px; }
+  .flow .fo { height: auto; aspect-ratio: 4 / 5; border-radius: 12px; }
+  /* relative for stacking, so the desktop left/top placement must not apply */
+  .flow .fi, .flow .fo { left: auto; top: auto; }
+  .flow-in .fi { position: relative; will-change: transform, opacity;
+    animation: fi-drop 14s var(--d, 0s) cubic-bezier(.5, .02, .3, 1) infinite; }
+  /* longhands: the shorthand would reset each frame's staggered delay to 0 */
+  .flow-out .fo { animation-name: fo-turn; animation-duration: 10.5s;
+    animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+
+  /* the mark, as on desktop: white plate, turning ring, a halo that breathes */
+  .flow-reel { border: 0; background: #FFFFFF; border-radius: 20px; padding: 18px 16px 14px;
+    box-shadow: 0 20px 50px -22px rgba(255,111,179,.55), 0 8px 20px -12px rgba(var(--shadow-rgb), .35); }
+  .flow-reel::before {
+    content: ''; position: absolute; inset: -2px; z-index: -1; border-radius: 22px; padding: 2px;
+    background: conic-gradient(from var(--ring-a, 0deg), #FF6FB3, #A78BFA, #60A5FA, #FF6FB3);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    animation: fx-ring-turn 6s linear infinite; }
+  .fx-halo { display: block; position: absolute; inset: -22%; z-index: -2; border-radius: 40px; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(255,111,179,.32), transparent);
+    animation: fx-breathe 3.5s .6s ease-in-out infinite; }
+
+  /* two short rails — library -> mark, mark -> frames — with light running down */
+  .flow-mid::before, .flow-mid::after {
+    content: ''; position: absolute; left: 50%; width: 2px; height: 24px; translate: -50% 0; border-radius: 2px;
+    background: linear-gradient(to bottom, transparent, var(--acc) 50%, transparent) 0 -24px / 100% 24px no-repeat,
+                rgba(255,111,179,.22);
+    animation: fx-drip 1.6s linear infinite; }
+  .flow-mid::before { top: 5px; }
+  .flow-mid::after { bottom: 5px; animation-delay: .8s; }
+}
+@keyframes fi-drop {
+  0%        { transform: translate(0, 0) scale(1); opacity: 1; z-index: 6; }
+  4%        { transform: translate(0, 0) scale(.95); opacity: 1; z-index: 6; }
+  16%       { transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(.3); opacity: .9; z-index: 6; }
+  20%       { transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(.14); opacity: 0; z-index: 6; }
+  20.01%    { transform: translate(0, 0) scale(.9); opacity: 0; z-index: 1; }
+  28%, 100% { transform: translate(0, 0) scale(1); opacity: 1; z-index: 1; }
+}
+@keyframes fx-drip { from { background-position: 0 -24px, 0 0; } to { background-position: 0 24px, 0 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .flow-in .fi, .flow-reel, .fx-fan .pulse, .fx-halo, .flow-out .fo,
+  .flow-reel::before, .flow-mid::before, .flow-mid::after { animation: none; }
+  .fx-fan .pulse { opacity: 0; }
+  .flow-out .fo { opacity: 1; }
+}
+
+/* ============================================================
+   HERO STAGE — the band stops being a panel and becomes a stage.
+   A bordered white box read as a dashboard widget; the pictures now
+   sit on the page itself, with a dot field that fades out at the edges
+   and a pink bloom behind the mark, so the eye lands in the middle.
+   ============================================================ */
+@media (min-width: 900px) {
+  .hero.hero-run { position: relative; isolation: isolate; }
+  /* a soft wash behind the headline, so the first screen has an atmosphere */
+  .hero.hero-run::before {
+    content: ''; position: absolute; z-index: -1; pointer-events: none;
+    left: 50%; top: -120px; width: min(1200px, 90vw); height: 520px; translate: -50% 0;
+    background:
+      radial-gradient(40% 55% at 30% 45%, rgba(255,111,179,.14), transparent 70%),
+      radial-gradient(38% 50% at 72% 40%, rgba(167,139,250,.12), transparent 70%); }
+  .hero.hero-run .flow {
+    background: none; border: 0; box-shadow: none; border-radius: 0; isolation: isolate; }
+  .hero.hero-run .flow::before {
+    content: ''; position: absolute; inset: 0; z-index: -2; pointer-events: none;
+    background-image: radial-gradient(rgba(var(--shadow-rgb), .16) 1px, transparent 1.3px);
+    background-size: 22px 22px;
+    -webkit-mask-image: radial-gradient(70% 80% at 50% 50%, #000 30%, transparent 78%);
+    mask-image: radial-gradient(70% 80% at 50% 50%, #000 30%, transparent 78%); }
+  .hero.hero-run .flow::after {
+    content: ''; position: absolute; z-index: -1; pointer-events: none;
+    left: 50%; top: 50%; width: min(620px, 46vw); aspect-ratio: 1; translate: -50% -46%;
+    background: radial-gradient(closest-side, rgba(255,111,179,.20), rgba(255,111,179,.06) 55%, transparent); }
+
+  /* the cards lift off the stage */
+  .hero.hero-run .flow .fi, .hero.hero-run .flow .fo {
+    border-radius: 14px; border-color: rgba(var(--shadow-rgb), .10);
+    box-shadow: 0 1px 0 rgba(255,255,255,.6) inset,
+                0 18px 36px -18px rgba(var(--shadow-rgb), .45),
+                0 4px 10px -6px rgba(var(--shadow-rgb), .25); }
+  .hero.hero-run .flow .fi { padding: 6px; background: #FFFFFF; }
+  .hero.hero-run .flow .fi img { border-radius: 9px; }
+
+  /* the mark: bigger, on a ring that turns, with a halo that breathes */
+  .hero.hero-run .flow { --fx-hub: clamp(210px, 18vw, 280px); --fx-gap: clamp(64px, 6.4vw, 118px); }
+  .hero.hero-run .flow-reel {
+    position: relative; border: 0; background: #FFFFFF; border-radius: 22px;
+    padding: clamp(18px, 1.8vw, 26px) clamp(16px, 1.6vw, 24px);
+    box-shadow: 0 24px 60px -24px rgba(255,111,179,.55), 0 10px 24px -14px rgba(var(--shadow-rgb), .4); }
+  .hero.hero-run .flow-reel::before {
+    content: ''; position: absolute; inset: -2px; z-index: -1; border-radius: 24px; padding: 2px;
+    background: conic-gradient(from var(--ring-a, 0deg), #FF6FB3, #A78BFA, #60A5FA, #FF6FB3);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    animation: fx-ring-turn 6s linear infinite; }
+  .fx-halo { display: none; }
+  .hero.hero-run .fx-halo {
+    display: block; position: absolute; inset: -18%; z-index: -2; border-radius: 40px; pointer-events: none;
+    background: radial-gradient(closest-side, rgba(255,111,179,.35), transparent);
+    animation: fx-breathe 3.5s .6s ease-in-out infinite; }
+}
+@property --ring-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@keyframes fx-ring-turn { to { --ring-a: 360deg; } }
+@keyframes fx-breathe {
+  0%, 70%, 100% { opacity: .45; transform: scale(.94); }
+  82% { opacity: 1; transform: scale(1.06); } }
+/* the dark ground wants the dots light, not dark */
+:root[data-theme="dark"] .hero.hero-run .flow::before {
+  background-image: radial-gradient(rgba(255,255,255,.12) 1px, transparent 1.3px); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hero.hero-run .flow::before {
+    background-image: radial-gradient(rgba(255,255,255,.12) 1px, transparent 1.3px); } }
 </style>
 </head>
 <body>
@@ -645,7 +1173,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
 <main id="main" class="screens">
 
-  <!-- ============ 1. HERO — flat shot to on-model ============ -->
+  <!-- ============ HERO — flat shot to on-model ============ -->
   <section class="hero hero-run" aria-label="AI fashion photography — overview">
     <div class="wrap hero-split">
       <div class="hero-copy">
@@ -655,6 +1183,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
           Your garment on a consistent model, in consistent light, across the whole catalog —
           no studio day, no scheduling, and every image checked by a human against the real product.
         </p>
+        <div class="act-row">
         <div class="acts rv in">
           <a href="#contact" class="btn-acc" data-cms="ai-photography-human-checked.button-1">Get my fixed quote</a>
           <a href="#how" class="btn-glass" data-cms="ai-photography-human-checked.button-2">How the QA works ↓</a>
@@ -662,46 +1191,49 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <div class="chips rv in">
           <span data-cms="ai-photography-human-checked.chip-1">Fixed quote in 24h</span>
           <span data-cms="ai-photography-human-checked.chip-2">Human QA on every image</span>
-          <span data-cms="ai-photography-human-checked.chip-3">Marketplace-safe</span>
+          <span data-cms="ai-photography-human-checked.chip-3">Marketplace guidance</span>
+        </div>
         </div>
       </div>
 
       <!-- right: the page's own demo, scaled by site.js to the room beside the copy -->
       <div class="hero-view rv in rv-media">
-        <div class="fit-box"><div class="hero-fit" style="--fit-w: 780px">
+        <div class="fit-box"><div class="hero-fit" style="--fit-w: 1320px">
     <div class="flow">
       <div class="flow-side flow-in">
-        <span class="flow-lab">Your library</span>
-        <figure class="fi fi-a"><img src="../../assets/img/prints/placement-adventure-640.webp" loading="lazy" decoding="async" alt="A tee flat with its placement graphics." / data-cms="the-transformation.image-1"></figure>
-        <figure class="fi fi-b"><img src="../../assets/img/woven/fabric-rolls-560.webp" loading="lazy" decoding="async" alt="Rolls of patterned fabric." / data-cms="the-transformation.image-2"></figure>
-        <figure class="fi fi-c"><img src="../../assets/img/prints/shorts-palm-stripe-640.webp" loading="lazy" decoding="async" alt="Swim shorts with their print repeat and colour references." / data-cms="the-transformation.image-3"></figure>
-        <figure class="fi fi-d"><img src="../../assets/img/prints/floral-repeat-640.webp" loading="lazy" decoding="async" alt="A painted floral repeat." / data-cms="the-transformation.image-4"></figure>
+        <span class="flow-lab"><b data-cms="the-transformation.text-1">Your library</b><i>4 files</i></span>
+        <figure class="fi fi-a"><img src="../../assets/img/photography/in/shirt-flat.webp" width="900" height="700" loading="eager" fetchpriority="high" decoding="async" alt="A checked shirt photographed flat, as a brand sends it." data-cms="the-transformation.image-1"></figure>
+        <figure class="fi fi-b"><img src="../../assets/img/photography/in/model.webp" width="560" height="700" loading="eager" decoding="async" alt="A head-and-shoulders reference of the model." data-cms="the-transformation.image-2"></figure>
+        <figure class="fi fi-c"><img src="../../assets/img/photography/in/trousers.webp" width="900" height="420" loading="eager" decoding="async" alt="A pair of trousers photographed flat." data-cms="the-transformation.image-3"></figure>
+        <figure class="fi fi-d"><img src="../../assets/img/photography/in/shoes.webp" width="760" height="570" loading="eager" decoding="async" alt="A pair of suede loafers." data-cms="the-transformation.image-4"></figure>
       </div>
 
       <div class="flow-mid">
-        <!-- The reel goes here. Portrait, because that is the shape this
-             output is actually used at. Left empty until there is real work
-             to show — an invented example is the one thing a buyer of AI
-             imagery is right to distrust. -->
-        <div class="flow-reel" role="img" aria-label="Space reserved for an example output reel.">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/>
-          </svg>
-          <span>Example reel coming</span>
+        <svg class="fx-fan fx-fan-in" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <path class="rail" d="M0 24 C 55 24, 45 50, 100 50" /><path class="rail" d="M0 50 H100" /><path class="rail" d="M0 76 C 55 76, 45 50, 100 50" />
+          <path class="pulse" d="M0 24 C 55 24, 45 50, 100 50" /><path class="pulse p2" d="M0 50 H100" /><path class="pulse p3" d="M0 76 C 55 76, 45 50, 100 50" />
+        </svg>
+        <div class="flow-reel">
+          <span class="fx-halo" aria-hidden="true"></span>
+          <span class="fx-mark">
+            <img src="../../assets/logo.png" width="768" height="171" loading="eager" decoding="async" alt="Fashion Freelancing">
+          </span>
+          <span class="flow-reel-tag" data-cms="the-transformation.text-2">Generated, then checked by a person</span>
         </div>
+        <svg class="fx-fan fx-fan-out" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <path class="rail" d="M0 50 C 55 50, 45 26, 100 26" /><path class="rail" d="M0 50 H100" /><path class="rail" d="M0 50 C 55 50, 45 74, 100 74" />
+          <path class="pulse" d="M0 50 C 55 50, 45 26, 100 26" /><path class="pulse p2" d="M0 50 H100" /><path class="pulse p3" d="M0 50 C 55 50, 45 74, 100 74" />
+        </svg>
       </div>
 
       <div class="flow-side flow-out">
-        <span class="flow-lab">What comes back</span>
-        <figure class="fo fo-a"><img src="../../assets/img/prints/shorts-coral-palm-640.webp" loading="lazy" decoding="async" alt="Coral shorts with their palm print artwork." / data-cms="the-transformation.image-5"></figure>
-        <figure class="fo fo-b"><img src="../../assets/img/woven/jacquard-floral-560.webp" loading="lazy" decoding="async" alt="A close crop of woven cloth." / data-cms="the-transformation.image-6"></figure>
-        <figure class="fo fo-c"><img src="../../assets/img/prints/tile-palm-coral-640.webp" loading="lazy" decoding="async" alt="A palm repeat print." / data-cms="the-transformation.image-7"></figure>
+        <span class="flow-lab"><b data-cms="the-transformation.text-3">What comes back</b><i>3 frames</i></span>
+        <figure class="fo fo-a"><img src="../../assets/img/photography/out/on-model-cafe.webp" width="600" height="800" loading="eager" decoding="async" alt="The shirt worn on model, seated at a cafe in late afternoon light." data-cms="the-transformation.image-5"></figure>
+        <figure class="fo fo-b"><img src="../../assets/img/photography/out/on-model-detail.webp" width="600" height="800" loading="eager" decoding="async" alt="A detail frame: the collar, placket and chest pocket on the body." data-cms="the-transformation.image-6"></figure>
+        <figure class="fo fo-c"><img src="../../assets/img/photography/out/on-model-sip.webp" width="600" height="800" loading="eager" decoding="async" alt="A second frame of the same look, the model raising a cup." data-cms="the-transformation.image-7"></figure>
       </div>
 
-      <svg class="flow-link" viewBox="0 0 1000 60" preserveAspectRatio="none" aria-hidden="true">
-        <path d="M40 30 H430" /><path d="M420 22 L436 30 L420 38 z" class="hd" />
-        <path d="M570 30 H960" /><path d="M950 22 L966 30 L950 38 z" class="hd" />
-      </svg>
+    </div>
     </div>
         </div></div>
       </div>
@@ -716,126 +1248,219 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   </section>
 
 
-  <!-- ============ 2. WHY CATALOGS STALL ============ -->
-  <section class="sec" aria-labelledby="ps-h">
+  <!-- ============ 01 · WHAT WE OFFER ============
+       Six cards: the frame it produces on top, then the number, the claim,
+       and the three lines that say what is actually in it. Nothing else —
+       the detail belongs in the delivery, not in the pitch. -->
+  <section class="sec" id="deliver" aria-labelledby="dl-h">
     <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv" data-cms="why-it-matters.kicker-1">Why it matters</span>
-        <h2 class="h-display rv rv-display" id="ps-h" data-cms="why-it-matters.heading-1">The photoshoot is the bottleneck <span class="acc-t">between you and launch.</span></h2>
+      <div class="dl-head">
+        <div>
+          <span class="eyebrow rv" data-cms="what-you-get.kicker-1">01 — What we offer</span>
+          <h2 class="h-display rv rv-words" id="dl-h" data-cms="what-you-get.heading-1">Six services. <span class="acc-t">One creative engine.</span></h2>
+        </div>
+        <p class="head-note rv" data-cms="what-you-get.text-1">From a podcast studio to a full video shoot — every service a modern creator, brand or agency needs, in-house.</p>
       </div>
-      <div class="kit">
-        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3 data-cms="why-it-matters.heading-2">The shoot you keep postponing</h3><p data-cms="why-it-matters.text-1">Model, photographer, studio, steaming, retouching — a full production to photograph a restock. So new SKUs sit unlisted.</p></div>
-        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">02</span><h3 data-cms="why-it-matters.heading-3">The catalog that looks like five brands</h3><p data-cms="why-it-matters.text-2">Different models, different light, different floors — every shoot batch ages your grid a different way.</p></div>
-        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">03</span><h3 data-cms="why-it-matters.heading-4">Flat shots don't sell fit</h3><p data-cms="why-it-matters.text-3">Customers buy when they can see drape on a body. A flat lay answers "what is it" — never "how will it look on me."</p></div>
+
+      <div class="offer">
+        <article class="off rv rv-card">
+          <figure class="off-img">
+            <img src="../../assets/img/photography/offer/podcast.webp" width="900" height="675" loading="lazy" decoding="async" alt="A studio condenser microphone in close-up" data-cms="what-you-get.image-2">
+          </figure>
+          <span class="off-n" aria-hidden="true">01</span>
+          <span class="off-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="11" r="3.4"/><path d="M12 14.4V19"/><path d="M8.5 19h7"/><path d="M6.5 10.5a5.5 5.5 0 0 0 11 0"/></svg></span>
+          <h3 data-cms="what-you-get.heading-2">Podcast Studio</h3>
+          <ul>
+            <li data-cms="what-you-get.text-2">Professional microphones</li>
+            <li data-cms="what-you-get.text-3">4K multi-cam setup</li>
+            <li data-cms="what-you-get.text-4">Acoustic-treated room</li>
+          </ul>
+        </article>
+
+        <article class="off rv rv-card rv-d1">
+          <figure class="off-img">
+            <img src="../../assets/img/photography/offer/video.webp" width="900" height="675" loading="lazy" decoding="async" alt="A film crew working on a soundstage with lights and cameras" data-cms="what-you-get.image-3">
+          </figure>
+          <span class="off-n" aria-hidden="true">02</span>
+          <span class="off-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="12" height="12" rx="2.5"/><path d="m15 10.5 6-3.5v10l-6-3.5z"/></svg></span>
+          <h3 data-cms="what-you-get.heading-3">Video Production</h3>
+          <ul>
+            <li data-cms="what-you-get.text-6">Corporate videos</li>
+            <li data-cms="what-you-get.text-7">Advertisements</li>
+            <li data-cms="what-you-get.text-8">Interviews & brand films</li>
+          </ul>
+        </article>
+
+        <article class="off rv rv-card rv-d2">
+          <figure class="off-img">
+            <img src="../../assets/img/photography/offer/editing.webp" width="900" height="675" loading="lazy" decoding="async" alt="A video editing timeline on a dark screen" data-cms="what-you-get.image-4">
+          </figure>
+          <span class="off-n" aria-hidden="true">03</span>
+          <span class="off-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 4.6L18.5 9l-4.6 1.4L12 15l-1.9-4.6L5.5 9l4.6-1.4z"/><path d="M18.5 16.5 19.4 19l2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg></span>
+          <h3 data-cms="what-you-get.heading-4">AI Video Editing</h3>
+          <ul>
+            <li data-cms="what-you-get.text-10">AI subtitles & voice cleanup</li>
+            <li data-cms="what-you-get.text-11">AI color grading & upscaling</li>
+            <li data-cms="what-you-get.text-12">AI background removal</li>
+            <li data-cms="what-you-get.text-13">AI shorts generator</li>
+          </ul>
+        </article>
+
+        <article class="off rv rv-card">
+          <figure class="off-img">
+            <img src="../../assets/img/photography/offer/rental.webp" width="900" height="675" loading="lazy" decoding="async" alt="A photo studio with a pink backdrop and a yellow chair" data-cms="what-you-get.image-5">
+          </figure>
+          <span class="off-n" aria-hidden="true">04</span>
+          <span class="off-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10 12 4l8 6"/><path d="M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9"/><path d="M12 20v-5"/></svg></span>
+          <h3 data-cms="what-you-get.heading-5">Studio Rental</h3>
+          <ul>
+            <li data-cms="what-you-get.text-14">Hourly & half-day</li>
+            <li data-cms="what-you-get.text-15">Full-day access</li>
+            <li data-cms="what-you-get.text-16">Monthly memberships</li>
+          </ul>
+        </article>
+
+        <article class="off rv rv-card rv-d1">
+          <figure class="off-img">
+            <img src="../../assets/img/photography/offer/product.webp" width="900" height="675" loading="lazy" decoding="async" alt="Studio lighting being set up for a product shoot" data-cms="what-you-get.image-6">
+          </figure>
+          <span class="off-n" aria-hidden="true">05</span>
+          <span class="off-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8.5 7 10 4h4l1.5 3"/><circle cx="12" cy="13.5" r="3.4"/></svg></span>
+          <h3 data-cms="what-you-get.heading-6">Product Photography</h3>
+          <ul>
+            <li data-cms="what-you-get.text-18">Amazon & ecommerce</li>
+            <li data-cms="what-you-get.text-19">Food & fashion</li>
+            <li data-cms="what-you-get.text-20">Jewellery macro shots</li>
+          </ul>
+        </article>
+
+        <article class="off rv rv-card rv-d2">
+          <figure class="off-img">
+            <img src="../../assets/img/photography/offer/social.webp" width="900" height="675" loading="lazy" decoding="async" alt="A creator recording herself on a phone tripod" data-cms="what-you-get.image-7">
+          </figure>
+          <span class="off-n" aria-hidden="true">06</span>
+          <span class="off-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="3"/><circle cx="12" cy="11" r="3.4"/><circle cx="16.4" cy="6.8" r="1.1"/></svg></span>
+          <h3 data-cms="what-you-get.heading-7">Social Media Content</h3>
+          <ul>
+            <li data-cms="what-you-get.text-22">Instagram Reels</li>
+            <li data-cms="what-you-get.text-23">YouTube Shorts & TikTok</li>
+            <li data-cms="what-you-get.text-24">Facebook ad creatives</li>
+          </ul>
+        </article>
+      </div>
+
+      <!-- the spec every delivery meets, whatever the garment -->
+      <div class="dl-spec-head rv">
+        <span class="eyebrow" data-cms="what-you-get.kicker-2">In every delivery</span>
+        <h3 class="h-display" data-cms="what-you-get.heading-8">Studio-grade <span class="acc-t">output.</span></h3>
+      </div>
+      <ul class="dl-spec rv">
+        <li>
+          <span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18"/><path d="M3 12h18"/></svg></span>
+          <div><b data-cms="what-you-get.heading-9">Colour-true</b><span data-cms="what-you-get.text-20">Matched to your reference</span></div>
+        </li>
+        <li>
+          <span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/><path d="M11 8v6M8 11h6"/></svg></span>
+          <div><b data-cms="what-you-get.heading-10">Zoom-safe</b><span data-cms="what-you-get.text-21">3000px on the long edge</span></div>
+        </li>
+        <li>
+          <span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5a2 2 0 0 1 2-2h2"/><path d="M20 7V5a2 2 0 0 0-2-2h-2"/><path d="M4 17v2a2 2 0 0 0 2 2h2"/><path d="M20 17v2a2 2 0 0 1-2 2h-2"/><path d="M8 12h8"/></svg></span>
+          <div><b data-cms="what-you-get.heading-11">Every ratio</b><span data-cms="what-you-get.text-22">1:1, 4:5, 3:4, 9:16, 16:9</span></div>
+        </li>
+        <li>
+          <span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h10M4 18h7"/></svg></span>
+          <div><b data-cms="what-you-get.heading-12">Named to your SKUs</b><span data-cms="what-you-get.text-23">Drops straight into your PIM</span></div>
+        </li>
+        <li>
+          <span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.2 8.3 8 9 4.8-.7 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <div><b data-cms="what-you-get.heading-13">Rights documented</b><span data-cms="what-you-get.text-24">Synthetic models, written down</span></div>
+        </li>
+        <li>
+          <span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+          <div><b data-cms="what-you-get.heading-14">Two revision rounds</b><span data-cms="what-you-get.text-25">Included in the quote</span></div>
+        </li>
+        <li>
+          <span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m8 11 4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>
+          <div><b data-cms="what-you-get.heading-15">PNG and web JPG</b><span data-cms="what-you-get.text-26">Both, every time</span></div>
+        </li>
+        <li>
+          <span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M3.5 9h17"/><path d="M8 3v4M16 3v4"/></svg></span>
+          <div><b data-cms="what-you-get.heading-16">Fixed quote in 24h</b><span data-cms="what-you-get.text-27">A number, not a range</span></div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 02 · SEE THE DIFFERENCE ============
+       Archetype: split. The claim reads down the left, the proof sits
+       beside it, so the section is one screen instead of three. -->
+  <section class="sec stage gate" id="kit" aria-labelledby="kit-h">
+    <div class="wrap ba-split">
+      <div class="ba-say">
+        <span class="eyebrow rv">02 — See the difference</span>
+        <h2 class="h-display rv rv-words" id="kit-h">What you send. <span class="acc-t">What goes on the site.</span></h2>
+        <p class="head-note rv" style="margin:16px 0 0">Drag the handle. Left is the flat a brand sent us; right is the frame that ships — same garment, same check, same colour.</p>
+        <ul class="ba-pts rv">
+          <li><b>One garment, one truth.</b> The check, the placket and the pocket are matched to the flat, not invented.</li>
+          <li><b>No studio day.</b> The frame on the right came from the photo on the left and nothing else.</li>
+          <li><b>Checked by a person.</b> Anything that flattered the garment by changing it was re-run before you saw it.</li>
+        </ul>
+        <a href="#contact" class="btn-acc rv" style="margin-top:22px">Get my fixed quote</a>
+      </div>
+
+      <div class="ba-wrap rv rv-media">
+        <div class="ba" id="ba" role="slider" tabindex="0"
+             aria-label="Before and after comparison. Use the left and right arrow keys to move the divider."
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="50 percent">
+          <img class="before" src="../../assets/img/photography/before-flat-1200.webp" width="1100" height="1375"
+               alt="The checked shirt as the brand sent it: laid flat on a plain ground, nobody wearing it." loading="lazy" decoding="async">
+          <img class="after" src="../../assets/img/photography/after-catalog-1200.webp" width="1100" height="1375"
+               alt="The same shirt worn on model at a cafe in late afternoon light." loading="lazy" decoding="async">
+          <span class="ba-tag l">What you sent</span>
+          <span class="ba-tag r">What ships</span>
+          <span class="ba-line" aria-hidden="true"></span>
+          <span class="ba-grip" aria-hidden="true">&#8596;</span>
+        </div>
+        <div class="ba-cap">
+          <b>Men's checked slim-fit shirt · indigo blue</b>
+          <p class="ba-note">Same garment, same colour, same check — off the table and onto a body.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ============ 3. HOW IT WORKS — QA IN THE MIDDLE ============ -->
+  <!-- ============ 03 · HOW IT WORKS ============
+       Archetype: rail. A line that fills as the section arrives. -->
   <section class="sec" id="how" aria-labelledby="how-h">
     <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv" data-cms="how.kicker-1">How it works</span>
-        <h2 class="h-display rv rv-display" id="how-h" data-cms="how.heading-1">The step that matters is the <span class="acc-t">human in the middle.</span></h2>
-      </div>
-      <div class="chat-wrap" style="grid-template-columns:1fr;max-width:860px;margin:0 auto;">
-        <div class="weeks rv-steps">
-          <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3 data-cms="how.heading-2">You send flat shots</h3><p data-cms="how.text-1">The product photos you already have — front and back, decent light. We confirm usability before quoting.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3 data-cms="how.heading-3">Model direction, agreed</h3><p data-cms="how.text-2">You pick the model look, poses and setting once — it holds across the whole catalog.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3 data-cms="how.heading-4">Generate → human QA</h3><p data-cms="how.text-3">Every image is checked against your real garment: print placement, seams, colour, drape. Failures die here, not in your store.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3 data-cms="how.heading-5">Delivered, channel-ready</h3><p data-cms="how.text-4">Crops and ratios for your store and marketplaces, with disclosure guidance where platforms require it.</p></div></div>
+      <div class="head-split">
+        <div>
+          <span class="eyebrow rv" data-cms="how.kicker-1">03 — How it works</span>
+          <h2 class="h-display rv rv-words" id="how-h" data-cms="how.heading-1">Flat shots in. <span class="acc-t">On-model photos out.</span></h2>
         </div>
+        <p class="head-note rv" data-cms="how.text-5">Four steps. The third one is a person, and it is the reason the other three are worth anything.</p>
+      </div>
+      <div class="weeks rail rv-steps">
+        <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3 data-cms="how.heading-2">You send flat shots</h3><p data-cms="how.text-1">The product photos you already have — front and back, decent light. We confirm they are usable before quoting.</p></div></div>
+        <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3 data-cms="how.heading-3">Model direction, agreed</h3><p data-cms="how.text-2">You pick the model, the poses and the setting once. It holds across the whole catalog.</p></div></div>
+        <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3 data-cms="how.heading-4">Generated, then checked by hand</h3><p data-cms="how.text-3">Print placement, seams, colour, drape, hardware — matched to your real garment. Failures die here, not in your store.</p></div></div>
+        <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3 data-cms="how.heading-5">Delivered, channel-ready</h3><p data-cms="how.text-4">Crops and ratios for your store and marketplaces, with disclosure guidance where a platform asks for it.</p></div></div>
+      </div>
+      <div class="assure rv">
+        <div class="spot"><b data-cms="how.stat-1">24h</b><span data-cms="how.stat-2">A fixed quote, not a range</span></div>
+        <div class="spot"><b data-cms="how.stat-3">100%</b><span data-cms="how.stat-4">Images checked by a person</span></div>
+        <div class="spot"><b data-cms="how.stat-5">2</b><span data-cms="how.stat-6">Revision rounds included</span></div>
+        <div class="spot"><b data-cms="how.stat-7">0</b><span data-cms="how.stat-8">Studio days you have to book</span></div>
       </div>
     </div>
   </section>
 
-  <!-- ============ 4. WHAT YOU GET ============ -->
-  <section class="sec" id="kit" aria-labelledby="kit-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv" data-cms="kit.kicker-1">What you get</span>
-        <h2 class="h-display rv rv-display" id="kit-h" data-cms="kit.heading-1">A catalog that finally looks like <span class="acc-t">one brand.</span></h2>
-      </div>
-      <div class="kit">
-        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3 data-cms="kit.heading-2">On-model images per garment</h3><p data-cms="kit.text-1">Your product on a model, in your agreed direction — from the flat shot alone.</p></div>
-        <div class="kit-c glass-p rv rv-row"><span class="ki">02</span><h3 data-cms="kit.heading-3">Consistent model &amp; light</h3><p data-cms="kit.text-2">The same looks, poses and lighting across every SKU — the grid reads as one collection.</p></div>
-        <div class="kit-c glass-p rv rv-row"><span class="ki">03</span><h3 data-cms="kit.heading-4">Colourway coverage</h3><p data-cms="kit.text-3">Every colour variant photographed — without re-shooting anything.</p></div>
-        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">04</span><h3 data-cms="kit.heading-5">Channel-ready crops</h3><p data-cms="kit.text-4">Ratios and resolutions for Shopify, Instagram and the marketplaces you name.</p></div>
-        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">05</span><h3 data-cms="kit.heading-6">Human garment-fidelity QA</h3><p data-cms="kit.text-5">Each image checked against the real product before you see it — documented.</p></div>
-        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">06</span><h3 data-cms="kit.heading-7">Disclosure guidance</h3><p data-cms="kit.text-6">Where a platform requires an AI label, we tell you — before you publish.</p></div>
-        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">07</span><h3 data-cms="kit.heading-8">Full usage rights</h3><p data-cms="kit.text-7">Delivered images are yours to use across your channels, documented.</p></div>
-        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">08</span><h3 data-cms="kit.heading-9">Restock speed</h3><p data-cms="kit.text-8">New colour or returning SKU? New images in days — no studio calendar.</p></div>
-        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">09</span><h3 data-cms="kit.heading-10">Two revision rounds</h3><p data-cms="kit.text-9">Model direction and image corrections — built into the price.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 5. FIDELITY PROMISE ============ -->
-  <section class="sec" aria-labelledby="fp-h">
-    <div class="wrap">
-      <div class="acc-honest">
-        <span class="kicker rv" data-cms="the-fidelity-promise.kicker-1">The fidelity promise</span>
-        <h2 class="h-display rv rv-display" id="fp-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;" data-cms="the-fidelity-promise.heading-1">The garment is the truth. <span class="acc-t">The image serves it.</span></h2>
-        <p class="rv" data-cms="the-fidelity-promise.text-1">An AI image that "improves" your product — sharper print, better drape, a colour that pops more than the dye ever will — is a returns machine. Our QA rejects any image that doesn't match the physical garment a customer will unbox. What you show is what they get, or the image doesn't ship.</p>
-        <p class="soft rv" data-cms="the-fidelity-promise.text-2">That's also why the frames above are placeholders: we don't decorate this page with generated fashion imagery and call it proof.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 6. HONEST COMPARISON ============ -->
-  <section class="sec" aria-labelledby="hc-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv" data-cms="an-honest-comparison.kicker-1">An honest comparison</span>
-        <h2 class="h-display rv rv-display" id="hc-h" data-cms="an-honest-comparison.heading-1">When to shoot real. <span class="acc-t">When to generate.</span></h2>
-      </div>
-      <div class="cmp2">
-        <div class="cmp-col glass-p rv">
-          <h3 data-cms="an-honest-comparison.heading-2">Real photoshoot wins</h3>
-          <ul>
-            <li data-cms="an-honest-comparison.item-1">Brand campaigns and hero imagery with a story</li>
-            <li data-cms="an-honest-comparison.item-2">Fabric stories that need macro texture in motion</li>
-            <li data-cms="an-honest-comparison.item-3">Lookbooks built around a specific muse or location</li>
-            <li data-cms="an-honest-comparison.item-4">We'll tell you when this is your answer — honestly</li>
-          </ul>
-        </div>
-        <div class="cmp-col lit glass-p rv rv-d1">
-          <h3 data-cms="an-honest-comparison.heading-3">AI on-model wins</h3>
-          <ul>
-            <li data-cms="an-honest-comparison.item-5">Catalog scale — tens or hundreds of SKUs</li>
-            <li data-cms="an-honest-comparison.item-6">Colourway variants without re-shooting</li>
-            <li data-cms="an-honest-comparison.item-7">Restocks and new drops on a deadline</li>
-            <li data-cms="an-honest-comparison.item-8">A consistent grid when shoots came out patchy</li>
-          </ul>
-        </div>
-      </div>
-      <p class="cmp-note rv" data-cms="an-honest-comparison.text-1">Most brands end up with both — each doing what it's best at.</p>
-    </div>
-  </section>
-
-  <!-- ============ 7. RIGHTS & ETHICS ============ -->
-  <section class="sec" aria-labelledby="re-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv" data-cms="rights-and-ethics.kicker-1">Rights &amp; ethics</span>
-        <h2 class="h-display rv rv-display" id="re-h" data-cms="rights-and-ethics.heading-1">Safe to publish. <span class="acc-t">Safe to stand behind.</span></h2>
-      </div>
-      <div class="kit">
-        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3 data-cms="rights-and-ethics.heading-2">No borrowed faces</h3><p data-cms="rights-and-ethics.text-1">Synthetic models only — never a real person's likeness without consent. No scraped faces, no look-alikes.</p></div>
-        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">02</span><h3 data-cms="rights-and-ethics.heading-3">Platform rules, tracked</h3><p data-cms="rights-and-ethics.text-2">Marketplace AI-imagery policies differ and change. We deliver compliant for the channels you name, and flag where a label is required.</p></div>
-        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">03</span><h3 data-cms="rights-and-ethics.heading-4">Your images, documented</h3><p data-cms="rights-and-ethics.text-3">Usage rights to every delivered image are yours, in writing — store, ads, marketplaces.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 8. PROOF ============ -->
-
-  <!-- ============ 8. FAQ ============ -->
+  <!-- ============ FAQ ============ -->
   <section class="sec" id="faq" aria-labelledby="faq-h">
     <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv" data-cms="faq.kicker-1">Questions</span>
-        <h2 class="h-display rv rv-display" id="faq-h" data-cms="faq.heading-1">Asked before <span class="acc-t">every catalog.</span></h2>
+      <div class="sec-head mid">
+        <span class="kicker rv" data-cms="faq.kicker-1">Good to know</span>
+        <h2 class="h-display rv rv-display" id="faq-h" data-cms="faq.heading-1">The questions <span class="acc-t">every brand asks first.</span></h2>
       </div>
       <div class="faq-list rv">
         <div class="faq-row glass-p">
@@ -866,8 +1491,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 9. CONTACT ============ -->
-  <!-- ============================ SPECIALIST NETWORK ============================ -->
+  <!-- ============ SPECIALIST NETWORK ============ -->
   <!-- Secondary route: the primary action on this page stays "start this
        project with our team", in the contact section directly below. -->
   <section class="sec" aria-labelledby="svcnet-h" style="padding-bottom:0;">
@@ -883,13 +1507,14 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
+  <!-- ============ CONTACT ============ -->
   <section class="sec" id="contact" aria-labelledby="contact-h">
     <div class="wrap">
       <div class="contact-panel glass-p">
-      <div class="sec-head">
-        <span class="kicker rv" data-cms="contact.kicker-1">Get your quote</span>
-        <h2 class="h-display rv rv-display" id="contact-h" data-cms="contact.heading-1">Send one flat shot. See what <span class="acc-t">your catalog could look like.</span></h2>
-        <p class="sub rv" data-cms="contact.text-1">Tell us the garments and where the photos will run — fixed quote within 24 hours.</p>
+      <div class="sec-head mid">
+        <span class="kicker rv" data-cms="contact.kicker-1">Start the catalog</span>
+        <h2 class="h-display rv rv-display" id="contact-h" data-cms="contact.heading-1">Send one flat shot. <span class="acc-t">Get your catalog on model.</span></h2>
+        <p class="sub rv" data-cms="contact.text-1">Tell us the garments and where the photos will run. Fixed quote in 24 hours, and asking costs nothing.</p>
       </div>
       <div class="contact-grid">
         <form id="td-form" class="cform glass-p rv" autocomplete="on" novalidate>
@@ -911,7 +1536,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
               <optgroup label="AI, website &amp; digital production">
                 <option value="website">Website Development</option>
                 <option value="ai-agent">AI Agent</option>
-                <option value="ai-photography" selected>AI Photography</option>
+                <option value="ai-photography" selected>AI Video &amp; Photography</option>
                 <option value="ecom-listing">E-Commerce Product Listing</option>
                 <option value="web-design">Web Design</option>
               </optgroup>
@@ -919,20 +1544,21 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
             </select>
           </label>
           <label><span class="fl">Tell us about your catalog<span class="rq" aria-hidden="true">*</span></span><textarea class="fi" name="message" required placeholder="e.g. 40 SKUs of womenswear, flat shots ready — need on-model images for Shopify and Instagram"></textarea></label>
-          <p class="cform-err" id="td-err" role="alert" hidden></p>
+          <p class="cform-err" id="td-err" role="alert" tabindex="-1" hidden></p>
           <button type="submit" class="btn-acc" style="width:100%;" data-cms="contact.button-1">Get my fixed quote</button>
         </form>
         <aside class="cside glass-p rv rv-d1" aria-label="Our promise">
           <span class="kicker" data-cms="contact.kicker-2">Our promise</span>
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v5.2c0 4.6-3.2 8.6-7.5 10.3C7.7 19.8 4.5 15.8 4.5 11.2V6z"/><path d="M9 12l2.2 2.2L15.5 10"/></svg></span>
           <h3 data-cms="contact.heading-2">What you get back from us.</h3>
           <ul>
             <li data-cms="contact.item-1">A real reply from a person inside 24 hours — usually faster.</li>
             <li data-cms="contact.item-2">A fixed price and delivery date before any work starts.</li>
             <li data-cms="contact.item-3">Every image human-checked against the real garment before delivery.</li>
-            <li data-cms="contact.item-4">Marketplace disclosure rules handled — we tell you where AI labels apply.</li>
-            <li data-cms="contact.item-5">Full usage rights to every delivered image are yours.</li>
+            <li data-cms="contact.item-4">Marketplace disclosure guidance — we tell you where AI labels apply.</li>
+            <li data-cms="contact.item-5">Full usage rights to every delivered image, yours on final payment.</li>
           </ul>
-          <button type="button" class="mail" id="copy-mail">hello@fashionos.app<span style="font-size: 11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-5);" id="copy-hint">Click to copy</span></button>
+          <button type="button" class="mail" id="copy-mail">hello@fashionos.app<span style="font-size: 11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-5);" id="copy-hint" role="status" aria-live="polite" class="nowrap">Click to copy</span></button>
         </aside>
       </div>
       </div>
@@ -955,10 +1581,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
   /* cursor glow */
   if (!reduced && window.matchMedia('(hover: hover)').matches) {
-    var glow = document.getElementById('glow');
+    var glow = document.getElementById('glow'), gx = 0, gy = 0, gq = false;
+    /* one write per frame, and none at all while the theme hides the glow */
     window.addEventListener('mousemove', function (e) {
-      glow.style.left = e.clientX + 'px';
-      glow.style.top = e.clientY + 'px'; }, { passive: true }); }
+      gx = e.clientX; gy = e.clientY;
+      if (gq || !glow) return;
+      gq = true;
+      requestAnimationFrame(function () {
+        gq = false;
+        if (getComputedStyle(glow).display === 'none') return;
+        glow.style.left = gx + 'px'; glow.style.top = gy + 'px'; }); }, { passive: true }); }
 
   /* Arm the how-it-works step stagger only when we can actually run it.
      Until 'armed' lands the steps are plain visible content, so a blocked
@@ -979,21 +1611,106 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       io.observe(el); }); } else {
     rvs.forEach(function (el) { el.classList.add('in'); }); }
   /* safety net — a janitor that also covers tab panels and IO misses */
+  var rvJanitorRuns = 0;
   var rvJanitor = setInterval(function () {
     var left = document.querySelectorAll('.rv:not(.in), .rv-steps:not(.in)');
-    if (!left.length) { clearInterval(rvJanitor); return; }
+    /* after ~20s the scroll observer owns it; site.js's failsafe covers the rest */
+    if (!left.length || ++rvJanitorRuns > 28) { clearInterval(rvJanitor); return; }
     left.forEach(function (el) {
       var r = el.getBoundingClientRect();
       if ((r.width || r.height) && r.top < window.innerHeight * 1.05) el.classList.add('in'); }); }, 700);
 
-  /* chat plays in view */
-  var chat = document.getElementById('chat');
-  if (chat) {
-    if ('IntersectionObserver' in window && !reduced) {
+
+  /* Before / after divider: pointer drag, click-to-place and arrow keys all
+     write one custom property, so CSS owns the clipping. */
+  (function () {
+    var ba = document.getElementById('ba');
+    if (!ba) return;
+    var pos = 50, dragging = false;
+    function set(v) {
+      pos = v < 0 ? 0 : v > 100 ? 100 : v;
+      ba.style.setProperty('--split', pos + '%');
+      ba.setAttribute('aria-valuenow', Math.round(pos));
+      ba.setAttribute('aria-valuetext', Math.round(pos) + ' percent');
+    }
+    function fromEvent(e) {
+      var r = ba.getBoundingClientRect();
+      set((e.clientX - r.left) / r.width * 100);
+    }
+    /* Track on the window rather than capturing the pointer: capture dropped
+       moves, so the divider only stepped once per drag. */
+    var touched = false;
+    ba.addEventListener('pointerdown', function (e) {
+      dragging = true; touched = true; fromEvent(e); e.preventDefault();
+      ba.focus({ preventScroll: true }); });
+    window.addEventListener('pointermove', function (e) { if (dragging) fromEvent(e); }, { passive: true });
+    ['pointerup', 'pointercancel'].forEach(function (ev) {
+      window.addEventListener(ev, function () { dragging = false; });
+    });
+    ba.addEventListener('keydown', function (e) {
+      touched = true;
+      var step = e.shiftKey ? 10 : 4;
+      if (e.key === 'ArrowLeft') { set(pos - step); e.preventDefault(); }
+      if (e.key === 'ArrowRight') { set(pos + step); e.preventDefault(); }
+      if (e.key === 'Home') { set(0); e.preventDefault(); }
+      if (e.key === 'End') { set(100); e.preventDefault(); }
+    });
+    set(50);
+
+    /* A short sweep the first time it scrolls into view, so it is obvious the
+       divider moves. It never runs under reduced motion, and any touch stops it. */
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+      var teased = false;
       new IntersectionObserver(function (en, obs) {
-        if (en[0].isIntersecting) { chat.classList.add('play'); obs.disconnect(); }
-      }, { threshold: 0.15 }).observe(chat); } else { chat.classList.add('play'); }
-  }
+        if (!en[0].isIntersecting || teased) return;
+        teased = true; obs.disconnect();
+        var t0 = null;
+        function tease(ts) {
+          if (dragging || touched) return;
+          if (!t0) t0 = ts;
+          var k = (ts - t0) / 1500;
+          if (k >= 1) { set(50); return; }
+          set(50 + Math.sin(k * Math.PI * 2) * 22);
+          requestAnimationFrame(tease);
+        }
+        setTimeout(function () { requestAnimationFrame(tease); }, 350);
+      }, { threshold: .4 }).observe(ba);
+    }
+  })();
+
+  /* ---- phones: each input card drops into the mark ----
+     Stacked, the trip is a vector from each card to the mark. It is measured
+     with offset* — which ignore transforms — so a card caught mid-flight never
+     skews its own target, and re-measured whenever the band changes size. */
+  (function () {
+    var band = document.querySelector('.hero .flow');
+    if (!band) return;
+    var mark = band.querySelector('.fx-mark');
+    var cards = band.querySelectorAll('.flow-in .fi');
+    var phone = window.matchMedia('(max-width: 899px)');
+    function at(el) {
+      var x = 0, y = 0;
+      while (el && el !== band) { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; }
+      return el === band ? [x, y] : null;
+    }
+    function measure() {
+      if (!phone.matches || !mark) return;
+      var m = at(mark);
+      if (!m) return;
+      var mx = m[0] + mark.offsetWidth / 2, my = m[1] + mark.offsetHeight / 2;
+      cards.forEach(function (c) {
+        var p = at(c);
+        if (!p) return;
+        c.style.setProperty('--tx', Math.round(mx - (p[0] + c.offsetWidth / 2)) + 'px');
+        c.style.setProperty('--ty', Math.round(my - (p[1] + c.offsetHeight / 2)) + 'px');
+      });
+    }
+    measure();
+    if ('ResizeObserver' in window) new ResizeObserver(measure).observe(band);
+    else window.addEventListener('resize', measure, { passive: true });
+    if (phone.addEventListener) phone.addEventListener('change', measure);
+    window.addEventListener('load', measure);
+  })();
 
   /* copy email */
   var mailBtn = document.getElementById('copy-mail');
@@ -1064,7 +1781,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         el.removeAttribute('aria-invalid');
         if (!data[f] || (f === 'email' && !EMAIL_RE.test(data.email))) invalid.push(el); });
       if (invalid.length) {
-        invalid.forEach(function (el) { el.setAttribute('aria-invalid', 'true'); });
+        invalid.forEach(function (el) {
+          el.setAttribute('aria-invalid', 'true');
+          el.setAttribute('aria-describedby', 'td-err');
+        });
         errBox.textContent = (!data.name || !data.email || !data.message)
           ? 'Please fill in name, email and a few words about your catalog.'
           : "That email address doesn't look right — mind checking it?";
@@ -1072,7 +1792,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         invalid[0].focus();
         return; }
       errBox.hidden = true;
+      form.querySelectorAll('[aria-invalid]').forEach(function (el) {
+        el.removeAttribute('aria-invalid');
+        el.removeAttribute('aria-describedby');
+      });
       var submit = form.querySelector('button[type="submit"]');
+      var sendLabel = submit.textContent;
       submit.disabled = true;
       submit.textContent = 'Sending…';
       /* Send the enquiry to the server. It used to be written to localStorage,
@@ -1083,25 +1808,72 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       if (!body.get('service')) body.set('service', 'ai-photography');
       fetch('/api/leads', { method: 'POST', body: body })
         .then(function (r) { if (!r.ok) throw new Error('lead ' + r.status); })
+        .then(function () {
+          /* Only now is it true. Swapping the form for "Got it" before the
+             request settled told every failed sender their enquiry had landed. */
+          var sent = document.createElement('div');
+          sent.className = 'sent-ok';
+          sent.setAttribute('tabindex', '-1');
+          sent.innerHTML =
+            '<div class="ok">✓</div>' +
+            '<h3>Got it, ' + (data.name || '').split(' ')[0].replace(/</g, '&lt;') + '.</h3>' +
+            '<p>Your fixed quote is on its way within 24 hours to <strong style="color:var(--ink);">' +
+            data.email.replace(/</g, '&lt;') + '</strong>.</p>';
+          form.parentElement.replaceChild(sent, form);
+          sent.focus(); })
         .catch(function () {
           /* Never lose the enquiry to a network blip — show the address so the
              person can still reach us, rather than a dead end. */
           errBox.textContent = 'That did not send. Please email hello@fashionos.app and we will pick it up.';
           errBox.hidden = false;
           submit.disabled = false;
-          submit.textContent = 'Send it'; });
-      var sent = document.createElement('div');
-      sent.className = 'sent-ok';
-      sent.setAttribute('tabindex', '-1');
-      sent.innerHTML =
-        '<div class="ok">✓</div>' +
-        '<h3>Got it, ' + (data.name || '').split(' ')[0].replace(/</g, '&lt;') + '.</h3>' +
-        '<p>Your fixed quote is on its way within 24 hours to <strong style="color:var(--ink);">' +
-        data.email.replace(/</g, '&lt;') + '</strong>.</p>';
-      form.parentElement.replaceChild(sent, form);
-      sent.focus(); }); }
+          submit.textContent = sendLabel;
+          errBox.focus && errBox.focus(); }); }); }
 })();
 </script>
 
+
+<script>
+/* ============================================================
+   Section behaviour: the tab viewer, the work filter, the display
+   word-stagger and the pointer spotlight. Everything degrades to
+   readable static content if this file never runs.
+   ============================================================ */
+(function () {
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- display headings arrive a word at a time ---- */
+  document.querySelectorAll('.rv-words').forEach(function (h) {
+    var walk = document.createTreeWalker(h, NodeFilter.SHOW_TEXT);
+    var nodes = [], n;
+    while ((n = walk.nextNode())) nodes.push(n);
+    nodes.forEach(function (node) {
+      if (!node.nodeValue.trim()) return;
+      var frag = document.createDocumentFragment();
+      node.nodeValue.split(/(\s+)/).forEach(function (word) {
+        if (!word.trim()) { frag.appendChild(document.createTextNode(word)); return; }
+        var sp = document.createElement('span');
+        sp.textContent = word;
+        frag.appendChild(sp);
+      });
+      node.parentNode.replaceChild(frag, node);
+    });
+    h.querySelectorAll(':scope > span, :scope > .acc-t > span').forEach(function (sp, i) {
+      sp.style.transitionDelay = Math.min(i * 0.045, 0.5) + 's';
+    });
+  });
+
+  /* ---- the pink spotlight follows the pointer across a panel ---- */
+  if (!reduced && window.matchMedia('(hover: hover)').matches) {
+    document.querySelectorAll('.spot').forEach(function (el) {
+      el.addEventListener('pointermove', function (e) {
+        var r = el.getBoundingClientRect();
+        el.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+        el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+      }, { passive: true });
+    });
+  }
+})();
+</script>
 </body>
 </html>

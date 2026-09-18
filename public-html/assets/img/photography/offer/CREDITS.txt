@@ -1,0 +1,9 @@
+Photos in this folder are from Unsplash (https://unsplash.com), used under the
+Unsplash License: free for commercial use, no permission or attribution required.
+Source IDs:
+  podcast.webp  photo-1478737270239-2f02b77fc618
+  video.webp    photo-1612544409025-e1f6a56c1152
+  editing.webp  photo-1574717024653-61fd2cf4d44d
+  rental.webp   photo-1647427854253-b92bb40c9330
+  product.webp  photo-1768076955015-dd4f057e96f6
+  social.webp   photo-1759393852314-59dc00faeed3

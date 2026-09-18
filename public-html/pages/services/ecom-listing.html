@@ -188,6 +188,44 @@ main { position: relative; z-index: 3; }
 .footer { background: rgba(var(--surface-rgb), .03) !important; border-top: 1px solid var(--line) !important; }
 #site-footer * { background-color: transparent; }
 
+
+/* ============================================================
+   RAW -> OPTIMISED — the one component that sells this service.
+   Namespaced `el-`.
+   ============================================================ */
+.el-split { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(14px, 1.8vw, 24px); max-width: 1180px; margin-inline: auto; align-items: stretch; }
+@media (max-width: 860px) { .el-split { grid-template-columns: 1fr; } }
+.el-pane {
+  display: flex; flex-direction: column; min-width: 0; padding: clamp(16px, 1.8vw, 24px);
+  border-radius: 18px; background: var(--glass); border: 1px solid var(--glass-border); }
+.el-pane.good { border-color: var(--acc-30, rgba(168,216,74,.32)); }
+.el-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.el-head h3 { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-5); margin: 0; font-weight: 500; }
+.el-pane.good .el-head h3 { color: var(--acc-text); }
+/* the listing itself, set like a marketplace would render it */
+.el-title { font-family: var(--sans); font-size: 15px; font-weight: 600; line-height: 1.4; color: var(--ink); margin: 0; }
+.el-pane.raw .el-title { color: var(--ink-4); font-weight: 500; }
+.el-meta { margin: 10px 0 0; font-size: 13px; line-height: 1.55; color: var(--ink-5); }
+.el-bul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 7px; }
+.el-bul li { display: grid; grid-template-columns: 14px 1fr; gap: 8px; font-size: 13px; line-height: 1.45; color: var(--ink-3); }
+.el-bul svg { width: 12px; height: 12px; margin-top: 4px; color: var(--acc-text); }
+.el-flags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.el-flag {
+  padding: 4px 9px; border-radius: 999px; font-family: var(--mono); font-size: 10px;
+  letter-spacing: .06em; text-transform: uppercase; }
+.el-flag.ok { background: var(--acc-16, rgba(168,216,74,.18)); color: var(--acc-text); }
+.el-flag.bad { background: rgba(255,120,120,.14); color: #E98A8A; }
+.el-foot { margin-top: auto; padding-top: 14px; font-size: 12px; color: var(--ink-6); line-height: 1.5; }
+
+/* where these listings go */
+.el-mk { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 900px; margin: clamp(16px, 2vw, 26px) auto 0; }
+.el-mk span {
+  padding: 9px 16px; border-radius: 999px; background: var(--glass); border: 1px solid var(--glass-border);
+  font-family: var(--sans); font-size: 13.5px; font-weight: 600; color: var(--ink-3); }
+.el-mk-l { text-align: center; margin: 0 0 4px; font-family: var(--mono); font-size: 10.5px;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-6); }
+
 /* ---- Atoms ---- */
 .kicker {
   font-family: var(--mono); font-size: 12px; font-weight: 500;
@@ -680,7 +718,55 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 4. INSIDE A LISTING ============ -->
+    <!-- ============ RAW VS OPTIMISED ============ -->
+  <section class="sec" id="rewrite" aria-labelledby="rewrite-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker rv">The same product, listed twice</span>
+        <h2 class="h-display rv rv-display" id="rewrite-h">What you send us. <span class="acc-t">What the marketplace sees.</span></h2>
+        <p class="sub rv">One real difference: the left listing is invisible to search and vague to a buyer. The right one answers the questions a shopper actually types.</p>
+      </div>
+
+      <div class="el-split rv">
+        <div class="el-pane raw">
+          <div class="el-head"><h3>What we usually receive</h3></div>
+          <div class="el-flags">
+            <span class="el-flag bad">No keywords</span>
+            <span class="el-flag bad">Title too short</span>
+            <span class="el-flag bad">No size guidance</span>
+          </div>
+          <p class="el-title">Mens shirt linen — blue (new stock)</p>
+          <p class="el-meta">Good quality linen shirt. Comfortable fit. Available in all sizes. Best price. Please check size chart before ordering. Colour may vary slightly.</p>
+          <p class="el-foot">Nothing here tells a shopper the fit, the fabric weight or the occasion — and nothing matches what they search for.</p>
+        </div>
+
+        <div class="el-pane good">
+          <div class="el-head"><h3>What we publish</h3></div>
+          <div class="el-flags">
+            <span class="el-flag ok">Keyword-optimised</span>
+            <span class="el-flag ok">Title length &#10003;</span>
+            <span class="el-flag ok">Readability &#10003;</span>
+          </div>
+          <p class="el-title">Men&rsquo;s Pure Linen Shirt — Breathable Summer Half-Sleeve, Relaxed Fit, Indigo Blue</p>
+          <ul class="el-bul">
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>100% pure linen, 140&nbsp;GSM — cool enough for an Indian summer</span></li>
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>Relaxed fit through chest and waist; size up if you are between sizes</span></li>
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>Chest 104&nbsp;cm on M · full size chart in the images</span></li>
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>Machine wash cold, line dry — colour stays after 20+ washes</span></li>
+          </ul>
+          <p class="el-foot">Written for the search terms buyers use, then checked against your real product facts before it goes live.</p>
+        </div>
+      </div>
+
+      <p class="el-mk-l rv">Listed where you sell</p>
+      <div class="el-mk rv">
+        <span>Shopify</span><span>Amazon</span><span>Flipkart</span><span>Myntra</span>
+        <span>Ajio</span><span>Etsy</span><span>Meesho</span><span>WooCommerce</span>
+      </div>
+    </div>
+  </section>
+
+<!-- ============ 4. INSIDE A LISTING ============ -->
   <section class="sec" id="kit" aria-labelledby="kit-h">
     <div class="wrap">
       <div class="sec-head">
