@@ -74,7 +74,7 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 #site-nav { min-height: 92px; }
 @media (max-width: 720px) { #site-nav { min-height: 90px; } }
 /* ============================================================
-   NIGHT GLASS — 3D Virtual Sampling. Single accent: SKY #3EC8C0.
+   NIGHT GLASS — AI Customer Agent. Single accent: TEAL #3EC8C0.
    ============================================================ */
 :root {
   /* Page-specific tokens only. The shared palette lives in
@@ -193,53 +193,16 @@ main { position: relative; z-index: 3; }
    TRY IT — the hero transcript becomes a 10-second trial.
    Namespaced `ag-` so styles.css cannot reach it.
    ============================================================ */
-.ag-ask { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
-.ag-ask-l {
-  width: 100%; margin: 0 0 2px; font-family: var(--mono); font-size: 10px;
-  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-6); }
-.ag-chip {
-  padding: 8px 12px; border-radius: 999px; cursor: pointer; text-align: left;
-  background: rgba(var(--surface-rgb), .07); color: var(--ink-3);
-  border: 1px solid rgba(var(--surface-rgb), .16);
-  font-family: var(--sans); font-size: 12.5px; font-weight: 500; line-height: 1.2;
-  transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease; }
-.ag-chip:hover:not([disabled]) { border-color: var(--acc); color: var(--ink); transform: translateY(-1px); }
-.ag-chip[disabled] { opacity: .45; cursor: default; }
-.ag-chip.is-used { border-color: var(--acc-30, rgba(62,200,192,.3)); color: var(--ink-5); }
 /* the reply being composed */
-.ag-typing { display: inline-flex; gap: 4px; align-items: center; }
-.ag-typing i {
-  width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: .45;
-  animation: ag-blink 1.2s infinite ease-in-out; }
-.ag-typing i:nth-child(2) { animation-delay: .18s; }
-.ag-typing i:nth-child(3) { animation-delay: .36s; }
 @keyframes ag-blink { 0%, 60%, 100% { opacity: .25; transform: translateY(0); } 30% { opacity: .9; transform: translateY(-3px); } }
-@media (prefers-reduced-motion: reduce) { .ag-typing i { animation: none; opacity: .6; } }
-.ag-reset {
-  background: none; border: 0; cursor: pointer; padding: 0; margin-left: auto;
-  font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
-  color: var(--ink-6); text-decoration: underline; text-underline-offset: 3px; }
-.ag-reset:hover { color: var(--acc-text); }
 
 /* the voice test, as two conversations rather than two lists */
-.ag-cmp { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(14px, 1.8vw, 24px); }
-@media (max-width: 760px) { .ag-cmp { grid-template-columns: 1fr; } }
-.ag-cmp > div { padding: clamp(16px, 1.8vw, 22px); border-radius: 18px;
-  background: var(--glass); border: 1px solid var(--glass-border); }
-.ag-cmp > div.lit { border-color: var(--acc-30, rgba(62,200,192,.3)); }
-.ag-cmp h3 { font-family: var(--disp); font-size: 16px; font-weight: 700; letter-spacing: -.02em;
-  margin: 0 0 14px; color: var(--ink); }
-.ag-cmp .lit h3 { color: var(--acc-text); }
-.ag-thread { display: flex; flex-direction: column; gap: 9px; }
 .ag-b {
   max-width: 88%; padding: 10px 13px; border-radius: 16px; font-size: 13.5px; line-height: 1.45; }
 .ag-b.them { align-self: flex-start; border-bottom-left-radius: 5px;
   background: rgba(var(--surface-rgb), .08); color: var(--ink-3); }
 .ag-b.us { align-self: flex-end; border-bottom-right-radius: 5px;
   background: rgba(var(--surface-rgb), .06); color: var(--ink-4); }
-.ag-cmp .lit .ag-b.us { background: var(--acc-16, rgba(62,200,192,.16)); color: var(--ink-2, var(--ink)); }
-.ag-why { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line);
-  font-size: 12.5px; line-height: 1.5; color: var(--ink-5); }
 
 /* ---- Atoms ---- */
 .kicker {
@@ -268,11 +231,15 @@ main { position: relative; z-index: 3; }
   font-family: var(--sans); font-size: 14px; font-weight: 500; text-decoration: none;
   transition: background .25s ease, transform .25s var(--easing); }
 .btn-glass:hover { background: var(--glass-hover); transform: translateY(-2px); }
-a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; }
+/* A teal ring alone measured about 2:1 on the light ground. The ink ring carries
+   the 3:1 non-text contrast; the teal sits inside it and keeps the brand cue. */
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible,
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--ink); outline-offset: 3px;
+  box-shadow: 0 0 0 5px var(--acc-28); border-radius: 4px; }
 .rv { transition: opacity .7s var(--easing), transform .7s var(--easing); }
 .rv-on .rv { opacity: 0; transform: translateY(24px); }
 .rv-on .rv.in { opacity: 1; transform: none; }
-.rv-d1 { transition-delay: .08s; } .rv-d2 { transition-delay: .16s; } .rv-d3 { transition-delay: .24s; }
 @media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; transition: none; } }
 .sec { position: relative; padding: calc(var(--u) * 12) 0; }
 @media (max-width: 720px) {
@@ -291,13 +258,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   min-height: calc(100vh - 104px);
   display: flex; align-items: center;
   padding: calc(var(--u) * 5) 0; }
-.hero-center { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
-.sec-visual { padding-top: 0; }
-.sec-visual .vwrap { width: min(100%, 780px); margin: 0 auto; }
 /* visual animations wait until the section scrolls into view */
-.sec-visual .vwrap:not(.in) *,
-.sec-visual .vwrap:not(.in) *::before,
-.sec-visual .vwrap:not(.in) *::after { animation-play-state: paused !important; }
 .hero h1 { font-size: clamp(42px, 5.5vw, 76px); max-width: 18ch; margin-inline: auto; }
 .hero .sub { max-width: 62ch; margin: 22px auto 0; font-size: clamp(15px, 1.25vw, 17.5px); line-height: 1.65; color: var(--ink-4); }
 .hero .acts { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 30px; justify-content: center; }
@@ -317,91 +278,20 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 /* ============================================================
    WHY — a sampling round, compared (no money)
    ============================================================ */
-.cmp2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.cmp2 .col { padding: 28px 26px; }
-.cmp2 .tag {
-  display: inline-block; padding: 7px 15px; border-radius: 999px;
-  font-family: var(--mono); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; }
-.cmp2 .without .tag { background: rgba(var(--surface-rgb), .08); color: var(--ink-4); border: 1px solid var(--line-2); }
-.cmp2 .with { border-color: var(--acc-45) !important; background: linear-gradient(170deg, var(--acc-10), var(--glass)) !important; }
-.cmp2 .with .tag { background: var(--grad-acc); color: #05201E; }
-.cmp2 ul { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 13px; }
-.cmp2 li { display: grid; gap: 2px; padding-left: 22px; position: relative; font-size: 13.5px; color: var(--ink-4); line-height: 1.5; }
-.cmp2 li b { color: var(--ink); font-family: var(--disp); font-size: 14.5px; }
-.cmp2 li::before { content: ''; position: absolute; left: 0; top: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--ink-7); }
-.cmp2 .with li::before { background: var(--acc); }
 /* comparison columns (cmp-col was unstyled — the alignment bug) */
-.cmp-col { padding: 28px 26px; }
-.cmp-col h3 { font-family: var(--disp); font-size: 19px; font-weight: 700; margin: 0 0 6px; }
-.cmp-col.lit { border-color: var(--acc-45) !important; background: linear-gradient(170deg, var(--acc-10), var(--glass)) !important; }
-.cmp-col.lit li::before { background: var(--acc); }
-.cmp-note {
-  text-align: center; margin-top: 26px;
-  font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--ink-5); }
-@media (max-width: 820px) { .cmp2 { grid-template-columns: 1fr; } }
 
 /* ============================================================
    REVIEW KIT — what every sample includes
    ============================================================ */
-.kit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.kit-c { padding: 26px 24px; }
-.kit-c .ki { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--acc-text); }
-.kit-c h3 { font-family: var(--disp); font-size: 17px; font-weight: 700; margin: 10px 0 8px; }
-.kit-c p { font-size: 13.5px; color: var(--ink-4); line-height: 1.6; margin: 0; }
-@media (max-width: 900px) { .kit { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px) { .kit { grid-template-columns: 1fr; } }
 
 /* ============================================================
    INDUSTRY PROOF band
    ============================================================ */
-.pb-stat { text-align: center; padding: 10px; }
-.pb-stat b {
-  display: block; font-family: var(--disp); font-weight: 600;
-  font-size: clamp(30px, 3.4vw, 48px); letter-spacing: -.025em;
-  background: var(--grad-acc-ink, var(--grad-acc)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.pb-stat span { display: block; margin-top: 8px; font-size: 12.5px; color: var(--ink-4); line-height: 1.5; max-width: 30ch; margin-left: auto; margin-right: auto; }
-.pb-note {
-  text-align: center; margin-top: 20px;
-  font-family: var(--mono); font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase;
-  color: var(--ink-5); }
 
 /* ============================================================
    CHAT + weeks (a real sampling round)
    ============================================================ */
-.chat-wrap { display: grid; grid-template-columns: 6fr 6fr; gap: clamp(30px, 4vw, 60px); align-items: center; }
-.chat { padding: calc(var(--u) * 3); display: grid; gap: 12px; max-width: 520px; }
-.chat .day { text-align: center; font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); padding: 4px 0; }
-.msg {
-  max-width: 82%; padding: 12px 16px; border-radius: 18px;
-  font-size: 14.5px; line-height: 1.5;
-  opacity: 0; transform: translateY(14px) scale(.96);
-  transition: opacity .5s var(--easing), transform .5s var(--easing); }
-.chat.play .msg { opacity: 1; transform: none; }
-.msg.them { background: rgba(255,255,255,.1); color: var(--ink); border-bottom-left-radius: 6px; justify-self: start; }
-.msg.us { background: var(--grad-acc); color: #05201E; font-weight: 500; border-bottom-right-radius: 6px; justify-self: end; }
 .msg.us .tick { font-size: 11px; opacity: .7; margin-left: 6px; }
-.chat.play .msg:nth-of-type(1) { transition-delay: .2s; }
-.chat.play .msg:nth-of-type(2) { transition-delay: 1s; }
-.chat.play .msg:nth-of-type(3) { transition-delay: 1.9s; }
-.chat.play .msg:nth-of-type(4) { transition-delay: 2.8s; }
-.chat.play .msg:nth-of-type(5) { transition-delay: 3.7s; }
-.msg .mini { display: block; margin-top: 10px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(7,21,35,.3); background: #fff; }
-.msg .mini .mb { display: flex; gap: 4px; padding: 6px 8px; background: #F1F0F7; border-bottom: 1px solid rgba(20,19,43,.08); }
-.msg .mini .mb i { width: 5px; height: 5px; border-radius: 50%; background: #C9C7D8; }
-.msg .mini .mc { display: block; padding: 10px; }
-.msg .mini .mc .a { display: block; height: 8px; width: 60%; border-radius: 4px; background: #14132B; }
-.msg .mini .mc .b { display: block; height: 5px; width: 85%; border-radius: 3px; background: #CBEEEB; margin-top: 7px; }
-.msg .mini .mc .c { display: block; height: 12px; width: 34%; border-radius: 999px; background: linear-gradient(135deg, #7ADDD7, #279E97); margin-top: 9px; }
-.msg .cap { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; opacity: .75; margin-top: 8px; }
-.chat .done {
-  justify-self: center; display: inline-flex; align-items: center; gap: 8px;
-  font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--acc-text); background: var(--acc-10); border: 1px solid var(--acc-30);
-  padding: 8px 16px; border-radius: 999px;
-  opacity: 0; transform: translateY(10px);
-  transition: opacity .5s var(--easing) 4.4s, transform .5s var(--easing) 4.4s; }
-.chat.play .done { opacity: 1; transform: none; }
 .weeks { display: grid; }
 .week { display: grid; grid-template-columns: 74px 1fr; gap: 20px; align-items: baseline; padding: calc(var(--u) * 3) 0; border-top: 1px solid var(--line); }
 .week:first-child { border-top: 0; }
@@ -425,19 +315,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .weeks.rv-steps.armed.in .week:nth-child(2) { transition-delay: .28s; }
 .weeks.rv-steps.armed.in .week:nth-child(3) { transition-delay: .46s; }
 .weeks.rv-steps.armed.in .week:nth-child(4) { transition-delay: .64s; }
-.weeks.rv-steps.armed.in .week:nth-child(5) { transition-delay: .82s; }
 @media (prefers-reduced-motion: reduce) {
   .weeks.rv-steps.armed .week { opacity: 1 !important; transform: none !important; transition: none !important; }
 }
-@media (max-width: 980px) { .chat-wrap { grid-template-columns: 1fr; } .chat { max-width: 100%; } }
-@media (prefers-reduced-motion: reduce) { .msg, .chat .done { opacity: 1 !important; transform: none !important; transition: none !important; } }
 
 /* ============================================================
    ACCURACY + PROOF SLOTS + FAQ + CONTACT
    ============================================================ */
-.acc-honest { max-width: 780px; margin: 0 auto; text-align: center; }
-.acc-honest p { font-size: 15px; color: var(--ink-3); line-height: 1.7; margin: 14px 0 0; }
-.acc-honest .soft { color: var(--ink-4); font-size: 14px; }
 
 .faq-list { max-width: 820px; margin: 0 auto; display: grid; gap: 12px; }
 .faq-row { border-radius: 16px; overflow: hidden; transition: border-color .3s ease; }
@@ -472,21 +356,20 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
      dark-on-white one, which on a pale panel is a grey smudge with a
      near-invisible edge. Light gives the field the paper colour and lets a
      real border define it; dark keeps the lift, below. */
-  background: var(--paper-3);
-  border: 1px solid var(--line-2); border-radius: 13px;
+  background-color: var(--field); border: 1px solid var(--field-edge); border-radius: 13px;
   /* 16px is the floor: iOS auto-zooms the page on focus below it. */
   padding: 13px 15px; font-family: var(--sans); font-size: 16px; color: var(--ink);
   transition: border-color .25s ease, box-shadow .25s ease; }
 .cform .fi::placeholder { color: var(--ink-5); }
-.cform .fi:focus { outline: none; border-color: var(--acc); box-shadow: 0 0 0 3px var(--acc-16); }
+.cform .fi:focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--acc-28); }
 .cform select.fi { -webkit-appearance: none; appearance: none; cursor: pointer;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233EC8C0' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right 14px center; background-size: 14px;
   padding-right: 40px; }
-.cform select.fi option { background: #131024; color: var(--ink); }
-.cform textarea.fi { min-height: 110px; resize: vertical; }
-.cform .fi[aria-invalid="true"] { border-color: #FF7AB8; background: rgba(255,79,160,.08); }
-.cform-err { margin: 0; font-size: 13px; color: #FF7AB8; }
+.cform select.fi option { background: var(--field-option); color: var(--ink); }
+.cform textarea.fi { min-height: 140px; resize: vertical; }
+.cform .fi[aria-invalid="true"] { border-color: var(--err); box-shadow: inset 0 0 0 1px var(--err); }
+.cform-err { margin: 0; font-size: 13px; font-weight: 500; color: var(--err); }
 .cside { padding: clamp(22px, 3vw, 32px); }
 .cside h3 { font-family: var(--disp); font-size: 20px; font-weight: 700; margin: 12px 0 14px; }
 .cside ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; }
@@ -535,56 +418,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 /* ============================================================
    AI-AGENT-SPECIFIC — self-playing chat hero
    ============================================================ */
-.bot { position: relative; overflow: hidden; min-height: clamp(320px, 48vh, 500px); border-radius: 20px; display: flex; flex-direction: column; padding: 0 0 54px; }
-.bot-bar {
-  display: flex; align-items: center; gap: 9px;
-  padding: 14px 18px; border-bottom: 1px solid var(--line-2);
-  font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
-.bot-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 10px var(--acc); }
-.bot-time { margin-left: auto; color: var(--acc-l-text); }
-.bot-log { display: flex; flex-direction: column; gap: 12px; padding: 20px 18px; }
-.bm {
-  max-width: 82%; margin: 0; padding: 11px 15px; border-radius: 14px;
-  font-size: 14.5px; line-height: 1.5; color: var(--ink-3);
-  opacity: 0; transform: translateY(10px); animation: bm-in .5s ease forwards; }
-.bm.in-m { align-self: flex-start; background: rgba(var(--surface-rgb), .07); border: 1px solid var(--line-2); border-bottom-left-radius: 4px; }
-.bm.out-m { align-self: flex-end; background: rgba(62,200,192,.13); border: 1px solid var(--acc-30); border-bottom-right-radius: 4px; color: var(--ink); }
-.bot-log .bm:nth-child(1) { animation-delay: .5s; }
-.bot-log .bm:nth-child(2) { animation-delay: 1.5s; }
-.bot-log .bm:nth-child(3) { animation-delay: 2.7s; }
-.bot-log .bm:nth-child(4) { animation-delay: 3.7s; }
 @keyframes bm-in { to { opacity: 1; transform: translateY(0); } }
-@media (prefers-reduced-motion: reduce) { .bm { animation: none; opacity: 1; transform: none; } }
-.bot-chip {
-  position: absolute; left: 50%; bottom: 16px; translate: -50% 0; white-space: nowrap;
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 9px 18px; border-radius: 999px;
-  background: rgba(var(--scrim-rgb), .75); border: 1px solid var(--acc-30);
-  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-  font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
-  color: var(--acc-l-text); }
-.bot-chip::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--acc); }
-.td-cap {
-  text-align: center; margin: 12px 0 0;
-  font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
-  color: var(--ink-4); }
-@media (max-width: 520px) { .bot-chip { white-space: normal; text-align: center; width: max-content; max-width: 92%; } }
 /* channels wall */
-.fmt-wall { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; max-width: 860px; margin: 0 auto; }
-.fmt {
-  padding: 16px 26px; border-radius: 14px;
-  background: var(--glass); border: 1px solid var(--line-2);
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-  font-family: var(--mono); font-size: 13px; letter-spacing: .08em; color: var(--ink-3);
-  transition: border-color .3s ease, transform .3s ease; }
-.fmt:hover { border-color: var(--acc-30); transform: translateY(-2px); }
-.fmt.hot { border-color: var(--acc-30); background: rgba(62,200,192,.08); color: var(--acc-l-text); }
 
 
 /* mobile performance: lighter effect cost, lazy below-fold rendering — same visuals */
 @media (max-width: 720px) {
   .blob { filter: blur(60px); }
-  .b4, .b5 { display: none; }
   .glass-p { -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px); }
   .topnav { -webkit-backdrop-filter: saturate(160%) blur(12px) !important; backdrop-filter: saturate(160%) blur(12px) !important; }
   .rv { transition-duration: .45s; }
@@ -595,19 +435,21 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   :root:not([data-theme="light"]) { --acc: var(--acc-bright); --acc-text: var(--acc-bright); --acc-disp: var(--acc-bright); --acc-l-text: var(--acc-l); --grad-acc-ink: var(--grad-acc); }
 }
 
-/* The field lifts against the dark ground, where a bordered white box glares. */
-:root[data-theme="dark"] .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
-:root[data-theme="dark"] .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+/* Field tokens, per theme. The old element-level dark rules used the
+   `background` shorthand (which wiped the select chevron) and outranked the
+   invalid state, so an invalid field looked fine. */
+:root { --field: var(--paper-3); --field-edge: rgba(var(--shadow-rgb), .28); --field-option: #FFFFFF; --err: #B3123F; }
+:root[data-theme="dark"] { --field: rgba(255,255,255,.07); --field-edge: rgba(255,255,255,.22); --field-option: #131024; --err: #FF9EC6; }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .cform .fi { background: rgba(var(--surface-rgb), .06); border-color: var(--glass-border); }
-  :root:not([data-theme="light"]) .cform .fi:focus { background: rgba(var(--surface-rgb), .09); }
+  :root:not([data-theme="light"]) { --field: rgba(255,255,255,.07); --field-edge: rgba(255,255,255,.22); --field-option: #131024; --err: #FF9EC6; }
 }
+.cform .fi:focus { background-color: var(--field); }
 /* A browser that fills a field paints it itself and ignores background-color;
    only an inset shadow and -webkit-text-fill-color reach it. */
 .cform .fi:-webkit-autofill, .cform .fi:-webkit-autofill:hover,
 .cform .fi:-webkit-autofill:focus, .cform .fi:autofill {
   -webkit-text-fill-color: var(--ink); caret-color: var(--ink);
-  -webkit-box-shadow: inset 0 0 0 1000px var(--paper-3); box-shadow: inset 0 0 0 1000px var(--paper-3);
+  -webkit-box-shadow: inset 0 0 0 1000px var(--field); box-shadow: inset 0 0 0 1000px var(--field);
   transition: background-color 9999s ease-in-out 0s; border-color: var(--line-2);
 }
 :root[data-theme="dark"] .cform .fi:-webkit-autofill,
@@ -628,14 +470,406 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
    accent on an item that is no more important than the eight beside it — and
    nothing at all happened on hover. The tint now follows the pointer, so the
    colour marks what the reader is actually looking at. */
-.kit-c { transition: border-color .2s var(--easing), background .2s var(--easing), transform .2s var(--easing); }
-.kit-c:hover {
-  border-color: var(--acc-45);
-  background: linear-gradient(170deg, var(--acc-10), var(--glass));
-  transform: translateY(-3px);
+
+/* ============================================================
+   AGENT REVAMP — the photography page's system, in this page's teal.
+   Tokens, section heads, the six-card grid, the split proof and the
+   step rail are the same components; only the evidence differs.
+   ============================================================ */
+:root {
+  --card: rgba(var(--surface-rgb), .045);
+  --card-2: rgba(var(--surface-rgb), .075);
+  --edge: rgba(var(--surface-rgb), .10);
+  --edge-2: rgba(var(--surface-rgb), .16);
+  --r: 20px; --r-sm: 14px;
+  --lift: 0 1px 0 rgba(var(--lift-rgb), .07) inset, 0 20px 50px -24px rgba(var(--shadow-rgb), .6);
+  --lift-h: 0 1px 0 rgba(var(--lift-rgb), .10) inset, 0 28px 64px -26px rgba(var(--shadow-rgb), .75);
+  --acc-08: rgba(62,200,192,.08);
+  --acc-14: rgba(62,200,192,.14);
+  --acc-28: rgba(62,200,192,.28);
+  --acc-45: rgba(62,200,192,.45);
 }
-@media (prefers-reduced-motion: reduce) { .kit-c:hover { transform: none; } }
-@media (hover: none) { .kit-c:hover { transform: none; } }
+:root:not([data-theme="dark"]) { --card: #FFFFFF; --card-2: #FFFFFF; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --card: rgba(255,255,255,.045); --card-2: rgba(255,255,255,.075); }
+}
+
+/* ---- section heads: ruled mono eyebrow, statement left, note right ---- */
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-family: var(--mono); font-size: 11.5px; font-weight: 500;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--ink-5); }
+.eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--edge-2); flex: none; }
+.head-split, .dl-head {
+  display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+  gap: clamp(20px, 4vw, 64px); align-items: end; margin-bottom: clamp(24px, 3vw, 40px); }
+.head-split h2, .dl-head h2 { font-size: clamp(28px, 3.4vw, 46px); margin: 16px 0 0; max-width: 20ch; text-wrap: balance; }
+.head-note { margin: 0 0 6px; font-size: 15px; line-height: 1.65; color: var(--ink-4); max-width: 44ch; text-wrap: pretty; }
+@media (max-width: 860px) { .head-split, .dl-head { grid-template-columns: 1fr; align-items: start; } }
+.gate { position: relative; }
+.gate::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; left: 50%; width: 100vw; transform: translateX(-50%);
+  background: rgba(var(--surface-rgb), .035); border-block: 1px solid var(--edge); }
+:root[data-theme="light"] .gate::before { background: rgba(var(--shadow-rgb), .025); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .gate::before { background: rgba(var(--shadow-rgb), .025); } }
+
+/* ---- 01 · six cards: the exchange on top, then number, icon, claim, three lines ---- */
+.offer { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(12px, 1.4vw, 18px); }
+@media (max-width: 1000px) { .offer { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px)  { .offer { grid-template-columns: 1fr; } }
+.off {
+  --pad: clamp(18px, 1.6vw, 22px);
+  position: relative; display: flex; flex-direction: column; overflow: hidden;
+  border-radius: var(--r); background: var(--card); border: 1px solid var(--edge);
+  box-shadow: var(--lift); padding: 0 var(--pad) clamp(20px, 1.9vw, 26px);
+  transition: transform .4s var(--easing), box-shadow .4s var(--easing), border-color .4s var(--easing); }
+/* the card's picture is the service's own proof: one real exchange */
+.off-chat {
+  position: relative; display: flex; flex-direction: column; justify-content: center; gap: 8px;
+  margin: 0 calc(-1 * var(--pad)); padding: 22px var(--pad) 18px; min-height: 158px;
+  background:
+    radial-gradient(rgba(var(--shadow-rgb), .10) 1px, transparent 1.3px) 0 0 / 16px 16px,
+    linear-gradient(180deg, var(--acc-08), transparent 90%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent);
+  mask-image: linear-gradient(to bottom, #000 72%, transparent); }
+.off-chat p {
+  margin: 0; max-width: 84%; padding: 9px 13px; border-radius: 14px;
+  font-size: 13px; line-height: 1.45; box-shadow: 0 6px 16px -10px rgba(var(--shadow-rgb), .45); }
+.off-chat .q { align-self: flex-start; background: var(--card-2); border: 1px solid var(--edge-2); color: var(--ink-3); border-bottom-left-radius: 4px; }
+.off-chat .a { align-self: flex-end; background: #E6F8F6; border: 1px solid var(--acc-28); color: #103F3C; border-bottom-right-radius: 4px; }
+:root[data-theme="dark"] .off-chat .a { background: rgba(62,200,192,.16); color: var(--ink); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .off-chat .a { background: rgba(62,200,192,.16); color: var(--ink); } }
+.off-n { display: block; margin-top: 6px; font-family: var(--mono); font-size: 11px; letter-spacing: .16em; color: var(--ink-5); font-variant-numeric: tabular-nums; }
+.off-ic {
+  display: grid; place-items: center; width: 38px; height: 38px; margin: 12px 0 14px;
+  border-radius: 11px; background: var(--grad-acc); color: #062321;
+  box-shadow: 0 8px 20px -10px rgba(62,200,192,.8); }
+.off-ic svg, .dl-ic svg, .src-ic svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.off h3 { font-family: var(--disp); font-size: clamp(16px, 1.5vw, 18px); font-weight: 700; letter-spacing: -.02em; margin: 0 0 12px; color: var(--ink); }
+.off ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.off li { position: relative; padding-left: 16px; font-size: 13px; line-height: 1.5; color: var(--ink-4); }
+.off li::before { content: ''; position: absolute; left: 0; top: 8px; width: 5px; height: 5px; border-radius: 50%; background: var(--acc); }
+@media (hover: hover) { .off:hover { transform: translateY(-4px); box-shadow: var(--lift-h); border-color: var(--acc-28); } }
+
+/* ---- where it lives: the spec tiles under the cards ---- */
+.dl-spec-head { margin: clamp(30px, 3.4vw, 46px) 0 clamp(14px, 1.6vw, 20px); }
+.dl-spec-head h3 { font-size: clamp(20px, 2.2vw, 28px); margin: 12px 0 0; }
+.dl-spec { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(10px, 1.1vw, 14px); }
+@media (max-width: 1000px) { .dl-spec { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px)  { .dl-spec { grid-template-columns: 1fr; } }
+.dl-spec li {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center;
+  padding: clamp(12px, 1.2vw, 16px); border-radius: var(--r-sm);
+  background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift);
+  transition: transform .3s var(--easing), border-color .3s ease; }
+.dl-ic { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: var(--acc-14); color: var(--acc-text); }
+.dl-ic svg { width: 17px; height: 17px; }
+.dl-spec b { display: block; font-family: var(--disp); font-size: 13.5px; font-weight: 700; letter-spacing: -.01em; color: var(--ink); }
+.dl-spec span { display: block; margin-top: 3px; font-size: 12px; line-height: 1.45; color: var(--ink-5); }
+@media (hover: hover) { .dl-spec li:hover { transform: translateY(-2px); border-color: var(--acc-28); } }
+
+/* ---- 02 · the split proof: claim left, the flipping chat right ---- */
+.stage { padding-block: clamp(46px, 5.6vw, 84px); }
+.ba-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 500px); gap: clamp(26px, 4vw, 64px); align-items: center; }
+@media (max-width: 900px) { .ba-split { grid-template-columns: 1fr; } }
+.ba-say h2 { font-size: clamp(26px, 3vw, 40px); margin: 16px 0 0; }
+.ba-pts { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 12px; max-width: 50ch; }
+.ba-pts li { position: relative; padding-left: 20px; font-size: 13.5px; line-height: 1.6; color: var(--ink-4); }
+.ba-pts li::before { content: ''; position: absolute; left: 0; top: 9px; width: 6px; height: 6px; border-radius: 50%; background: var(--acc); }
+.ba-pts b { color: var(--ink); font-weight: 600; }
+.agv { width: 100%; max-width: 500px; justify-self: end; }
+@media (max-width: 900px) { .agv { justify-self: stretch; margin-inline: auto; } }
+.agv-toggle {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 4px; margin-bottom: 12px;
+  border-radius: 999px; background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift); }
+.agv-t {
+  position: relative; z-index: 1; padding: 10px 12px; border: 0; background: none; cursor: pointer; border-radius: 999px;
+  font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--ink-4); transition: color .3s ease; }
+.agv-t[aria-selected="true"] { color: #062321; }
+.agv-pill {
+  position: absolute; z-index: 0; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px);
+  border-radius: 999px; background: var(--grad-acc); box-shadow: 0 8px 20px -10px rgba(62,200,192,.8);
+  transition: translate .45s cubic-bezier(.16, 1, .3, 1); }
+.agv[data-v="agent"] .agv-pill { translate: 100% 0; }
+.agv[data-v="bot"] .agv-pill { background: linear-gradient(115deg, #B8B6C2, #8E8B9A); box-shadow: none; }
+.agv[data-v="bot"] .agv-t[data-v="bot"] { color: #fff; }
+.agv-card { border-radius: var(--r); background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift); overflow: hidden; }
+.agv-head { display: flex; align-items: center; gap: 9px; padding: 13px 16px; border-bottom: 1px solid var(--edge);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-4); }
+.agv-head b { font-weight: 500; }
+.agv-head i { margin-left: auto; font-style: normal; color: var(--acc-text); }
+.agv[data-v="bot"] .agv-head i { color: var(--ink-5); }
+.agv-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 0 3px var(--acc-14); }
+.agv[data-v="bot"] .agv-dot { background: #9A97A6; box-shadow: none; }
+.agv-thread { display: flex; flex-direction: column; gap: 10px; padding: 18px 16px 16px; min-height: 300px; }
+.agv-thread[hidden] { display: none; }
+.agv-thread .ag-b { margin: 0; max-width: 84%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.5;
+  animation: agv-in .45s cubic-bezier(.16, 1, .3, 1) both; }
+.agv-thread .ag-b:nth-child(2) { animation-delay: .12s; } .agv-thread .ag-b:nth-child(3) { animation-delay: .24s; } .agv-thread .ag-b:nth-child(4) { animation-delay: .36s; }
+.agv-thread .them { align-self: flex-end; background: var(--card-2); border: 1px solid var(--edge-2); color: var(--ink-3); border-bottom-right-radius: 4px; }
+.agv-thread .us { align-self: flex-start; border-bottom-left-radius: 4px; }
+.agv-thread[data-v="agent"] .us { background: #E6F8F6; border: 1px solid var(--acc-28); color: #103F3C; }
+.agv-thread[data-v="bot"] .us { background: rgba(var(--shadow-rgb), .05); border: 1px dashed var(--edge-2); color: var(--ink-4); }
+:root[data-theme="dark"] .agv-thread[data-v="agent"] .us { background: rgba(62,200,192,.16); color: var(--ink); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .agv-thread[data-v="agent"] .us { background: rgba(62,200,192,.16); color: var(--ink); } }
+.agv-why { margin: auto 0 0; padding-top: 12px; border-top: 1px solid var(--edge); font-size: 12.5px; line-height: 1.55; color: var(--ink-4); }
+.agv-why.good::before, .agv-why.bad::before { font-weight: 700; margin-right: 6px; }
+.agv-why.good::before { content: '✓'; color: var(--acc-text); }
+.agv-why.bad::before { content: '✕'; color: #B4233F; }
+@keyframes agv-in { from { opacity: 0; transform: translateY(8px); } }
+
+/* ---- 03 · the rail: four beats, left to right, a line that fills ---- */
+@media (min-width: 900px) {
+  .weeks.rail { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(18px, 2vw, 30px); position: relative; }
+  .weeks.rail::before {
+    content: ''; position: absolute; left: 12%; right: 12%; top: 23px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--edge-2) 10%, var(--edge-2) 90%, transparent); }
+  .weeks.rail::after {
+    content: ''; position: absolute; left: 12%; top: 23px; height: 1px; width: 0;
+    background: var(--grad-acc); transition: width 1.4s cubic-bezier(.33, 1, .68, 1) .2s; }
+  .weeks.rail.in::after { width: 76%; }
+  .weeks.rail .week { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 0; border-top: 0; text-align: center; justify-items: center; align-items: start; }
+  .weeks.rail .week .wn {
+    position: relative; z-index: 1; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%;
+    font-family: var(--mono); font-size: 13px; letter-spacing: 0; color: var(--acc-text); -webkit-text-stroke: 0;
+    background: var(--card); border: 1px solid var(--edge-2); box-shadow: var(--lift); }
+  .weeks.rail .week p { max-width: 30ch; margin-inline: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .weeks.rail::after { transition: none; width: 76%; } }
+.assure { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(12px, 1.4vw, 18px); margin-top: clamp(30px, 4vw, 52px); }
+.assure > div { padding: clamp(18px, 2vw, 26px); border-radius: var(--r-sm); background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift); text-align: center; }
+.assure b { display: block; font-family: var(--disp); font-weight: 600; letter-spacing: -.03em; font-size: clamp(28px, 3.2vw, 42px); color: var(--ink); font-variant-numeric: tabular-nums; }
+.assure span { display: block; margin-top: 8px; font-size: 12.5px; line-height: 1.45; color: var(--ink-4); }
+@media (max-width: 760px) { .assure { grid-template-columns: 1fr 1fr; } }
+
+/* ---- FAQ: hairlines, not boxes; the ask: one panel, lit from above ---- */
+.faq-list { max-width: 880px; gap: 0; }
+.faq-row { background: none !important; border: 0 !important; box-shadow: none !important; border-radius: 0; border-top: 1px solid var(--edge) !important; }
+.faq-row:last-child { border-bottom: 1px solid var(--edge) !important; }
+.faq-row.open { border-top-color: var(--acc-45) !important; }
+.faq-q { padding: 21px 6px; font-size: 15.5px; }
+.faq-i { width: 24px; height: 24px; background: none; color: var(--acc-text); font-size: 19px; }
+.faq-row.open .faq-i { background: none; color: var(--acc-text); }
+.faq-a { padding: 0 6px 22px; }
+.contact-panel { background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift); }
+.contact-panel::after { content: ''; position: absolute; left: -10%; right: -10%; top: -55%; height: 100%;
+  background: radial-gradient(52% 100% at 50% 100%, var(--acc-14), transparent 72%); pointer-events: none; }
+.contact-panel > * { position: relative; z-index: 1; }
+.cform { background: var(--card-2) !important; border: 1px solid var(--edge) !important; box-shadow: none; }
+.cside { background: none !important; border: 0 !important; box-shadow: none !important; padding-top: 0; }
+.cside .mail { background: var(--card-2); border: 1px solid var(--edge); flex-wrap: wrap; max-width: 100%; }
+.svc-net { background: none !important; border: 1px dashed var(--edge-2) !important; box-shadow: none !important; }
+
+/* ============================================================
+   HERO — a day in your inbox.
+   Copy left, a stage right. The stage is a clock that runs from 3PM
+   to 3AM over a sky that goes dark; messages arrive as notifications
+   from each channel, fly into the store's inbox and get answered.
+   At night the phone goes into dark mode, because phones do.
+   ============================================================ */
+@media (min-width: 900px) {
+  .screens > .hero.hero-run.ag-hero { padding-top: 0 !important; grid-template-rows: minmax(0, 1fr); }
+  .ag-hero > .hero-split {
+    grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr) !important;
+    gap: clamp(28px, 4vw, 72px); max-width: none; align-items: center;
+    padding-inline: clamp(24px, 4vw, 72px); padding-block: clamp(12px, 2vh, 26px); }
+  .ag-hero .hero-split h1 { max-width: 12ch; font-size: clamp(36px, min(4.6vw, 7.4svh), 70px); line-height: 1.04; }
+  .ag-hero .hero-split .sub { max-width: 44ch; }
+  .ag-hero .hero-view { display: flex; flex-direction: column; gap: 12px; align-self: stretch; align-items: stretch; justify-content: center; min-height: 0; height: 100%; }
+}
+
+/* ---- the stage ---- */
+.nt {
+  --nt-ink: #1B1A21; --nt-soft: rgba(27,26,33,.62); --nt-chip: rgba(255,255,255,.72); --nt-line: rgba(27,26,33,.08);
+  position: relative; isolation: isolate; overflow: hidden; border-radius: 28px;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto;
+  padding: clamp(16px, 2vw, 24px); border: 1px solid var(--edge); box-shadow: var(--lift);
+  color: var(--nt-ink); transition: color 1.2s ease; text-align: left; }
+@media (min-width: 900px) { .nt { flex: 1 1 auto; min-height: 420px; max-height: 720px; } }
+.nt[data-phase="night"], .nt[data-phase="late"] {
+  --nt-ink: #EEF1FA; --nt-soft: rgba(238,241,250,.66); --nt-chip: rgba(22,28,44,.62); --nt-line: rgba(255,255,255,.10); }
+
+/* sky: four grounds, one lit at a time */
+.nt-sky { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.nt-sky i { position: absolute; inset: 0; opacity: 0; transition: opacity 1.4s ease; }
+.nt-sky i[data-p="day"] { background:
+  radial-gradient(55% 45% at 84% 8%, rgba(255,214,150,.55), transparent 70%),
+  linear-gradient(180deg, #FFF5E8 0%, #F1F8F6 70%, #EAF5F3 100%); }
+.nt-sky i[data-p="eve"] { background:
+  radial-gradient(60% 45% at 86% 34%, rgba(255,150,110,.50), transparent 70%),
+  linear-gradient(180deg, #FFE1CF 0%, #F2DDE8 50%, #DCDDF4 100%); }
+.nt-sky i[data-p="night"], .nt-sky i[data-p="late"] {
+  background-image:
+    radial-gradient(1.4px 1.4px at 12% 22%, rgba(255,255,255,.9), transparent 60%),
+    radial-gradient(1.1px 1.1px at 28% 64%, rgba(255,255,255,.7), transparent 60%),
+    radial-gradient(1.3px 1.3px at 46% 14%, rgba(255,255,255,.8), transparent 60%),
+    radial-gradient(1px 1px at 58% 82%, rgba(255,255,255,.6), transparent 60%),
+    radial-gradient(1.5px 1.5px at 74% 26%, rgba(255,255,255,.9), transparent 60%),
+    radial-gradient(1px 1px at 86% 58%, rgba(255,255,255,.7), transparent 60%),
+    radial-gradient(1.2px 1.2px at 92% 12%, rgba(255,255,255,.8), transparent 60%),
+    radial-gradient(1px 1px at 8% 86%, rgba(255,255,255,.6), transparent 60%),
+    radial-gradient(1.3px 1.3px at 36% 40%, rgba(255,255,255,.7), transparent 60%),
+    radial-gradient(1px 1px at 66% 48%, rgba(255,255,255,.55), transparent 60%),
+    linear-gradient(180deg, #13223B 0%, #1C2848 100%); }
+.nt-sky i[data-p="late"] { background-color: #060B16;
+  background-image:
+    radial-gradient(1.4px 1.4px at 12% 22%, #fff, transparent 60%),
+    radial-gradient(1.1px 1.1px at 28% 64%, rgba(255,255,255,.8), transparent 60%),
+    radial-gradient(1.3px 1.3px at 46% 14%, #fff, transparent 60%),
+    radial-gradient(1px 1px at 58% 82%, rgba(255,255,255,.7), transparent 60%),
+    radial-gradient(1.5px 1.5px at 74% 26%, #fff, transparent 60%),
+    radial-gradient(1px 1px at 86% 58%, rgba(255,255,255,.8), transparent 60%),
+    radial-gradient(1.2px 1.2px at 92% 12%, #fff, transparent 60%),
+    radial-gradient(1px 1px at 8% 86%, rgba(255,255,255,.7), transparent 60%),
+    radial-gradient(1.3px 1.3px at 36% 40%, rgba(255,255,255,.8), transparent 60%),
+    radial-gradient(1px 1px at 66% 48%, rgba(255,255,255,.65), transparent 60%),
+    radial-gradient(60% 40% at 50% 110%, rgba(62,200,192,.20), transparent 70%),
+    linear-gradient(180deg, #070C18 0%, #0F1730 100%); }
+.nt[data-phase="day"] .nt-sky i[data-p="day"],
+.nt[data-phase="eve"] .nt-sky i[data-p="eve"],
+.nt[data-phase="night"] .nt-sky i[data-p="night"],
+.nt[data-phase="late"] .nt-sky i[data-p="late"] { opacity: 1; }
+/* the sun sets and the moon rises, on the same clock */
+.nt-orb {
+  position: absolute; left: 0; top: 0; width: clamp(46px, 4.6vw, 66px); aspect-ratio: 1; border-radius: 50%;
+  translate: var(--ox, 78cqw) var(--oy, 8%); transition: translate 1.4s cubic-bezier(.45, 0, .2, 1), background 1.4s ease, box-shadow 1.4s ease;
+  background: radial-gradient(circle at 40% 40%, #FFE7B0, #FFC76B); box-shadow: 0 0 60px 18px rgba(255,200,110,.45); }
+.nt-sky { container-type: size; }
+.nt[data-phase="day"]   .nt-orb { --ox: 86cqw; --oy: 16cqh; }
+.nt[data-phase="eve"]   .nt-orb { --ox: 88cqw; --oy: 40cqh; background: radial-gradient(circle at 40% 40%, #FFC49A, #FF8A5B); box-shadow: 0 0 70px 22px rgba(255,130,90,.4); }
+.nt[data-phase="night"] .nt-orb { --ox: 84cqw; --oy: 20cqh; background: #F3F5FF; box-shadow: inset -12px -6px 0 0 #C9CFE6, 0 0 40px 6px rgba(200,210,255,.25); }
+.nt[data-phase="late"]  .nt-orb { --ox: 78cqw; --oy: 13cqh; background: #F6F7FF; box-shadow: inset -14px -6px 0 0 #BFC6E2, 0 0 50px 10px rgba(200,210,255,.3); }
+
+/* the clock */
+.nt-clock { grid-column: 1 / -1; grid-row: 1; position: relative; z-index: 2; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+.nt-time { display: inline-flex; align-items: baseline; }
+.nt-time b { font-family: var(--disp); font-weight: 600; font-size: clamp(32px, 3.4vw, 50px); letter-spacing: -.045em; line-height: 1; font-variant-numeric: tabular-nums; }
+.nt-time i { font-style: normal; font-family: var(--mono); font-size: 13px; letter-spacing: .08em; margin-left: 7px; color: var(--nt-soft); }
+.nt-time.tick b, .nt-time.tick i { animation: nt-tick .6s cubic-bezier(.16, 1, .3, 1); }
+@keyframes nt-tick { from { opacity: 0; transform: translateY(45%); } }
+.nt-you { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--nt-soft); }
+.nt-you.tick { animation: nt-tick .6s .1s cubic-bezier(.16, 1, .3, 1) both; }
+
+/* the day, as a track: where the clock is between 3PM and 3AM */
+.nt-track { list-style: none; margin: 0 0 0 auto; padding: 0; display: flex; align-items: center; gap: 0; }
+.nt-track li { position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px; width: clamp(38px, 3.6vw, 54px);
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .06em; color: var(--nt-soft); transition: color .6s ease; }
+.nt-track li::before { content: ''; position: absolute; top: 4px; left: -50%; width: 100%; height: 1px; background: var(--nt-line); }
+.nt-track li:first-child::before { display: none; }
+.nt-track i { position: relative; z-index: 1; width: 9px; height: 9px; border-radius: 50%; background: var(--nt-chip); border: 1px solid var(--nt-line);
+  transition: background .6s ease, box-shadow .6s ease, transform .6s ease; }
+.nt[data-phase="day"] .nt-track li[data-p="day"], .nt[data-phase="eve"] .nt-track li[data-p="eve"],
+.nt[data-phase="night"] .nt-track li[data-p="night"], .nt[data-phase="late"] .nt-track li[data-p="late"] { color: var(--nt-ink); }
+.nt[data-phase="day"] .nt-track li[data-p="day"] i, .nt[data-phase="eve"] .nt-track li[data-p="eve"] i,
+.nt[data-phase="night"] .nt-track li[data-p="night"] i, .nt[data-phase="late"] .nt-track li[data-p="late"] i {
+  background: var(--acc); border-color: var(--acc); box-shadow: 0 0 0 4px var(--acc-28); transform: scale(1.15); }
+@media (max-width: 899px) { .nt-track { display: none; } }
+
+/* the store's inbox */
+.nt-phone {
+  grid-column: 2; grid-row: 2; align-self: center; justify-self: center; position: relative; z-index: 2;
+  height: 100%; max-height: 540px; min-height: 0; aspect-ratio: 9 / 17; margin: 12px 0 6px;
+  padding: 8px; border-radius: 40px; background: #0D0E12;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset, 0 36px 80px -36px rgba(0,0,0,.65), 0 12px 28px -18px rgba(0,0,0,.5); }
+.nt-screen {
+  height: 100%; border-radius: 32px; overflow: hidden; display: flex; flex-direction: column;
+  background: #F5F0E9; color: #1B1A21; transition: background 1.2s ease, color 1.2s ease; }
+.nt[data-phase="night"] .nt-screen, .nt[data-phase="late"] .nt-screen { background: #0E1117; color: #E6E9F2; }
+.nt-status { display: flex; justify-content: space-between; align-items: center; padding: 11px 20px 3px; font: 600 11px/1 var(--sans); font-variant-numeric: tabular-nums; }
+.nt-sig { display: inline-flex; gap: 2px; align-items: flex-end; }
+.nt-sig i { width: 3px; border-radius: 1px; background: currentColor; }
+.nt-sig i:nth-child(1) { height: 5px; } .nt-sig i:nth-child(2) { height: 7px; } .nt-sig i:nth-child(3) { height: 9px; }
+.nt-head { display: flex; align-items: center; gap: 9px; padding: 8px 12px 10px; border-bottom: 1px solid rgba(127,127,127,.16); }
+.nt-av { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font: 700 12.5px/1 var(--sans); color: #fff; background: #25D366; transition: background .5s ease; }
+.nt-av.ig  { background: linear-gradient(135deg, #F58529, #DD2A7B 55%, #8134AF); }
+.nt-av.web { background: var(--grad-acc); color: #062321; }
+.nt-who { min-width: 0; display: grid; }
+.nt-who b { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nt-who i { font-style: normal; font-size: 10.5px; opacity: .6; }
+.nt-ai { margin-left: auto; flex: none; padding: 4px 8px; border-radius: 999px; font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; background: rgba(62,200,192,.18); color: #176A65; }
+.nt[data-phase="night"] .nt-ai, .nt[data-phase="late"] .nt-ai { color: #7ADDD7; }
+.nt-log {
+  flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; gap: 7px;
+  padding: 10px 10px 6px; transition: opacity .25s ease;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%); mask-image: linear-gradient(to bottom, transparent, #000 22%); }
+.nt-log.swap { opacity: 0; }
+.nb { flex: none; max-width: 86%; margin: 0; padding: 8px 11px; border-radius: 14px; font-size: 12.5px; line-height: 1.42;
+  opacity: 0; transform: translateY(8px); animation: bm-in .45s cubic-bezier(.16, 1, .3, 1) forwards; }
+.nb.in  { align-self: flex-start; background: #FFFFFF; color: #1B1A21; border-bottom-left-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,.06); }
+.nb.out { align-self: flex-end; background: #D3F4EF; color: #0E3A36; border-bottom-right-radius: 4px; }
+.nb.sys { align-self: center; max-width: none; padding: 6px 11px; border-radius: 999px; background: rgba(245,158,11,.14); color: #92400E;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase; }
+.nt[data-phase="night"] .nb.in, .nt[data-phase="late"] .nb.in { background: #1C212B; color: #E6E9F2; box-shadow: none; }
+.nt[data-phase="night"] .nb.out, .nt[data-phase="late"] .nb.out { background: #12514C; color: #E4FFFB; }
+.nt[data-phase="night"] .nb.sys, .nt[data-phase="late"] .nb.sys { background: rgba(245,158,11,.18); color: #FCD34D; }
+.nt-typing { display: inline-flex; gap: 4px; align-items: center; padding: 3px 0; }
+.nt-typing i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: .45; animation: ag-blink 1.2s infinite ease-in-out; }
+.nt-typing i:nth-child(2) { animation-delay: .18s; } .nt-typing i:nth-child(3) { animation-delay: .36s; }
+.nt-input { display: flex; align-items: center; gap: 8px; margin: 4px 9px 11px; padding: 7px 7px 7px 13px; border-radius: 999px;
+  background: rgba(127,127,127,.12); font-size: 12px; }
+.nt-input span { opacity: .5; }
+.nt-input i { margin-left: auto; width: 26px; height: 26px; border-radius: 50%; background: var(--grad-acc); }
+
+/* notifications arriving, then flying into the inbox */
+.nt-toasts { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.nt-toast {
+  position: absolute; width: min(250px, 30%); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; align-items: center;
+  padding: 10px 12px; border-radius: 16px; background: rgba(255,255,255,.94); color: #1B1A21;
+  box-shadow: 0 20px 44px -18px rgba(0,0,0,.45), 0 0 0 1px rgba(0,0,0,.04);
+  animation: nt-in .55s cubic-bezier(.16, 1, .3, 1) both; }
+.nt[data-phase="night"] .nt-toast, .nt[data-phase="late"] .nt-toast { background: rgba(28,34,48,.94); color: #EEF1FA; box-shadow: 0 20px 44px -18px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.08); }
+.nt-toast .ic { grid-row: 1 / 3; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; color: #fff; background: #25D366; }
+.nt-toast .ic.ig  { background: linear-gradient(135deg, #F58529, #DD2A7B 55%, #8134AF); }
+.nt-toast .ic.web { background: var(--grad-acc); color: #062321; }
+.nt-toast .ic svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.nt-toast b { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nt-toast b small { font-family: var(--mono); font-size: 9.5px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; opacity: .55; margin-left: 6px; }
+.nt-toast p { margin: 0; font-size: 12px; line-height: 1.35; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nt-toast.go { animation: nt-go .7s cubic-bezier(.55, 0, .3, 1) forwards; }
+@keyframes nt-in { from { opacity: 0; transform: translateY(14px) scale(.96); } }
+@keyframes nt-go { to { opacity: 0; transform: translate(var(--tx, 0px), var(--ty, 0px)) scale(.3); } }
+
+/* what happened while you were away */
+.nt-stats { grid-column: 1 / -1; grid-row: 3; position: relative; z-index: 2; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.nt-stats span { display: inline-flex; align-items: baseline; gap: 6px; padding: 7px 13px; border-radius: 999px;
+  background: var(--nt-chip); border: 1px solid var(--nt-line); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--nt-soft); transition: background 1.2s ease, color 1.2s ease; }
+.nt-stats b { font-family: var(--disp); font-size: 15px; letter-spacing: -.01em; color: var(--nt-ink); font-variant-numeric: tabular-nums; }
+.nt-stats b.bump { animation: nt-bump .6s cubic-bezier(.16, 1, .3, 1); }
+@keyframes nt-bump { 40% { transform: scale(1.35); color: var(--acc); } }
+
+/* replay any moment */
+.nt-try { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; }
+.nt-try-l { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-5); margin-right: 4px; }
+.nt-chip { padding: 8px 13px; border-radius: 999px; cursor: pointer; background: var(--card); color: var(--ink-3);
+  border: 1px solid var(--edge-2); box-shadow: var(--lift); font-family: var(--sans); font-size: 12.5px; font-weight: 600; line-height: 1.2;
+  transition: border-color .2s ease, color .2s ease, transform .2s ease, background .2s ease; }
+.nt-chip:hover { border-color: var(--acc); color: var(--ink); transform: translateY(-1px); }
+.nt-chip.is-on { background: var(--acc-14); border-color: var(--acc); color: var(--ink); }
+
+/* short laptop screens keep one viewport */
+@media (min-width: 900px) and (max-height: 820px) {
+  .nt { padding: 14px 16px; }
+  .nt-time b { font-size: clamp(28px, 3vw, 40px); }
+  .nt-phone { margin: 8px 0 4px; }
+  .nt-stats span { padding: 5px 11px; }
+  .nt-try-l { display: none; }
+}
+
+/* phones: the same day, stacked */
+@media (max-width: 899px) {
+  .ag-hero .hero-view { flex-direction: column; align-items: stretch; gap: 12px; width: 100%; }
+  .nt { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .nt-phone { grid-column: 1; height: 440px; max-height: none; margin: 14px 0 10px; }
+  .nt-toast { width: min(260px, 78%); }
+  .nt-orb { width: 40px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nt-sky i, .nt-orb, .nt-screen, .nt { transition: none !important; }
+  .nb, .nt-toast, .nt-time.tick b, .nt-time.tick i, .nt-you.tick, .nt-stats b.bump,
+  .agv-thread .ag-b { animation: none !important; opacity: 1; transform: none; }
+}
 </style>
 </head>
 <body>
@@ -650,12 +884,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
 <main id="main" class="screens">
 
-  <!-- ============ 1. HERO — the 3AM conversation ============ -->
-  <section class="hero hero-run" aria-label="AI customer agent — overview">
+  <!-- ============ HERO — a day in your inbox ============
+       The headline is about time, so the proof is time: the clock runs from
+       3PM to 3AM, the sky goes dark, you go to sleep — and the messages keep
+       arriving from every channel and keep getting answered. At 3AM the one
+       that needs a person is handed to a person. The chips replay any moment. -->
+  <section class="hero hero-run ag-hero" aria-label="AI customer agent — overview">
     <div class="wrap hero-split">
       <div class="hero-copy">
         <span class="kicker rv in" data-cms="ai-customer-agent-built-for-your.kicker-1">AI customer agent — built for your store</span>
-        <h1 class="h-display rv in rv-display" style="margin-top:14px;" data-cms="ai-customer-agent-built-for-your.heading-1">Answers every customer. At 3PM <span class="acc-t">and 3AM.</span></h1>
+        <h1 class="h-display rv in rv-display" style="margin-top:14px;" data-cms="ai-customer-agent-built-for-your.heading-1">Answers every customer, 24/7. <span class="acc-t">Even at 3AM.</span></h1>
         <p class="sub rv in" data-cms="ai-customer-agent-built-for-your.text-1">
           A custom AI agent trained only on your business — sizing, orders, shipping, returns —
           on WhatsApp, Instagram and your website. And when a human is needed, it hands over. Gracefully.
@@ -671,154 +909,209 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         </div>
       </div>
 
-      <!-- right: the page's own demo, scaled by site.js to the room beside the copy -->
       <div class="hero-view rv in rv-media">
-        <div class="fit-box"><div class="hero-fit" style="--fit-w: 500px">
-      <div class="bot glass-p" aria-label="Example conversation" role="img">
-        <div class="bot-bar"><span class="bot-dot"></span>Your store · online<span class="bot-time">03:12 AM</span></div>
-        <div class="bot-log">
-          <p class="bm in-m" data-cms="see-it-answer.text-1">Hi! Do you have the linen shirt in M? And does it run small?</p>
-          <p class="bm out-m" data-cms="see-it-answer.text-2">Yes — M is in stock. It runs true to size, but if you're between M and L our customers usually size up. Chest for M is 104&nbsp;cm. Want the size chart?</p>
-          <p class="bm in-m" data-cms="see-it-answer.text-3">Perfect. How fast is delivery to Chennai?</p>
-          <p class="bm out-m" data-cms="see-it-answer.text-4">2–3 working days, free over the current threshold. I can hold your size while you decide — should I?</p>
-        </div>
-        <span class="bot-chip" id="ag-src">Answered from your size chart — not a guess</span>
-        <div class="ag-ask" id="ag-ask">
-          <p class="ag-ask-l">Ask it something <button type="button" class="ag-reset" id="ag-reset" hidden>Start over</button></p>
-        </div>
-      </div>
-        </div></div>
-      </div>
-    </div>
+        <div class="nt" id="nt" data-phase="day">
+          <!-- the sky: four grounds cross-fade as the clock moves -->
+          <div class="nt-sky" aria-hidden="true">
+            <i data-p="day"></i><i data-p="eve"></i><i data-p="night"></i><i data-p="late"></i>
+            <span class="nt-orb"></span>
+          </div>
 
-    <!-- the running strip: shown only once the editor has added images -->
-    <div class="flat-run" role="region" aria-label="AI agent work — hover, focus or tap to pause" tabindex="0">
-      <div class="fr-view">
-        <div class="fr-track" role="list" data-cms-gallery="run" data-cms-label="Running strip"></div>
+          <!-- the clock -->
+          <div class="nt-clock" aria-live="off">
+            <span class="nt-time"><b id="nt-hm">3:04</b><i id="nt-ap">PM</i></span>
+            <span class="nt-you" id="nt-you">Tuesday · you're at work</span>
+            <ol class="nt-track" aria-hidden="true">
+              <li data-p="day"><i></i>3PM</li><li data-p="eve"><i></i>8PM</li><li data-p="night"><i></i>12AM</li><li data-p="late"><i></i>3AM</li>
+            </ol>
+          </div>
+
+          <!-- messages arriving from each channel -->
+          <div class="nt-toasts" id="nt-toasts" aria-hidden="true"></div>
+
+          <!-- the store's inbox, where the agent answers -->
+          <div class="nt-phone" id="nt-phone">
+            <div class="nt-screen">
+              <div class="nt-status"><span id="nt-sb">3:04</span><span class="nt-sig" aria-hidden="true"><i></i><i></i><i></i></span></div>
+              <div class="nt-head">
+                <span class="nt-av" aria-hidden="true" id="nt-av">A</span>
+                <span class="nt-who"><b id="nt-name">Anjali</b><i id="nt-ch">WhatsApp</i></span>
+                <span class="nt-ai">AI agent on</span>
+              </div>
+              <div class="nt-log" id="nt-log" aria-live="polite">
+                <p class="nb in" data-cms="see-it-answer.text-1">Hi! Does the linen shirt run small? I'm usually an M.</p>
+                <p class="nb out" data-cms="see-it-answer.text-2">True to size — take your usual M. Chest on M is 104&nbsp;cm. Want the size chart?</p>
+              </div>
+              <div class="nt-input" aria-hidden="true"><span>Message</span><i></i></div>
+            </div>
+          </div>
+
+          <!-- what happened while you were away — counted from this demo, not invented -->
+          <div class="nt-stats">
+            <span><b id="nt-answered">1</b> answered</span>
+            <span><b>~3s</b> to reply</span>
+            <span><b id="nt-handed">0</b> handed to you</span>
+          </div>
+        </div>
+
+        <div class="nt-try" id="nt-try">
+          <span class="nt-try-l">Try a moment</span>
+          <button type="button" class="nt-chip" data-turn="size">Does M fit me?</button>
+          <button type="button" class="nt-chip" data-turn="stock">Is it back in stock?</button>
+          <button type="button" class="nt-chip" data-turn="order">Where's my order?</button>
+          <button type="button" class="nt-chip" data-turn="refund">I want a refund</button>
+        </div>
       </div>
     </div>
   </section>
 
 
-  <!-- ============ 2. THE COST OF SILENCE ============ -->
-  <section class="sec" aria-labelledby="cs-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv" data-cms="why-it-matters.kicker-1">Why it matters</span>
-        <h2 class="h-display rv rv-display" id="cs-h" data-cms="why-it-matters.heading-1">The customer who doesn't get an answer <span class="acc-t">buys somewhere else.</span></h2>
-      </div>
-      <div class="kit">
-        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3 data-cms="why-it-matters.heading-2">The 11PM size question</h3><p data-cms="why-it-matters.text-1">People shop when they shop — not when you're at your desk. A sizing question that waits until morning is usually a sale that didn't.</p></div>
-        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">02</span><h3 data-cms="why-it-matters.heading-3">The same ten questions</h3><p data-cms="why-it-matters.text-2">Sizing, delivery, returns, stock, payment — most of your inbox is the same ten questions, asked by different people, every day.</p></div>
-        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">03</span><h3 data-cms="why-it-matters.heading-4">The founder as support desk</h3><p data-cms="why-it-matters.text-3">Every hour you spend re-typing your returns policy is an hour not spent on the product. That's the expensive part.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 3. WHAT IT HANDLES ============ -->
+  <!-- ============ 01 · WHAT IT HANDLES ============
+       Six cards in the photography page's card shape — but the picture on
+       top is the proof this service can show: a real exchange, in the chat. -->
   <section class="sec" id="kit" aria-labelledby="kit-h">
     <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv" data-cms="kit.kicker-1">What you get</span>
-        <h2 class="h-display rv rv-display" id="kit-h" data-cms="kit.heading-1">The repetitive 80%, handled. The human 20%, <span class="acc-t">handed to you.</span></h2>
+      <div class="dl-head">
+        <div>
+          <span class="eyebrow rv" data-cms="kit.kicker-1">01 — What it handles</span>
+          <h2 class="h-display rv" id="kit-h" data-cms="kit.heading-1">The repetitive 80%, handled. <span class="acc-t">The human 20%, handed to you.</span></h2>
+        </div>
+        <p class="head-note rv" data-cms="why-it-matters.text-2">Sizing, delivery, returns, stock — most of your inbox is the same ten questions, asked by different people, every day. Including at 11PM.</p>
       </div>
-      <div class="kit">
-        <div class="kit-c glass-p rv rv-row"><span class="ki">01</span><h3 data-cms="kit.heading-2">Sizing &amp; fit</h3><p data-cms="kit.text-1">Answers from your size charts and fit notes — including "does it run small?"</p></div>
-        <div class="kit-c glass-p rv rv-row"><span class="ki">02</span><h3 data-cms="kit.heading-3">Product questions</h3><p data-cms="kit.text-2">Fabric, care, colours, styling — from your own product information.</p></div>
-        <div class="kit-c glass-p rv rv-row"><span class="ki">03</span><h3 data-cms="kit.heading-4">Stock &amp; availability</h3><p data-cms="kit.text-3">What's in, what's gone, what's restocking — kept current with your catalog.</p></div>
-        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">04</span><h3 data-cms="kit.heading-5">Shipping &amp; delivery</h3><p data-cms="kit.text-4">Times, costs and thresholds by destination — your policy, quoted exactly.</p></div>
-        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">05</span><h3 data-cms="kit.heading-6">Returns &amp; exchanges</h3><p data-cms="kit.text-5">Your rules, explained kindly — and escalated to you when someone's unhappy.</p></div>
-        <div class="kit-c glass-p rv rv-d1 rv-row"><span class="ki">06</span><h3 data-cms="kit.heading-7">Order status</h3><p data-cms="kit.text-6">"Where is my order?" answered without you opening a single tab.</p></div>
-        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">07</span><h3 data-cms="kit.heading-8">Lead capture</h3><p data-cms="kit.text-7">When someone's ready to buy or wants a restock alert, their details reach you, not a void.</p></div>
-        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">08</span><h3 data-cms="kit.heading-9">Human handoff</h3><p data-cms="kit.text-8">Frustration, refunds, anything complex — a person takes over with the full transcript.</p></div>
-        <div class="kit-c glass-p rv rv-d2 rv-row"><span class="ki">09</span><h3 data-cms="kit.heading-10">Your voice</h3><p data-cms="kit.text-9">Trained on how you actually talk to customers — reviewed by you before launch.</p></div>
+
+      <div class="offer">
+        <article class="off rv">
+          <div class="off-chat" aria-hidden="true"><p class="q">Does the linen shirt run small?</p><p class="a">True to size — most people take M. Chest on M is 104&nbsp;cm.</p></div>
+          <span class="off-n" aria-hidden="true">01</span>
+          <span class="off-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h18v10H3z"/><path d="M7 7v4M11 7v6M15 7v4M19 7v6"/></svg></span>
+          <h3 data-cms="kit.heading-2">Sizing &amp; fit</h3>
+          <ul><li data-cms="kit.text-1">From your size charts and fit notes</li><li data-cms="kit.text-10">"Between sizes?" answered your way</li><li data-cms="kit.text-11">The size guide, linked in the chat</li></ul>
+        </article>
+        <article class="off rv rv-d1">
+          <div class="off-chat" aria-hidden="true"><p class="q">Where is my order?</p><p class="a">#4471 shipped yesterday — due Thursday. Here's the tracking link.</p></div>
+          <span class="off-n" aria-hidden="true">02</span>
+          <span class="off-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg></span>
+          <h3 data-cms="kit.heading-7">Order status</h3>
+          <ul><li data-cms="kit.text-6">Live status from your order system</li><li data-cms="kit.text-12">The tracking link, sent in the chat</li><li data-cms="kit.text-13">Not one tab opened by you</li></ul>
+        </article>
+        <article class="off rv rv-d2">
+          <div class="off-chat" aria-hidden="true"><p class="q">Can I swap it for an L?</p><p class="a">Yes — within 14 days, unworn. Shall I start the exchange?</p></div>
+          <span class="off-n" aria-hidden="true">03</span>
+          <span class="off-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></span>
+          <h3 data-cms="kit.heading-6">Returns &amp; exchanges</h3>
+          <ul><li data-cms="kit.text-5">Your rules, explained kindly</li><li data-cms="kit.text-14">Starts the return or exchange</li><li data-cms="kit.text-15">An unhappy customer goes to you</li></ul>
+        </article>
+        <article class="off rv">
+          <div class="off-chat" aria-hidden="true"><p class="q">Do you ship to Dubai?</p><p class="a">We do — 4–6 working days, duties paid at checkout.</p></div>
+          <span class="off-n" aria-hidden="true">04</span>
+          <span class="off-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.6"/><circle cx="17.5" cy="17.5" r="1.6"/></svg></span>
+          <h3 data-cms="kit.heading-5">Shipping &amp; delivery</h3>
+          <ul><li data-cms="kit.text-4">Times and costs by destination</li><li data-cms="kit.text-16">Your free-shipping threshold, exactly</li><li data-cms="kit.text-17">COD and payment questions</li></ul>
+        </article>
+        <article class="off rv rv-d1">
+          <div class="off-chat" aria-hidden="true"><p class="q">Is the olive one back?</p><p class="a">Restocking next week — want a WhatsApp alert when it lands?</p></div>
+          <span class="off-n" aria-hidden="true">05</span>
+          <span class="off-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16v13H4z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/></svg></span>
+          <h3 data-cms="kit.heading-4">Stock &amp; restocks</h3>
+          <ul><li data-cms="kit.text-3">Kept current with your catalog</li><li data-cms="kit.text-7">A restock alert captures the lead</li><li data-cms="kit.text-18">Suggests what is in stock instead</li></ul>
+        </article>
+        <article class="off rv rv-d2">
+          <div class="off-chat" aria-hidden="true"><p class="q">I need to talk to someone.</p><p class="a">Of course — passing you to Priya now, with this chat attached.</p></div>
+          <span class="off-n" aria-hidden="true">06</span>
+          <span class="off-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"/><path d="M5 20v-1.4A5.6 5.6 0 0 1 10.6 13h2.8a5.6 5.6 0 0 1 5.6 5.6V20"/></svg></span>
+          <h3 data-cms="kit.heading-9">Human handoff</h3>
+          <ul><li data-cms="kit.text-8">Complaints and refunds go to a person</li><li data-cms="kit.text-19">The full transcript comes with it</li><li data-cms="kit.text-20">Your hours, your rules</li></ul>
+        </article>
       </div>
+
+      <div class="dl-spec-head rv">
+        <span class="eyebrow" data-cms="where-it-lives.kicker-1">Where it lives</span>
+        <h3 class="h-display" data-cms="where-it-lives.heading-1">On the channels your customers <span class="acc-t">already use.</span></h3>
+      </div>
+      <ul class="dl-spec rv">
+        <li><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"/></svg></span><div><b>WhatsApp Business</b><span>Where most fashion questions start</span></div></li>
+        <li><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="12" cy="12" r="3.6"/><circle cx="16.8" cy="7.2" r=".9"/></svg></span><div><b>Instagram DMs</b><span>Replies right under your posts</span></div></li>
+        <li><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2.5"/><path d="M3 8h18M9 21h6"/></svg></span><div><b>Website chat widget</b><span>On every product page</span></div></li>
+        <li><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3C7 3 3 6.7 3 11.3c0 2.6 1.3 4.9 3.3 6.4V21l3-1.7c.9.3 1.8.4 2.7.4 5 0 9-3.7 9-8.4S17 3 12 3z"/><path d="m7.5 13 3-3 2.3 2.2L16.5 9l-3 3.2-2.3-2.2z"/></svg></span><div><b>Facebook Messenger</b><span>If your customers still use it</span></div></li>
+        <li><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.2 8.3 8 9 4.8-.7 8-4.5 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span><div><b>Only your content</b><span>No guessing, no invented offers</span></div></li>
+        <li><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></span><div><b>Your voice</b><span>Tone reviewed by you before launch</span></div></li>
+        <li><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg></span><div><b>Leads sent to you</b><span>Ready-to-buy details, not a void</span></div></li>
+        <li><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><div><b>Live 24/7</b><span>The 3AM question gets an answer</span></div></li>
+      </ul>
     </div>
   </section>
 
-  <!-- ============ 4. CHANNELS ============ -->
-  <section class="sec" aria-labelledby="ch-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv" data-cms="where-it-lives.kicker-1">Where it lives</span>
-        <h2 class="h-display rv rv-display" id="ch-h" data-cms="where-it-lives.heading-1">On the channels your customers <span class="acc-t">already use.</span></h2>
-        <p class="sub rv" data-cms="where-it-lives.text-1">For most fashion stores the answer starts with WhatsApp. We'll recommend the rollout order based on where your questions actually arrive.</p>
+  <!-- ============ 02 · SEE THE DIFFERENCE ============
+       Split, like the photography proof: the claim reads down the left, the
+       evidence sits beside it — one chat card that flips between a canned
+       bot and your agent answering the same two questions. -->
+  <section class="sec stage gate" id="voice" aria-labelledby="vc-h">
+    <div class="wrap ba-split ag-split">
+      <div class="ba-say">
+        <span class="eyebrow rv" data-cms="the-voice-test.kicker-1">02 — See the difference</span>
+        <h2 class="h-display rv" id="vc-h" data-cms="the-voice-test.heading-1">Your customers can smell <span class="acc-t">a generic bot.</span></h2>
+        <p class="head-note rv" style="margin:16px 0 0" data-cms="the-voice-test.text-2">The same two questions, asked of an off-the-shelf chatbot and of an agent trained on your store. Flip between them.</p>
+        <ul class="ba-pts rv">
+          <li><b data-cms="the-rule-that-makes-it-safe.heading-1">Trained on your business. Nothing else.</b> <span data-cms="the-rule-that-makes-it-safe.text-3">Your policies, products, FAQ and tone — a closed box you control.</span></li>
+          <li><b>It cannot make things up.</b> <span data-cms="the-rule-that-makes-it-safe.text-4">No invented discount, no delivery date you never offered.</span></li>
+          <li><b>It knows when to stop.</b> <span data-cms="the-rule-that-makes-it-safe.text-5">Outside the box it says so honestly — and hands the chat to you.</span></li>
+        </ul>
+        <a href="#contact" class="btn-acc rv" style="margin-top:22px">Get my fixed quote</a>
       </div>
-      <div class="fmt-wall rv">
-        <span class="fmt hot">WhatsApp Business</span>
-        <span class="fmt">Instagram DMs</span>
-        <span class="fmt">Website chat widget</span>
-        <span class="fmt">Facebook Messenger</span>
-      </div>
-    </div>
-  </section>
 
-  <!-- ============ 5. VOICE COMPARISON ============ -->
-  <section class="sec" aria-labelledby="vc-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv" data-cms="the-voice-test.kicker-1">The voice test</span>
-        <h2 class="h-display rv rv-display" id="vc-h" data-cms="the-voice-test.heading-1">Your customers can smell <span class="acc-t">a generic bot.</span></h2>
-      </div>
-      <div class="ag-cmp">
-        <div class="rv">
-          <h3>Off-the-shelf chatbot</h3>
-          <div class="ag-thread">
+      <div class="agv rv" id="agv">
+        <div class="agv-toggle" role="tablist" aria-label="Compare">
+          <button type="button" role="tab" class="agv-t" data-v="bot" aria-selected="false">Off-the-shelf chatbot</button>
+          <button type="button" role="tab" class="agv-t" data-v="agent" aria-selected="true">Your agent</button>
+          <span class="agv-pill" aria-hidden="true"></span>
+        </div>
+        <div class="agv-card">
+          <div class="agv-head"><span class="agv-dot" aria-hidden="true"></span><b class="agv-name">Your store</b><i class="agv-state">Online</i></div>
+          <div class="agv-thread" data-v="bot" role="tabpanel" hidden>
             <p class="ag-b them">Is the linen shirt true to size?</p>
             <p class="ag-b us">I'm sorry, I didn't understand your query. Please rephrase.</p>
             <p class="ag-b them">Can I speak to someone?</p>
             <p class="ag-b us">Please visit our Help Centre for more information.</p>
+            <p class="agv-why bad">Canned scripts written for every store, so they fit none — and a dead end with no way to reach a person.</p>
           </div>
-          <p class="ag-why">Canned scripts written for every store, so they fit none — and a dead end with no way to reach a person.</p>
-        </div>
-        <div class="lit rv rv-d1">
-          <h3>Your agent</h3>
-          <div class="ag-thread">
+          <div class="agv-thread" data-v="agent" role="tabpanel">
             <p class="ag-b them">Is the linen shirt true to size?</p>
             <p class="ag-b us">Between M and L? Our linen runs roomy — most people take M. Chest on M is 104&nbsp;cm.</p>
             <p class="ag-b them">Can I speak to someone?</p>
             <p class="ag-b us">Of course — passing you to Priya now, with this chat attached so you don't repeat yourself.</p>
+            <p class="agv-why good">Trained on your real replies, answering only from your approved policies — and it knows when to hand over.</p>
           </div>
-          <p class="ag-why">Trained on your real replies and answering only from your approved policies — and it knows when to hand over.</p>
         </div>
       </div>
-      <p class="cmp-note rv" data-cms="the-voice-test.text-1">You review real sample conversations and correct the tone before any customer meets it.</p>
     </div>
   </section>
 
-  <!-- ============ 6. THE HONESTY RULE ============ -->
-  <section class="sec" aria-labelledby="hr-h">
-    <div class="wrap">
-      <div class="acc-honest">
-        <span class="kicker rv" data-cms="the-rule-that-makes-it-safe.kicker-1">The rule that makes it safe</span>
-        <h2 class="h-display rv rv-display" id="hr-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;" data-cms="the-rule-that-makes-it-safe.heading-1">Trained on your business. <span class="acc-t">Nothing else.</span></h2>
-        <p class="rv" data-cms="the-rule-that-makes-it-safe.text-1">The agent's knowledge is a closed box you control: your policies, your products, your FAQ, your tone. It cannot invent a discount, promise a delivery date you never offered, or improvise an answer to a question it can't source. Outside the box, it says so honestly — and hands the conversation to you with the full transcript.</p>
-        <p class="soft rv" data-cms="the-rule-that-makes-it-safe.text-2">An AI that guesses is a liability wearing your brand's name. Ours is built not to.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 7. PROCESS ============ -->
+  <!-- ============ 03 · HOW IT WORKS ============ -->
   <section class="sec" id="how" aria-labelledby="how-h">
     <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv" data-cms="how.kicker-1">How it works</span>
-        <h2 class="h-display rv rv-display" id="how-h" data-cms="how.heading-1">From your FAQ to a working agent, <span class="acc-t">in four steps.</span></h2>
-      </div>
-      <div class="chat-wrap" style="grid-template-columns:1fr;max-width:860px;margin:0 auto;">
-        <div class="weeks rv-steps">
-          <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3 data-cms="how.heading-2">Brief</h3><p data-cms="how.text-1">Show us where customers message you and what they ask — screenshots of real chats are perfect.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3 data-cms="how.heading-3">Fixed quote in 24h</h3><p data-cms="how.text-2">One number for the build, training, channel setup and launch tuning.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3 data-cms="how.heading-4">Train &amp; rehearse</h3><p data-cms="how.text-3">We build the knowledge base from your content, then you grill it with real questions until the answers sound like you.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3 data-cms="how.heading-5">Launch &amp; tune</h3><p data-cms="how.text-4">Live on your channels with handoff wired to you — then tuned against real conversations in the first weeks.</p></div></div>
+      <div class="head-split">
+        <div>
+          <span class="eyebrow rv" data-cms="how.kicker-1">03 — How it works</span>
+          <h2 class="h-display rv" id="how-h" data-cms="how.heading-1">From your FAQ to a working agent. <span class="acc-t">In four steps.</span></h2>
         </div>
+        <p class="head-note rv" data-cms="the-voice-test.text-1">You review real sample conversations and correct the tone before any customer meets it.</p>
+      </div>
+      <div class="weeks rail rv-steps">
+        <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3 data-cms="how.heading-2">Brief</h3><p data-cms="how.text-1">Show us where customers message you and what they ask — screenshots of real chats are perfect.</p></div></div>
+        <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3 data-cms="how.heading-3">Fixed quote in 24h</h3><p data-cms="how.text-2">One number for the build, training, channel setup and launch tuning.</p></div></div>
+        <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3 data-cms="how.heading-4">Train &amp; rehearse</h3><p data-cms="how.text-3">We build the knowledge base from your content, then you grill it with real questions until the answers sound like you.</p></div></div>
+        <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3 data-cms="how.heading-5">Launch &amp; tune</h3><p data-cms="how.text-4">Live on your channels with handoff wired to you — then tuned against real conversations in the first weeks.</p></div></div>
+      </div>
+      <div class="assure rv">
+        <div><b data-cms="how.stat-1">24h</b><span data-cms="how.stat-2">A fixed quote, not a range</span></div>
+        <div><b data-cms="how.stat-3">4</b><span data-cms="how.stat-4">Channels it can answer on</span></div>
+        <div><b data-cms="how.stat-5">24/7</b><span data-cms="how.stat-6">Answers, including at 3AM</span></div>
+        <div><b data-cms="how.stat-7">0</b><span data-cms="how.stat-8">Answers invented outside your content</span></div>
       </div>
     </div>
   </section>
 
-  <!-- ============ 8. PROOF ============ -->
-
-  <!-- ============ 8. FAQ ============ -->
+  <!-- ============ FAQ ============ -->
   <section class="sec" id="faq" aria-labelledby="faq-h">
     <div class="wrap">
       <div class="sec-head">
@@ -854,8 +1147,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 9. CONTACT ============ -->
-  <!-- ============================ SPECIALIST NETWORK ============================ -->
+  <!-- ============ SPECIALIST NETWORK ============ -->
   <!-- Secondary route: the primary action on this page stays "start this
        project with our team", in the contact section directly below. -->
   <section class="sec" aria-labelledby="svcnet-h" style="padding-bottom:0;">
@@ -907,7 +1199,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
             </select>
           </label>
           <label><span class="fl">Tell us about your store<span class="rq" aria-hidden="true">*</span></span><textarea class="fi" name="message" required placeholder="e.g. Instagram boutique, most questions are sizing and delivery — I reply late and lose people"></textarea></label>
-          <p class="cform-err" id="td-err" role="alert" hidden></p>
+          <p class="cform-err" id="td-err" role="alert" tabindex="-1" hidden></p>
           <button type="submit" class="btn-acc" style="width:100%;" data-cms="contact.button-1">Get my fixed quote</button>
         </form>
         <aside class="cside glass-p rv rv-d1" aria-label="Our promise">
@@ -920,7 +1212,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
             <li data-cms="contact.item-4">A human handoff path is designed in from day one.</li>
             <li data-cms="contact.item-5">You review and approve the agent before a single customer meets it.</li>
           </ul>
-          <button type="button" class="mail" id="copy-mail">hello@fashionos.app<span style="font-size: 11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-5);" id="copy-hint">Click to copy</span></button>
+          <button type="button" class="mail" id="copy-mail">hello@fashionos.app<span style="font-size: 11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-5);" id="copy-hint" role="status" aria-live="polite">Click to copy</span></button>
         </aside>
       </div>
       </div>
@@ -943,10 +1235,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 
   /* cursor glow */
   if (!reduced && window.matchMedia('(hover: hover)').matches) {
-    var glow = document.getElementById('glow');
+    var glow = document.getElementById('glow'), gx = 0, gy = 0, gq = false;
+    /* one write per frame, and none at all while the theme hides the glow */
     window.addEventListener('mousemove', function (e) {
-      glow.style.left = e.clientX + 'px';
-      glow.style.top = e.clientY + 'px'; }, { passive: true }); }
+      gx = e.clientX; gy = e.clientY;
+      if (gq || !glow) return;
+      gq = true;
+      requestAnimationFrame(function () {
+        gq = false;
+        if (getComputedStyle(glow).display === 'none') return;
+        glow.style.left = gx + 'px'; glow.style.top = gy + 'px'; }); }, { passive: true }); }
 
   /* Arm the how-it-works step stagger only when we can actually run it.
      Until 'armed' lands the steps are plain visible content, so a blocked
@@ -967,103 +1265,196 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       io.observe(el); }); } else {
     rvs.forEach(function (el) { el.classList.add('in'); }); }
   /* safety net — a janitor that also covers tab panels and IO misses */
+  var rvJanitorRuns = 0;
   var rvJanitor = setInterval(function () {
     var left = document.querySelectorAll('.rv:not(.in), .rv-steps:not(.in)');
-    if (!left.length) { clearInterval(rvJanitor); return; }
+    /* after ~20s the scroll observer owns it; site.js's failsafe covers the rest */
+    if (!left.length || ++rvJanitorRuns > 28) { clearInterval(rvJanitor); return; }
     left.forEach(function (el) {
       var r = el.getBoundingClientRect();
       if ((r.width || r.height) && r.top < window.innerHeight * 1.05) el.classList.add('in'); }); }, 700);
 
-  /* chat plays in view */
-  var chat = document.getElementById('chat');
-  if (chat) {
-    if ('IntersectionObserver' in window && !reduced) {
-      new IntersectionObserver(function (en, obs) {
-        if (en[0].isIntersecting) { chat.classList.add('play'); obs.disconnect(); }
-      }, { threshold: 0.15 }).observe(chat); } else { chat.classList.add('play'); }
-  }
 
 
-  /* The hero transcript is a real trial: a preset question appends, the agent
-     "thinks", then its reply types out. Answers are fixed copy — this is a
-     scripted demo, not a live model, and it never claims otherwise. */
+  /* ---- the hero: a day in your inbox ----
+     One moment at a time: the clock moves on and the sky with it, a message
+     arrives as a notification from its channel, flies into the store's inbox
+     and is answered. At 3AM the refund is handed to a person, not argued with.
+     The replies are fixed copy — a scripted demo — and the counters count only
+     what this demo has answered. Nothing runs off screen or in a hidden tab. */
   (function () {
-    var log = document.querySelector('.bot-log');
-    var ask = document.getElementById('ag-ask');
-    var src = document.getElementById('ag-src');
-    var reset = document.getElementById('ag-reset');
-    if (!log || !ask) return;
+    var nt = document.getElementById('nt');
+    var log = document.getElementById('nt-log');
+    if (!nt || !log) return;
+    var $ = function (id) { return document.getElementById(id); };
+    var hm = $('nt-hm'), ap = $('nt-ap'), you = $('nt-you'), sb = $('nt-sb');
+    var who = $('nt-name'), chn = $('nt-ch'), av = $('nt-av');
+    var nAns = $('nt-answered'), nHand = $('nt-handed');
+    var toasts = $('nt-toasts'), phone = $('nt-phone');
+    var chips = [].slice.call(document.querySelectorAll('.nt-chip'));
     var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var start = log.innerHTML, startSrc = src ? src.textContent : '';
 
-    var QA = [
-      { q: 'Where is my order?',
-        a: 'Order #4471 left Tiruppur yesterday and is with the courier — due Thursday. Want the tracking link?',
-        s: 'Answered from your order system — live status' },
-      { q: 'Can I return this?',
-        a: 'Yes — 14 days from delivery, unworn with tags. I can start it now if you give me the order number.',
-        s: 'Answered from your returns policy — not a guess' },
-      { q: 'Do you ship to Dubai?',
-        a: 'We do. Dubai is 4–6 working days, duties paid at checkout, and returns are free within 14 days.',
-        s: 'Answered from your shipping table — not a guess' }
-    ];
+    var ICON = {
+      wa:  '<svg viewBox="0 0 24 24"><path d="M4 20l1.3-4A8 8 0 1 1 8 18.7z"/></svg>',
+      ig:  '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="12" cy="12" r="3.6"/></svg>',
+      web: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2.5"/><path d="M3 8h18"/></svg>'
+    };
+    var CH = { wa: 'WhatsApp', ig: 'Instagram', web: 'Website chat' };
+    var TURNS = {
+      size:   { phase: 'day',   hm: '3:04',  ap: 'PM', you: "Tuesday · you're at work",  ch: 'wa',  name: 'Anjali',  side: 'r',
+                q: "Hi! Does the linen shirt run small? I'm usually an M.",
+                a: 'True to size — take your usual M. Chest on M is 104 cm. Want the size chart?' },
+      stock:  { phase: 'eve',   hm: '7:46',  ap: 'PM', you: "Tuesday · you're at dinner", ch: 'ig',  name: 'riya.k',  side: 'l',
+                q: 'Is the olive one back in stock?',
+                a: 'Restocking next Tuesday — want a WhatsApp alert the minute it lands?' },
+      order:  { phase: 'night', hm: '11:52', ap: 'PM', you: "Tuesday · you're asleep",    ch: 'web', name: 'Guest',   side: 'r',
+                q: 'Where is my order? #4471',
+                a: 'Order #4471 shipped yesterday and is due Thursday. Here is your tracking link.' },
+      refund: { phase: 'late',  hm: '3:12',  ap: 'AM', you: "Wednesday · you're asleep",  ch: 'wa',  name: 'Karthik', side: 'l',
+                q: 'The zip broke on day one. I want a refund.',
+                a: "I'm sorry — that shouldn't happen. I've passed this to Priya with your order attached; she'll reply by 10 AM.",
+                handoff: 'Handed to Priya · transcript attached' }
+    };
+    var ORDER = ['size', 'stock', 'order', 'refund'];
+    var step = 1, answered = 1, handed = 0, timers = [], typer = null, visible = true, waiting = false;
 
-    QA.forEach(function (item, i) {
-      var b = document.createElement('button');
-      b.type = 'button'; b.className = 'ag-chip'; b.textContent = item.q;
-      b.addEventListener('click', function () { play(item, b); });
-      ask.appendChild(b);
-    });
+    function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+    function stop() { timers.forEach(clearTimeout); timers = []; if (typer) { clearInterval(typer); typer = null; } }
+    function restart(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+    function bump(el, n) { el.textContent = n; if (!reduced) restart(el, 'bump'); }
 
+    function moment(t) {
+      nt.setAttribute('data-phase', t.phase);
+      hm.textContent = t.hm; ap.textContent = t.ap; sb.textContent = t.hm; you.textContent = t.you;
+      if (!reduced) { restart(hm.parentNode, 'tick'); restart(you, 'tick'); }
+    }
+    function conversation(t) {
+      who.textContent = t.name; chn.textContent = CH[t.ch];
+      av.textContent = t.name.charAt(0).toUpperCase(); av.className = 'nt-av ' + t.ch;
+      log.innerHTML = '';
+    }
     function bubble(cls, text) {
       var p = document.createElement('p');
-      p.className = 'bm ' + cls;
-      p.textContent = text;
+      p.className = 'nb ' + cls;
+      if (text != null) p.textContent = text;
       log.appendChild(p);
-      log.scrollTop = log.scrollHeight;
       return p;
     }
+    function toast(t) {
+      var el = document.createElement('div');
+      el.className = 'nt-toast';
+      el.innerHTML = '<span class="ic ' + t.ch + '">' + ICON[t.ch] + '</span><b></b><p></p>';
+      el.querySelector('b').innerHTML = '';
+      el.querySelector('b').appendChild(document.createTextNode(t.name));
+      var small = document.createElement('small'); small.textContent = CH[t.ch]; el.querySelector('b').appendChild(small);
+      el.querySelector('p').textContent = t.q;
+      /* beside the phone on a wide stage, above it on a narrow one */
+      var wide = nt.clientWidth > 700;
+      if (wide) { el.style[t.side === 'l' ? 'left' : 'right'] = '3.5%'; el.style.top = t.side === 'l' ? '38%' : '28%'; }
+      else { el.style.left = '50%'; el.style.marginLeft = '-' + Math.min(130, nt.clientWidth * .39) + 'px'; el.style.top = '64px'; }
+      toasts.appendChild(el);
+      return el;
+    }
+    function fly(el) {
+      var a = el.getBoundingClientRect(), p = phone.getBoundingClientRect();
+      el.style.setProperty('--tx', Math.round((p.left + p.width / 2) - (a.left + a.width / 2)) + 'px');
+      el.style.setProperty('--ty', Math.round((p.top + p.height * .72) - (a.top + a.height / 2)) + 'px');
+      el.classList.add('go');
+      setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 800);
+    }
 
-    var busy = false;
-    function play(item, chip) {
-      if (busy) return;
-      busy = true;
-      chip.disabled = true; chip.classList.add('is-used');
-      if (reset) reset.hidden = false;
-      bubble('in-m', item.q);
+    function play(id, fromChip) {
+      var t = TURNS[id];
+      if (!t) return;
+      stop();
+      toasts.innerHTML = '';
+      chips.forEach(function (c) { c.classList.toggle('is-on', c.getAttribute('data-turn') === id); });
+      moment(t);
 
-      var out = bubble('out-m', '');
-      out.innerHTML = '<span class="ag-typing"><i></i><i></i><i></i></span>';
-
-      var think = reduced ? 0 : 550;
-      setTimeout(function () {
-        out.textContent = '';
-        if (reduced) { out.textContent = item.a; done(); return; }
-        var n = 0;
-        var t = setInterval(function () {
-          n += 2;
-          out.textContent = item.a.slice(0, n);
-          log.scrollTop = log.scrollHeight;
-          if (n >= item.a.length) { clearInterval(t); done(); }
-        }, 16);
-      }, think);
+      if (reduced) {
+        conversation(t);
+        bubble('in', t.q); bubble('out', t.a);
+        if (t.handoff) bubble('sys', t.handoff);
+        return;
+      }
+      /* the old chat leaves, the notification arrives, then flies in */
+      log.classList.add('swap');
+      later(function () { conversation(t); log.classList.remove('swap'); }, 300);
+      var el;
+      later(function () { el = toast(t); }, 650);
+      later(function () { if (el) fly(el); }, 1750);
+      later(function () { bubble('in', t.q); }, 2250);
+      later(function () {
+        var out = bubble('out', null);
+        out.innerHTML = '<span class="nt-typing"><i></i><i></i><i></i></span>';
+        later(function () {
+          var n = 0; out.textContent = '';
+          typer = setInterval(function () {
+            n += 2; out.textContent = t.a.slice(0, n);
+            if (n >= t.a.length) { clearInterval(typer); typer = null; done(); }
+          }, 18);
+        }, 650);
+      }, 2650);
 
       function done() {
-        if (src) src.textContent = item.s;
-        busy = false;
+        bump(nAns, ++answered);
+        if (t.handoff) later(function () { bubble('sys', t.handoff); bump(nHand, ++handed); }, 350);
+        later(next, fromChip ? 9000 : 2800);
       }
     }
 
-    if (reset) {
-      reset.addEventListener('click', function () {
-        log.innerHTML = start;
-        if (src) src.textContent = startSrc;
-        ask.querySelectorAll('.ag-chip').forEach(function (c) {
-          c.disabled = false; c.classList.remove('is-used');
-        });
-        reset.hidden = true;
-        busy = false;
+    function next() {
+      if (!visible || document.hidden) { waiting = true; return; }
+      play(ORDER[step % ORDER.length], false);
+      step++;
+    }
+
+    chips.forEach(function (c) {
+      c.addEventListener('click', function () {
+        var id = c.getAttribute('data-turn');
+        step = ORDER.indexOf(id) + 1;
+        play(id, true);
       });
+    });
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (en) {
+        visible = en[0].isIntersecting;
+        if (visible && waiting) { waiting = false; next(); }
+      }, { threshold: 0.25 }).observe(nt);
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden && waiting && visible) { waiting = false; next(); }
+    });
+    if (!reduced) later(next, 1500);
+  })();
+
+  /* ---- 02: the proof card flips between a canned bot and your agent ---- */
+  (function () {
+    var box = document.getElementById('agv');
+    if (!box) return;
+    var ts = [].slice.call(box.querySelectorAll('.agv-t'));
+    var panes = [].slice.call(box.querySelectorAll('.agv-thread'));
+    var name = box.querySelector('.agv-name'), state = box.querySelector('.agv-state');
+    function show(v) {
+      box.setAttribute('data-v', v);
+      ts.forEach(function (t) { t.setAttribute('aria-selected', t.getAttribute('data-v') === v ? 'true' : 'false'); });
+      panes.forEach(function (p) { p.hidden = p.getAttribute('data-v') !== v; });
+      if (name) name.textContent = v === 'bot' ? 'Generic chatbot' : 'Your store';
+      if (state) state.textContent = v === 'bot' ? 'Auto-reply' : 'Online';
+    }
+    var touched = false;
+    ts.forEach(function (t) { t.addEventListener('click', function () { touched = true; show(t.getAttribute('data-v')); }); });
+    show('agent');
+    /* the first time it scrolls in, show the bot first, then the answer that wins */
+    if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      new IntersectionObserver(function (en, obs) {
+        if (!en[0].isIntersecting) return;
+        obs.disconnect();
+        if (touched) return;
+        show('bot');
+        setTimeout(function () { if (!touched) show('agent'); }, 2600);
+      }, { threshold: 0.45 }).observe(box);
     }
   })();
 
@@ -1136,7 +1527,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         el.removeAttribute('aria-invalid');
         if (!data[f] || (f === 'email' && !EMAIL_RE.test(data.email))) invalid.push(el); });
       if (invalid.length) {
-        invalid.forEach(function (el) { el.setAttribute('aria-invalid', 'true'); });
+        invalid.forEach(function (el) { el.setAttribute('aria-invalid', 'true'); el.setAttribute('aria-describedby', 'td-err'); });
         errBox.textContent = (!data.name || !data.email || !data.message)
           ? 'Please fill in name, email and a few words about your store.'
           : "That email address doesn't look right — mind checking it?";
@@ -1144,7 +1535,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         invalid[0].focus();
         return; }
       errBox.hidden = true;
+      form.querySelectorAll('[aria-invalid]').forEach(function (el) {
+        el.removeAttribute('aria-invalid'); el.removeAttribute('aria-describedby'); });
       var submit = form.querySelector('button[type="submit"]');
+      var sendLabel = submit.textContent;
       submit.disabled = true;
       submit.textContent = 'Sending…';
       /* Send the enquiry to the server. It used to be written to localStorage,
@@ -1155,23 +1549,27 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       if (!body.get('service')) body.set('service', 'ai-agent');
       fetch('/api/leads', { method: 'POST', body: body })
         .then(function (r) { if (!r.ok) throw new Error('lead ' + r.status); })
+        .then(function () {
+          /* Only now is it true. Swapping the form for "Got it" before the
+             request settled told every failed sender their enquiry had landed. */
+          var sent = document.createElement('div');
+          sent.className = 'sent-ok';
+          sent.setAttribute('tabindex', '-1');
+          sent.innerHTML =
+            '<div class="ok">✓</div>' +
+            '<h3>Got it, ' + (data.name || '').split(' ')[0].replace(/</g, '&lt;') + '.</h3>' +
+            '<p>Your fixed quote is on its way within 24 hours to <strong style="color:var(--ink);">' +
+            data.email.replace(/</g, '&lt;') + '</strong>.</p>';
+          form.parentElement.replaceChild(sent, form);
+          sent.focus(); })
         .catch(function () {
           /* Never lose the enquiry to a network blip — show the address so the
              person can still reach us, rather than a dead end. */
           errBox.textContent = 'That did not send. Please email hello@fashionos.app and we will pick it up.';
           errBox.hidden = false;
           submit.disabled = false;
-          submit.textContent = 'Send it'; });
-      var sent = document.createElement('div');
-      sent.className = 'sent-ok';
-      sent.setAttribute('tabindex', '-1');
-      sent.innerHTML =
-        '<div class="ok">✓</div>' +
-        '<h3>Got it, ' + (data.name || '').split(' ')[0].replace(/</g, '&lt;') + '.</h3>' +
-        '<p>Your fixed quote is on its way within 24 hours to <strong style="color:var(--ink);">' +
-        data.email.replace(/</g, '&lt;') + '</strong>.</p>';
-      form.parentElement.replaceChild(sent, form);
-      sent.focus(); }); }
+          submit.textContent = sendLabel;
+          if (errBox.focus) errBox.focus(); }); }); }
 })();
 </script>
 
