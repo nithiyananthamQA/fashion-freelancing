@@ -735,6 +735,57 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     border-color: var(--glass-border);
   }
 }
+
+/* ---- bento visuals: stills from the very sample the viewer below spins ---- */
+.sc-shots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: auto; padding-top: 14px; }
+.sc-shots figure { margin: 0; border-radius: 12px; overflow: hidden; background: var(--card-2); border: 1px solid var(--edge); }
+.sc-shots img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; }
+.sc-one { margin-top: auto; padding-top: 12px; border-radius: 12px; overflow: hidden; }
+.sc-one img { display: block; width: 100%; height: auto; max-height: 128px; object-fit: contain; }
+
+/* ---- the intake panel: what we read before a single seam is built ---- */
+.intake { display: grid; gap: 14px; align-content: start; padding: clamp(16px, 1.8vw, 24px); }
+.intake-cap { font: 600 10.5px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-5); }
+.intake-fig { position: relative; margin: 0; border-radius: 14px; overflow: hidden; background: #fff; border: 1px solid var(--edge); }
+.intake-fig img { display: block; width: 100%; height: auto; aspect-ratio: 1400 / 990; object-fit: cover; object-position: top center; }
+.intake-fig .pin { position: absolute; padding: 5px 9px; border-radius: 8px; background: var(--card); border: 1px solid var(--acc-28);
+  box-shadow: var(--lift); font: 600 10px/1.2 var(--mono); color: var(--acc-text); white-space: nowrap; }
+.intake-fig .p1 { left: 8px; top: 10px; } .intake-fig .p2 { right: 8px; top: 38%; } .intake-fig .p3 { left: 8px; bottom: 10px; }
+.intake-say { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--ink-4); }
+.intake-say b { color: var(--ink); font-weight: 600; }
+
+/* ---- the sampling chain, with our stage lit ---- */
+.stagerail { list-style: none; position: relative; margin: 0; padding: clamp(18px, 2vw, 26px) clamp(14px, 2vw, 26px);
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; align-items: start;
+  border-radius: var(--r); background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift); }
+.stagerail::before { content: ''; position: absolute; z-index: 0; left: calc(clamp(14px, 2vw, 26px) + 8%); right: calc(clamp(14px, 2vw, 26px) + 8%);
+  top: calc(clamp(18px, 2vw, 26px) + 8px); height: 2px; border-radius: 2px; background: rgba(var(--ink-rgb), .16); }
+.stagerail li { position: relative; display: grid; justify-items: center; gap: 10px; text-align: center;
+  font: 600 clamp(10px, .82vw, 12.5px)/1.3 var(--mono); letter-spacing: .04em; color: var(--ink-5); }
+.stagerail li i { position: relative; z-index: 1; width: 16px; height: 16px; border-radius: 50%; background: var(--card); border: 2px solid rgba(var(--ink-rgb), .28); }
+.stagerail li.lit { color: var(--acc-text); }
+.stagerail li.lit i { background: var(--grad-acc); border-color: transparent; box-shadow: 0 0 0 5px var(--acc-14); width: 18px; height: 18px; }
+@media (max-width: 760px) { .stagerail { grid-auto-flow: row; justify-items: start; gap: 12px; }
+  .stagerail::before { left: calc(clamp(14px, 2vw, 26px) + 8px); right: auto; top: clamp(26px, 3vw, 34px); bottom: clamp(26px, 3vw, 34px); width: 2px; height: auto; }
+  .stagerail li { grid-auto-flow: column; justify-items: start; align-items: center; gap: 12px; text-align: left; } }
+.stage-say { margin: 14px 0 clamp(18px, 2vw, 26px); font-size: 14px; line-height: 1.65; color: var(--ink-4); }
+.stage-say b { color: var(--ink); font-weight: 600; }
+
+/* ---- the terms a buyer reads together, under the deliverables ---- */
+.terms { list-style: none; margin: clamp(14px, 1.6vw, 20px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(10px, 1.2vw, 16px); }
+@media (max-width: 1000px) { .terms { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .terms { grid-template-columns: 1fr; } }
+.terms li { padding: clamp(13px, 1.4vw, 17px); border-radius: var(--r-sm); background: var(--card); border: 1px dashed var(--edge-2); }
+.terms b { display: block; font: 600 10px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--acc-text); }
+.terms span { display: block; margin-top: 5px; font-size: 12.5px; line-height: 1.55; color: var(--ink-4); }
+
+/* ---- accuracy: what the simulation is built from, and what it is not ---- */
+.acc-from, .acc-not { list-style: none; margin: clamp(16px, 2vw, 24px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 1.2vw, 16px); text-align: left; }
+@media (max-width: 820px) { .acc-from, .acc-not { grid-template-columns: 1fr; } }
+.acc-from li, .acc-not li { padding: clamp(14px, 1.5vw, 18px); border-radius: var(--r-sm); background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift); }
+.acc-not li { background: none; border-style: dashed; box-shadow: none; }
+.acc-from b, .acc-not b { display: block; font: 700 14.5px/1.3 var(--disp); letter-spacing: -.01em; color: var(--ink); }
+.acc-from span, .acc-not span { display: block; margin-top: 5px; font-size: 13px; line-height: 1.55; color: var(--ink-4); }
 </style>
 </head>
 <body>
@@ -806,17 +857,24 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
           <span class="ti">01</span>
           <h3 data-cms="kit.heading-2">Photoreal garment renders</h3>
           <p data-cms="kit.text-2">Front, side and back at photographic quality — simulated in CLO3D and Browzwear, the same engines the biggest brands develop in.</p>
-          <div class="sc sc-views" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="sc-shots"><figure><img src="../../assets/img/sampling3d/jacket-front-520.webp" srcset="../../assets/img/sampling3d/jacket-front-520.webp 520w, ../../assets/img/sampling3d/jacket-front-900.webp 900w" sizes="(max-width: 900px) 30vw, 14vw" width="900" height="900" loading="lazy" decoding="async" alt="The 3D sample rendered from the front" data-cms="kit.image-1"></figure><figure><img src="../../assets/img/sampling3d/jacket-side-520.webp" srcset="../../assets/img/sampling3d/jacket-side-520.webp 520w, ../../assets/img/sampling3d/jacket-side-900.webp 900w" sizes="(max-width: 900px) 30vw, 14vw" width="900" height="900" loading="lazy" decoding="async" alt="The same 3D sample from the side" data-cms="kit.image-2"></figure><figure><img src="../../assets/img/sampling3d/jacket-back-520.webp" srcset="../../assets/img/sampling3d/jacket-back-520.webp 520w, ../../assets/img/sampling3d/jacket-back-900.webp 900w" sizes="(max-width: 900px) 30vw, 14vw" width="900" height="900" loading="lazy" decoding="async" alt="The same 3D sample from the back" data-cms="kit.image-3"></figure></div>
         </div>
-        <div class="tile glass-p rv rv-row"><span class="ti">02</span><h3 data-cms="kit.heading-3">True fabric drape</h3><p data-cms="kit.text-3">Weight, stretch and fall simulated from your material spec.</p><div class="sc sc-drape" aria-hidden="true"></div></div>
+        <div class="tile glass-p rv rv-row"><span class="ti">02</span><h3 data-cms="kit.heading-3">Drape from your fabric numbers</h3><p data-cms="kit.text-3">GSM, stretch and composition off your spec sheet drive the simulation. Post a swatch and we measure it instead — a better input, and we tell you which one we used.</p><div class="sc sc-drape" aria-hidden="true"></div></div>
         <div class="tile glass-p rv rv-row"><span class="ti">03</span><h3 data-cms="kit.heading-4">Every colorway</h3><p data-cms="kit.text-4">All colorways rendered from the same model — included.</p><div class="sc sc-swatch" role="img" aria-label="Five colourways rendered from one build: cobalt, magenta, tangerine, acid green and jade"><i></i><i></i><i></i><i></i><i></i></div></div>
         <div class="tile glass-p rv rv-d1 rv-row"><span class="ti">04</span><h3 data-cms="kit.heading-5">360° turntable video</h3><p data-cms="kit.text-5">A rotating view for buyer presentations and content.</p><div class="sc sc-turn" aria-hidden="true"><i></i></div></div>
-        <div class="tile glass-p rv rv-d1 rv-row"><span class="ti">05</span><h3 data-cms="kit.heading-6">First render in 24h</h3><p data-cms="kit.text-6">The clock starts the moment your brief lands.</p><div class="sc sc-clock" aria-hidden="true"><i></i></div></div>
+        <div class="tile glass-p rv rv-d1 rv-row"><span class="ti">05</span><h3 data-cms="kit.heading-6">Every file you get</h3><p data-cms="kit.text-6">High-res renders, MP4 turntable, technical flat and a PDF deck. Source project or another format on request — tell us what your PLM needs.</p></div>
         <div class="tile glass-p rv rv-d1 rv-row"><span class="ti">06</span><h3 data-cms="kit.heading-7">Presentation deck</h3><p data-cms="kit.text-7">A formatted PDF ready for factories or buyers.</p><div class="sc sc-deck" aria-hidden="true"><i></i><i></i><i></i></div></div>
         <div class="tile glass-p rv rv-d2 rv-row"><span class="ti">07</span><h3 data-cms="kit.heading-8">Flat-lay export</h3><p data-cms="kit.text-8">Clean overhead flat lay for your tech pack or store.</p></div>
         <div class="tile tile-tint glass-p rv rv-d2 rv-row"><span class="ti">08</span><h3 data-cms="kit.heading-9">CLO3D + Browzwear</h3><p data-cms="kit.text-9">Industry-standard software, chosen per garment. No licence needed on your side.</p></div>
-        <div class="tile glass-p rv rv-d2 rv-row"><span class="ti">09</span><h3 data-cms="kit.heading-10">Two revision rounds</h3><p data-cms="kit.text-10">Fit, colorway, fabric or camera — adjusted in hours, not weeks.</p><div class="sc sc-rounds" aria-hidden="true"><i></i></div></div>
       </div>
+      </div>
+
+      <ul class="terms rv" aria-label="Terms that come with every sample">
+        <li data-cms="kit.item-1"><b>NDA</b><span>Signed before we open your tech pack.</span></li>
+        <li data-cms="kit.item-2"><b>Your files</b><span>Renders, turntable and source are yours on final payment.</span></li>
+        <li data-cms="kit.item-3"><b>Revisions</b><span>Two rounds included — a colour swap and a new sleeve length are not the same edit, and we say which it is.</span></li>
+        <li data-cms="kit.item-4"><b>Your garment</b><span>Never in our portfolio unless you put it in writing.</span></li>
+      </ul>
     </div>
   </section>
 
@@ -872,18 +930,18 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <p class="sub rv" data-cms="how.text-1">This is what a sampling round with us actually looks like.</p>
       </div>
       <div class="chat-wrap">
-        <div class="chat glass-p rv" id="chat" aria-label="Example conversation with a client">
-          <span class="day">Day 1</span>
-          <div class="msg them">We've got a bomber for AW25 — tech pack's done, fabric is 320gsm cotton twill. Can we see it in 3D before the factory sample?</div>
-          <div class="msg us">Send the tech pack and fabric spec over. First render lands within 24 hours.<span class="tick" aria-hidden="true">✓✓</span></div>
-          <div class="msg us">
-            Here's your bomber — front, side, back. Thoughts?
-            <span class="mini" aria-hidden="true"><span class="mb"><i></i><i></i><i></i></span><span class="mc"><span class="a"></span><span class="b"></span><span class="c"></span></span></span>
-            <span class="cap">3D sample — render v1</span>
-          </div>
-          <div class="msg them">Collar's great. Can we see it in olive, and drop the hem 2cm?</div>
-          <div class="msg us">Done — updated renders this afternoon. Not another sample round.<span class="tick" aria-hidden="true">✓✓</span></div>
-          <span class="done">✓ Delivered — renders, turntable video and deck</span>
+        <div class="intake glass-p rv">
+          <span class="intake-cap">Before we build anything, we read your pack</span>
+          <figure class="intake-fig">
+            <img src="../../assets/img/techpack/measurement-chart-800.webp"
+                 srcset="../../assets/img/techpack/measurement-chart-800.webp 800w, ../../assets/img/techpack/measurement-chart-1400.webp 1400w"
+                 sizes="(max-width: 900px) 92vw, 42vw" width="1400" height="990" loading="lazy" decoding="async"
+                 alt="A graded measurement sheet of the kind we read before building a 3D sample" data-cms="how.image-1">
+            <span class="pin p1">POMs &amp; tolerances</span>
+            <span class="pin p2">Construction notes</span>
+            <span class="pin p3">Fabric: GSM, stretch, recovery</span>
+          </figure>
+          <p class="intake-say" data-cms="how.text-6"><b>You get a query list back the same working day</b> — the questions a sampling room would raise before cutting. If the pack cannot answer them, we tell you what it changes instead of guessing quietly.</p>
         </div>
         <div class="weeks rv rv-d1">
           <div class="week"><span class="wn" aria-hidden="true">D1</span><div><h3 data-cms="how.heading-2">Brief</h3><p data-cms="how.text-2">Send a sketch or tech pack, fabric reference and fit notes — that's all we need.</p></div></div>
@@ -900,32 +958,27 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="sec-head">
         <span class="kicker rv" data-cms="why-it-matters.kicker-1">Why it matters</span>
-        <h2 class="h-display rv rv-display" id="cmp-h" data-cms="why-it-matters.heading-1">One sampling round. Two very <span class="acc-t">different waits.</span></h2>
-        <p class="sub rv" data-cms="why-it-matters.text-1">Same garment, same tech pack — watch the difference.</p>
+        <h2 class="h-display rv rv-display" id="cmp-h" data-cms="why-it-matters.heading-1">Where a 3D sample <span class="acc-t">actually sits.</span></h2>
+        <p class="sub rv" data-cms="why-it-matters.text-1">One stage of your sampling chain — the earliest one, where changes are still cheap.</p>
       </div>
+      <ol class="stagerail rv" aria-label="Where a 3D sample sits in the sampling chain"><li data-cms="why-it-matters.item-7"><i></i><span>Concept</span></li><li class="lit" data-cms="why-it-matters.item-8"><i></i><span>3D sample</span></li><li data-cms="why-it-matters.item-9"><i></i><span>Proto</span></li><li data-cms="why-it-matters.item-10"><i></i><span>Fit sample</span></li><li data-cms="why-it-matters.item-11"><i></i><span>PP sample</span></li><li data-cms="why-it-matters.item-12"><i></i><span>Sealed</span></li></ol>
+      <p class="stage-say rv" data-cms="why-it-matters.text-3"><b>We replace the first look, and take pressure off the proto.</b> We do not replace the PP sample — that is the one that decides whether bulk fabric gets cut, and no render seals it. Your factory still drafts its own development pattern; the 3D sample means fewer things are in dispute when they do.</p>
+
       <div class="duo2">
         <div class="duo-panel glass-p rv">
-          <span class="dp-tag">Waiting on a factory sample</span>
-          <div class="lane" aria-hidden="true">
-            <span class="ll">brief → pattern → sew → courier <em class="lr">weeks</em></span>
-            <span class="track"><span class="fill slow"></span></span>
-          </div>
+          <span class="dp-tag">What a round costs you today</span>
           <ul>
-            <li data-cms="why-it-matters.item-1"><b>Weeks of waiting</b><span>from brief to a sample in your hands</span></li>
-            <li data-cms="why-it-matters.item-2"><b>One colorway</b><span>each new colorway is a new sample</span></li>
-            <li data-cms="why-it-matters.item-3"><b>Fabric cut every round</b><span>material and labour spent on guesses</span></li>
+            <li data-cms="why-it-matters.item-1"><b>How many days</b><span>pass between a comment and seeing it answered?</span></li>
+            <li data-cms="why-it-matters.item-2"><b>How many colourways</b><span>got a sample of their own — and how many were guessed?</span></li>
+            <li data-cms="why-it-matters.item-3"><b>Which round</b><span>went on something a drawing could have settled?</span></li>
           </ul>
         </div>
         <div class="duo-panel lit glass-p rv rv-d1">
-          <span class="dp-tag">Your 3D round with us</span>
-          <div class="lane" aria-hidden="true">
-            <span class="ll">brief → 3D build → review <em class="lr">days</em></span>
-            <span class="track"><span class="fill quick"></span></span>
-          </div>
+          <span class="dp-tag">What changes with a 3D round</span>
           <ul>
-            <li data-cms="why-it-matters.item-4"><b>First render in 24 hours</b><span>the clock starts when your brief lands</span></li>
-            <li data-cms="why-it-matters.item-5"><b>Every colorway included</b><span>rendered from the same model, no extra rounds</span></li>
-            <li data-cms="why-it-matters.item-6"><b>Changes in hours</b><span>fit, colour or fabric — two revision rounds built in</span></li>
+            <li data-cms="why-it-matters.item-4"><b>The first look moves earlier</b><span>reviewed on screen before anything is cut</span></li>
+            <li data-cms="why-it-matters.item-5"><b>Every colourway, one build</b><span>rendered from the same model, not re-sampled</span></li>
+            <li data-cms="why-it-matters.item-6"><b>Comments answered in the file</b><span>fit, colour or fabric — two revision rounds included</span></li>
           </ul>
         </div>
       </div>
@@ -938,9 +991,23 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     <div class="wrap">
       <div class="acc-honest">
         <span class="kicker rv" data-cms="accuracy-honestly.kicker-1">Accuracy, honestly</span>
-        <h2 class="h-display rv rv-display" id="acc-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;" data-cms="accuracy-honestly.heading-1">Real fabric physics, <span class="acc-t">not pretty pictures.</span></h2>
-        <p class="rv" data-cms="accuracy-honestly.text-1">We simulate from your actual fabric spec — GSM, stretch percentage, drape — so the render behaves like the textile, not like a video game. Most sample changes come from fit and fabric issues; that's exactly what a 3D pass catches before you cut.</p>
-        <p class="soft rv" data-cms="accuracy-honestly.text-2">A 3D sample is a design tool, not a replacement for your final checks. Most brands still make one physical proto before bulk — that decision stays entirely with you. If a construction is hard to simulate reliably, we'll say so up front.</p>
+        <h2 class="h-display rv rv-display" id="acc-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;" data-cms="accuracy-honestly.heading-1">We tell you what the render <span class="acc-t">cannot settle.</span></h2>
+        <p class="rv" data-cms="accuracy-honestly.text-1">We simulate from your actual fabric spec — GSM, stretch percentage, composition and drape behaviour. Send a swatch and we measure it instead, which is the better input of the two, and we tell you which one the render used.</p>
+
+        <ul class="acc-from rv" aria-label="What the simulation is built from">
+          <li data-cms="accuracy-honestly.item-1"><b>Your spec sheet</b><span>GSM, composition, stretch and recovery, typed in as given.</span></li>
+          <li data-cms="accuracy-honestly.item-2"><b>A measured swatch</b><span>Bend, shear and weight taken off the cloth itself — closer to how it will hang.</span></li>
+          <li data-cms="accuracy-honestly.item-3"><b>Your pattern</b><span>Built from your DXF where you have one, or drafted to your block from the pack.</span></li>
+        </ul>
+
+        <span class="eyebrow rv" style="margin-top:clamp(26px,3vw,38px); display:inline-block;">Three things we will not predict</span>
+        <ul class="acc-not rv" aria-label="What a 3D sample cannot settle">
+          <li data-cms="accuracy-honestly.item-4"><b>Hand-feel</b><span>No screen transmits it. If the decision is how the cloth feels, that decision stays physical.</span></li>
+          <li data-cms="accuracy-honestly.item-5"><b>Wash and garment-dye finishes</b><span>We can render the intended result; the mill still has to hit it on real cloth.</span></li>
+          <li data-cms="accuracy-honestly.item-6"><b>The sealed sample</b><span>A render does not seal bulk. It makes the round before it far less of a guess.</span></li>
+        </ul>
+
+        <p class="soft rv" data-cms="accuracy-honestly.text-2">A 3D sample is a design and approval tool, not a replacement for your final fit and PP samples — and anyone who tells you otherwise is selling software.</p>
       </div>
     </div>
   </section>
@@ -1334,23 +1401,27 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       if (!body.get('service')) body.set('service', '3d-virtual-sampling');
       fetch('/api/leads', { method: 'POST', body: body })
         .then(function (r) { if (!r.ok) throw new Error('lead ' + r.status); })
+        .then(function () {
+          /* the success panel belongs here: only a send that actually landed
+             may replace the form, or a network blip reads as "sent" */
+          var sent = document.createElement('div');
+          sent.className = 'sent-ok';
+          sent.setAttribute('tabindex', '-1');
+          sent.innerHTML =
+            '<div class="ok">✓</div>' +
+            '<h3>Got it, ' + (data.name || '').split(' ')[0].replace(/</g, '&lt;') + '.</h3>' +
+            '<p>Your fixed quote is on its way within 24 hours to <strong style="color:var(--ink);">' +
+            data.email.replace(/</g, '&lt;') + '</strong>.</p>';
+          form.parentElement.replaceChild(sent, form);
+          sent.focus();
+        })
         .catch(function () {
           /* Never lose the enquiry to a network blip — show the address so the
              person can still reach us, rather than a dead end. */
           errBox.textContent = 'That did not send. Please email hello@fashionos.app and we will pick it up.';
           errBox.hidden = false;
           submit.disabled = false;
-          submit.textContent = 'Send it'; });
-      var sent = document.createElement('div');
-      sent.className = 'sent-ok';
-      sent.setAttribute('tabindex', '-1');
-      sent.innerHTML =
-        '<div class="ok">✓</div>' +
-        '<h3>Got it, ' + (data.name || '').split(' ')[0].replace(/</g, '&lt;') + '.</h3>' +
-        '<p>Your fixed quote is on its way within 24 hours to <strong style="color:var(--ink);">' +
-        data.email.replace(/</g, '&lt;') + '</strong>.</p>';
-      form.parentElement.replaceChild(sent, form);
-      sent.focus(); }); }
+          submit.textContent = 'Send it'; }); }); }
 })();
 </script>
 
