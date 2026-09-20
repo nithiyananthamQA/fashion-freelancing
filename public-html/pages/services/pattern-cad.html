@@ -814,6 +814,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .pc-stage * { animation: none !important; }
 }
+
+/* a photograph slot on the file section — replaceable from the dashboard */
+.pc-shot { margin: 0; border-radius: var(--r); overflow: hidden; background: #fff; border: 1px solid var(--edge); box-shadow: var(--lift); }
+.pc-shot img { display: block; width: 100%; height: auto; aspect-ratio: 1400 / 990; object-fit: cover; object-position: top center; }
+.pc-shot figcaption { padding: 10px 14px; font: 500 11.5px/1.45 var(--mono); letter-spacing: .04em; color: var(--ink-5); border-top: 1px solid var(--edge); }
+.fw { align-items: start; }
 </style>
 </head>
 <body>
@@ -925,6 +931,34 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   <!-- ============ 01 — INSIDE A PATTERN ============
        The nine approved kit lines, split: the six a buyer weighs up as
        cards, the rest as the standing terms of every delivery. -->
+  <section class="sec" id="how" aria-labelledby="how-h">
+    <div class="wrap">
+      <div class="head-split">
+        <div>
+          <span class="eyebrow rv" data-cms="how.kicker-1">04 — How it works</span>
+          <h2 id="how-h" class="rv" data-cms="how.heading-1">Sketch to cuttable file, <span class="acc-t">in four steps.</span></h2>
+        </div>
+        <p class="head-note rv" data-cms="how.text-5">You sew the sample; we correct the pattern from your fit notes. Two rounds are part of the price, not an extra.</p>
+      </div>
+
+      <div class="weeks rail rv-steps">
+        <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3 data-cms="how.heading-2">Brief</h3><p data-cms="how.text-1">Send your tech pack, sketch or a sample garment — plus your factory&rsquo;s CAD system if you know it.</p></div></div>
+        <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3 data-cms="how.heading-3">Fixed quote in 24h</h3><p data-cms="how.text-2">One number covering drafting, grading and every file format listed above.</p></div></div>
+        <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3 data-cms="how.heading-4">Draft + your sample round</h3><p data-cms="how.text-3">You sew the sample with your factory; we take your fit notes and correct the pattern — two rounds included.</p></div></div>
+        <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3 data-cms="how.heading-5">Graded handoff</h3><p data-cms="how.text-4">Full size set, cutter&rsquo;s must, native + DXF files — and ownership transferred to you.</p></div></div>
+      </div>
+
+      <div class="hx rv">
+        <span class="eyebrow">What changes when, truthfully</span>
+        <ol>
+          <li data-cms="how.item-1"><b>Straight away</b><span>A pattern drafted to your spec, with the allowances and notches your construction needs — the sample room stops guessing.</span></li>
+          <li data-cms="how.item-2"><b>After your sample</b><span>Fit notes become pattern corrections, twice, inside the price. Most styles settle in those two rounds.</span></li>
+          <li class="no" data-cms="how.item-3"><b>What a pattern can't fix</b><span>A fabric that behaves differently from the one specified, or a fit you have not decided yet. We will say so before drafting rather than after.</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
   <section class="sec" id="kit" aria-labelledby="kit-h">
     <div class="wrap">
       <div class="dl-head">
@@ -1071,6 +1105,14 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
           <p class="cmp-note rv" data-cms="formats.text-2"><b>DXF with AAMA/ASTM carries the grade rules</b> — plain DXF often does not. Free with every job, and we convert what you have: Gerber .tmp, Lectra .iba/.mdl, Investronica .exp, Assyst .zip, PLT, CUT.</p>
         </div>
 
+
+        <figure class="pc-shot rv rv-d1">
+          <img src="../../assets/img/techpack/measurement-chart-800.webp"
+               srcset="../../assets/img/techpack/measurement-chart-800.webp 800w, ../../assets/img/techpack/measurement-chart-1400.webp 1400w"
+               sizes="(max-width: 900px) 92vw, 44vw" width="1400" height="990" loading="lazy" decoding="async"
+               alt="A graded measurement sheet of the kind a pattern is checked against" data-cms="file.image-1">
+          <figcaption data-cms="file.caption-1">The spec the pattern is measured against, at base size.</figcaption>
+        </figure>
         <div class="bundle rv rv-d1">
           <div class="bundle-h"><span>What lands in your inbox</span><i>Example</i></div>
           <ul>
@@ -1093,33 +1135,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   </section>
 
   <!-- ============ 04 — HOW IT WORKS ============ -->
-  <section class="sec" id="how" aria-labelledby="how-h">
-    <div class="wrap">
-      <div class="head-split">
-        <div>
-          <span class="eyebrow rv" data-cms="how.kicker-1">04 — How it works</span>
-          <h2 id="how-h" class="rv" data-cms="how.heading-1">Sketch to cuttable file, <span class="acc-t">in four steps.</span></h2>
-        </div>
-        <p class="head-note rv" data-cms="how.text-5">You sew the sample; we correct the pattern from your fit notes. Two rounds are part of the price, not an extra.</p>
-      </div>
 
-      <div class="weeks rail rv-steps">
-        <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3 data-cms="how.heading-2">Brief</h3><p data-cms="how.text-1">Send your tech pack, sketch or a sample garment — plus your factory&rsquo;s CAD system if you know it.</p></div></div>
-        <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3 data-cms="how.heading-3">Fixed quote in 24h</h3><p data-cms="how.text-2">One number covering drafting, grading and every file format listed above.</p></div></div>
-        <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3 data-cms="how.heading-4">Draft + your sample round</h3><p data-cms="how.text-3">You sew the sample with your factory; we take your fit notes and correct the pattern — two rounds included.</p></div></div>
-        <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3 data-cms="how.heading-5">Graded handoff</h3><p data-cms="how.text-4">Full size set, cutter&rsquo;s must, native + DXF files — and ownership transferred to you.</p></div></div>
-      </div>
-
-      <div class="hx rv">
-        <span class="eyebrow">What changes when, truthfully</span>
-        <ol>
-          <li data-cms="how.item-1"><b>Straight away</b><span>A pattern drafted to your spec, with the allowances and notches your construction needs — the sample room stops guessing.</span></li>
-          <li data-cms="how.item-2"><b>After your sample</b><span>Fit notes become pattern corrections, twice, inside the price. Most styles settle in those two rounds.</span></li>
-          <li class="no" data-cms="how.item-3"><b>What a pattern can't fix</b><span>A fabric that behaves differently from the one specified, or a fit you have not decided yet. We will say so before drafting rather than after.</span></li>
-        </ol>
-      </div>
-    </div>
-  </section>
 
   <section class="sec" id="faq" aria-labelledby="faq-h">
     <div class="wrap">
