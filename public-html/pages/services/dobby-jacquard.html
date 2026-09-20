@@ -701,6 +701,55 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .dj-grid * { transition: none !important; animation: none !important; }
 }
+
+/* section headings hold one line on desktop; they wrap again on smaller screens */
+@media (min-width: 1100px) {
+  .head-split h2, .dl-head h2, .sec-head h2 { white-space: nowrap; font-size: clamp(26px, 2.9vw, 42px); }
+}
+
+/* how it works: the line travels 01 to 04 as the section arrives */
+@media (min-width: 900px) {
+  .weeks.rail::after { width: 0; }
+  .weeks.rail.in::after { animation: dj-travel 2.4s cubic-bezier(.33, 1, .68, 1) .2s forwards; }
+  .weeks.rail .week .wn { transition: color .3s ease, border-color .3s ease; }
+  .weeks.rail.in .week:nth-child(1) .wn { animation: dj-beat .6s ease .35s both; }
+  .weeks.rail.in .week:nth-child(2) .wn { animation: dj-beat .6s ease .95s both; }
+  .weeks.rail.in .week:nth-child(3) .wn { animation: dj-beat .6s ease 1.55s both; }
+  .weeks.rail.in .week:nth-child(4) .wn { animation: dj-beat .6s ease 2.15s both; }
+}
+@keyframes dj-travel { from { width: 0; } to { width: 76%; } }
+@keyframes dj-beat {
+  0% { color: var(--acc-text); border-color: var(--edge-2); background: var(--card); }
+  40% { color: #2A0A04; background: var(--grad-acc); border-color: transparent; }
+  100% { color: var(--acc-text); border-color: var(--acc-30); background: var(--card); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .weeks.rail::after, .weeks.rail.in::after { width: 76%; animation: none; }
+  .weeks.rail.in .week .wn { animation: none; }
+}
+
+/* the mill sheet writes itself: rows land one after another, and a rule
+   runs down the left edge as each line is entered */
+.ms { position: relative; overflow: hidden; }
+.ms::after { content: ''; position: absolute; left: 0; top: 0; width: 2px; height: 0; background: var(--grad-acc); }
+.rv-on .ms.in::after { animation: ms-rule 2.2s cubic-bezier(.33, 1, .68, 1) .15s forwards; }
+.rv-on .ms .ms-row { opacity: 0; transform: translateY(10px); }
+.rv-on .ms.in .ms-row { animation: ms-line .55s cubic-bezier(.16, 1, .3, 1) both; }
+.rv-on .ms.in .ms-row:nth-child(1) { animation-delay: .18s; }
+.rv-on .ms.in .ms-row:nth-child(2) { animation-delay: .34s; }
+.rv-on .ms.in .ms-row:nth-child(3) { animation-delay: .50s; }
+.rv-on .ms.in .ms-row:nth-child(4) { animation-delay: .66s; }
+.rv-on .ms.in .ms-row:nth-child(5) { animation-delay: .82s; }
+.rv-on .ms.in .ms-row:nth-child(6) { animation-delay: .98s; }
+.rv-on .ms.in .ms-row:nth-child(7) { animation-delay: 1.14s; }
+.rv-on .ms.in .ms-row:nth-child(8) { animation-delay: 1.30s; }
+.rv-on .ms.in .ms-row:nth-child(9) { animation-delay: 1.46s; }
+@keyframes ms-line { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes ms-rule { from { height: 0; } to { height: 100%; } }
+@media (prefers-reduced-motion: reduce) {
+  .rv-on .ms .ms-row, .rv-on .ms.in .ms-row { opacity: 1; transform: none; animation: none; }
+  .ms::after, .rv-on .ms.in::after { height: 100%; animation: none; }
+}
 </style>
 </head>
 <body>
@@ -774,13 +823,32 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     </div>
   </section>
 
+  <!-- ============ 05 — HOW IT WORKS ============ -->
+  <section class="sec" id="how" aria-labelledby="how-h">
+    <div class="wrap">
+      <div class="head-split">
+        <div>
+          <span class="eyebrow rv" data-cms="how.kicker-1">01 — How it works</span>
+          <h2 id="how-h" class="rv" data-cms="how.heading-1">Idea to loom, <span class="acc-t">in four steps.</span></h2>
+        </div>
+        <p class="head-note rv" data-cms="how.text-5">You approve a woven simulation, not a flat picture — structure and colour together, before yarn is committed.</p>
+      </div>
+      <div class="weeks rail rv-steps">
+        <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3 data-cms="how.heading-2">Brief</h3><p data-cms="how.text-1">Send references, the end use, and your loom details if you have them — or introduce us to your mill and we will ask.</p></div></div>
+        <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3 data-cms="how.heading-3">Fixed quote in 24h</h3><p data-cms="how.text-2">One number covering the draft, construction spec, simulation and colourways.</p></div></div>
+        <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3 data-cms="how.heading-4">Design + simulation review</h3><p data-cms="how.text-3">You approve the woven simulation — structure and colour, not just artwork. Two rounds included.</p></div></div>
+        <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3 data-cms="how.heading-5">Loom-ready handoff</h3><p data-cms="how.text-4">Point paper, spec sheet, colourways and files for your mill&rsquo;s software — ownership transferred.</p></div></div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ 01 — WHAT YOU GET ============
        Laid out as a mill sheet, because that is how a weaver reads it. -->
   <section class="sec" id="kit" aria-labelledby="kit-h">
     <div class="wrap">
       <div class="head-split">
         <div>
-          <span class="eyebrow rv" data-cms="kit.kicker-1">01 — What you get</span>
+          <span class="eyebrow rv" data-cms="kit.kicker-1">02 — What you get</span>
           <h2 id="kit-h" class="rv" data-cms="kit.heading-1">Not a pretty JPEG. <span class="acc-t">A weaving instruction.</span></h2>
         </div>
         <p class="head-note rv" data-cms="kit.text-10">A mill cannot weave a picture. It weaves a draft, a construction and a repeat that fits the loom in front of it.</p>
@@ -806,7 +874,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     <div class="wrap">
       <div class="head-split">
         <div>
-          <span class="eyebrow rv">02 — Which loom</span>
+          <span class="eyebrow rv">03 — Which loom</span>
           <h2 id="loom-h" class="rv" data-cms="loom.heading-1">Dobby or jacquard — <span class="acc-t">we tell you straight.</span></h2>
         </div>
         <p class="head-note rv" data-cms="loom.text-1">It is not a style choice. It is who controls the warp: a shaft that moves a whole group of ends, or a hook that moves one.</p>
@@ -846,7 +914,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     <div class="wrap">
       <div class="head-split">
         <div>
-          <span class="eyebrow rv" data-cms="colorway-economics.kicker-1">03 — Colourway economics</span>
+          <span class="eyebrow rv" data-cms="colorway-economics.kicker-1">04 — Colourway economics</span>
           <h2 id="cw-h" class="rv" data-cms="colorway-economics.heading-1">Change the weft, <span class="acc-t">not the warp.</span></h2>
         </div>
         <p class="head-note rv" data-cms="colourways.text-1">Swapping a weft cone takes minutes. Re-beaming a warp takes a day and a bill, so the range should come out of the weft wherever it can.</p>
@@ -877,7 +945,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     <div class="wrap">
       <div class="head-split">
         <div>
-          <span class="eyebrow rv" data-cms="structure-vocabulary.kicker-1">04 — Structure vocabulary</span>
+          <span class="eyebrow rv" data-cms="structure-vocabulary.kicker-1">05 — Structure vocabulary</span>
           <h2 id="sv-h" class="rv" data-cms="structure-vocabulary.heading-1">The structures <span class="acc-t">your mill already trusts.</span></h2>
         </div>
         <p class="head-note rv" data-cms="structure-vocabulary.text-1">In a jacquard these are the palette: satin catches the light where twill holds shadow, and that contrast is the design.</p>
@@ -902,7 +970,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     <div class="wrap">
       <div class="head-split">
         <div>
-          <span class="eyebrow rv">05 — Inside the work</span>
+          <span class="eyebrow rv">06 — Inside the work</span>
           <h2 id="chain-h" class="rv" data-cms="chain.heading-1">From your drawing <span class="acc-t">to a file the loom accepts.</span></h2>
         </div>
         <p class="head-note rv" data-cms="chain.text-1">Eleven stages, in this order. The four in colour are the ones that decide whether the cloth can be woven at all.</p>
@@ -920,25 +988,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
         <div class="ch-step"><i>09</i><div><b>Repeat / width validation</b><span>The repeat checked against hook or shaft count and the finished cloth width.</span></div></div>
         <div class="ch-step"><i>10</i><div><b>Production specification</b><span>EPI, PPI, counts, structures per area, finish — the sheet the weaver works from.</span></div></div>
         <div class="ch-step key"><i>11</i><div><b>Loom-ready output</b><span>Files in the format your mill&rsquo;s software reads, plus the spec, plus ownership.</span></div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 05 — HOW IT WORKS ============ -->
-  <section class="sec" id="how" aria-labelledby="how-h">
-    <div class="wrap">
-      <div class="head-split">
-        <div>
-          <span class="eyebrow rv" data-cms="how.kicker-1">06 — How it works</span>
-          <h2 id="how-h" class="rv" data-cms="how.heading-1">Idea to loom, <span class="acc-t">in four steps.</span></h2>
-        </div>
-        <p class="head-note rv" data-cms="how.text-5">You approve a woven simulation, not a flat picture — structure and colour together, before yarn is committed.</p>
-      </div>
-      <div class="weeks rail rv-steps">
-        <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3 data-cms="how.heading-2">Brief</h3><p data-cms="how.text-1">Send references, the end use, and your loom details if you have them — or introduce us to your mill and we will ask.</p></div></div>
-        <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3 data-cms="how.heading-3">Fixed quote in 24h</h3><p data-cms="how.text-2">One number covering the draft, construction spec, simulation and colourways.</p></div></div>
-        <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3 data-cms="how.heading-4">Design + simulation review</h3><p data-cms="how.text-3">You approve the woven simulation — structure and colour, not just artwork. Two rounds included.</p></div></div>
-        <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3 data-cms="how.heading-5">Loom-ready handoff</h3><p data-cms="how.text-4">Point paper, spec sheet, colourways and files for your mill&rsquo;s software — ownership transferred.</p></div></div>
       </div>
     </div>
   </section>

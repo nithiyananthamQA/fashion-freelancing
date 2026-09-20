@@ -552,19 +552,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 
 
 /* ---- in every month: the spec tiles under the cards ---- */
-.dl-spec-head { margin: clamp(30px, 3.4vw, 46px) 0 clamp(14px, 1.6vw, 20px); }
-.dl-spec { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(10px, 1.1vw, 14px); }
 @media (max-width: 1000px) { .dl-spec { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 520px)  { .dl-spec { grid-template-columns: 1fr; } }
-.dl-spec li {
-  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center;
-  padding: clamp(12px, 1.2vw, 16px); border-radius: var(--r-sm);
-  background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift);
-  transition: transform .3s var(--easing), border-color .3s ease; }
 .dl-ic { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; background: var(--acc-14); color: var(--acc-text); }
 .dl-ic svg { width: 17px; height: 17px; }
-.dl-spec b { display: block; font-family: var(--disp); font-size: 13.5px; font-weight: 700; letter-spacing: -.01em; color: var(--ink); }
-.dl-spec span { display: block; margin-top: 3px; font-size: 12px; line-height: 1.45; color: var(--ink-5); }
 @media (hover: hover) { .dl-spec li:hover { transform: translateY(-2px); border-color: var(--acc-28); } }
 
 /* the card's picture: a small working piece of the listing */
@@ -741,22 +732,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 }
 
 /* how it works: the same four rounded cards the other pages use */
-#how .how-wrap { display: block; }
-#how .weeks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(14px, 1.7vw, 24px); position: relative; }
-#how .weeks::before { content: ''; position: absolute; left: 8%; right: 8%; top: 44px; height: 2px; border-radius: 2px;
-  background: repeating-linear-gradient(90deg, var(--line-2) 0 8px, transparent 8px 16px); }
-#how .week { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 14px; align-content: start;
-  padding: clamp(18px, 1.9vw, 24px) !important; border-top: 0 !important; border-radius: 22px;
-  background: var(--glass); border: 1px solid var(--glass-border);
-  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
-  box-shadow: 0 18px 38px -28px rgba(10, 32, 20, .5);
-  transition: transform .35s var(--ease), box-shadow .35s ease, border-color .3s ease; }
-@media (hover: hover) { #how .week:hover { transform: translateY(-3px); box-shadow: 0 24px 46px -26px rgba(10, 32, 20, .55); } }
-#how .week .wn { position: relative; z-index: 1; justify-self: start; display: grid; place-items: center;
-  width: 44px; height: 44px; border-radius: 14px; background: var(--grad-acc); color: #062414;
-  font: 700 12.5px/1 var(--mono); letter-spacing: .06em; -webkit-text-stroke: 0; }
-#how .week h3 { font-size: 17.5px; margin: 0 0 6px; }
-#how .week p { font-size: 14px; line-height: 1.6; max-width: none; }
 @media (max-width: 1000px) { #how .weeks { grid-template-columns: repeat(2, minmax(0, 1fr)); } #how .weeks::before { display: none; } }
 @media (max-width: 560px) { #how .weeks { grid-template-columns: 1fr; } }
 
@@ -775,6 +750,47 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   opacity: .9; transition: opacity .3s ease; pointer-events: none; }
 .tile-demo.is-live .td-hint { opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .tile-demo.is-eased .td-canvas, .tile-demo.is-eased .td-grid { transition: none; } }
+
+/* how it works: four beats left to right, on a line that fills */
+@media (min-width: 900px) {
+  #how .weeks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(18px, 2vw, 30px); position: relative; }
+  #how .weeks::before {
+    content: ''; position: absolute; left: 12%; right: 12%; top: 23px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--line-2) 10%, var(--line-2) 90%, transparent); }
+  #how .weeks::after {
+    content: ''; position: absolute; left: 12%; top: 23px; width: 76%; height: 1px; background: var(--grad-acc); }
+  #how .week { grid-template-columns: minmax(0, 1fr) !important; gap: 14px; padding: 0 !important; border-top: 0 !important;
+    text-align: center; justify-items: center; align-content: start; }
+  #how .week .wn {
+    position: relative; z-index: 1; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%;
+    font-family: var(--mono); font-size: 13px; letter-spacing: 0; color: var(--acc-text); -webkit-text-stroke: 0;
+    background: var(--glass); border: 1px solid var(--line-2);
+    -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px); }
+  #how .week p { max-width: 30ch; margin-inline: auto; }
+}
+
+
+
+/* no hover highlight on these steps — the line does the moving instead */
+@media (min-width: 900px) {
+  #how .weeks::after { width: 0; }
+  #how .weeks.in::after { animation: gp-travel 2.4s cubic-bezier(.33, 1, .68, 1) .2s forwards; }
+  #how .week .wn { transition: color .3s ease, border-color .3s ease; }
+  #how .weeks.in .week:nth-child(1) .wn { animation: gp-beat .6s ease .35s both; }
+  #how .weeks.in .week:nth-child(2) .wn { animation: gp-beat .6s ease .95s both; }
+  #how .weeks.in .week:nth-child(3) .wn { animation: gp-beat .6s ease 1.55s both; }
+  #how .weeks.in .week:nth-child(4) .wn { animation: gp-beat .6s ease 2.15s both; }
+}
+@keyframes gp-travel { from { width: 0; } to { width: 76%; } }
+@keyframes gp-beat {
+  0% { color: var(--acc-text); border-color: var(--line-2); }
+  40% { color: #062414; background: var(--grad-acc); border-color: transparent; }
+  100% { color: var(--acc-text); border-color: var(--acc-30); background: var(--glass); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #how .weeks::after, #how .weeks.in::after { width: 76%; animation: none; }
+  #how .weeks.in .week .wn { animation: none; }
+}
 </style>
 </head>
 <body>
@@ -820,6 +836,24 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
                sizes="(max-width: 899px) 92vw, 46vw" width="1200" height="871" fetchpriority="high" decoding="async"
                alt="A print development board: references, motif options and the palette they resolve into">
         </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOW IT WORKS — restored, with the development board ============ -->
+  <section class="sec" id="how" aria-labelledby="how-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker rv" data-cms="how.kicker-1">How it works</span>
+        <h2 class="h-display rv rv-display" id="how-h" data-cms="how.heading-1">Brief today. <span class="acc-t">Quote tomorrow.</span></h2>
+      </div>
+      <div class="how-wrap">
+        <div class="weeks rv-steps">
+          <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3 data-cms="how.heading-2">Brief</h3><p data-cms="how.text-1">Send references, your palette, the fabric and the garment — moodboards welcome.</p></div></div>
+          <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3 data-cms="how.heading-3">Fixed quote in 24h</h3><p data-cms="how.text-2">One number, no surprises. It covers artwork, colorways, separations and the spec sheet.</p></div></div>
+          <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3 data-cms="how.heading-4">Design + colorways</h3><p data-cms="how.text-3">Original artwork in repeat, your palette applied — two structured revision rounds included.</p></div></div>
+          <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3 data-cms="how.heading-5">Mill-ready handoff</h3><p data-cms="how.text-4">Tile-tested repeat, separations, spec sheet — and full ownership transferred to you.</p></div></div>
+        </div>
       </div>
     </div>
   </section>
@@ -970,13 +1004,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
           <div class="b"><h3 data-cms="kit.heading-7">Colourway variants</h3><p data-cms="kit.text-6">Your palette applied across the repeat, three ways, each one to Pantone.</p></div>
         </article>
       </div>
-
-      <div class="dl-spec-head rv"><span class="eyebrow">In every print pack</span></div>
-      <ul class="dl-spec rv" aria-label="In every print pack">
-        <li data-cms="kit.item-1"><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l4.5 4.5L19 7"/></svg></span><div><b data-cms="kit.heading-8">Layered master file</b><span data-cms="kit.text-7">Editable AI/PSD source — motifs on layers</span></div></li>
-        <li data-cms="kit.item-2"><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l4.5 4.5L19 7"/></svg></span><div><b data-cms="kit.heading-9">Two revision rounds</b><span data-cms="kit.text-8">Motifs, colours, scale — most prints land in round one</span></div></li>
-        <li data-cms="kit.item-3"><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l4.5 4.5L19 7"/></svg></span><div><b data-cms="kit.heading-10">Exclusive ownership</b><span data-cms="kit.text-9">Full copyright transfers on final payment. One print, one brand</span></div></li>
-      </ul>
     </div>
   </section>
 
@@ -1030,24 +1057,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
           <span class="td-chip">Seam check · passed</span>
         </div>
         <p class="td-cap" data-cms="see-it-tiling.text-1">A live repeat, tiling right now — no seam, no break. That's the deliverable.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ HOW IT WORKS — restored, with the development board ============ -->
-  <section class="sec" id="how" aria-labelledby="how-h">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv" data-cms="how.kicker-1">How it works</span>
-        <h2 class="h-display rv rv-display" id="how-h" data-cms="how.heading-1">Brief today. <span class="acc-t">Quote tomorrow.</span></h2>
-      </div>
-      <div class="how-wrap">
-        <div class="weeks rv-steps">
-          <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3 data-cms="how.heading-2">Brief</h3><p data-cms="how.text-1">Send references, your palette, the fabric and the garment — moodboards welcome.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3 data-cms="how.heading-3">Fixed quote in 24h</h3><p data-cms="how.text-2">One number, no surprises. It covers artwork, colorways, separations and the spec sheet.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3 data-cms="how.heading-4">Design + colorways</h3><p data-cms="how.text-3">Original artwork in repeat, your palette applied — two structured revision rounds included.</p></div></div>
-          <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3 data-cms="how.heading-5">Mill-ready handoff</h3><p data-cms="how.text-4">Tile-tested repeat, separations, spec sheet — and full ownership transferred to you.</p></div></div>
-        </div>
       </div>
     </div>
   </section>
