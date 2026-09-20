@@ -316,15 +316,17 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
   width: min(1160px, 100%); margin-top: 54px; padding: 24px 18px; border-radius: 24px;
   gap: 8px 0; }
 .hst {
-  flex: 1 1 250px; display: flex; align-items: center; justify-content: center;
-  gap: 12px; padding: 4px 18px; text-align: left; }
-.hst + .hst { border-left: 1px solid var(--line); }
+  flex: 1 1 0; min-width: 170px; display: grid; gap: 6px; align-content: start;
+  padding: 6px 20px; text-align: left; }
+.hst + .hst { border-left: 1px solid var(--line-2); }
 .hst b {
-  font-family: var(--disp); font-weight: 600; white-space: nowrap;
+  font-family: var(--disp); font-weight: 600; white-space: nowrap; line-height: 1;
   font-size: clamp(24px, 2.4vw, 34px); letter-spacing: -.025em;
   background: var(--grad-acc-ink, var(--grad-acc));
   -webkit-background-clip: text; background-clip: text; color: transparent; }
-.hst span { font-size: 12.5px; color: var(--ink-4); line-height: 1.35; max-width: 15ch; }
+.hst span { font-size: 12.5px; color: var(--ink-4); line-height: 1.4; max-width: 18ch; }
+/* the unit sits with the number, upright — never italic */
+.hst b i { font-style: normal; font-size: .62em; font-weight: 500; letter-spacing: -.01em; }
 @media (max-width: 900px) {
   .hero-stats { padding: 12px 6px; gap: 0; }
   .hst {
@@ -548,7 +550,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 /* ============================================================
    CHAT + weeks (a real sampling round)
    ============================================================ */
-.chat-wrap { display: grid; grid-template-columns: 6fr 6fr; gap: clamp(30px, 4vw, 60px); align-items: center; }
+.chat-wrap { display: block; }
 .chat { padding: calc(var(--u) * 3); display: grid; gap: 12px; max-width: 520px; }
 .chat .day { text-align: center; font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); padding: 4px 0; }
 .msg {
@@ -597,9 +599,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 /* ============================================================
    ACCURACY + PROOF SLOTS + FAQ + CONTACT
    ============================================================ */
-.acc-honest { max-width: 780px; margin: 0 auto; text-align: center; }
-.acc-honest p { font-size: 15px; color: var(--ink-3); line-height: 1.7; margin: 14px 0 0; }
-.acc-honest .soft { color: var(--ink-4); font-size: 14px; }
 
 .faq-list { max-width: 820px; margin: 0 auto; display: grid; gap: 12px; }
 .faq-row { border-radius: 16px; overflow: hidden; transition: border-color .3s ease; }
@@ -779,13 +778,24 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 .terms b { display: block; font: 600 10px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--acc-text); }
 .terms span { display: block; margin-top: 5px; font-size: 12.5px; line-height: 1.55; color: var(--ink-4); }
 
-/* ---- accuracy: what the simulation is built from, and what it is not ---- */
-.acc-from, .acc-not { list-style: none; margin: clamp(16px, 2vw, 24px) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 1.2vw, 16px); text-align: left; }
-@media (max-width: 820px) { .acc-from, .acc-not { grid-template-columns: 1fr; } }
-.acc-from li, .acc-not li { padding: clamp(14px, 1.5vw, 18px); border-radius: var(--r-sm); background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift); }
-.acc-not li { background: none; border-style: dashed; box-shadow: none; }
-.acc-from b, .acc-not b { display: block; font: 700 14.5px/1.3 var(--disp); letter-spacing: -.01em; color: var(--ink); }
-.acc-from span, .acc-not span { display: block; margin-top: 5px; font-size: 13px; line-height: 1.55; color: var(--ink-4); }
+/* ---- how it works: four rounded cards across one line ---- */
+#how .weeks { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(14px, 1.7vw, 24px); position: relative; }
+#how .weeks::before { content: ''; position: absolute; left: 8%; right: 8%; top: 44px; height: 2px; border-radius: 2px;
+  background: repeating-linear-gradient(90deg, var(--line-2) 0 8px, transparent 8px 16px); }
+#how .week { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 14px; align-content: start;
+  padding: clamp(18px, 1.9vw, 24px) !important; border-top: 0 !important; border-radius: 22px;
+  background: var(--glass); border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 18px 38px -28px rgba(7, 21, 35, .55);
+  transition: transform .35s var(--ease), box-shadow .35s ease, border-color .3s ease; }
+@media (hover: hover) { #how .week:hover { transform: translateY(-3px); box-shadow: 0 24px 46px -26px rgba(7, 21, 35, .6); } }
+#how .week .wn { position: relative; z-index: 1; justify-self: start; display: grid; place-items: center;
+  width: 44px; height: 44px; border-radius: 14px; background: var(--grad-acc); color: #071523;
+  font: 700 12.5px/1 var(--mono); letter-spacing: .06em; -webkit-text-stroke: 0; }
+#how .week h3 { font-size: 17.5px; margin: 0 0 6px; }
+#how .week p { font-size: 14px; line-height: 1.6; max-width: none; }
+@media (max-width: 1000px) { #how .weeks { grid-template-columns: repeat(2, minmax(0, 1fr)); } #how .weeks::before { display: none; } }
+@media (max-width: 560px) { #how .weeks { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -930,19 +940,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <p class="sub rv" data-cms="how.text-1">This is what a sampling round with us actually looks like.</p>
       </div>
       <div class="chat-wrap">
-        <div class="intake glass-p rv">
-          <span class="intake-cap">Before we build anything, we read your pack</span>
-          <figure class="intake-fig">
-            <img src="../../assets/img/techpack/measurement-chart-800.webp"
-                 srcset="../../assets/img/techpack/measurement-chart-800.webp 800w, ../../assets/img/techpack/measurement-chart-1400.webp 1400w"
-                 sizes="(max-width: 900px) 92vw, 42vw" width="1400" height="990" loading="lazy" decoding="async"
-                 alt="A graded measurement sheet of the kind we read before building a 3D sample" data-cms="how.image-1">
-            <span class="pin p1">POMs &amp; tolerances</span>
-            <span class="pin p2">Construction notes</span>
-            <span class="pin p3">Fabric: GSM, stretch, recovery</span>
-          </figure>
-          <p class="intake-say" data-cms="how.text-6"><b>You get a query list back the same working day</b> — the questions a sampling room would raise before cutting. If the pack cannot answer them, we tell you what it changes instead of guessing quietly.</p>
-        </div>
         <div class="weeks rv rv-d1">
           <div class="week"><span class="wn" aria-hidden="true">D1</span><div><h3 data-cms="how.heading-2">Brief</h3><p data-cms="how.text-2">Send a sketch or tech pack, fabric reference and fit notes — that's all we need.</p></div></div>
           <div class="week"><span class="wn" aria-hidden="true">D2</span><div><h3 data-cms="how.heading-3">Model build</h3><p data-cms="how.text-3">Garment constructed in 3D, your fabric spec simulated — weight, stretch, drape.</p></div></div>
@@ -986,31 +983,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
-  <!-- ============ 6. ACCURACY, honestly ============ -->
-  <section class="sec" aria-labelledby="acc-h">
-    <div class="wrap">
-      <div class="acc-honest">
-        <span class="kicker rv" data-cms="accuracy-honestly.kicker-1">Accuracy, honestly</span>
-        <h2 class="h-display rv rv-display" id="acc-h" style="font-size:clamp(26px,3.2vw,40px);margin-top:14px;" data-cms="accuracy-honestly.heading-1">We tell you what the render <span class="acc-t">cannot settle.</span></h2>
-        <p class="rv" data-cms="accuracy-honestly.text-1">We simulate from your actual fabric spec — GSM, stretch percentage, composition and drape behaviour. Send a swatch and we measure it instead, which is the better input of the two, and we tell you which one the render used.</p>
-
-        <ul class="acc-from rv" aria-label="What the simulation is built from">
-          <li data-cms="accuracy-honestly.item-1"><b>Your spec sheet</b><span>GSM, composition, stretch and recovery, typed in as given.</span></li>
-          <li data-cms="accuracy-honestly.item-2"><b>A measured swatch</b><span>Bend, shear and weight taken off the cloth itself — closer to how it will hang.</span></li>
-          <li data-cms="accuracy-honestly.item-3"><b>Your pattern</b><span>Built from your DXF where you have one, or drafted to your block from the pack.</span></li>
-        </ul>
-
-        <span class="eyebrow rv" style="margin-top:clamp(26px,3vw,38px); display:inline-block;">Three things we will not predict</span>
-        <ul class="acc-not rv" aria-label="What a 3D sample cannot settle">
-          <li data-cms="accuracy-honestly.item-4"><b>Hand-feel</b><span>No screen transmits it. If the decision is how the cloth feels, that decision stays physical.</span></li>
-          <li data-cms="accuracy-honestly.item-5"><b>Wash and garment-dye finishes</b><span>We can render the intended result; the mill still has to hit it on real cloth.</span></li>
-          <li data-cms="accuracy-honestly.item-6"><b>The sealed sample</b><span>A render does not seal bulk. It makes the round before it far less of a guess.</span></li>
-        </ul>
-
-        <p class="soft rv" data-cms="accuracy-honestly.text-2">A 3D sample is a design and approval tool, not a replacement for your final fit and PP samples — and anyone who tells you otherwise is selling software.</p>
-      </div>
-    </div>
-  </section>
+  
 
   <!-- ============ 8. FAQ ============ -->
   <section class="sec" id="faq" aria-labelledby="faq-h">

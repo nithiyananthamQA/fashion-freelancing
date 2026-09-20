@@ -671,24 +671,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 .kitg p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--ink-4); }
 
 /* ============================================================
-   05 · COLOUR, PROVED — the reference beside the cloth it produced.
-   The right-hand plate is where a mill strike-off goes when we have
-   one; until then it is the printed garment from the same pack.
-   ============================================================ */
-.pr2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 1.8vw, 24px); }
-@media (max-width: 860px) { .pr2 { grid-template-columns: 1fr; } }
-.pr2 figure { margin: 0; position: relative; border-radius: var(--r); overflow: hidden; background: var(--card);
-  border: 1px solid var(--edge); box-shadow: var(--lift); }
-.pr2 img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; object-position: left center; background: #fff; }
-.pr2 figcaption { position: absolute; left: 10px; bottom: 10px; padding: 5px 9px; border-radius: 8px; background: var(--card);
-  border: 1px solid var(--edge); font: 600 9.5px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-5); }
-.pr-step { position: absolute; right: 10px; top: 10px; padding: 4px 9px; border-radius: 999px; background: var(--grad-acc);
-  color: #062414; font: 700 9.5px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
-.pr-note { margin: clamp(18px, 2vw, 26px) 0 0; padding: 16px 20px; border-radius: var(--r-sm); background: var(--acc-08);
-  border: 1px solid var(--acc-28); font-size: 14px; line-height: 1.65; color: var(--ink-3); }
-.pr-note b { color: var(--ink); font-weight: 600; }
-
-/* ============================================================
    03 · REPEAT TYPES — drawn, because the difference is the grid.
    ============================================================ */
 .rp3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(14px, 1.8vw, 24px); }
@@ -706,6 +688,93 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .gp-stage * { animation: none !important; transition: none !important; }
 }
+
+/* ---- restored: live tiling demo + the how-it-works board ---- */
+.sec-visual { padding-top: 0; }
+.sec-visual .vwrap { width: min(100%, 780px); margin: 0 auto; }
+.sec-visual .vwrap:not(.in) *::after { animation-play-state: paused !important; }
+.tile-demo { position: relative; overflow: hidden; min-height: clamp(320px, 48vh, 500px); border-radius: 20px;
+  background: #fff; -webkit-backdrop-filter: none; backdrop-filter: none; }
+.td-canvas {
+  position: absolute; inset: 0;
+  background-image: url("../../assets/img/prints/tile-palm-coral-1200.webp");
+  background-size: 200px 200px;
+  animation: td-pan 26s linear infinite; }
+.td-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(var(--surface-rgb), .05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--surface-rgb), .05) 1px, transparent 1px);
+  background-size: 200px 200px;
+  animation: td-pan 26s linear infinite; }
+.td-chip {
+  position: absolute; left: 50%; bottom: 18px; translate: -50% 0;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 18px; border-radius: 999px;
+  background: rgba(var(--scrim-rgb), .75); border: 1px solid var(--acc-30);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--acc-l-text); }
+.td-chip::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--acc); }
+.td-cap {
+  text-align: center; margin: 12px 0 0;
+  font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-4); }
+.sec-visual .td-canvas {
+  background-image: url("../../assets/img/prints/tile-geometric-1200.webp");
+  background-size: 170px 170px;
+}
+.sec-visual .td-canvas { animation-name: td-pan-lattice; }
+.how-wrap { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+@keyframes td-pan { from { background-position: 0 0; } to { background-position: 240px 120px; } }
+@keyframes td-pan-lattice { to { background-position: 340px 170px; } }
+
+/* ---- the hero now carries the development board; the print board is a section ---- */
+.gp-hero-fig { margin: 0; border-radius: 24px; overflow: hidden; background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift-h); }
+.gp-hero-fig img { display: block; width: 100%; height: auto; }
+.gp-boardwrap .gp-board { height: auto; min-height: clamp(420px, 46vw, 560px); }
+.gp-boardwrap .gp-stage { min-height: clamp(280px, 30vw, 420px); }
+
+/* section headings sit on one line at desktop; they wrap again on small screens */
+@media (min-width: 1100px) {
+  .head-split h2, .dl-head h2, .sec-head h2 { white-space: nowrap; font-size: clamp(26px, 3vw, 42px); }
+}
+
+/* how it works: the same four rounded cards the other pages use */
+#how .how-wrap { display: block; }
+#how .weeks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(14px, 1.7vw, 24px); position: relative; }
+#how .weeks::before { content: ''; position: absolute; left: 8%; right: 8%; top: 44px; height: 2px; border-radius: 2px;
+  background: repeating-linear-gradient(90deg, var(--line-2) 0 8px, transparent 8px 16px); }
+#how .week { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 14px; align-content: start;
+  padding: clamp(18px, 1.9vw, 24px) !important; border-top: 0 !important; border-radius: 22px;
+  background: var(--glass); border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  box-shadow: 0 18px 38px -28px rgba(10, 32, 20, .5);
+  transition: transform .35s var(--ease), box-shadow .35s ease, border-color .3s ease; }
+@media (hover: hover) { #how .week:hover { transform: translateY(-3px); box-shadow: 0 24px 46px -26px rgba(10, 32, 20, .55); } }
+#how .week .wn { position: relative; z-index: 1; justify-self: start; display: grid; place-items: center;
+  width: 44px; height: 44px; border-radius: 14px; background: var(--grad-acc); color: #062414;
+  font: 700 12.5px/1 var(--mono); letter-spacing: .06em; -webkit-text-stroke: 0; }
+#how .week h3 { font-size: 17.5px; margin: 0 0 6px; }
+#how .week p { font-size: 14px; line-height: 1.6; max-width: none; }
+@media (max-width: 1000px) { #how .weeks { grid-template-columns: repeat(2, minmax(0, 1fr)); } #how .weeks::before { display: none; } }
+@media (max-width: 560px) { #how .weeks { grid-template-columns: 1fr; } }
+
+/* the tiling demo answers the pointer: drag, or just move across it, and the
+   cloth pans the way it was already travelling. Auto-pan resumes on leave. */
+.tile-demo { cursor: grab; touch-action: pan-y; }
+.tile-demo.is-held { cursor: grabbing; }
+.tile-demo.is-live .td-canvas, .tile-demo.is-live .td-grid {
+  animation: none;
+  background-position: var(--tx, 0px) var(--ty, 0px); }
+.tile-demo.is-eased .td-canvas, .tile-demo.is-eased .td-grid { transition: background-position .5s cubic-bezier(.33, 1, .68, 1); }
+.td-hint { position: absolute; left: 50%; top: 16px; translate: -50% 0; padding: 6px 12px; border-radius: 999px;
+  background: rgba(var(--scrim-rgb), .7); border: 1px solid var(--line-2);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-4);
+  opacity: .9; transition: opacity .3s ease; pointer-events: none; }
+.tile-demo.is-live .td-hint { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .tile-demo.is-eased .td-canvas, .tile-demo.is-eased .td-grid { transition: none; } }
 </style>
 </head>
 <body>
@@ -745,6 +814,27 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
       </div>
 
       <div class="hero-view">
+        <figure class="gp-hero-fig">
+          <img src="../../assets/img/prints/print-development-640.webp"
+               srcset="../../assets/img/prints/print-development-640.webp 640w, ../../assets/img/prints/print-development-1200.webp 1200w, ../../assets/img/prints/print-development-1600.webp 1600w"
+               sizes="(max-width: 899px) 92vw, 46vw" width="1200" height="871" fetchpriority="high" decoding="async"
+               alt="A print development board: references, motif options and the palette they resolve into">
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 02 — THE PRINT, IN REPEAT AND COLOURWAY ============ -->
+  <section class="sec stage gate" id="print" aria-labelledby="print-h">
+    <div class="wrap">
+      <div class="head-split">
+        <div>
+          <span class="eyebrow rv">01 — Repeat &amp; colourway</span>
+          <h2 id="print-h" class="rv">One tile, <span class="acc-t">then the garment.</span></h2>
+        </div>
+        <p class="head-note rv">Switch the colourway and the same drawing carries it: every colour named to a Pantone your printer can match.</p>
+      </div>
+      <div class="gp-boardwrap rv">
         <div class="gp-board" id="gp">
           <div class="gp-top">
             <span class="gp-name">Print <b id="gp-title">Sunset stripe</b> · repeat + colourway</span>
@@ -803,7 +893,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     <div class="wrap">
       <div class="dl-head">
         <div>
-          <span class="eyebrow rv" data-cms="cover.kicker-1">01 — What we cover</span>
+          <span class="eyebrow rv" data-cms="cover.kicker-1">02 — What we cover</span>
           <h2 id="cover-h" class="rv" data-cms="cover.heading-1">Surface pattern and <span class="acc-t">apparel graphics.</span></h2>
         </div>
         <p class="head-note rv" data-cms="cover.text-1">Two halves of the same job: the print that covers the cloth, and the artwork that sits on the garment.</p>
@@ -826,7 +916,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 
         <article class="cv-card rv rv-d1">
           <div class="cv-pair">
-            <figure><img src="../../assets/img/prints/adventure-tee-sheet-640.webp" srcset="../../assets/img/prints/adventure-tee-sheet-640.webp 640w, ../../assets/img/prints/adventure-tee-sheet-1200.webp 1200w" sizes="(max-width: 900px) 92vw, 30vw" width="1200" height="1200" loading="lazy" decoding="async" alt="A placement graphics sheet with each graphic dimensioned" data-cms="cover.image-3"><figcaption data-cms="cover.caption-3">Placement sheet</figcaption></figure>
+            <figure class="fit"><img src="../../assets/img/prints/cover-two-details-640.webp" srcset="../../assets/img/prints/cover-two-details-640.webp 640w, ../../assets/img/prints/cover-two-details-1200.webp 1200w" sizes="(max-width: 900px) 92vw, 30vw" width="1200" height="480" loading="lazy" decoding="async" alt="The placement graphics themselves, each one dimensioned" data-cms="cover.image-3"><figcaption data-cms="cover.caption-3">Placement sheet</figcaption></figure>
             <figure class="fit"><img src="../../assets/img/prints/placement-adventure-640.webp" srcset="../../assets/img/prints/placement-adventure-640.webp 640w, ../../assets/img/prints/placement-adventure-1200.webp 1200w" sizes="(max-width: 900px) 92vw, 30vw" width="1200" height="1200" loading="lazy" decoding="async" alt="A tee with the placement graphics applied front and back" data-cms="cover.image-4"><figcaption data-cms="cover.caption-4">On the garment</figcaption></figure>
           </div>
           <h3 data-cms="cover.heading-3">Apparel graphics &amp; placement art</h3>
@@ -848,8 +938,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     <div class="wrap">
       <div class="head-split">
         <div>
-          <span class="eyebrow rv" data-cms="kit.kicker-1">02 — What you get</span>
-          <h2 id="kit-h" class="rv" data-cms="kit.heading-1">When your mill says &ldquo;production-ready,&rdquo; <span class="acc-t">this is what they mean.</span></h2>
+          <span class="eyebrow rv" data-cms="kit.kicker-1">03 — What you get</span>
+          <h2 id="kit-h" class="rv" data-cms="kit.heading-1">What <span class="acc-t">&ldquo;production-ready&rdquo; means.</span></h2>
         </div>
         <p class="head-note rv" data-cms="kit.text-10">Every pack ships with the same six pieces, whatever the print is.</p>
       </div>
@@ -897,8 +987,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     <div class="wrap">
       <div class="head-split">
         <div>
-          <span class="eyebrow rv">03 — Repeat types</span>
-          <h2 id="repeat-h" class="rv" data-cms="repeat.heading-1">Which repeat your print uses <span class="acc-t">changes where the join hides.</span></h2>
+          <span class="eyebrow rv">04 — Repeat types</span>
+          <h2 id="repeat-h" class="rv" data-cms="repeat.heading-1">The repeat decides <span class="acc-t">where the join hides.</span></h2>
         </div>
         <p class="head-note rv" data-cms="repeat.text-1">We pick it with you at the brief, because it decides how the motif sits once the cloth is cut.</p>
       </div>
@@ -923,59 +1013,42 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     </div>
   </section>
 
-  <!-- ============ 05 — COLOUR, PROVED ============
-       The colour argument, shown rather than claimed: the Pantone
-       reference we specify, and the cloth that came back from it. When a
-       mill strike-off photograph is available it replaces plate 02. -->
-  <section class="sec stage gate" id="colour" aria-labelledby="colour-h">
+  
+
+  <!-- ============ SEE IT TILING — restored ============ -->
+  <section class="sec sec-visual" aria-label="See it tiling">
     <div class="wrap">
-      <div class="head-split">
-        <div>
-          <span class="eyebrow rv">05 — Colour, proved</span>
-          <h2 id="colour-h" class="rv" data-cms="colour.heading-1">&ldquo;That pink&rdquo; is not a colour. <span class="acc-t">13-1906 TCX is.</span></h2>
+      <div class="sec-head" style="margin-bottom:30px;">
+        <span class="kicker rv" data-cms="see-it-tiling.kicker-1">See it tiling</span>
+        <h2 class="h-display rv rv-display" data-cms="see-it-tiling.heading-1">A live repeat — no seam, <span class="acc-t">no break.</span></h2>
+      </div>
+      <div class="vwrap rv rv-media">
+        <div class="tile-demo glass-p" id="td" role="img" aria-label="A repeat tiling seamlessly — drag to pan it">
+          <div class="td-canvas"></div>
+          <div class="td-grid"></div>
+          <span class="td-hint">Drag to pan the repeat</span>
+          <span class="td-chip">Seam check · passed</span>
         </div>
-        <p class="head-note rv" data-cms="colour.text-1">Every colour in the artwork is named to a Pantone TCX before it goes out, so what comes back off the machine can be checked against something.</p>
+        <p class="td-cap" data-cms="see-it-tiling.text-1">A live repeat, tiling right now — no seam, no break. That's the deliverable.</p>
       </div>
-
-      <div class="pr2">
-        <figure class="rv">
-          <img src="../../assets/img/prints/detail-print-colours-640.webp" srcset="../../assets/img/prints/detail-print-colours-640.webp 640w, ../../assets/img/prints/detail-print-colours-1200.webp 1200w" sizes="(max-width: 860px) 92vw, 44vw" width="1200" height="1200" loading="lazy" decoding="async" alt="The print colours named to Pantone TCX references: 13-1906 Flamingo, 13-4720 Sea Splash, 17-1930 Sunset Pink" data-cms="colour.image-1">
-          <span class="pr-step">01 — Specified</span>
-          <figcaption data-cms="colour.caption-1">The colour standard we send</figcaption>
-        </figure>
-        <figure class="rv rv-d1">
-          <img src="../../assets/img/prints/shorts-palm-stripe-640.webp" srcset="../../assets/img/prints/shorts-palm-stripe-640.webp 640w, ../../assets/img/prints/shorts-palm-stripe-1200.webp 1200w" sizes="(max-width: 860px) 92vw, 44vw" width="1200" height="626" loading="lazy" decoding="async" alt="The finished shorts printed in the same three colours" data-cms="colour.image-2">
-          <span class="pr-step">02 — Printed</span>
-          <figcaption data-cms="colour.caption-2">The same colours, on cloth</figcaption>
-        </figure>
-      </div>
-
-      <p class="pr-note rv" data-cms="colour.text-2"><b>What a named colour buys you.</b> A printer can hit a TCX reference and prove it; nobody can hit &ldquo;a warmer pink&rdquo;. Next season&rsquo;s re-order matches, and a second mill can quote without seeing your cloth.</p>
     </div>
   </section>
 
-  <!-- ============ 04 — HOW IT WORKS ============ -->
-  <section class="sec stage gate" id="how" aria-labelledby="how-h">
+  <!-- ============ HOW IT WORKS — restored, with the development board ============ -->
+  <section class="sec" id="how" aria-labelledby="how-h">
     <div class="wrap">
-      <div class="head-split">
-        <div>
-          <span class="eyebrow rv" data-cms="how.kicker-1">06 — How it works</span>
-          <h2 id="how-h" class="rv" data-cms="how.heading-1">Brief today. <span class="acc-t">Quote tomorrow.</span></h2>
+      <div class="sec-head">
+        <span class="kicker rv" data-cms="how.kicker-1">How it works</span>
+        <h2 class="h-display rv rv-display" id="how-h" data-cms="how.heading-1">Brief today. <span class="acc-t">Quote tomorrow.</span></h2>
+      </div>
+      <div class="how-wrap">
+        <div class="weeks rv-steps">
+          <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3 data-cms="how.heading-2">Brief</h3><p data-cms="how.text-1">Send references, your palette, the fabric and the garment — moodboards welcome.</p></div></div>
+          <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3 data-cms="how.heading-3">Fixed quote in 24h</h3><p data-cms="how.text-2">One number, no surprises. It covers artwork, colorways, separations and the spec sheet.</p></div></div>
+          <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3 data-cms="how.heading-4">Design + colorways</h3><p data-cms="how.text-3">Original artwork in repeat, your palette applied — two structured revision rounds included.</p></div></div>
+          <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3 data-cms="how.heading-5">Mill-ready handoff</h3><p data-cms="how.text-4">Tile-tested repeat, separations, spec sheet — and full ownership transferred to you.</p></div></div>
         </div>
-        <p class="head-note rv" data-cms="how.text-5">Artwork begins once the quote is agreed, and the first colourways come back inside the same week for most prints.</p>
       </div>
-
-      <div class="weeks rail rv-steps">
-        <div class="week"><span class="wn" aria-hidden="true">01</span><div><h3 data-cms="how.heading-2">Brief</h3><p data-cms="how.text-1">Send references, your palette, the fabric and the garment — moodboards welcome.</p></div></div>
-        <div class="week"><span class="wn" aria-hidden="true">02</span><div><h3 data-cms="how.heading-3">Fixed quote in 24h</h3><p data-cms="how.text-2">One number, no surprises. It covers artwork, colourways, separations and the mill files.</p></div></div>
-        <div class="week"><span class="wn" aria-hidden="true">03</span><div><h3 data-cms="how.heading-4">Design + colourways</h3><p data-cms="how.text-3">Original artwork in repeat, your palette applied — two structured revision rounds.</p></div></div>
-        <div class="week"><span class="wn" aria-hidden="true">04</span><div><h3 data-cms="how.heading-5">Mill-ready handoff</h3><p data-cms="how.text-4">Tile-tested repeat, separations, spec sheet — and full ownership transferred to you.</p></div></div>
-      </div>
-
-      <figure class="an-fig rv" style="margin-top: clamp(28px, 3.4vw, 44px); padding: 0; overflow: hidden;">
-        <img src="../../assets/img/prints/print-development-640.webp" srcset="../../assets/img/prints/print-development-640.webp 640w, ../../assets/img/prints/print-development-1200.webp 1200w" sizes="(max-width: 900px) 92vw, 68vw" width="1600" height="1000" loading="lazy" decoding="async" alt="A print development board: references, motif options and the palette they resolve into" data-cms="how.image-1">
-      </figure>
-      <p class="head-note rv" style="margin-top: 12px;" data-cms="how.text-6">A print development board from the studio: the references, the options drawn from them, and the palette each one resolves into.</p>
     </div>
   </section>
 
@@ -1195,6 +1268,39 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
         if (visible) { setTimeout(function () { gp.classList.add('measured'); }, 700); timer = setTimeout(loop, 4200); }
       }, { threshold: .25 }).observe(gp);
     } else { visible = true; gp.classList.add('measured'); timer = setTimeout(loop, 4200); }
+  })();
+
+  /* ---- see it tiling: the pointer pans the cloth, in the direction it travels ---- */
+  (function () {
+    var demo = document.getElementById('td');
+    if (!demo) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var x = 0, y = 0, held = false, px = 0, py = 0, raf = 0;
+    function write() { raf = 0; demo.style.setProperty('--tx', x.toFixed(1) + 'px'); demo.style.setProperty('--ty', y.toFixed(1) + 'px'); }
+    function queue() { if (!raf) raf = requestAnimationFrame(write); }
+    function live() { demo.classList.add('is-live'); }
+    function move(e) {
+      var dx = e.clientX - px, dy = e.clientY - py;
+      px = e.clientX; py = e.clientY;
+      if (!held) { dx *= .35; dy *= .35; }          /* hover nudges, a drag carries */
+      x += dx; y += dy * .5;                         /* the same slope the auto-pan runs on */
+      queue();
+    }
+    demo.addEventListener('pointerenter', function (e) { live(); demo.classList.remove('is-eased'); px = e.clientX; py = e.clientY; });
+    demo.addEventListener('pointermove', move);
+    demo.addEventListener('pointerdown', function (e) {
+      held = true; demo.classList.add('is-held'); px = e.clientX; py = e.clientY;
+      if (demo.setPointerCapture) { try { demo.setPointerCapture(e.pointerId); } catch (err) {} }
+    });
+    function release() { held = false; demo.classList.remove('is-held'); }
+    demo.addEventListener('pointerup', release);
+    demo.addEventListener('pointercancel', release);
+    demo.addEventListener('pointerleave', function () {
+      release();
+      /* hand it back to the animation, from where the pointer left it */
+      demo.classList.add('is-eased');
+      setTimeout(function () { demo.classList.remove('is-live', 'is-eased'); }, 520);
+    });
   })();
 
   /* copy email */
