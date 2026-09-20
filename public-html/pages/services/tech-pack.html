@@ -748,46 +748,123 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   .tp-bom li { font-size: 10.5px; padding: 6px 8px; }
 }
 
+.rv-on .rv-card { opacity: 0; transform: translateY(24px) scale(.97); transition: opacity .5s ease, transform .65s var(--ease); }
+.rv-on .rv-card.in { opacity: 1; transform: none; }
 /* ============================================================
-   01 · INSIDE THE PACK — the six real pages, on a rail you push.
-   Nobody else in this market lets you read the document before you
-   buy it, so the proof is the document itself: full pages, scrolled
-   horizontally, each with what it pins down.
+   4. VIEWER — page through a real pack.
    ============================================================ */
-.pk { position: relative; }
-.pk-rail { display: grid; grid-auto-flow: column; grid-auto-columns: min(560px, 82vw); gap: clamp(14px, 1.8vw, 24px);
-  overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none;
-  padding: 4px 4px 8px; margin-inline: -4px; }
-.pk-rail::-webkit-scrollbar { display: none; }
-@media (prefers-reduced-motion: reduce) { .pk-rail { scroll-behavior: auto; } }
-.pk-page { scroll-snap-align: start; display: grid; grid-template-rows: auto auto 1fr; gap: 12px; padding: clamp(14px, 1.4vw, 18px);
-  border-radius: var(--r); background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift); }
-.pk-cap { display: flex; align-items: baseline; gap: 9px; font: 600 10.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-5); }
-.pk-cap b { color: var(--acc-text); font-size: 12px; }
-.pk-sheet { position: relative; margin: 0; border-radius: 12px; overflow: hidden; background: #fff; border: 1px solid var(--edge); }
-.pk-sheet img { display: block; width: 100%; height: auto; aspect-ratio: 1400 / 990; object-fit: cover; object-position: top center; }
-.pk-page h3 { margin: 0; font: 700 clamp(17px, 1.5vw, 20px)/1.25 var(--disp); letter-spacing: -.02em; color: var(--ink); }
-.pk-page > p { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-4); }
-.pk-page ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; align-content: start; }
-.pk-page li { position: relative; padding-left: 20px; font-size: 12.5px; line-height: 1.45; color: var(--ink-4); }
-.pk-page li::before { content: ''; position: absolute; left: 0; top: 4px; width: 13px; height: 13px; border-radius: 50%;
-  background: var(--acc-14) center / 9px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23875400' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); }
-:root[data-theme="dark"] .pk-page li::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F5A623' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pk-page li::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F5A623' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E"); } }
+.viewer {
+  max-width: 1500px; margin-inline: auto;
+  border-radius: var(--r); background: var(--card); border: 1px solid var(--edge);
+  box-shadow: var(--lift); overflow: hidden; }
+.dp-body { margin-top: 10px; display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 0; }
+@media (max-width: 880px) { .dp-body { grid-template-columns: minmax(0, 1fr); } }
+.dp-page { display: none; }
+.dp-page.is-on { display: contents; }
+.dp-shot { margin: 0; background: #FFFFFF; align-self: start; }
+@media (min-width: 881px) { .dp-shot { height: clamp(430px, 66svh, 660px); } }
+@media (max-width: 880px) { .dp-shot { aspect-ratio: 788 / 531; } }
+.dp-shot img { display: block; width: 100%; height: 100%; object-fit: contain; animation: dp-in .5s var(--ease) both; }
+@keyframes dp-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .dp-shot img { animation: none; } }
 
-/* rail controls: a progress line, a page count and two arrows */
-.pk-bar { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
-.pk-track { position: relative; flex: 1; height: 3px; border-radius: 3px; background: var(--edge); overflow: hidden; }
-.pk-track i { position: absolute; left: 0; top: 0; height: 100%; width: 17%; border-radius: 3px; background: var(--grad-acc); transition: transform .35s cubic-bezier(.33, 1, .68, 1); }
-.pk-n { flex: none; font: 600 11px/1 var(--mono); letter-spacing: .08em; color: var(--ink-5); font-variant-numeric: tabular-nums; }
-.pk-go { flex: none; display: flex; gap: 8px; }
-.pk-go button { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; cursor: pointer;
-  background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift); color: var(--ink-3);
-  transition: background .25s ease, color .25s ease, border-color .25s ease, transform .25s ease; }
-.pk-go button:hover { color: var(--ink); border-color: var(--acc-28); transform: translateY(-1px); }
-.pk-go button[disabled] { opacity: .4; cursor: default; transform: none; }
-.pk-go svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-@media (max-width: 620px) { .pk-rail { grid-auto-columns: 86vw; } .pk-go { display: none; } }
+
+
+/* ---- the section header, as one compact band ---- */
+.dp-sticky > .sec-head {
+  flex: 0 0 auto; max-width: none; text-align: left;
+  margin: 0 0 clamp(12px, 1.4vw, 18px) !important;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+  gap: 6px clamp(20px, 3vw, 48px); align-items: end; }
+.dp-sticky > .sec-head .kicker { grid-column: 1; }
+.dp-sticky > .sec-head h2 { grid-column: 1; font-size: clamp(22px, 2.3vw, 32px); margin: 4px 0 0; }
+.dp-sticky > .sec-head .sub { grid-column: 2; grid-row: 1 / 3; margin: 0; align-self: end; font-size: 14.5px; }
+@media (max-width: 980px) {
+  .dp-sticky > .sec-head { grid-template-columns: minmax(0, 1fr); text-align: center; }
+  .dp-sticky > .sec-head .sub { grid-column: 1; grid-row: auto; margin-inline: auto; } }
+
+/* ---- tabs: compact pills, numbered, left aligned ---- */
+.dp-tabs {
+  counter-reset: dpt; display: flex; flex-wrap: nowrap; gap: 4px;
+  padding: 6px; margin: 0; flex: 0 0 auto;
+  border: 0; border-bottom: 1px solid var(--edge); border-radius: 0;
+  background: none; overflow-x: auto; scrollbar-width: none; }
+.dp-tabs::-webkit-scrollbar { display: none; }
+.dp-tab {
+  flex: 1 1 0; min-width: 0; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 9px 12px; border-radius: 10px; cursor: pointer; white-space: nowrap;
+  background: transparent; border: 0;
+  font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--ink-5);
+  transition: background .2s ease, color .2s ease; }
+.dp-tab::before {
+  content: counter(dpt, decimal-leading-zero); counter-increment: dpt;
+  font-family: var(--mono); font-size: 10.5px; color: var(--ink-6); }
+.dp-tab:hover { color: var(--ink); background: var(--card-2); }
+.dp-tab.is-on { background: var(--acc); color: #1A1206; box-shadow: 0 6px 18px -8px rgba(245,166,35,.85); }
+.dp-tab.is-on::before { color: rgba(26,18,6,.6); }
+
+/* ---- the note beside the page, filling its column ---- */
+.dp-say {
+  display: flex; flex-direction: column; min-height: 0; max-height: clamp(430px, 66svh, 660px);
+  padding: clamp(18px, 2vw, 26px); border-left: 1px solid var(--edge); align-self: stretch; }
+@media (max-width: 880px) { .dp-say { border-left: 0; border-top: 1px solid var(--edge); } }
+.dp-say-top { display: flex; align-items: baseline; gap: 12px; }
+.dp-count { font-family: var(--mono); font-size: 12px; color: var(--ink-6); letter-spacing: .04em; }
+.dp-count b { color: var(--acc-text); font-weight: 500; font-size: 15px; }
+.dp-say h3 { font-family: var(--disp); font-size: clamp(19px, 2vw, 25px); font-weight: 700;
+  letter-spacing: -.028em; margin: 10px 0 0; color: var(--ink); }
+.dp-say p { margin: 9px 0 0; font-size: 14px; line-height: 1.55; color: var(--ink-4); text-wrap: pretty; }
+.dp-answers { list-style: none; margin: 16px 0 0; padding: 14px 0 0; border-top: 1px solid var(--edge);
+  display: grid; gap: 9px; }
+.dp-answers li { display: grid; grid-template-columns: 16px 1fr; gap: 9px; align-items: start;
+  font-size: 13.5px; line-height: 1.4; color: var(--ink-3); }
+.dp-answers svg { width: 14px; height: 14px; margin-top: 3px; color: var(--acc-text); }
+.dp-nav { margin-top: auto; padding-top: 16px; display: flex; align-items: center; gap: 8px; }
+.dp-arrow {
+  width: 34px; height: 34px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; cursor: pointer; background: var(--card-2); color: var(--ink);
+  border: 1px solid var(--edge-2); font-size: 15px; line-height: 1;
+  transition: background .2s ease, border-color .2s ease, transform .2s var(--ease); }
+.dp-arrow:hover { background: var(--acc-14); border-color: var(--acc); transform: translateY(-1px); }
+.dp-arrow[disabled] { opacity: .35; cursor: not-allowed; transform: none; }
+.dp-hint { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-6); margin-left: 4px; }
+
+
+/* The six pages turn as the section is scrolled: the card pins and each
+   stretch of scroll advances one page. Added by script, so without JS the
+   section stays an ordinary set of tabs. */
+.dp-scroll { position: relative; }
+@media (min-width: 901px) {
+  .dp-scroll.is-pinned { height: calc(6 * 58vh); }
+  .dp-scroll.is-pinned .dp-sticky { position: sticky; top: 92px;
+    /* the block is centred in the screen it owns, it does not stretch to it */
+    min-height: calc(100vh - 104px); min-height: calc(100svh - 104px);
+    display: flex; flex-direction: column; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dp-scroll.is-pinned { height: auto; }
+  .dp-scroll.is-pinned .dp-sticky { position: static; }
+}
+
+
+/* The page tilts towards the cursor. Script writes the two angles; the page
+   rests flat and eases back when the pointer leaves. */
+.dp-shot { perspective: 1200px; }
+.dp-shot img {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(var(--sc, 1));
+  transform-origin: 50% 50%; transform-style: preserve-3d;
+  transition: transform .5s var(--ease); will-change: transform; }
+/* while the pointer is on it the angle must follow, not ease behind */
+.dp-shot.is-tilting img { transition: transform .06s linear; }
+@media (prefers-reduced-motion: reduce) {
+  .dp-shot img, .dp-shot.is-tilting img { transform: none; transition: none; } }
+
+
+/* the scroll progress line under the tabs — it drives the pinned pages */
+.dp-rail { position: relative; height: 3px; margin: 12px 0 0; border-radius: 3px; background: var(--edge); overflow: hidden; }
+.dp-rail i { position: absolute; left: 0; top: 0; height: 100%; width: 0; border-radius: 3px; background: var(--grad-acc);
+  transition: width .25s cubic-bezier(.33, 1, .68, 1); }
 
 /* ============================================================
    02 · WHAT A VAGUE BRIEF COSTS — a ledger, read like a document.
@@ -817,10 +894,51 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 }
 
 /* ============================================================
-   03 · ANY GARMENT — the drawing library, as a wall.
+   COVERAGE — what we draw, and where it ships.
+   Eight equal cards on one rhythm, same surface as the rest.
    ============================================================ */
-.gw-note { margin: clamp(18px, 2vw, 26px) 0 0; max-width: 78ch; font-size: 14px; line-height: 1.65; color: var(--ink-4); }
-.gw-note b { color: var(--ink); font-weight: 600; }
+.tp-cov { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(12px, 1.4vw, 18px); max-width: 1500px; margin-inline: auto; }
+@media (max-width: 1000px) { .tp-cov { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 540px) { .tp-cov { grid-template-columns: minmax(0, 1fr); } }
+.tp-cov-card {
+  min-width: 0; border-radius: var(--r); background: var(--card); border: 1px solid var(--edge);
+  box-shadow: var(--lift); padding: clamp(16px, 1.8vw, 22px);
+  transition: transform .4s var(--ease), box-shadow .4s ease, border-color .3s ease; }
+@media (hover: hover) { .tp-cov-card:hover { transform: translateY(-4px); box-shadow: var(--lift-h); border-color: var(--edge-2); } }
+/* the icon draws itself in as the card arrives, then answers the hover.
+   pathLength="1" normalises every path, so one dash rule covers them all. */
+.tp-cov-ic {
+  width: 40px; height: 40px; border-radius: 12px; margin-bottom: 14px;
+  display: grid; place-items: center; color: var(--acc-text);
+  background: var(--acc-14); border: 1px solid var(--acc-28);
+  transition: transform .45s var(--ease), background .3s ease; }
+.tp-cov-ic svg { width: 21px; height: 21px; display: block; overflow: visible; }
+.tp-cov-ic { margin-bottom: 12px; }
+.tp-cov-ic svg * {
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  transition: stroke-dashoffset .9s var(--ease) .12s; }
+.rv-on .tp-cov-card.in .tp-cov-ic svg * { stroke-dashoffset: 0; }
+@media (hover: hover) {
+  .tp-cov-card:hover .tp-cov-ic { transform: translateY(-3px) rotate(-5deg); background: var(--acc-28); } }
+@media (prefers-reduced-motion: reduce) {
+  .tp-cov-ic svg * { stroke-dashoffset: 0; transition: none; }
+  .tp-cov-card:hover .tp-cov-ic { transform: none; } }
+.tp-cov-card h3 {
+  font-family: var(--disp); font-size: clamp(16px, 1.55vw, 19px); font-weight: 700;
+  letter-spacing: -.025em; color: var(--ink); margin: 0 0 5px; }
+.tp-cov-card p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--ink-4); }
+.tp-cov-note {
+  max-width: 1500px; margin: clamp(14px, 1.8vw, 22px) auto 0;
+  border-radius: var(--r); background: var(--card); border: 1px solid var(--edge);
+  padding: clamp(14px, 1.6vw, 20px) clamp(16px, 1.8vw, 24px);
+  font-size: 14.5px; line-height: 1.6; color: var(--ink-4); text-wrap: pretty; }
+.tp-cov-note b { color: var(--ink); font-weight: 600; }
+
+
+
+/* the heading stays on one line — it is short enough to hold it */
+#coverage .sec-head h2 { max-width: none; white-space: nowrap; font-size: clamp(22px, 3.1vw, 40px); }
+@media (max-width: 620px) { #coverage .sec-head h2 { white-space: normal; } }
 
 /* ============================================================
    04 · PACKAGES — three ways to buy the same craft.
@@ -1019,127 +1137,194 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   </section>
 
   <!-- ============ 01 — INSIDE THE PACK ============
-       The proof this market never shows: the whole document, readable
-       before you buy. Six real pages from one men's polo pack, on a rail
-       you push. Brand marks on the sheets are blank by design. -->
-  <section class="sec" id="pack" aria-labelledby="pack-h">
+       The previous viewer, restored: six real pages that turn as the
+       section is scrolled — the card pins and each stretch of scroll
+       advances one page. Tabs and arrows still work without scrolling. -->
+  <section class="sec" id="inside" aria-labelledby="inside-h">
     <div class="wrap">
-      <div class="dl-head">
-        <div>
-          <span class="eyebrow rv">01 — Inside the pack</span>
-          <h2 id="pack-h" class="rv" data-cms="pack.heading-1">Six pages that answer <span class="acc-t">every question a factory would ask.</span></h2>
+      <div class="dp-scroll">
+       <div class="dp-sticky">
+        <div class="sec-head">
+          <span class="kicker rv">Inside the document</span>
+          <h2 class="h-display rv rv-display" id="inside-h">Six pages that answer <span class="acc-t">every question</span> a factory would ask.</h2>
+          <p class="sub rv">Page through a real one — a men's polo, exactly as it went to the factory.</p>
         </div>
-        <p class="head-note rv" data-cms="pack.text-1">Page through a real one — a men&rsquo;s polo, exactly as it went to the factory. An example pack, with the brand marks left blank.</p>
-      </div>
-
-      <div class="pk rv">
-        <div class="pk-rail" id="pk-rail" tabindex="0" role="group" aria-label="Pages of an example tech pack">
-          <article class="pk-page">
-            <span class="pk-cap"><b>01</b> / 06 · Flats</span>
-            <figure class="pk-sheet">
-              <img src="../../assets/img/techpack/flats-800.webp"
-                   srcset="../../assets/img/techpack/flats-800.webp 800w, ../../assets/img/techpack/flats-1400.webp 1400w, ../../assets/img/techpack/flats-2000.webp 2000w"
-                   sizes="(max-width: 620px) 86vw, 560px" width="1400" height="990" loading="lazy" decoding="async"
-                   alt="The technical flat sketch page of a men's polo tech pack: front and back line drawings with the style header filled in" data-cms="pack.image-1">
-            </figure>
-            <h3 data-cms="pack.heading-2">Technical flats</h3>
-            <p data-cms="pack.text-2">Front, back and detail line drawings of your garment, drawn to proportion.</p>
-          <ul>
-            <li data-cms="pack.item-1">Front, back and detail views</li>
-            <li data-cms="pack.item-2">Drawn to scale, seams marked</li>
-            <li data-cms="pack.item-3">The drawing they cut from</li>
-          </ul>
-          </article>
-          <article class="pk-page">
-            <span class="pk-cap"><b>02</b> / 06 · Construction</span>
-            <figure class="pk-sheet">
-              <img src="../../assets/img/techpack/construction-callout-800.webp"
-                   srcset="../../assets/img/techpack/construction-callout-800.webp 800w, ../../assets/img/techpack/construction-callout-1400.webp 1400w, ../../assets/img/techpack/construction-callout-2000.webp 2000w"
-                   sizes="(max-width: 620px) 86vw, 560px" width="1400" height="990" loading="lazy" decoding="async"
-                   alt="The construction callout page: the polo flat marked up with neck taping, placket, armhole and hem instructions" data-cms="pack.image-2">
-            </figure>
-            <h3 data-cms="pack.heading-3">Construction callouts</h3>
-            <p data-cms="pack.text-3">Seam class, stitch type, SPI, finish and tolerance, pinned to the exact spot.</p>
-          <ul>
-            <li data-cms="pack.item-4">Seam class and stitch type</li>
-            <li data-cms="pack.item-5">SPI and finish, per seam</li>
-            <li data-cms="pack.item-6">The tolerance QC checks against</li>
-          </ul>
-          </article>
-          <article class="pk-page">
-            <span class="pk-cap"><b>03</b> / 06 · Materials</span>
-            <figure class="pk-sheet">
-              <img src="../../assets/img/techpack/bill-of-materials-800.webp"
-                   srcset="../../assets/img/techpack/bill-of-materials-800.webp 800w, ../../assets/img/techpack/bill-of-materials-1400.webp 1400w, ../../assets/img/techpack/bill-of-materials-2000.webp 2000w"
-                   sizes="(max-width: 620px) 86vw, 560px" width="1400" height="990" loading="lazy" decoding="async"
-                   alt="The bill of materials page: a table of fabric and trims with images, composition, placement, quantity and supplier" data-cms="pack.image-3">
-            </figure>
-            <h3 data-cms="pack.heading-4">Bill of materials</h3>
-            <p data-cms="pack.text-4">Every fabric and trim named, with composition, placement and supplier.</p>
-          <ul>
-            <li data-cms="pack.item-7">Fabric composition and GSM</li>
-            <li data-cms="pack.item-8">Every trim, with its supplier</li>
-            <li data-cms="pack.item-9">A colour named against each</li>
-          </ul>
-          </article>
-          <article class="pk-page">
-            <span class="pk-cap"><b>04</b> / 06 · Measurements</span>
-            <figure class="pk-sheet">
-              <img src="../../assets/img/techpack/measurement-chart-800.webp"
-                   srcset="../../assets/img/techpack/measurement-chart-800.webp 800w, ../../assets/img/techpack/measurement-chart-1400.webp 1400w, ../../assets/img/techpack/measurement-chart-2000.webp 2000w"
-                   sizes="(max-width: 620px) 86vw, 560px" width="1400" height="990" loading="lazy" decoding="async"
-                   alt="The measurement chart page: points of measure graded from S to 4XL with plus and minus tolerances" data-cms="pack.image-4">
-            </figure>
-            <h3 data-cms="pack.heading-5">Measurement spec</h3>
-            <p data-cms="pack.text-5">Full points of measure, graded across the size run, with tolerances.</p>
-          <ul>
-            <li data-cms="pack.item-10">Every point of measure, graded</li>
-            <li data-cms="pack.item-11">A plus and minus tolerance</li>
-            <li data-cms="pack.item-12">Centimetres and inches together</li>
-          </ul>
-          </article>
-          <article class="pk-page">
-            <span class="pk-cap"><b>05</b> / 06 · Colourways</span>
-            <figure class="pk-sheet">
-              <img src="../../assets/img/techpack/colorways-artwork-800.webp"
-                   srcset="../../assets/img/techpack/colorways-artwork-800.webp 800w, ../../assets/img/techpack/colorways-artwork-1400.webp 1400w, ../../assets/img/techpack/colorways-artwork-2000.webp 2000w"
-                   sizes="(max-width: 620px) 86vw, 560px" width="1400" height="990" loading="lazy" decoding="async"
-                   alt="The colourways and artwork page: each colourway shown against its Pantone reference with placement artwork" data-cms="pack.image-5">
-            </figure>
-            <h3 data-cms="pack.heading-6">Colourways &amp; artwork</h3>
-            <p data-cms="pack.text-6">Every colourway against a Pantone or fabric reference, with placement artwork.</p>
-          <ul>
-            <li data-cms="pack.item-13">A Pantone TCX per colour</li>
-            <li data-cms="pack.item-14">Print and embroidery placement</li>
-            <li data-cms="pack.item-15">Artwork repeats, production-ready</li>
-          </ul>
-          </article>
-          <article class="pk-page">
-            <span class="pk-cap"><b>06</b> / 06 · Labels</span>
-            <figure class="pk-sheet">
-              <img src="../../assets/img/techpack/labels-packaging-800.webp"
-                   srcset="../../assets/img/techpack/labels-packaging-800.webp 800w, ../../assets/img/techpack/labels-packaging-1400.webp 1400w, ../../assets/img/techpack/labels-packaging-2000.webp 2000w"
-                   sizes="(max-width: 620px) 86vw, 560px" width="1400" height="990" loading="lazy" decoding="async"
-                   alt="The labels and packaging page: care content, label placements, polybag and a dimensioned carton dieline" data-cms="pack.image-6">
-            </figure>
-            <h3 data-cms="pack.heading-7">Labels &amp; packaging</h3>
-            <p data-cms="pack.text-7">Care content, label placement, polybag and the carton dieline your packer folds from.</p>
-          <ul>
-            <li data-cms="pack.item-16">Care content and wash symbols</li>
-            <li data-cms="pack.item-17">Brand and size label placement</li>
-            <li data-cms="pack.item-18">The carton dieline, dimensioned</li>
-          </ul>
-          </article>
+      <div class="viewer rv rv-card">
+        <div class="dp-tabs" role="tablist" aria-label="Pages in a tech pack">
+          <button class="dp-tab is-on" role="tab" type="button" aria-selected="true" aria-controls="dp-1" id="dpt-1" tabindex="0">Flats</button>
+          <button class="dp-tab" role="tab" type="button" aria-selected="false" aria-controls="dp-2" id="dpt-2" tabindex="-1">Construction</button>
+          <button class="dp-tab" role="tab" type="button" aria-selected="false" aria-controls="dp-3" id="dpt-3" tabindex="-1">Materials</button>
+          <button class="dp-tab" role="tab" type="button" aria-selected="false" aria-controls="dp-4" id="dpt-4" tabindex="-1">Measurements</button>
+          <button class="dp-tab" role="tab" type="button" aria-selected="false" aria-controls="dp-5" id="dpt-5" tabindex="-1">Colourways</button>
+          <button class="dp-tab" role="tab" type="button" aria-selected="false" aria-controls="dp-6" id="dpt-6" tabindex="-1">Labels</button>
         </div>
 
-        <div class="pk-bar">
-          <div class="pk-track" aria-hidden="true"><i id="pk-fill"></i></div>
-          <span class="pk-n"><b id="pk-now">01</b> / 06</span>
-          <div class="pk-go">
-            <button type="button" id="pk-prev" aria-label="Previous page" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-            <button type="button" id="pk-next" aria-label="Next page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+        <div class="dp-rail" aria-hidden="true"><i></i></div>
+        <div class="dp-body">
+          <div class="dp-page is-on" id="dp-1" role="tabpanel" aria-labelledby="dpt-1">
+            <figure class="dp-shot">
+              <picture>
+                <source type="image/webp" srcset="../../assets/img/techpack/flats-800.webp 800w, ../../assets/img/techpack/flats-1400.webp 1400w, ../../assets/img/techpack/flats-2000.webp 2000w" sizes="(max-width: 880px) 96vw, 700px" />
+                <img src="../../assets/img/techpack/flats-1400.webp" width="1400" height="990" loading="lazy" decoding="async" alt="A technical flat sketch of a men's polo, front and back, above a header carrying the customer, style number, style description, season, size range and merchandiser.">
+              </picture>
+            </figure>
+            <div class="dp-say">
+            <div class="dp-say-top">
+              <span class="dp-count"><b>01</b> / 06</span>
+              <span class="kicker">Page one</span>
+            </div>
+            <h3>Technical flats</h3>
+            <p>Front, back and detail line drawings of your garment, drawn to proportion.</p>
+            <ul class="dp-answers">
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>Front, back and detail views</span></li>
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>Drawn to scale, seams marked</span></li>
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>The drawing they cut from</span></li>
+            </ul>
+            <div class="dp-nav">
+              <button type="button" class="dp-arrow" data-dp-step="-1" aria-label="Previous page">&larr;</button>
+              <button type="button" class="dp-arrow" data-dp-step="1" aria-label="Next page">&rarr;</button>
+              <span class="dp-hint">Scroll to turn the pages</span>
+            </div>
+          </div>
+          </div>
+
+          <div class="dp-page" id="dp-2" role="tabpanel" aria-labelledby="dpt-2" hidden>
+            <figure class="dp-shot">
+              <picture>
+                <source type="image/webp" srcset="../../assets/img/techpack/construction-callout-800.webp 800w, ../../assets/img/techpack/construction-callout-1400.webp 1400w, ../../assets/img/techpack/construction-callout-2000.webp 2000w" sizes="(max-width: 880px) 96vw, 700px" />
+                <img src="../../assets/img/techpack/construction-callout-1400.webp" width="1400" height="990" loading="lazy" decoding="async" alt="The front view of the polo with leader lines pinned to named construction points — neck taping set onto the interior collar band, a 4T interior safety stitch at the armhole, edge stitch all round with a box stitch at the bottom of the placket, single turn-back hems, and a bottom sideseam slit bartacked at the opening.">
+              </picture>
+            </figure>
+            <div class="dp-say">
+            <div class="dp-say-top">
+              <span class="dp-count"><b>02</b> / 06</span>
+              <span class="kicker">Page two</span>
+            </div>
+            <h3>Construction callouts</h3>
+            <p>Seam class, stitch type, SPI, finish and tolerance, pinned to the exact spot.</p>
+            <ul class="dp-answers">
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>Seam class and stitch type</span></li>
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>SPI and finish, per seam</span></li>
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>The tolerance QC checks against</span></li>
+            </ul>
+            <div class="dp-nav">
+              <button type="button" class="dp-arrow" data-dp-step="-1" aria-label="Previous page">&larr;</button>
+              <button type="button" class="dp-arrow" data-dp-step="1" aria-label="Next page">&rarr;</button>
+              <span class="dp-hint">Scroll to turn the pages</span>
+            </div>
+          </div>
+          </div>
+
+          <div class="dp-page" id="dp-3" role="tabpanel" aria-labelledby="dpt-3" hidden>
+            <figure class="dp-shot">
+              <picture>
+                <source type="image/webp" srcset="../../assets/img/techpack/bill-of-materials-800.webp 800w, ../../assets/img/techpack/bill-of-materials-1400.webp 1400w, ../../assets/img/techpack/bill-of-materials-2000.webp 2000w" sizes="(max-width: 880px) 96vw, 700px" />
+                <img src="../../assets/img/techpack/bill-of-materials-1400.webp" width="1400" height="990" loading="lazy" decoding="async" alt="A bill of materials table naming every fabric and trim with a swatch, brand reference, material description, placement, quantity and supplier — body fabric, stretch tape, labels, sewing thread, poly bag, chest print and placket buttons — each specified against two navy colourways.">
+              </picture>
+            </figure>
+            <div class="dp-say">
+            <div class="dp-say-top">
+              <span class="dp-count"><b>03</b> / 06</span>
+              <span class="kicker">Page three</span>
+            </div>
+            <h3>Bill of materials</h3>
+            <p>Every fabric and trim named, with composition, placement and supplier.</p>
+            <ul class="dp-answers">
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>Fabric composition and GSM</span></li>
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>Every trim, with its supplier</span></li>
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>A colour named against each</span></li>
+            </ul>
+            <div class="dp-nav">
+              <button type="button" class="dp-arrow" data-dp-step="-1" aria-label="Previous page">&larr;</button>
+              <button type="button" class="dp-arrow" data-dp-step="1" aria-label="Next page">&rarr;</button>
+              <span class="dp-hint">Scroll to turn the pages</span>
+            </div>
+          </div>
+          </div>
+
+          <div class="dp-page" id="dp-4" role="tabpanel" aria-labelledby="dpt-4" hidden>
+            <figure class="dp-shot">
+              <picture>
+                <source type="image/webp" srcset="../../assets/img/techpack/measurement-chart-800.webp 800w, ../../assets/img/techpack/measurement-chart-1400.webp 1400w, ../../assets/img/techpack/measurement-chart-2000.webp 2000w" sizes="(max-width: 880px) 96vw, 700px" />
+                <img src="../../assets/img/techpack/measurement-chart-1400.webp" width="1400" height="991" loading="lazy" decoding="async" alt="A points-of-measure table giving a minus and plus tolerance and a graded measurement from S to 4XL for every point — front and back length from HPS, shoulder seam and slope, across front and back, chest, waist, sweep, neck width and depth, armhole drop, sleeve length and opening, hem height and placket.">
+              </picture>
+            </figure>
+            <div class="dp-say">
+            <div class="dp-say-top">
+              <span class="dp-count"><b>04</b> / 06</span>
+              <span class="kicker">Page four</span>
+            </div>
+            <h3>Measurement spec</h3>
+            <p>Full points of measure, graded across the size run, with tolerances.</p>
+            <ul class="dp-answers">
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>Every point of measure, graded</span></li>
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>A plus and minus tolerance</span></li>
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>Centimetres and inches together</span></li>
+            </ul>
+            <div class="dp-nav">
+              <button type="button" class="dp-arrow" data-dp-step="-1" aria-label="Previous page">&larr;</button>
+              <button type="button" class="dp-arrow" data-dp-step="1" aria-label="Next page">&rarr;</button>
+              <span class="dp-hint">Scroll to turn the pages</span>
+            </div>
+          </div>
+          </div>
+
+          <div class="dp-page" id="dp-5" role="tabpanel" aria-labelledby="dpt-5" hidden>
+            <figure class="dp-shot">
+              <picture>
+                <source type="image/webp" srcset="../../assets/img/techpack/colorways-artwork-800.webp 800w, ../../assets/img/techpack/colorways-artwork-1400.webp 1400w, ../../assets/img/techpack/colorways-artwork-2000.webp 2000w" sizes="(max-width: 880px) 96vw, 700px" />
+                <img src="../../assets/img/techpack/colorways-artwork-1400.webp" width="1400" height="990" loading="lazy" decoding="async" alt="Six production colourways of the polo — Heather Grey, Deep Navy, Mineral Black and Forest Sage against their Pantone TPX codes, plus a tropical floral print and a yarn-dyed stripe, each shown on the garment with its artwork repeat and colour chips.">
+              </picture>
+            </figure>
+            <div class="dp-say">
+            <div class="dp-say-top">
+              <span class="dp-count"><b>05</b> / 06</span>
+              <span class="kicker">Page five</span>
+            </div>
+            <h3>Colourways &amp; artwork</h3>
+            <p>Every colourway against a Pantone or fabric reference, with placement artwork.</p>
+            <ul class="dp-answers">
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>A Pantone TCX per colour</span></li>
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>Print and embroidery placement</span></li>
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>Artwork repeats, production-ready</span></li>
+            </ul>
+            <div class="dp-nav">
+              <button type="button" class="dp-arrow" data-dp-step="-1" aria-label="Previous page">&larr;</button>
+              <button type="button" class="dp-arrow" data-dp-step="1" aria-label="Next page">&rarr;</button>
+              <span class="dp-hint">Scroll to turn the pages</span>
+            </div>
+          </div>
+          </div>
+
+          <div class="dp-page" id="dp-6" role="tabpanel" aria-labelledby="dpt-6" hidden>
+            <figure class="dp-shot">
+              <picture>
+                <source type="image/webp" srcset="../../assets/img/techpack/labels-packaging-800.webp 800w, ../../assets/img/techpack/labels-packaging-1400.webp 1400w, ../../assets/img/techpack/labels-packaging-2000.webp 2000w" sizes="(max-width: 880px) 96vw, 700px" />
+                <img src="../../assets/img/techpack/labels-packaging-1400.webp" width="1400" height="990" loading="lazy" decoding="async" alt="Brand, size and care labels laid out with fibre content and wash-care symbols, beside a dieline for the garment carton with every panel and fold dimensioned.">
+              </picture>
+            </figure>
+            <div class="dp-say">
+            <div class="dp-say-top">
+              <span class="dp-count"><b>06</b> / 06</span>
+              <span class="kicker">Page six</span>
+            </div>
+            <h3>Labels &amp; packaging</h3>
+            <p>Care content, label placement, polybag and the carton dieline your packer folds from.</p>
+            <ul class="dp-answers">
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>Care content and wash symbols</span></li>
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>Brand and size label placement</span></li>
+            <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg><span>The carton dieline, dimensioned</span></li>
+            </ul>
+            <div class="dp-nav">
+              <button type="button" class="dp-arrow" data-dp-step="-1" aria-label="Previous page">&larr;</button>
+              <button type="button" class="dp-arrow" data-dp-step="1" aria-label="Next page">&rarr;</button>
+              <span class="dp-hint">Scroll to turn the pages</span>
+            </div>
+          </div>
           </div>
         </div>
+      </div>
+       </div>
       </div>
     </div>
   </section>
@@ -1195,31 +1380,61 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     </div>
   </section>
 
-  <!-- ============ 03 — ANY GARMENT ============
-       Range, shown rather than claimed: flats we have drawn, and the
-       categories they cover. No client names attached to any of them. -->
-  <section class="sec" id="garments" aria-labelledby="garments-h">
+  <!-- ============ COVERAGE — restored from f360c0b ============ -->
+  <section class="sec" id="coverage" aria-labelledby="coverage-h">
     <div class="wrap">
-      <div class="head-split">
-        <div>
-          <span class="eyebrow rv">03 — Any garment</span>
-          <h2 id="garments-h" class="rv" data-cms="garments.heading-1">Knits, wovens, denim, outerwear — <span class="acc-t">drawn from scratch, every time.</span></h2>
-        </div>
-        <p class="head-note rv" data-cms="garments.text-1">A garment we have not drawn before is a normal week, not a special case. Send the hardest one first.</p>
+      <div class="sec-head">
+        <span class="kicker rv">Coverage</span>
+        <h2 class="h-display rv rv-display" id="coverage-h">Any garment. Any factory. <span class="acc-t">Anywhere.</span></h2>
       </div>
-
-      <ul class="dl-spec rv" aria-label="Categories we cover">
-          <li data-cms="garments.item-1"><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 3 4 5l1 4h2v12h10V9h2l1-4-4-2a4 4 0 0 1-8 0Z"/></svg></span><div><b>Streetwear</b><span>Hoodies · tees · caps</span></div></li>
-          <li data-cms="garments.item-2"><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 3 5 14h5l-1 7 8-11h-5l1-7z"/></svg></span><div><b>Activewear</b><span>Leggings · sets · stretch</span></div></li>
-          <li data-cms="garments.item-3"><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h10v7l-1 11h-4l-1-8-1 8H7z"/></svg></span><div><b>Denim</b><span>Jeans · jackets · washes</span></div></li>
-          <li data-cms="garments.item-4"><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 3h4l2 5-4 3-4-3zM8 11h8l2 10H6z"/></svg></span><div><b>Dresses &amp; wovens</b><span>Drape-critical pieces</span></div></li>
-          <li data-cms="garments.item-5"><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 3l3 2 3-2 4 3v15H5V6zM12 5v16"/></svg></span><div><b>Outerwear</b><span>Bombers · coats · parkas</span></div></li>
-          <li data-cms="garments.item-6"><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg></span><div><b>Swim &amp; lingerie</b><span>Fit-sensitive builds</span></div></li>
-          <li data-cms="garments.item-7"><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM6 21v-4a6 6 0 0 1 12 0v4"/></svg></span><div><b>Kidswear</b><span>Compliance-aware specs</span></div></li>
-          <li data-cms="garments.item-8"><span class="dl-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 8h12l1 12H5zM9 8V6a3 3 0 0 1 6 0v2"/></svg></span><div><b>Accessories</b><span>Bags · scarves · soft goods</span></div></li>
-      </ul>
-
-      <p class="gw-note rv" data-cms="garments.text-2"><b>Understood where it lands.</b> Factory-standard terminology, in centimetres and inches together — read the same way in Tiruppur as in China, Turkey or Portugal.</p>
+      <div class="tp-cov">
+        <article class="tp-cov-card rv rv-card">
+          <span class="tp-cov-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M8 4 6 5 3 7l2 3 1.5-1V20h11V9L19 10l2-3-3-2-2-1a3 3 0 0 1-6 0Z"/><path pathLength="1" d="M10 4a3 3 0 0 0 4 0"/></svg></span>
+          <h3>Streetwear</h3>
+          <p>Hoodies · tees · caps</p>
+        </article>
+        <article class="tp-cov-card rv rv-card rv-d1">
+          <span class="tp-cov-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M8 3h8l-1 7 1 11h-3l-1-8-1 8H8l1-11Z"/></svg></span>
+          <h3>Activewear</h3>
+          <p>Leggings · sets · stretch</p>
+        </article>
+        <article class="tp-cov-card rv rv-card rv-d2">
+          <span class="tp-cov-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M7 3h10v5l-1 13h-4l-1-8-1 8H6l1-13Z"/><path pathLength="1" d="M7 8h10"/></svg></span>
+          <h3>Denim</h3>
+          <p>Jeans · jackets · washes</p>
+        </article>
+        <article class="tp-cov-card rv rv-card rv-d3">
+          <span class="tp-cov-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M9 3h6l-1 4 4 14H6l4-14Z"/><path pathLength="1" d="M10 7h4"/></svg></span>
+          <h3>Dresses &amp; wovens</h3>
+          <p>Drape-critical pieces</p>
+        </article>
+        <article class="tp-cov-card rv rv-card">
+          <span class="tp-cov-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M8 4 4 6v6h3v9h10v-9h3V6l-4-2-2 3-2 3-2-3Z"/><path pathLength="1" d="M12 10v11"/></svg></span>
+          <h3>Outerwear</h3>
+          <p>Bombers · coats · parkas</p>
+        </article>
+        <article class="tp-cov-card rv rv-card rv-d1">
+          <span class="tp-cov-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M4 6c3 0 5 2 8 2s5-2 8-2c0 6-3 9-8 12C7 15 4 12 4 6Z"/></svg></span>
+          <h3>Swim &amp; lingerie</h3>
+          <p>Fit-sensitive builds</p>
+        </article>
+        <article class="tp-cov-card rv rv-card rv-d2">
+          <span class="tp-cov-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M9 4 5 6l1 4 2-1v10h8V9l2 1 1-4-4-2-2 2-2-2Z"/></svg></span>
+          <h3>Kidswear</h3>
+          <p>Compliance-aware specs</p>
+        </article>
+        <article class="tp-cov-card rv rv-card rv-d3">
+          <span class="tp-cov-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path pathLength="1" d="M5 8h14l-1 12H6Z"/><path pathLength="1" d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span>
+          <h3>Accessories</h3>
+          <p>Bags · scarves · soft goods</p>
+        </article>
+      </div>
+      <p class="tp-cov-note rv rv-card rv-d3">
+        Written in <b>international factory-standard terminology</b> and supplied in
+        <b>centimetres and inches together</b> — because the sampling room works in inches and the
+        buyer asks in centimetres. Understood in India, China, Turkey, Portugal and Bangladesh,
+        even where you and the factory share no language.
+      </p>
     </div>
   </section>
 
@@ -1586,31 +1801,149 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
   })();
 
-  /* ---- 01 · the pack rail: arrows, page count and the progress line ---- */
-  (function () {
-    var rail = document.getElementById('pk-rail');
-    if (!rail) return;
-    var fill = document.getElementById('pk-fill'), now = document.getElementById('pk-now');
-    var prev = document.getElementById('pk-prev'), next = document.getElementById('pk-next');
-    var pages = [].slice.call(rail.children), n = pages.length, queued = 0;
-    function step() { return pages[1] ? pages[1].offsetLeft - pages[0].offsetLeft : rail.clientWidth; }
-    function sync() {
-      /* snap can stop a little short of the true end, so allow half a card */
-      var end = rail.scrollLeft >= rail.scrollWidth - rail.clientWidth - step() / 2;
-      var i = end ? n - 1 : Math.max(0, Math.min(n - 1, Math.round(rail.scrollLeft / step())));
-      now.textContent = ('0' + (i + 1)).slice(-2);
-      fill.style.transform = 'translateX(' + (i * 100) + '%)';
-      prev.disabled = rail.scrollLeft < 8;
-      next.disabled = end;
+(function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll('.dp-tab'));
+    if (!tabs.length) return;
+    function open(tab) {
+      tabs.forEach(function (t) {
+        var on = t === tab;
+        t.classList.toggle('is-on', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        var panel = document.getElementById(t.getAttribute('aria-controls'));
+        if (panel) { panel.classList.toggle('is-on', on); panel.hidden = !on; }
+      });
     }
-    rail.addEventListener('scroll', function () {
-      if (queued) return;
-      queued = requestAnimationFrame(function () { queued = 0; sync(); });
+    tabs.forEach(function (t) { t.addEventListener('click', function () { open(t); }); });
+    window.__dpTabs = tabs; window.__dpOpen = open;
+    document.querySelector('.dp-tabs').addEventListener('keydown', function (e) {
+      /* Move from where the focus is, not from what is open — a reader can
+         tab to a control without opening it, and the arrow key should carry
+         on from there. */
+      var i = tabs.indexOf(document.activeElement);
+      if (i === -1) i = tabs.findIndex(function (t) { return t.getAttribute('aria-selected') === 'true'; });
+      var k = e.key;
+      var n = (k === 'ArrowDown' || k === 'ArrowRight') ? i + 1
+            : (k === 'ArrowUp' || k === 'ArrowLeft') ? i - 1
+            : k === 'Home' ? 0 : k === 'End' ? tabs.length - 1 : -1;
+      if (n === -1) return;
+      n = (n + tabs.length) % tabs.length;
+      open(tabs[n]); tabs[n].focus(); e.preventDefault();
     });
-    prev.addEventListener('click', function () { rail.scrollBy({ left: -step(), behavior: 'smooth' }); });
-    next.addEventListener('click', function () { rail.scrollBy({ left: step(), behavior: 'smooth' }); });
-    window.addEventListener('resize', sync);
-    sync();
+  })();
+
+  (function () {
+    var scroller = document.querySelector('.dp-scroll');
+    var rail = document.querySelector('.dp-rail i');
+    if (!scroller || !window.__dpTabs || !window.__dpOpen) return;
+    var tabs = window.__dpTabs, open = window.__dpOpen;
+    var enabled = false, current = 0, ticking = false;
+
+    var canPin = function () {
+      return window.innerWidth > 900 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    };
+    var setup = function () {
+      var want = canPin();
+      if (want === enabled) return;
+      enabled = want;
+      scroller.classList.toggle('is-pinned', want);
+      if (!want && rail) rail.style.width = '';
+    };
+
+    var read = function () {
+      ticking = false;
+      if (!enabled) return;
+      var sticky = scroller.firstElementChild;
+      var top = parseFloat(getComputedStyle(sticky).top) || 0;
+      var total = scroller.offsetHeight - sticky.offsetHeight;
+      if (total <= 0) return;
+      var p = (top - scroller.getBoundingClientRect().top) / total;
+      p = p < 0 ? 0 : p > 1 ? 1 : p;
+      var i = Math.floor(p * tabs.length);
+      if (i > tabs.length - 1) i = tabs.length - 1;
+      if (rail) rail.style.width = ((i + 1) / tabs.length * 100) + '%';
+      if (i !== current) { current = i; open(tabs[i]); }
+    };
+    var onScroll = function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(read);
+    };
+
+    setup();
+    read();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', function () { setup(); read(); }, { passive: true });
+
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () {
+        if (!enabled) return;
+        var sticky = scroller.firstElementChild;
+        var top = parseFloat(getComputedStyle(sticky).top) || 0;
+        var total = scroller.offsetHeight - sticky.offsetHeight;
+        var docTop = scroller.getBoundingClientRect().top + window.pageYOffset;
+        var y = docTop - top + (i + 0.5) / tabs.length * total;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      });
+    });
+  })();
+
+  (function () {
+    var stage = document.querySelector('.viewer');
+    if (!stage) return;
+    if (!window.matchMedia('(hover: hover)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var MAX = 7;              /* degrees at the far edge */
+    var shot = null, px = 0, py = 0, queued = false;
+
+    var apply = function () {
+      queued = false;
+      if (!shot) return;
+      shot.style.setProperty('--ry', (px * MAX).toFixed(2) + 'deg');
+      shot.style.setProperty('--rx', (-py * MAX).toFixed(2) + 'deg');
+      shot.style.setProperty('--sc', '1.012');
+    };
+
+    stage.addEventListener('pointermove', function (e) {
+      if (e.pointerType === 'touch') return;
+      var el = document.querySelector('.dp-page.is-on .dp-shot');
+      if (!el) return;
+      if (el !== shot) { reset(); shot = el; shot.classList.add('is-tilting'); }
+      var r = shot.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      /* -1 .. 1 from the centre of the page */
+      px = (e.clientX - r.left) / r.width * 2 - 1;
+      py = (e.clientY - r.top) / r.height * 2 - 1;
+      if (px < -1) px = -1; else if (px > 1) px = 1;
+      if (py < -1) py = -1; else if (py > 1) py = 1;
+      if (!queued) { queued = true; requestAnimationFrame(apply); }
+    }, { passive: true });
+
+    function reset() {
+      if (!shot) return;
+      shot.classList.remove('is-tilting');
+      shot.style.setProperty('--rx', '0deg');
+      shot.style.setProperty('--ry', '0deg');
+      shot.style.setProperty('--sc', '1');
+      shot = null;
+    }
+    stage.addEventListener('pointerleave', reset);
+    /* a page change mid-hover must not leave the old one holding an angle */
+    stage.addEventListener('click', reset);
+  })();
+
+  (function () {
+    var tabs = window.__dpTabs;
+    if (!tabs) return;
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest ? e.target.closest('[data-dp-step]') : null;
+      if (!btn) return;
+      var i = tabs.findIndex(function (t) { return t.getAttribute('aria-selected') === 'true'; });
+      var n = i + parseInt(btn.getAttribute('data-dp-step'), 10);
+      if (n < 0 || n > tabs.length - 1) return;
+      tabs[n].click();
+    });
   })();
 
   /* copy email */
