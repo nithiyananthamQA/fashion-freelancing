@@ -301,8 +301,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   color: transparent; -webkit-text-stroke: 1.3px var(--acc-45); font-variant-numeric: tabular-nums;
   transition: color .3s ease; }
 .week:hover .wn { color: var(--acc-text); }
-.week h3 { font-family: var(--disp); font-weight: 700; font-size: 16.5px; letter-spacing: -.014em; color: var(--ink); margin: 0 0 4px; }
-.week p { font-size: 13.5px; line-height: 1.55; color: var(--ink-4); margin: 0; max-width: 42ch; }
+.week h3 { font-family: var(--disp); font-weight: 700; font-size: 18px; letter-spacing: -.014em; color: var(--ink); margin: 0 0 4px; }
+.week p { font-size: 14.5px; line-height: 1.6; color: var(--ink-4); margin: 0; max-width: 42ch; }
 
 /* How it works — steps stagger in as the list scrolls into view.
    Hidden state is applied by JS (.rv-steps.armed) so the steps stay visible
@@ -605,7 +605,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   background: radial-gradient(closest-side, rgba(245,166,35,.22), transparent); pointer-events: none; }
 
 /* ---- the flats strip: range, running along the foot of the hero ---- */
-.tp-run { position: relative; z-index: 1; opacity: .92; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(14px, 2vw, 28px); align-items: center;
+.tp-run { position: relative; z-index: 1; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(14px, 2vw, 28px); align-items: center;
   padding: clamp(10px, 1.4vh, 16px) clamp(24px, 4vw, 72px); border-top: 1px solid var(--edge); background: rgba(var(--surface-rgb), .02); }
 .tp-run-lab { font: 500 11px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-5); white-space: nowrap; }
 .tp-run-view { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
@@ -613,7 +613,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 .tp-run-view:hover .tp-run-track { animation-play-state: paused; }
 @keyframes tp-roll { to { transform: translateX(calc(-50% - clamp(5px, .7vw, 9px))); } }
 .tp-run-track li { flex: none; display: grid; justify-items: center; gap: 4px; width: clamp(74px, 6vw, 96px); }
-.tp-run-track img { width: 100%; height: auto; aspect-ratio: 287 / 184; object-fit: contain; opacity: .42; }
+.tp-run-track img { width: 100%; height: auto; aspect-ratio: 287 / 184; object-fit: contain; opacity: .68; }
 .tp-run-track span { font: 500 9px/1.2 var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--ink-5); white-space: nowrap; }
 :root[data-theme="dark"] .tp-run-track img { filter: invert(1) hue-rotate(180deg) brightness(1.06); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tp-run-track img { filter: invert(1) hue-rotate(180deg) brightness(1.06); } }
@@ -640,9 +640,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 
 /* ---- stage: graph paper, the flat, and everything pinned to it ---- */
 .tp-stage { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; align-items: center; min-height: 0; padding: 10px; border-radius: 14px;
-  background: var(--card-2); border: 1px solid var(--edge);
-  background-image: linear-gradient(var(--edge) 1px, transparent 1px), linear-gradient(90deg, var(--edge) 1px, transparent 1px);
-  background-size: 26px 26px; background-position: -1px -1px; }
+  background: var(--card-2); border: 1px solid var(--edge); }
 .tp-fig { position: relative; height: 100%; max-height: 400px; aspect-ratio: 1200 / 1442; max-width: 100%; }
 .tp-fig img { display: block; width: 100%; height: 100%; object-fit: contain;
   clip-path: inset(0 100% 0 0); transition: clip-path 1.1s cubic-bezier(.33, 1, .68, 1); }
@@ -662,8 +660,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 .tp-q::before { content: '?'; position: absolute; left: -11px; top: -11px; width: 22px; height: 22px; border-radius: 50%;
   border: 1.5px dashed var(--ink-5); display: grid; place-items: center;
   font: 700 12px/1 var(--mono); color: var(--ink-5); background: var(--card); }
-.tp-q b { position: absolute; top: 0; width: max-content; max-width: 150px; padding: 5px 9px; border-radius: 9px;
-  background: var(--card); border: 1px dashed var(--edge-2); box-shadow: var(--lift);
+.tp-q b { position: absolute; top: 0; width: max-content; max-width: 150px; padding: 2px 0; border-radius: 0;
+  background: none; border: 0; box-shadow: none; text-shadow: 0 1px 0 var(--card), 0 -1px 0 var(--card), 1px 0 0 var(--card), -1px 0 0 var(--card);
   font: 500 clamp(10.5px, .74vw, 12.5px)/1.35 var(--sans); color: var(--ink-4); transform: translateY(-50%); }
 .tp-q.r b { left: 20px; }
 .tp-q.l b { right: 20px; text-align: right; }
@@ -676,8 +674,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   background: var(--acc); box-shadow: 0 0 0 4px var(--acc-14); }
 .tp-pin i { position: absolute; top: 0; height: 1px; width: var(--len, 30px); background: var(--acc-deep); opacity: .55;
   transform: scaleX(0); transform-origin: left center; transition: transform .5s cubic-bezier(.33, 1, .68, 1); }
-.tp-pin b { position: absolute; top: 0; width: max-content; max-width: 150px; padding: 6px 9px; border-radius: 9px;
-  background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift);
+.tp-pin b { position: absolute; top: 0; width: max-content; max-width: 150px; padding: 2px 0; border-radius: 0;
+  background: none; border: 0; box-shadow: none; text-shadow: 0 1px 0 var(--card), 0 -1px 0 var(--card), 1px 0 0 var(--card), -1px 0 0 var(--card);
   font: 500 clamp(10.5px, .74vw, 12.5px)/1.35 var(--sans); color: var(--ink-3); transform: translateY(-50%); }
 .tp-pin b em { display: block; font-style: normal; font: 600 9.5px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--acc-text); }
 .tp-pin.r i { left: 0; }
@@ -705,8 +703,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 .tp-dim.h::before { left: 0; } .tp-dim.h::after { right: 0; }
 .tp-dim.v::before, .tp-dim.v::after { content: ''; position: absolute; left: -4px; width: 9px; height: 1px; background: var(--acc-deep); }
 .tp-dim.v::before { top: 0; } .tp-dim.v::after { bottom: 0; }
-.tp-dim b { position: absolute; width: max-content; padding: 5px 9px; border-radius: 8px;
-  background: var(--card); border: 1px solid var(--acc-28); box-shadow: var(--lift);
+.tp-dim b { position: absolute; width: max-content; padding: 2px 4px; border-radius: 0;
+  background: none; border: 0; box-shadow: none; text-shadow: 0 1px 0 var(--card), 0 -1px 0 var(--card), 1px 0 0 var(--card), -1px 0 0 var(--card);
   font: 600 clamp(10.5px, .78vw, 13px)/1.2 var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; }
 /* labels sit beside their line, never on top of the drawing */
 .tp-dim.h b { left: 50%; top: 0; translate: -50% 9px; }
@@ -717,8 +715,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 .tp-bom { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
   max-height: 0; overflow: hidden; opacity: 0; transition: max-height .5s cubic-bezier(.33, 1, .68, 1), opacity .35s ease, margin-top .5s ease; }
 .tp-board.l-bom .tp-bom { max-height: 120px; opacity: 1; margin-top: 10px; }
-.tp-bom li { display: flex; align-items: center; gap: 8px; padding: 7px 11px; border-radius: 10px; background: var(--card); border: 1px solid var(--edge);
-  box-shadow: var(--lift); font: 500 clamp(10.5px, .74vw, 12.5px)/1.3 var(--sans); color: var(--ink-3);
+.tp-bom li { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 8px; background: var(--card-2); border: 1px solid var(--edge);
+  box-shadow: none; font: 500 clamp(10.5px, .74vw, 12.5px)/1.3 var(--sans); color: var(--ink-3);
   opacity: 0; transform: translateY(8px); transition: opacity .4s ease, transform .5s cubic-bezier(.16, 1, .3, 1); }
 .tp-bom li em { font-style: normal; font: 600 9.5px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-5); }
 .tp-bom li b { color: var(--ink); font-weight: 600; }
@@ -856,33 +854,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 .dp-rail { position: relative; height: 3px; margin: 12px 0 0; border-radius: 3px; background: var(--edge); overflow: hidden; }
 .dp-rail i { position: absolute; left: 0; top: 0; height: 100%; width: 0; border-radius: 3px; background: var(--grad-acc);
   transition: width .25s cubic-bezier(.33, 1, .68, 1); }
-
-/* ============================================================
-   02 · WHAT A VAGUE BRIEF COSTS — a ledger, read like a document.
-   Five gaps a factory fills in for you when the brief is thin, what
-   each one costs, and the page of the pack that closes it.
-   ============================================================ */
-.lg { border-radius: var(--r); background: var(--card); border: 1px solid var(--edge); box-shadow: var(--lift); overflow: hidden; }
-.lg-hd, .lg-row { display: grid; grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, .8fr); gap: clamp(12px, 1.6vw, 26px);
-  align-items: baseline; padding: clamp(13px, 1.3vw, 17px) clamp(16px, 1.8vw, 26px); }
-.lg-hd { font: 600 10px/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-5); background: var(--card-2); border-bottom: 1px solid var(--edge); }
-.lg-row { border-top: 1px solid var(--edge); transition: background .25s ease; }
-.lg-hd + .lg-row { border-top: 0; }
-@media (hover: hover) { .lg-row:hover { background: var(--acc-08); } }
-.lg-row > span:first-child { font: 500 10.5px/1.5 var(--mono); color: var(--ink-5); font-variant-numeric: tabular-nums; }
-.lg-gap { font: 600 clamp(14px, 1.15vw, 16px)/1.35 var(--disp); letter-spacing: -.01em; color: var(--ink); }
-.lg-cost { font-size: 13.5px; line-height: 1.55; color: var(--ink-4); }
-.lg-fix { justify-self: start; padding: 6px 11px; border-radius: 999px; background: var(--acc-08); border: 1px solid var(--acc-28);
-  font: 600 10.5px/1.3 var(--mono); letter-spacing: .04em; color: var(--acc-text); }
-.lg-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: clamp(13px, 1.3vw, 17px) clamp(16px, 1.8vw, 26px);
-  background: var(--card-2); border-top: 1px solid var(--edge); font-size: 13px; line-height: 1.5; color: var(--ink-4); }
-.lg-foot b { color: var(--ink); font-weight: 600; }
-@media (max-width: 900px) {
-  .lg-hd { display: none; }
-  .lg-row { grid-template-columns: 22px minmax(0, 1fr); row-gap: 7px; }
-  .lg-row > span:first-child { grid-row: span 3; }
-  .lg-fix { margin-top: 2px; }
-}
 
 /* ============================================================
    COVERAGE — what we draw, and where it ships.
@@ -1320,53 +1291,43 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     </div>
   </section>
 
-  <!-- ============ 02 — WHAT A VAGUE BRIEF COSTS ============
-       The argument the sourcing blogs make in prose, as a ledger: the gap,
-       what the factory does with it, and the page that closes it. No
-       claimed savings, no invented numbers — just cause and effect. -->
-  <section class="sec stage gate" id="why" aria-labelledby="why-h">
+  <!-- ============ 05 — HOW IT WORKS + the straight answer ============ -->
+  <section class="sec" id="how" aria-labelledby="how-h">
     <div class="wrap">
       <div class="head-split">
         <div>
-          <span class="eyebrow rv">02 — What a vague brief costs</span>
-          <h2 id="why-h" class="rv" data-cms="why.heading-1">Anything you leave out, <span class="acc-t">the factory decides for you.</span></h2>
+          <span class="eyebrow rv">02 — How it works</span>
+          <h2 id="how-h" class="rv" data-cms="how.heading-1">Idea to factory-ready <span class="acc-t">in four steps.</span></h2>
         </div>
-        <p class="head-note rv" data-cms="why.text-1">Not carelessness — a line has to keep moving, so every blank gets filled with whatever that floor usually does.</p>
+        <p class="head-note rv" data-cms="how.text-1">You sign off the flats before we build the rest, so the drawing is right before the numbers are written around it.</p>
       </div>
 
-      <div class="lg rv">
-        <div class="lg-hd" aria-hidden="true"><span>#</span><span>The gap</span><span>What it costs you</span><span>Closed on</span></div>
-        <div class="lg-row">
-          <span>01</span>
-          <span class="lg-gap">Materials described, not specified</span>
-          <span class="lg-cost">Named by feel, not by composition, GSM and finish — so the factory sources what it already buys.</span>
-          <span class="lg-fix">Bill of materials</span>
+      <div class="weeks rail rv-steps">
+        <div class="week"><span class="wn" aria-hidden="true">01</span><div><span class="day">Day 0</span><h3 data-cms="how.heading-2">Send your idea</h3><p data-cms="how.text-2">A sketch, a photo, a reference link or a garment you already own. No clean drawing needed — that is our job.</p></div></div>
+        <div class="week"><span class="wn" aria-hidden="true">02</span><div><span class="day">Within 24h</span><h3 data-cms="how.heading-3">Fixed quote</h3><p data-cms="how.text-3">One number in writing, with a delivery date. No hourly billing, no scope creep later.</p></div></div>
+        <div class="week"><span class="wn" aria-hidden="true">03</span><div><span class="day">Day 1–4</span><h3 data-cms="how.heading-4">We build the pack</h3><p data-cms="how.text-4">Flats first — you sign off the drawing before we spend a day on specs, BOM and construction.</p></div></div>
+        <div class="week"><span class="wn" aria-hidden="true">04</span><div><span class="day">Day 3–5</span><h3 data-cms="how.heading-5">Revise &amp; hand over</h3><p data-cms="how.text-5">Two revision rounds included, then the print PDF and the editable source — yours outright.</p></div></div>
+      </div>
+
+      <div class="fit">
+        <div class="yes rv">
+          <h3 data-cms="how.heading-6">Buy this if</h3>
+          <ul>
+            <li data-cms="how.item-1">You are sending a style to two or more factories and want quotes you can actually compare.</li>
+            <li data-cms="how.item-2">Your last sample came back wrong and nobody can point to what it was measured against.</li>
+            <li data-cms="how.item-3">You are ordering 100–1,000 pieces, where a factory gives you the least hand-holding.</li>
+            <li data-cms="how.item-4">You want the option to move factories next season without redrawing everything.</li>
+          </ul>
         </div>
-        <div class="lg-row">
-          <span>02</span>
-          <span class="lg-gap">Photos standing in for flats</span>
-          <span class="lg-cost">They copy what the picture shows, including what you never meant to order.</span>
-          <span class="lg-fix">Technical flats</span>
+        <div class="no rv rv-d1">
+          <h3 data-cms="how.heading-7">Do not buy this if</h3>
+          <ul>
+            <li data-cms="how.item-5">You are reordering an approved style from a factory that already holds your approved spec.</li>
+            <li data-cms="how.item-6">You are buying ready stock or private-label blanks with only a logo change — you need a print spec, not a pack.</li>
+            <li data-cms="how.item-7">The design is not settled. Sort the silhouette first; a pack drawn around a moving target gets redrawn.</li>
+            <li data-cms="how.item-8">You want an hourly designer on call. We quote fixed, per pack, and that is the whole arrangement.</li>
+          </ul>
         </div>
-        <div class="lg-row">
-          <span>03</span>
-          <span class="lg-gap">One sample size, no grade rules</span>
-          <span class="lg-cost">The sample fits. The size run does not — and you find out after the cut.</span>
-          <span class="lg-fix">Measurement spec</span>
-        </div>
-        <div class="lg-row">
-          <span>04</span>
-          <span class="lg-gap">Measurements without tolerances</span>
-          <span class="lg-cost">Nothing to measure a delivery against, so nothing to reject it with.</span>
-          <span class="lg-fix">Measurement spec</span>
-        </div>
-        <div class="lg-row">
-          <span>05</span>
-          <span class="lg-gap">Finish left to the sewing floor</span>
-          <span class="lg-cost">Hem, stitch and seam finish come back however that line does them.</span>
-          <span class="lg-fix">Construction callouts</span>
-        </div>
-        <p class="lg-foot" data-cms="why.text-2"><b>Both rooms read it the same way:</b> centimetres and inches side by side — the sampling room works in inches, the buyer asks in centimetres.</p>
       </div>
     </div>
   </section>
@@ -1438,7 +1399,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     <div class="wrap">
       <div class="head-split">
         <div>
-          <span class="eyebrow rv">04 — Packages</span>
+          <span class="eyebrow rv">03 — Packages</span>
           <h2 id="packages-h" class="rv" data-cms="packages.heading-1">Three ways to buy it. <span class="acc-t">One fixed number, up front.</span></h2>
         </div>
         <p class="head-note rv" data-cms="packages.text-1">Quoted at a fixed price before any work starts — no hourly billing and no scope creep later. Pick the one that matches where your collection actually is.</p>
@@ -1487,47 +1448,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
           </ul>
           <a href="#contact" class="btn-glass" data-cms="packages.button-3">Quote the season</a>
         </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ 05 — HOW IT WORKS + the straight answer ============ -->
-  <section class="sec" id="how" aria-labelledby="how-h">
-    <div class="wrap">
-      <div class="head-split">
-        <div>
-          <span class="eyebrow rv">05 — How it works</span>
-          <h2 id="how-h" class="rv" data-cms="how.heading-1">Idea to factory-ready <span class="acc-t">in four steps.</span></h2>
-        </div>
-        <p class="head-note rv" data-cms="how.text-1">You sign off the flats before we build the rest, so the drawing is right before the numbers are written around it.</p>
-      </div>
-
-      <div class="weeks rail rv-steps">
-        <div class="week"><span class="wn" aria-hidden="true">01</span><div><span class="day">Day 0</span><h3 data-cms="how.heading-2">Send your idea</h3><p data-cms="how.text-2">A sketch, a photo, a reference link or a garment you already own. No clean drawing needed — that is our job.</p></div></div>
-        <div class="week"><span class="wn" aria-hidden="true">02</span><div><span class="day">Within 24h</span><h3 data-cms="how.heading-3">Fixed quote</h3><p data-cms="how.text-3">One number in writing, with a delivery date. No hourly billing, no scope creep later.</p></div></div>
-        <div class="week"><span class="wn" aria-hidden="true">03</span><div><span class="day">Day 1–4</span><h3 data-cms="how.heading-4">We build the pack</h3><p data-cms="how.text-4">Flats first — you sign off the drawing before we spend a day on specs, BOM and construction.</p></div></div>
-        <div class="week"><span class="wn" aria-hidden="true">04</span><div><span class="day">Day 3–5</span><h3 data-cms="how.heading-5">Revise &amp; hand over</h3><p data-cms="how.text-5">Two revision rounds included, then the print PDF and the editable source — yours outright.</p></div></div>
-      </div>
-
-      <div class="fit">
-        <div class="yes rv">
-          <h3 data-cms="how.heading-6">Buy this if</h3>
-          <ul>
-            <li data-cms="how.item-1">You are sending a style to two or more factories and want quotes you can actually compare.</li>
-            <li data-cms="how.item-2">Your last sample came back wrong and nobody can point to what it was measured against.</li>
-            <li data-cms="how.item-3">You are ordering 100–1,000 pieces, where a factory gives you the least hand-holding.</li>
-            <li data-cms="how.item-4">You want the option to move factories next season without redrawing everything.</li>
-          </ul>
-        </div>
-        <div class="no rv rv-d1">
-          <h3 data-cms="how.heading-7">Do not buy this if</h3>
-          <ul>
-            <li data-cms="how.item-5">You are reordering an approved style from a factory that already holds your approved spec.</li>
-            <li data-cms="how.item-6">You are buying ready stock or private-label blanks with only a logo change — you need a print spec, not a pack.</li>
-            <li data-cms="how.item-7">The design is not settled. Sort the silhouette first; a pack drawn around a moving target gets redrawn.</li>
-            <li data-cms="how.item-8">You want an hourly designer on call. We quote fixed, per pack, and that is the whole arrangement.</li>
-          </ul>
-        </div>
       </div>
     </div>
   </section>

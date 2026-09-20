@@ -457,12 +457,14 @@ body:has(.topnav-burger.is-open) { padding-top: 80px; }
 .topnav-links {
   display: none;
   align-items: center;
-  gap: 22px;
-  font-size: 14px;
+  gap: 26px;
+  font-size: 15.5px;
+  letter-spacing: -.005em;
   margin-left: auto;
 }
 .topnav-links a {
   color: var(--ink-3);
+  font-weight: 450;
   text-decoration: none;
   position: relative;
   padding: 4px 0;
