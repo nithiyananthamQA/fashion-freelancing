@@ -9,4 +9,4 @@ Disallow: /hire/
 Disallow: /sign-in
 Disallow: /api/
 
-Sitemap: /sitemap.xml
+Sitemap: https://fashionfreelancing.com/sitemap.xml

@@ -34,7 +34,7 @@ bucket_name = "fashion-os-media"
 # sign-in sessions live in D1, so nothing needs a KV namespace.
 
 [vars]
-SITE_URL = "https://fashion-freelancing.freelancingfashion.workers.dev"   # domain not connected yet; switch back when it is
+SITE_URL = "https://fashionfreelancing.com"
 # Outbound mail: leave unset to queue verification / notification mail in the
 # outbound_email table instead of sending it (see src/server/mail.ts).
 # MAIL_FROM = "no-reply@fashionfreelancing.com"
