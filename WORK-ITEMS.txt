@@ -1,0 +1,119 @@
+Fashion Freelancing - Work Items
+fashionfreelancing.com
+
+
+COMPLETED
+[x] Domain connected to Cloudflare
+[x] Nameservers updated in Hostinger
+[x] Email records moved (Hostinger mail working)
+[x] Website live on fashionfreelancing.com
+[x] www.fashionfreelancing.com live
+[x] Sitemap updated with domain URLs
+[x] robots.txt updated
+[x] Site URL updated to main domain
+
+
+EMAIL & NOTIFICATIONS
+[ ] Email sending setup (Resend)
+[ ] Sender email - no-reply@fashionfreelancing.com
+[ ] Domain verification for sending
+[ ] SPF record update
+[ ] Sign-up verification email
+[ ] Password reset email
+[ ] Job / enquiry notification emails
+[ ] Pending email queue
+[ ] Bounce handling
+[ ] Email routing - check before enabling, it replaces the Hostinger mail records
+
+
+LOGIN
+[ ] Google sign-in
+[ ] Session security key
+[ ] Login rate limit
+[ ] Forgot password flow
+
+
+SEO
+[ ] Canonical tags on all pages
+[ ] Share card image (og:image)
+[ ] Open Graph tags on remaining pages
+[ ] Schema markup on remaining pages
+[ ] Meta descriptions on remaining pages
+[ ] Favicon set (ico, apple touch icon)
+[ ] Google Search Console setup
+[ ] Sitemap submission
+[ ] Bing Webmaster Tools
+[ ] IndexNow
+
+
+LIGHTHOUSE & PERFORMANCE
+[ ] Lighthouse audit - all pages
+[ ] Image compression (WebP)
+[ ] Cache headers check
+[ ] Font loading
+[ ] JS size check
+[ ] Core Web Vitals
+
+
+ALERTS & MONITORING
+[ ] Workers logs
+[ ] Workers traces
+[ ] Error alerts
+[ ] Uptime monitoring
+[ ] Analytics
+
+
+DASHBOARD & BACKEND
+[ ] Post job
+[ ] Job status flow
+[ ] Company dashboard
+[ ] Freelancer dashboard
+[ ] Admin dashboard
+[ ] Specialist apply flow
+[ ] Messages
+[ ] File upload
+[ ] Admin moderation
+[ ] Billing
+
+
+TESTING
+[ ] Test setup (unit tests)
+[ ] Browser test setup (end-to-end)
+[ ] Sign-up / login testing
+[ ] Post job to status testing
+[ ] Dashboard testing (all roles)
+[ ] Email testing
+[ ] Broken link check
+[ ] Accessibility check
+[ ] Mobile testing
+[ ] Cross-browser testing
+
+
+PRIORITY ORDER
+1. Canonical tags
+2. Search Console + sitemap
+3. Email sending + session key
+4. Lighthouse audit
+5. Testing setup
+
+
+REFERENCE
+
+Cloudflare nameservers
+  clara.ns.cloudflare.com
+  leonidas.ns.cloudflare.com
+
+Hostinger nameservers (to revert if needed)
+  ns1.dns-parking.com
+  ns2.dns-parking.com
+
+Mail records - keep "DNS only" in Cloudflare
+  MX     mx1.hostinger.com (5)
+  MX     mx2.hostinger.com (10)
+  TXT    SPF
+  TXT    _dmarc
+  CNAME  hostingermail-a._domainkey
+  CNAME  hostingermail-b._domainkey
+  CNAME  hostingermail-c._domainkey
+  CNAME  autoconfig
+  CNAME  autodiscover

@@ -854,6 +854,49 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
     </div>
   </section>
 
+  <!-- ============ 3. TRY IT — the deliverable, in your hands ============ -->
+  <section class="sec" id="try" aria-label="Interactive 3D sample — try it">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="kicker rv" data-cms="try.kicker-1">Try it yourself</span>
+        <h2 class="h-display rv rv-display" data-cms="try.heading-1">This is what lands in your inbox. <span class="acc-t">Spin it.</span></h2>
+        <p class="sub rv" data-cms="try.text-1">A real deliverable — drag it, zoom in, inspect the seams. Your factory and your buyers review exactly this.</p>
+      </div>
+      <div class="stage3d rv">
+        <div class="dais" aria-hidden="true"></div>
+        <model-viewer id="mv"
+          alt="Interactive 3D sample of a bomber jacket — drag to rotate, scroll to zoom"
+          camera-controls
+          interaction-prompt="none"
+          reveal="manual"
+          loading="eager"
+          touch-action="pan-y"
+          shadow-intensity="0.8"
+          shadow-softness="0.9"
+          exposure="1.05"
+          camera-orbit="20deg 78deg 105%"
+          min-camera-orbit="auto auto 70%"
+          max-camera-orbit="auto auto 160%">
+        </model-viewer>
+        <div class="mv-load" id="mv-load" aria-hidden="true">
+          <div class="ring"></div>
+          <span class="t">Preparing your 3D sample…</span>
+          <span class="bar"><i id="mv-bar"></i></span>
+        </div>
+        <button type="button" class="mv-hint" id="mv-hint" hidden>
+          <svg class="mv-drag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 11V6.5a1.5 1.5 0 0 1 3 0V11"/>
+            <path d="M12 11V5.5a1.5 1.5 0 0 1 3 0V11"/>
+            <path d="M15 11V7.5a1.5 1.5 0 0 1 3 0V13a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-1a1.5 1.5 0 0 1 3 0"/>
+          </svg>
+          <span id="mv-hint-text">Drag to spin it</span>
+        </button>
+        <p class="mv-cap" data-cms="try.text-2">Built in CLO3D — the same sample your factory and buyers receive.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ 2. WHAT YOU GET — living bento ============ -->
   <section class="sec" id="how" aria-labelledby="cmp-h">
     <div class="wrap">
@@ -917,49 +960,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <li data-cms="kit.item-3"><b>Revisions</b><span>Two rounds included — a colour swap and a new sleeve length are not the same edit, and we say which it is.</span></li>
         <li data-cms="kit.item-4"><b>Your garment</b><span>Never in our portfolio unless you put it in writing.</span></li>
       </ul>
-    </div>
-  </section>
-
-  <!-- ============ 3. TRY IT — the deliverable, in your hands ============ -->
-  <section class="sec" id="try" aria-label="Interactive 3D sample — try it">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="kicker rv" data-cms="try.kicker-1">Try it yourself</span>
-        <h2 class="h-display rv rv-display" data-cms="try.heading-1">This is what lands in your inbox. <span class="acc-t">Spin it.</span></h2>
-        <p class="sub rv" data-cms="try.text-1">A real deliverable — drag it, zoom in, inspect the seams. Your factory and your buyers review exactly this.</p>
-      </div>
-      <div class="stage3d rv">
-        <div class="dais" aria-hidden="true"></div>
-        <model-viewer id="mv"
-          alt="Interactive 3D sample of a bomber jacket — drag to rotate, scroll to zoom"
-          camera-controls
-          interaction-prompt="none"
-          reveal="manual"
-          loading="eager"
-          touch-action="pan-y"
-          shadow-intensity="0.8"
-          shadow-softness="0.9"
-          exposure="1.05"
-          camera-orbit="20deg 78deg 105%"
-          min-camera-orbit="auto auto 70%"
-          max-camera-orbit="auto auto 160%">
-        </model-viewer>
-        <div class="mv-load" id="mv-load" aria-hidden="true">
-          <div class="ring"></div>
-          <span class="t">Preparing your 3D sample…</span>
-          <span class="bar"><i id="mv-bar"></i></span>
-        </div>
-        <button type="button" class="mv-hint" id="mv-hint" hidden>
-          <svg class="mv-drag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M9 11V6.5a1.5 1.5 0 0 1 3 0V11"/>
-            <path d="M12 11V5.5a1.5 1.5 0 0 1 3 0V11"/>
-            <path d="M15 11V7.5a1.5 1.5 0 0 1 3 0V13a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6v-1a1.5 1.5 0 0 1 3 0"/>
-          </svg>
-          <span id="mv-hint-text">Drag to spin it</span>
-        </button>
-        <p class="mv-cap" data-cms="try.text-2">Built in CLO3D — the same sample your factory and buyers receive.</p>
-      </div>
     </div>
   </section>
 
