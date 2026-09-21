@@ -758,6 +758,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 .dj-shots img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
 .dj-shots figcaption { padding: 10px 14px; font: 500 11px/1.45 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-5); border-top: 1px solid var(--edge); }
 </style>
+<link rel="stylesheet" href="../../assets/mobile.css">
 </head>
 <body>
 
@@ -1238,8 +1239,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
       var s = STRUCT[idx], m = build(s);
       svg.setAttribute('viewBox', '0 0 ' + (W * 2 + GAP) + ' ' + (PICKS + 2));
       while (svg.firstChild) svg.removeChild(svg.firstChild);
-      svg.appendChild(el('text', { x: 0, y: 1.2 })).textContent = 'Point paper — draft';
-      svg.appendChild(el('text', { x: W + GAP, y: 1.2 })).textContent = 'Woven cloth — simulation';
+      /* on the 16-end phone grid the long labels ran past their half and were cut off */
+      svg.appendChild(el('text', { x: 0, y: 1.2 })).textContent = small ? 'Point paper' : 'Point paper — draft';
+      svg.appendChild(el('text', { x: W + GAP, y: 1.2 })).textContent = small ? 'Woven cloth' : 'Woven cloth — simulation';
       var top = 2;
       for (var y = 0; y < PICKS; y++) {
         if (y >= upto) break;

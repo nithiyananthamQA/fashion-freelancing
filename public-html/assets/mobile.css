@@ -1,0 +1,212 @@
+/* ============================================================
+   MOBILE LAYER — loaded last on every page, after each page's own
+   <style>, so equal-specificity rules here win.
+
+   Every rule sits inside a max-width query: desktop is untouched.
+   Same design, adapted for a phone — gutters, overflow, tap targets,
+   and the few components that break when the screen narrows.
+
+   Breakpoints follow the site's existing ones:
+     1000px  web-development stack split collapses
+      899px  split heroes stack (their desktop rule starts at 900px)
+      720px  shared phone breakpoint (styles.css .container, index .wrap)
+      560px  narrow phones
+   ============================================================ */
+
+
+/* ---------- 1. Gutters ----------------------------------------------
+   Service pages pad .wrap with 10vw (39px on a 390px phone) while the
+   nav, footer and homepage use 20px below 720px. One gutter, site-wide. */
+@media (max-width: 720px) {
+  .wrap { padding-inline: 20px; }
+}
+
+/* Four split heroes (tech pack, dobby & jacquard, graphics & prints,
+   pattern CAD) are not wrapped in .wrap, and their only gutter rule
+   starts at 900px — so below that the copy ran into the screen edge. */
+@media (max-width: 899px) {
+  .tp-hero > .hero-split,
+  .dj-hero > .hero-split,
+  .gp-hero > .hero-split,
+  .pc-hero > .hero-split { padding-inline: 10vw; }
+}
+@media (max-width: 720px) {
+  .tp-hero > .hero-split,
+  .dj-hero > .hero-split,
+  .gp-hero > .hero-split,
+  .pc-hero > .hero-split { padding-inline: 20px; }
+}
+
+
+/* ---------- 2. Contact block ----------------------------------------
+   The quote form sits card-in-card: page gutter, panel padding, form
+   padding. On a phone that left the inputs 228px wide. Thinner shells. */
+@media (max-width: 560px) {
+  .contact-panel { padding-inline: 14px; }
+  .contact-panel .cform { padding: 20px 16px; }
+  .contact-panel .cside { padding-inline: 16px; }
+  /* email + "click to copy" wrapped into a three-line pill */
+  .cside .mail { display: flex; flex-wrap: wrap; justify-content: space-between; row-gap: 4px; width: 100%; min-height: 44px; }
+}
+
+
+/* ---------- 3. Tap targets ------------------------------------------
+   44px where it costs nothing visually; never under 24px (WCAG 2.5.8). */
+@media (max-width: 1099px) {
+  .topnav-burger { width: 44px; height: 44px; }
+}
+@media (max-width: 720px) {
+  /* footer accordion links were 18px tall, stacked 10px apart */
+  .footer li { margin-bottom: 0; }
+  .footer li a { display: inline-flex; align-items: center; min-height: 44px; }
+  .footer-bottom a { display: inline-flex; align-items: center; min-height: 44px; }
+  /* legal pages: table of contents */
+  .doc-toc a { display: flex; align-items: center; min-height: 44px; }
+}
+
+
+/* ---------- 4. Text that fell under a readable size ----------------
+   Floors on a phone: 11px for uppercase mono labels (tracked caps read
+   large), 12px for sentence text. Scoped per component so each demo
+   keeps its layout; the tech pack hero labels step up only half a
+   pixel because they must still fit around the drawing. */
+@media (max-width: 720px) {
+  body .qb-head span { font-size: 11px; }          /* chat panel subtitle, was 9.5px */
+  .tp-run-track span { font-size: 11px; white-space: normal; text-align: center; }
+
+  /* 3D virtual sampling */
+  .stagerail span, .terms b { font-size: 11px; }
+
+  /* AI agent — phone demo */
+  .nt-ai, .nt-stats span, .nt-try-l { font-size: 11px; }
+  .nt-status span, .nt-who i { font-size: 12px; }
+
+  /* AI photography */
+  .flow-reel-tag, .ba-tag { font-size: 11px; }
+
+  /* Digital marketing — dashboard and report */
+  .gb-site, .gb-ex, .gb-k span, .gb-k em, .gb-cap, .gb-src li em, .gb-pin b,
+  .rp-head em, .rp-row em { font-size: 11px; }
+  .gb-src li b { font-size: 12px; }
+
+  /* Dobby & jacquard */
+  .dj-name, .dj-name b, .dj-ex, .dj-ref, .dj-read b, .dj-read span, #dj-loom b,
+  .dj-swatch span, .ms-row > span:first-child, .lm-card h3 b, .cw-set figcaption { font-size: 11px; }
+  .dj-led, .dj-led b, .dj-led em, .sv figcaption span { font-size: 12px; }
+
+  /* E-commerce listing — listing rewrite demo */
+  .rw-ex, .rw-cap, .rw-cap b, .rw-flags li, .rw-crumb, .rw-size li, .lk-n, .lk-fix b { font-size: 11px; }
+  .rw-checks li, .rw-checks span { font-size: 12px; }
+
+  /* Graphics & prints */
+  .gp-name, .gp-name b, .gp-ex, .gp-rule, .gp-cap, .gp-chip, .gp-way,
+  .cv-pair figcaption, .fit figcaption, .kitg .n, .td-hint { font-size: 11px; }
+  .gp-say, .gp-say b { font-size: 12px; }
+
+  /* Pattern CAD */
+  .pc-file, .pc-file b, .pc-ex, .pc-cap, .pc-read span, .pc-read em, .pc-size,
+  .pc-pieces span, .pc-pieces b, .pc-fmt, .zm-lens b, .zm-item b i,
+  .bundle-h span, .bundle-h i, .mk-head span, .mk-head b, .mk-head i { font-size: 11px; }
+  .pc-tag, .pc-tag b { font-size: 12px; }
+
+  /* Tech pack */
+  .tp-id, .tp-ex, .tp-dim b, .tp-dim.v b, .tp-bom li em, .week .day, .dp-hint, .tier-flag { font-size: 11px; }
+  .tp-act span, .tp-bom b, .tp-say, .tp-say b { font-size: 12px; }
+  .tp-q b, .tp-pin b { font-size: 11px; }
+  .tp-pin b em { font-size: 10px; }
+
+  /* Web development */
+  .wl-count, .wk-badge, .wk-tags li, .sx-tab .sx-seen, .sx-n, .ff-tag { font-size: 11px; }
+  .wl-tile figcaption i { font-size: 12px; }
+  /* the tiny browser bars in the hero wall: bigger, and cut with an ellipsis */
+  .wl-bar span { font-size: 10px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+
+/* ============================================================
+   Page components
+   ============================================================ */
+
+/* ---------- 3D virtual sampling ---------- */
+/* hero stat grid: .hst keeps a 170px min-width from the wide stat bar,
+   which pushed the right column out of its card */
+@media (max-width: 900px) {
+  .hero-split .hst { min-width: 0; }
+}
+/* styles.css fixes bento rows at 220px; in one column the renders tile
+   needs its own height or the three shots are cut off */
+@media (max-width: 560px) {
+  .bento { grid-auto-rows: auto; }
+}
+
+/* ---------- Tech pack: hero board ---------- */
+/* On a phone the drawing fills the board, so labels that sit outside
+   the garment ran off both edges. Side labels turn inward over the
+   empty body of the shirt (m-l / m-r in the markup), neck taping
+   turns right into the empty collar area; the sleeve
+   question lifts a line so it clears the chest one; Armhole joins the
+   bottom hem, which this page already drops on narrow screens. */
+@media (max-width: 560px) {
+  .tp-pin { --len: 18px; }
+  .tp-pin.m-off { display: none; }
+  .tp-q.m-r b { left: 20px; right: auto; text-align: left; }
+  .tp-q.m-l b { right: 20px; left: auto; text-align: right; }
+  .tp-q.m-up b { transform: translateY(-100%); }
+  .tp-pin.m-l i { left: auto; right: 0; transform-origin: right center; }
+  .tp-pin.m-l b { left: auto; right: calc(var(--len) + 8px); text-align: right; transform: translateY(-20%); }
+  .tp-pin.m-r i { left: 0; right: auto; transform-origin: left center; }
+  .tp-pin.m-r b { left: calc(var(--len) + 8px); right: auto; text-align: left; }
+  /* measurement labels cross the collar and sleeve at this size —
+     a paper chip keeps them legible over the line work */
+  .tp-dim b { background: var(--card); border-radius: 4px; }
+  .tp-pin b, .tp-q b { background: var(--card); border-radius: 5px; padding: 2px 5px; }
+  .tp-dim.v b { white-space: nowrap; }   /* one column — it wrapped into two at 360px */
+}
+@media (max-width: 340px) {
+  /* 320px phones: labels back to their original size so they still fit */
+  .tp-q b, .tp-pin b { font-size: 10.5px; }
+  .tp-dim b, .tp-dim.v b { font-size: 10px; }
+  .tp-pin b { max-width: 104px; }
+  .tp-dim.v b { translate: calc(-100% - 5px) -50%; }
+}
+
+/* ---------- Tech pack: "Inside the document" tabs ---------- */
+/* flex: 1 1 0 + nowrap squeezed six labels into 46px each and they
+   overprinted. Natural width instead; the strip already scrolls. */
+@media (max-width: 720px) {
+  .dp-tabs { scroll-snap-type: x proximity; }
+  .dp-tab { flex: 0 0 auto; min-height: 44px; scroll-snap-align: start; }
+}
+
+/* ---------- Pattern CAD: hero board foot ---------- */
+/* .pc-say is flex: 1 with min-width 0 inside a wrapping row, so it
+   shrank to one word per line beside the format chips */
+@media (max-width: 720px) {
+  .pc-say { flex-basis: 100%; font-size: 12.5px; }
+  /* same trap on the drawing's callout: it shared a row with the
+     piece caption and shrank to a one-word column */
+  .pc-tag { flex-basis: 100%; }
+}
+
+/* ---------- Web development: "Everything a website needs" ---------- */
+/* a 1fr track takes the min-content width of the scrolling tab strip
+   inside it (1156px), clipping the whole section */
+@media (max-width: 1000px) {
+  .sx-split { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- Controls inside the product demos ----------
+   Tabs, toggles, pills and swatches a thumb has to hit: 44px where the
+   row has room, 40px for the dense chip rows. */
+@media (max-width: 720px) {
+  .dp-arrow { width: 44px; height: 44px; }                     /* tech pack viewer arrows, were 34 */
+  .tp-act { min-height: 40px; }                                /* tech pack hero layer chips, were 29 */
+  .wk-f, .rw-tab, .nt-chip, .rp-t, .lc-t, .agv-t, .mv-hint { min-height: 44px; }
+  .wk-go { display: inline-flex; align-items: center; min-height: 44px; }   /* "Visit ↗", was 31 */
+  .dj-swatch, .gp-way { min-height: 40px; }
+  .pc-size { min-width: 40px; min-height: 40px; }              /* pattern CAD sizes, were 24×23 */
+  .dj-weftdot { width: 32px; height: 32px; }                   /* dobby weft swatches, were 20×20 */
+  .topnav .logo, .footer .logo { display: inline-flex; align-items: center; min-height: 44px; }
+  .rw-tab { min-width: 44px; justify-content: center; }       /* icon-only platform tabs, were 34 wide */
+  .mt-8 .btn { min-height: 44px; }                             /* 404 / 500 buttons, were 40 */
+}
