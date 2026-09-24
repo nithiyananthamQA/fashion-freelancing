@@ -21,7 +21,6 @@ EMAIL & NOTIFICATIONS
 [ ] Sign-up verification email
 [ ] Password reset email
 [ ] Job / enquiry notification emails
-[ ] Pending email queue
 [ ] Bounce handling
 [ ] Email routing - check before enabling, it replaces the Hostinger mail records
 
@@ -43,7 +42,6 @@ SEO
 [ ] Google Search Console setup
 [ ] Sitemap submission
 [ ] Bing Webmaster Tools
-[ ] IndexNow
 
 
 LIGHTHOUSE & PERFORMANCE
@@ -57,7 +55,6 @@ LIGHTHOUSE & PERFORMANCE
 
 ALERTS & MONITORING
 [ ] Workers logs
-[ ] Workers traces
 [ ] Error alerts
 [ ] Uptime monitoring
 [ ] Analytics
@@ -77,8 +74,7 @@ DASHBOARD & BACKEND
 
 
 TESTING
-[ ] Test setup (unit tests)
-[ ] Browser test setup (end-to-end)
+[ ] Test setup
 [ ] Sign-up / login testing
 [ ] Post job to status testing
 [ ] Dashboard testing (all roles)
@@ -117,3 +113,4 @@ Mail records - keep "DNS only" in Cloudflare
   CNAME  hostingermail-c._domainkey
   CNAME  autoconfig
   CNAME  autodiscover
+  

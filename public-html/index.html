@@ -320,11 +320,13 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
 /* the scroll spotlight — the lit card must be unmissable */
 /* resting cards stay readable — dimmed, never disabled-looking */
 .duo-grid .svc { opacity: .72; }
-.duo-grid .svc:hover {
-  opacity: 1;
-  background: var(--glass-hover);
-  border-color: color-mix(in srgb, var(--acc) 60%, transparent);
-  transform: translateY(-4px); }
+@media (min-width: 821px) and (hover: hover) {
+  .duo-grid .svc:hover {
+    opacity: 1;
+    background: var(--glass-hover);
+    border-color: color-mix(in srgb, var(--acc) 60%, transparent);
+    transform: translateY(-4px); }
+}
 .duo-grid .svc.on {
   opacity: 1;
   /* the lit card has to end up BRIGHTER than its neighbours: its wash was
@@ -357,18 +359,18 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
   .duo-grid .svc p { -webkit-line-clamp: 2; }
   .duo-head { padding-top: calc(var(--nav-h) - 8px); }
 }
-/* mobile: unpin — two natural swipe rows */
+/* mobile: unpin and show each service in page order */
 @media (max-width: 820px) {
   .duo-sec { height: auto !important; }
   .duo-pin { position: static; height: auto; overflow: visible; padding: calc(var(--u) * 8) 0 calc(var(--u) * 5); }
   .duo-head { padding-top: 0; }
   .rail-hint { display: none; }
   .duo-grid {
-    display: flex; gap: 12px;
-    overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+    grid-template-columns: 1fr; gap: 12px;
     padding: 6px 2px 14px; }
-  .duo-grid::-webkit-scrollbar { display: none; }
-  .duo-grid .svc { flex: none; width: 72vw; min-height: 250px; scroll-snap-align: center; opacity: 1; }
+  .duo-grid .svc { width: 100%; min-height: 0; opacity: .82; }
+  .duo-grid .svc.on { transform: none; }
+  .duo-grid .svc p { display: block; -webkit-line-clamp: unset; overflow: visible; }
   .rail-foot { display: none; }
 }
 
@@ -857,7 +859,19 @@ a:focus-visible, button:focus-visible { outline: 2px solid #A78BFA; outline-offs
     function sizeDuo() {
       duo.style.height = duoMobile() ? '' : (window.innerHeight + SWEEP) + 'px'; }
     function paintDuo() {
-      if (duoMobile()) return;
+      if (duoMobile()) {
+        var viewportMiddle = window.innerHeight / 2;
+        var nearest = -1;
+        var nearestDistance = Infinity;
+        duoCards.forEach(function (card, i) {
+          var rect = card.getBoundingClientRect();
+          if (rect.bottom <= 0 || rect.top >= window.innerHeight) return;
+          var distance = Math.abs((rect.top + rect.bottom) / 2 - viewportMiddle);
+          if (distance < nearestDistance) { nearest = i; nearestDistance = distance; }
+        });
+        duoCards.forEach(function (card, i) { card.classList.toggle('on', i === nearest); });
+        return;
+      }
       var r = duo.getBoundingClientRect();
       var total = r.height - window.innerHeight;
       var p = total > 0 ? Math.min(Math.max(-r.top / total, 0), 1) : 0;
