@@ -78,8 +78,10 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 
 <style>
 /* metric-matched fallbacks — the font swap no longer moves layout (CLS) */
-@font-face { font-family: 'Inter-fb'; src: local('Arial'); size-adjust: 107%; ascent-override: 90%; descent-override: 22.5%; line-gap-override: 0%; }
-@font-face { font-family: 'PJS-fb'; src: local('Arial'); size-adjust: 105%; ascent-override: 96%; descent-override: 24%; line-gap-override: 0%; }
+@font-face { font-family: 'Inter-fb'; src: local('Arial'), local('ArialMT'), local('Liberation Sans'); size-adjust: 101.5%; ascent-override: 95.5%; descent-override: 24.6%; line-gap-override: 0%; }
+@font-face { font-family: 'Inter-fb-r'; src: local('Roboto'), local('Roboto-Regular'); size-adjust: 101.6%; ascent-override: 95.5%; descent-override: 24.6%; line-gap-override: 0%; }
+@font-face { font-family: 'PJS-fb'; src: local('Arial Bold'), local('Arial-BoldMT'), local('Liberation Sans Bold'); font-weight: 600 800; size-adjust: 99.9%; ascent-override: 104%; descent-override: 22%; line-gap-override: 0%; }
+@font-face { font-family: 'PJS-fb-r'; src: local('Roboto Bold'), local('Roboto-Bold'); font-weight: 600 800; size-adjust: 105.5%; ascent-override: 98.5%; descent-override: 20.8%; line-gap-override: 0%; }
 /* reserve the injected nav's space — kills the layout shift (CLS) */
 #site-nav { min-height: 92px; }
 @media (max-width: 720px) { #site-nav { min-height: 90px; } }

@@ -39,8 +39,8 @@
 :root {
   --u: 8px;
   --nav-h: 72px;
-  --sans: 'Instrument Sans', 'Inter-fb', system-ui, sans-serif;
-  --disp: 'Plus Jakarta Sans', 'PJS-fb', var(--sans);
+  --sans: 'Instrument Sans', 'Inter-fb', 'Inter-fb-r', system-ui, sans-serif;
+  --disp: 'Plus Jakarta Sans', 'PJS-fb', 'PJS-fb-r', var(--sans);
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
   --easing: cubic-bezier(.22, 1, .36, 1);
 
