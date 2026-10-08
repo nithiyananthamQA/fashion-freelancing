@@ -27,6 +27,9 @@ export default defineConfig({
   server: { host: true, port: 4321 },
   vite: {
     build: { sourcemap: false },
+    /** Part of the edge-cache key for rendered marketing pages (src/server/site-content.ts):
+        every deploy starts from an empty cache, so no page outlives its templates. */
+    define: { __SITE_BUILD__: JSON.stringify(Date.now().toString(36)) },
     /**
      * `astro/assets/services/noop` is discovered lazily on the first request,
      * which makes Vite re-optimize and reload mid-boot. Excluding it stops the

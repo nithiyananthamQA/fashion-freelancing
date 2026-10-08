@@ -13,6 +13,9 @@
 import type { SessionUser } from './server/session';
 
 declare global {
+  /** Unique per build — see `vite.define` in astro.config.mjs. */
+  const __SITE_BUILD__: string;
+
   interface Env {
     /** D1 — see wrangler.toml and migrations/. */
     DB: D1Database;

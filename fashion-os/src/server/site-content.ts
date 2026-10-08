@@ -406,10 +406,104 @@ export function notFoundResponse(): Response {
   return new Response(html, { status: 404, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache' } });
 }
 
+// --- edge cache ----------------------------------------------------------------
+
+/*
+ * A marketing page is the same for every visitor, but rendering one costs a
+ * D1 round trip — from far away that is most of a second before the first
+ * byte. So each rendered page is kept in the Cloudflare data centre that
+ * served it and answered from there.
+ *
+ * A copy older than FRESH_MS is still served at once, and re-rendered in the
+ * background, so no visitor waits on the database and an edit reaches every
+ * data centre on the next request or two. Saving in the editor drops the copy
+ * in the editor's own data centre straight away (purgeSitePage). The build id
+ * is part of the key, so a deploy never serves a page rendered from the old
+ * templates. If the database cannot be read, the page is served as designed
+ * and not cached, so the edits come back on the next request.
+ */
+const FRESH_MS = 30_000;
+const KEEP_SECONDS = 7 * 24 * 60 * 60;
+/** Paths being re-rendered by this isolate, so a burst of hits refreshes once. */
+const refreshing = new Set<string>();
+
+function edgeCache(): Cache | null {
+  try { return (globalThis as unknown as { caches?: { default?: Cache } }).caches?.default ?? null; } catch { return null; }
+}
+const cacheKey = (ctx: Ctx, path: string) => new Request(`${ctx.url.origin}${path}?__build=${__SITE_BUILD__}`);
+const waitUntil = (ctx: Ctx, work: Promise<unknown>) => {
+  const cf = (ctx.locals as { cfContext?: { waitUntil(p: Promise<unknown>): void } }).cfContext;
+  if (cf) cf.waitUntil(work); else work.catch(() => {});
+};
+
+async function etagOf(html: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(html));
+  return `"${[...new Uint8Array(digest)].slice(0, 12).map((b) => b.toString(16).padStart(2, '0')).join('')}"`;
+}
+
+/** The page with its edits, read in one round trip. `ok` is false when the database could not be read. */
+async function renderFresh(ctx: Ctx, page: SitePage): Promise<{ html: string; ok: boolean }> {
+  try {
+    const database = db(ctx);
+    const [content, strips] = await database.batch([
+      database.prepare('SELECT key, kind, value FROM site_content WHERE page = ?').bind(page.path),
+      database.prepare('SELECT gallery, items FROM site_gallery WHERE page = ?').bind(page.path),
+    ]);
+    const overrides = new Map(((content?.results ?? []) as { key: string; kind: Kind; value: string }[]).map((r) => [r.key, { kind: r.kind, value: r.value }]));
+    const galleries = new Map(((strips?.results ?? []) as { gallery: string; items: string }[]).map((r) => [r.gallery, readItems(r.items)]));
+    return { html: renderPage(page, overrides, galleries), ok: true };
+  } catch (error) {
+    console.error('[site-content] edits unavailable, serving the template:', error);
+    return { html: renderPage(page, new Map()), ok: false };
+  }
+}
+
+async function store(ctx: Ctx, cache: Cache, path: string, html: string, etag: string): Promise<void> {
+  await cache.put(cacheKey(ctx, path), new Response(html, { headers: {
+    'content-type': 'text/html; charset=utf-8', etag, 'x-rendered-at': String(Date.now()),
+    'cache-control': `public, max-age=${KEEP_SECONDS}`,
+  } }));
+}
+
+/** What the visitor gets: always revalidated by the browser, answered with a 304 when unchanged. */
+function toVisitor(ctx: Ctx, html: string | null, etag: string, state: 'hit' | 'stale' | 'miss' | 'bypass', body?: ReadableStream | null): Response {
+  const headers = {
+    'content-type': 'text/html; charset=utf-8',
+    'cache-control': state === 'bypass' ? 'no-cache' : 'public, max-age=0, must-revalidate',
+    etag, 'x-edge-cache': state,
+  };
+  const inm = ctx.request.headers.get('if-none-match');
+  if (inm && inm.split(/\s*,\s*/).includes(etag)) return new Response(null, { status: 304, headers });
+  return new Response(body ?? html, { headers });
+}
+
 export async function renderSitePage(ctx: Ctx, path: string): Promise<Response | null> {
   const page = pageByPath(path);
   if (!page) return null;
-  const [overrides, galleries] = await Promise.all([loadOverrides(ctx, page), loadGalleries(ctx, page)]);
-  const html = renderPage(page, overrides, galleries);
-  return new Response(html, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache' } });
+  const cache = edgeCache();
+
+  const cached = cache ? await cache.match(cacheKey(ctx, path)).catch(() => undefined) : undefined;
+  if (cache && cached) {
+    const age = Date.now() - Number(cached.headers.get('x-rendered-at') ?? 0);
+    const stale = !(age < FRESH_MS);
+    if (stale && !refreshing.has(path)) {
+      refreshing.add(path);
+      waitUntil(ctx, (async () => {
+        const { html, ok } = await renderFresh(ctx, page);
+        if (ok) await store(ctx, cache, path, html, await etagOf(html));
+      })().catch((e) => console.error('[site-content] background refresh failed:', e)).finally(() => refreshing.delete(path)));
+    }
+    return toVisitor(ctx, null, cached.headers.get('etag') ?? '', stale ? 'stale' : 'hit', cached.body);
+  }
+
+  const { html, ok } = await renderFresh(ctx, page);
+  const etag = await etagOf(html);
+  if (cache && ok) waitUntil(ctx, store(ctx, cache, path, html, etag).catch((e) => console.error('[site-content] cache write failed:', e)));
+  return toVisitor(ctx, html, etag, cache && ok ? 'miss' : 'bypass');
+}
+
+/** Drop this data centre's copy of a page, so an editor sees their change at once. */
+export async function purgeSitePage(ctx: Ctx, page: SitePage): Promise<void> {
+  const cache = edgeCache();
+  if (cache) await cache.delete(cacheKey(ctx, page.path)).catch(() => false);
 }

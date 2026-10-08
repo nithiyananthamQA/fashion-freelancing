@@ -8,7 +8,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { env } from 'cloudflare:workers';
 import { loadUser } from './server/session';
-import { resolveTenant } from './server/tenant';
+import { PUBLIC_TENANT, resolveTenant } from './server/tenant';
 
 /* Retired service pages -> where they live now, mirrored from public/_redirects.
    That file is read by the asset layer in production; nothing reads it in local
@@ -27,6 +27,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // Now that the worker renders them, Astro would quietly serve all three
   // forms, so the same page would exist at three addresses. Keep one.
   const { pathname, search } = context.url;
+  // One host: www answers with the apex, so search engines index one copy and
+  // a sign-in cookie set on one host is never missing on the other.
+  if (context.url.hostname.startsWith('www.')) {
+    const method = context.request.method;
+    return Response.redirect(`${context.url.protocol}//${context.url.host.slice(4)}${pathname}${search}`, method === 'GET' || method === 'HEAD' ? 301 : 308);
+  }
   const retired = RETIRED[pathname.replace(/\.html$|\/+$/, '')];
   if (retired) return context.redirect(retired + search, 301);
   if (pathname === '/index.html') return context.redirect('/' + search, 301);
@@ -34,6 +40,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (pathname.startsWith('/pages/') && pathname.length > 1 && pathname.endsWith('/')) return context.redirect(pathname.replace(/\/+$/, '') + search, 301);
 
   context.locals.user = null;
+  // The marketing pages are the same for everyone and served from the edge
+  // cache (src/server/site-content.ts): no cookie, no session lookup.
+  if (pathname === '/' || pathname.startsWith('/pages/')) {
+    context.locals.tenant = PUBLIC_TENANT;
+    return next();
+  }
   // Every visitor gets a private workspace; shared demo content is 'public'.
   context.locals.tenant = resolveTenant(context);
 

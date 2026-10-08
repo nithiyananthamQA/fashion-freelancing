@@ -19,6 +19,26 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const publicDir = join(root, 'public');
 const assetsDir = join(publicDir, 'assets');
 
+/* Minify the shared stylesheets and scripts in the synced copy — the sources
+   in public-html stay readable. Every page loads these before it can paint,
+   so the bytes matter. esbuild arrives with Astro's toolchain; if it is ever
+   missing the files ship as written rather than failing the build. */
+try {
+  const { transform } = await import('esbuild');
+  let saved = 0;
+  for (const name of readdirSync(assetsDir)) {
+    const loader = name.endsWith('.css') ? 'css' : name.endsWith('.js') ? 'js' : null;
+    if (!loader) continue;
+    const file = join(assetsDir, name);
+    const source = readFileSync(file, 'utf8');
+    const { code } = await transform(source, { loader, minify: true, legalComments: 'none', charset: 'utf8' });
+    if (code.length < source.length) { writeFileSync(file, code); saved += source.length - code.length; }
+  }
+  console.log(`[version-assets] minified shared css/js, ${Math.round(saved / 1024)} KiB smaller`);
+} catch (error) {
+  console.warn('[version-assets] minify skipped:', error?.message ?? error);
+}
+
 /** Short content hash — long enough to never collide in a set this size. */
 const hashOf = (file) => createHash('sha256').update(readFileSync(file)).digest('hex').slice(0, 10);
 

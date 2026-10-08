@@ -19,7 +19,7 @@ export const prerender = false;
 import Workspace from '../../../layouts/Workspace.astro';
 import { guard, requireEditor } from '../../../server/guards';
 import { adminNav, editorNav } from '../../../data/workspace-nav';
-import { fieldsOf, galleriesOf, GALLERY_KEY, GALLERY_MAX, loadGalleries, loadOverrides, pageBySlug, recentChanges, resetGallery, saveField, saveGallery, undoChange, type Change, type Field, type Gallery, type Section } from '../../../server/site-content';
+import { fieldsOf, galleriesOf, GALLERY_KEY, GALLERY_MAX, loadGalleries, loadOverrides, pageBySlug, purgeSitePage, recentChanges, resetGallery, saveField, saveGallery, undoChange, type Change, type Field, type Gallery, type Section } from '../../../server/site-content';
 
 const gate = await guard(Astro, () => requireEditor(Astro));
 if (gate.response) return gate.response;
@@ -85,6 +85,7 @@ if (Astro.request.method === 'POST') {
   } else if (action === 'undo') {
     done = (await undoChange(Astro, page, String(form.get('change') ?? ''), user.id)) ? 'Change undone. It\'s live now.' : 'That change is no longer there.';
   }
+  await purgeSitePage(Astro, page);
 
   const query = new URLSearchParams();
   if (done) query.set('done', done);
