@@ -11,10 +11,13 @@
 export const prerender = false;
 
 import Night from '../../layouts/Night.astro';
-import { db, writeList } from '../../server/db';
+import { db, env, writeList } from '../../server/db';
 import { newId, nowIso } from '../../server/ids';
-import { audit, notify } from '../../server/audit';
+import { audit, notify, notifyAdmins } from '../../server/audit';
+import { verificationRequired } from '../../server/guards';
 import { parse } from '../../server/validate';
+import { limited, tooManyRequests } from '../../server/rate-limit';
+import { ACCEPT, MAX_FILES, pickFiles, storeFiles } from '../../server/repo/attachments';
 import { clearDraft, draftValue, draftValues, readDraft, saveDraft } from '../../server/draft';
 import { mergeCookieShortlist } from '../../server/shortlist';
 import { loadCandidates, rank } from '../../server/matching';
@@ -37,7 +40,15 @@ let draft = readDraft(Astro, DRAFT_KIND);
 let errors: Record<string, string> = {};
 /** Body of a submission that failed validation, so nothing typed is lost. */
 let submitted: FormData | null = null;
-let published: { id: string; title: string; invited: { name: string; handle: string | null; reason: string }[] } | null = null;
+let published: {
+  id: string; title: string; files: number; invited: { name: string; handle: string | null; reason: string }[];
+} | null = null;
+/** Mail is configured and this address is unconfirmed, so nothing was published. */
+let mustVerify = false;
+
+/* Files need an R2 bucket; without one the form has no file field at all,
+   exactly as the portfolio step of /apply does. */
+const bucket = env(Astro).MEDIA;
 
 /* The service drives every conditional field below, so it is read first. */
 const selectedServiceId = currentServiceId(Astro.url.searchParams.get('service')) ?? draftValue(draft, 'service');
@@ -66,6 +77,13 @@ if (Astro.request.method === 'POST') {
   }
   const { f, errors: found } = parse(form);
   errors = found;
+  mustVerify = verificationRequired(user);
+
+  /* Checked with the rest of the form, before the project exists, so a bad
+     file costs one field rather than a brief published without its files. */
+  const uploads = bucket ? await pickFiles(form, 'files') : { files: [], problem: null };
+  if (uploads.problem) errors.files = uploads.problem;
+  if (uploads.files.length && await limited(database, 'upload', user.id)) return tooManyRequests();
 
   /* No company yet? Collect the two things we need here, not on a detour. */
   let workingCompanyId = companyId;
@@ -111,7 +129,7 @@ if (Astro.request.method === 'POST') {
     errors.deadline = 'The deadline cannot be before the start date.';
   }
 
-  if (!Object.keys(errors).length && chosen && engagement && workLocation && visibility) {
+  if (!Object.keys(errors).length && !mustVerify && chosen && engagement && workLocation && visibility) {
     const id = newId();
     const now = nowIso();
 
@@ -150,6 +168,9 @@ if (Astro.request.method === 'POST') {
          VALUES (?, ?, ?, ?, ?, '[]', ?)`,
       ).bind(id, writeList(specialties), writeList(skills), writeList(tools), writeList(stack), minExperience),
     ]);
+    if (bucket && uploads.files.length) {
+      await storeFiles(database, bucket, uploads.files, user.id, { projectId: id });
+    }
 
     /* --- matching (§9): explainable, and stored with the invite ---
        A confidential project is promised to reach nobody until the company
@@ -210,10 +231,22 @@ if (Astro.request.method === 'POST') {
       actorId: user.id, action: 'project.published', entityType: 'project', entityId: id,
       detail: { matched: matches.length }, request: Astro.request,
     });
+    /* Operations hears about every new brief — and needs to most when the
+       matcher found nobody, because the company has just been promised that
+       our team will match it by hand. */
+    await notifyAdmins(database, {
+      kind: 'project_published',
+      title: matches.length ? `New project: ${title}` : `New project, no match: ${title}`,
+      body: `${chosen.name} · ${matches.length} matched${visibility === 'private' ? ' · confidential' : ''}`,
+      link: '/workspace/admin/projects',
+    });
 
     clearDraft(Astro, DRAFT_KIND);
     draft = {};
-    published = { id, title, invited: matches.map((m) => ({ name: m.name, handle: m.handle, reason: m.reason })) };
+    published = {
+      id, title, files: uploads.files.length,
+      invited: matches.map((m) => ({ name: m.name, handle: m.handle, reason: m.reason })),
+    };
   }
 }
 
@@ -226,6 +259,9 @@ const d = (key: string, fallback = ''): string => {
   return draftValue(draft, key) || fallback;
 };
 const restored = !published && Object.keys(draft).length > 0;
+/* A file cannot ride in the draft cookie across the sign-in detour, so the
+   field is offered once there is an account to attach it to. */
+const uploadsEnabled = Boolean(bucket) && Boolean(user);
 const dm = (key: string): string[] => {
   if (submitted) return submitted.getAll(key).filter((x): x is string => typeof x === 'string');
   return draftValues(draft, key);
@@ -246,6 +282,7 @@ const dm = (key: string): string[] => {
                 {published.invited.length > 0
                   ? `${published.invited.length} matching specialist${published.invited.length === 1 ? ' has' : 's have'} been invited. Their applications land in your workspace.`
                   : 'No approved specialist matches this brief yet. Our team will match it by hand and come back to you.'}
+                {published.files > 0 && ` ${published.files === 1 ? 'The file you attached goes' : `The ${published.files} files you attached go`} with it, to the people who can see it.`}
               </p>
             </div>
 
@@ -295,13 +332,20 @@ const dm = (key: string): string[] => {
             )}
 
             <div class="flow-panel glass-p">
+              {mustVerify && (
+                <p class="notice bad" role="alert" style="margin-bottom:22px;">
+                  Confirm your email first — we sent you a link. Lost it? Send a fresh one
+                  from <a href="/account">Password &amp; security</a>. Your brief is still here.
+                </p>
+              )}
+
               {Object.keys(errors).length > 0 && (
                 <p class="notice bad" role="alert" style="margin-bottom:22px;">
                   Nothing was lost — check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
                 </p>
               )}
 
-              <form method="post" class="cform" novalidate>
+              <form method="post" class="cform" novalidate enctype={uploadsEnabled ? 'multipart/form-data' : undefined}>
                 {needsCompany && (
                   <fieldset class="fieldset" style="margin-bottom:26px;">
                     <legend>About you</legend>
@@ -517,6 +561,23 @@ const dm = (key: string): string[] => {
                   <input type="checkbox" name="nda" value="on" checked={d('nda') === 'on'} />
                   A mutual NDA is required before any file is shared.
                 </label>
+
+                {uploadsEnabled && (
+                  <label>
+                    <span class="fl">Files</span>
+                    <input class="fi" id="f-files" type="file" name="files" multiple accept={ACCEPT}
+                           aria-invalid={errors.files ? 'true' : undefined} />
+                    <span class="fh">
+                      Tech packs, references, moodboards — JPG, PNG, WebP, AVIF, PDF or MP4, up to {MAX_FILES} files
+                      of 25 MB each. Only the specialists who can see this project can open them, so if it needs an
+                      NDA first, keep the confidential ones back until it is signed.
+                    </span>
+                    {errors.files && <span class="cform-err" role="alert">{errors.files}</span>}
+                    {Object.keys(errors).length > 0 && !errors.files && (
+                      <span class="fh">Files are not kept when a form comes back — choose them again before publishing.</span>
+                    )}
+                  </label>
+                )}
 
                 <button type="submit" class="btn-hot" style="width:100%;margin-top:6px;">
                   {user ? 'Publish project' : 'Continue — you will sign in next'}

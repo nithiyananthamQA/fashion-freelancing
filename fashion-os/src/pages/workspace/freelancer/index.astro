@@ -16,9 +16,10 @@ export const prerender = false;
 import Workspace from '../../../layouts/Workspace.astro';
 import { all, db, one } from '../../../server/db';
 import { guard, requireSpecialist } from '../../../server/guards';
+import { listThreads } from '../../../server/repo/threads';
 import { getService } from '../../../data/taxonomy';
 import {
-  applicationStatusLabel, engagementStatusLabel, hireStatusForSpecialist, statusTone,
+  engagementStatusLabel, hireStatusForSpecialist, statusTone,
 } from '../../../data/labels';
 import { freelancerNav } from '../../../data/workspace-nav';
 
@@ -36,7 +37,7 @@ const profile = await one<{
   profileId,
 );
 
-const [requests, invites, applications, engagements, unanswered, paid] = await Promise.all([
+const [requests, invites, applications, engagements, threads, paid] = await Promise.all([
   all<{ id: string; title: string; status: string; company_name: string; budget_min: number | null; budget_max: number | null; currency: string | null }>(
     database,
     `SELECT h.id, h.title, h.status, c.name AS company_name, h.budget_min, h.budget_max, h.currency
@@ -72,16 +73,8 @@ const [requests, invites, applications, engagements, unanswered, paid] = await P
       ORDER BY e.created_at DESC`,
     profileId,
   ),
-  /* threads where the company spoke last: the ball is with us */
-  one<{ n: number }>(
-    database,
-    `SELECT COUNT(*) AS n FROM hire_requests h
-      WHERE h.profile_id = ?1
-        AND EXISTS (SELECT 1 FROM messages m WHERE m.hire_request_id = h.id)
-        AND (SELECT m2.sender_id FROM messages m2
-              WHERE m2.hire_request_id = h.id ORDER BY m2.created_at DESC LIMIT 1) <> ?2`,
-    profileId, user.id,
-  ),
+  /* every thread — requests, replies and work — to count the ones where the company spoke last */
+  listThreads(database, { as: 'specialist', profileId, userId: user.id }),
   one<{ total: number; currency: string | null }>(
     database,
     `SELECT COALESCE(SUM(pay.amount), 0) AS total, MAX(pay.currency) AS currency
@@ -92,8 +85,8 @@ const [requests, invites, applications, engagements, unanswered, paid] = await P
 ]);
 
 const open = requests.filter((r) => ['sent', 'viewed', 'question'].includes(r.status));
-const live = engagements.filter((e) => !['completed', 'cancelled'].includes(e.status));
-const waiting = unanswered?.n ?? 0;
+const live = engagements.filter((e) => !['completed', 'closed'].includes(e.status));
+const waiting = threads.filter((t) => t.theirsLast && t.open).length;
 
 const money = (n: number, ccy: string | null) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: ccy || 'USD', maximumFractionDigits: 0 }).format(n);

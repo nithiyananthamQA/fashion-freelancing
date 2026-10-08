@@ -8,7 +8,7 @@
  */
 import { newId } from './ids';
 
-/** Types a portfolio item or project attachment may use. */
+/** Types a portfolio item, an attachment on a brief or request, or a hand-over may use. */
 export const ALLOWED_TYPES: Record<string, string> = {
   'image/jpeg': 'jpg',
   'image/png': 'png',
@@ -69,7 +69,12 @@ export async function putObject(bucket: R2Bucket, key: string, file: File): Prom
   });
 }
 
-export async function getObject(bucket: R2Bucket, key: string): Promise<Response> {
+/**
+ * `filename` is the name the uploader gave an attachment. Without it a saved
+ * file is called whatever the random key ends in, which is no use to the
+ * person who has to find the tech pack in their downloads folder afterwards.
+ */
+export async function getObject(bucket: R2Bucket, key: string, filename?: string): Promise<Response> {
   const object = await bucket.get(key);
   if (!object) return new Response(null, { status: 404 });
   const headers = new Headers();
@@ -78,7 +83,10 @@ export async function getObject(bucket: R2Bucket, key: string): Promise<Response
   // Private by default: never let a CDN or shared cache keep a brief or a
   // portfolio file that only one authorized account was allowed to read.
   headers.set('cache-control', 'private, max-age=0, must-revalidate');
-  headers.set('content-disposition', 'inline');
+  headers.set(
+    'content-disposition',
+    filename ? `inline; filename*=UTF-8''${encodeURIComponent(filename)}` : 'inline',
+  );
   headers.set('x-content-type-options', 'nosniff');
   return new Response(object.body, { headers });
 }

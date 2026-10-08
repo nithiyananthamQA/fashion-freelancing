@@ -176,6 +176,8 @@ export function loadCandidates(
        JOIN users u ON u.id = p.user_id
        JOIN specialist_service_offerings o ON o.profile_id = p.id
       WHERE p.status = 'approved' AND o.service_id = ?
+        -- a suspended or closed account cannot sign in to answer an invitation
+        AND u.status = 'active'
         AND u.tenant IN (?, ?)`,
     serviceId, tenant, PUBLIC_TENANT,
   );

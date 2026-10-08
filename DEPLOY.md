@@ -68,8 +68,18 @@ The bucket must stay **private**. Files are only ever read back through
 npx wrangler secret put RESEND_API_KEY    # optional, enables real email — or set it in the dashboard
 ```
 
-And set `MAIL_FROM` (e.g. `no-reply@fashionfreelancing.com`) as a Worker
-variable in the dashboard, alongside `SITE_URL`.
+And set these as Worker variables in the dashboard (`keep_vars = true` in
+wrangler.toml keeps them across deploys):
+
+| Variable | Example | What it does |
+|---|---|---|
+| `MAIL_FROM` | `Fashion Freelancing <no-reply@fashionfreelancing.com>` | Sender for every email; mail stays queued until set |
+| `MAIL_REPLY_TO` | `hello@fashionfreelancing.com` | Where replies to our mail go |
+| `LEADS_TO` | `hello@fashionfreelancing.com` | Every new enquiry is emailed here (comma-separated) |
+| `DEMO_SANDBOX` | *(leave unset)* | `1` turns on per-browser demo sandboxes — never on the live site |
+
+Workers Logs are on (`[observability]` in wrangler.toml): Workers →
+fashion-freelancing → Logs.
 
 Without a mail provider the app still works: verification and reset messages are
 recorded in the `outbound_email` table and shown in `/workspace/admin`, so no

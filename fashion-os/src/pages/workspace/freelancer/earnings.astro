@@ -36,21 +36,26 @@ interface Payment {
   status: string;
   reference: string | null;
   created_at: string;
+  /** A row changes only when its status does, so this is when it last moved. */
+  updated_at: string;
+  work_id: string;
   work_title: string;
   work_status: string;
   company_name: string;
 }
 
 /* Payments hang off engagements, never off a person, so the engagement is what
-   proves the row is this specialist's — the join is the isolation. */
+   proves the row is this specialist's — the join is the isolation. A draft is
+   our team's note to itself until it is raised, so it stays off this page. */
 const payments = await all<Payment>(
   database,
-  `SELECT pay.id, pay.kind, pay.amount, pay.currency, pay.status, pay.reference, pay.created_at,
-          e.title AS work_title, e.status AS work_status, c.name AS company_name
+  `SELECT pay.id, pay.kind, pay.amount, pay.currency, pay.status, pay.reference,
+          pay.created_at, pay.updated_at,
+          e.id AS work_id, e.title AS work_title, e.status AS work_status, c.name AS company_name
      FROM payments pay
      JOIN engagements e ON e.id = pay.engagement_id
      JOIN companies c ON c.id = e.company_id
-    WHERE e.profile_id = ?
+    WHERE e.profile_id = ? AND pay.status != 'draft'
     -- what is still owed first, then most recently changed
     ORDER BY CASE WHEN pay.status = 'due' THEN 0 ELSE 1 END, pay.updated_at DESC`,
   profileId,
@@ -89,6 +94,20 @@ const money = (currency: string, amount: number) => `${currency} ${amount.toLoca
 const when = (iso: string) =>
   new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
+/* The dates that answer "when?" for each state. There is no separate due or
+   paid column: a row is written when it is raised and touched again only when
+   its status moves, so the last change IS the day it fell due, was paid,
+   failed or was refunded. */
+const dates = (p: Payment): string => {
+  switch (p.status) {
+    case 'due': return `Raised ${when(p.created_at)} · due since ${when(p.updated_at)}`;
+    case 'paid': return `Raised ${when(p.created_at)} · paid ${when(p.updated_at)}`;
+    case 'failed': return `Raised ${when(p.created_at)} · failed ${when(p.updated_at)}`;
+    case 'refunded': return `Raised ${when(p.created_at)} · refunded ${when(p.updated_at)}`;
+    default: return `Recorded ${when(p.created_at)}`;
+  }
+};
+
 const tone = (status: string) => {
   const t = statusTone(status);
   // pill-tone only paints warn, ok and bad — anything else stays neutral.
@@ -115,12 +134,12 @@ const nav = freelancerNav();
       <h3>No payments recorded yet</h3>
       <p>
         Your fee is agreed directly with the company and paid directly by them —
-        this site does not hold it or take a cut. Once a payment is recorded
-        against a piece of work it appears here, with the amount, the company,
-        and whether it has been settled.
+        this site does not hold it or take a cut. When our team records a
+        payment against a piece of work it appears here, with the amount, the
+        work it is for, when it fell due and when it was settled.
       </p>
       {workInProgress > 0 ? (
-        <a class="btn-glass btn-sm" href="/workspace/freelancer">See your work in progress</a>
+        <a class="btn-glass btn-sm" href="/workspace/freelancer/work">See your work in progress</a>
       ) : (
         <a class="btn-hot btn-sm" href="/projects">Browse open projects</a>
       )}
@@ -163,9 +182,11 @@ const nav = freelancerNav();
           <div class="ws-row-head">
             <div>
               <h2 style="margin:0;">{money(p.currency, p.amount)}</h2>
-              <p class="ws-sub">{paymentKindLabel(p.kind)} · {p.work_title} · {p.company_name}</p>
               <p class="ws-sub">
-                Recorded {when(p.created_at)} · work is {engagementStatusLabel(p.work_status).toLowerCase()}
+                {paymentKindLabel(p.kind)} · <a href={`/workspace/freelancer/work#work-${p.work_id}`}>{p.work_title}</a> · {p.company_name}
+              </p>
+              <p class="ws-sub">
+                {dates(p)} · work is {engagementStatusLabel(p.work_status).toLowerCase()}
                 {p.reference && <span> · reference {p.reference}</span>}
               </p>
             </div>

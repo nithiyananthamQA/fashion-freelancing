@@ -6,10 +6,18 @@
  * It wraps Night rather than replacing it, so the workspace keeps the site's
  * header, footer, theme toggle and both palettes instead of becoming a second
  * design that has to be maintained alongside the first.
+ *
+ * It also owns the one figure every workspace page shows: how many
+ * notifications are unread. Counting it here, once, means no page can forget
+ * the badge and no page has to pass it in — the layout already knows who is
+ * signed in, and the count is a single indexed COUNT (notifications is indexed
+ * on user_id, read_at).
  */
 import Night from './Night.astro';
 import WorkspaceNav from '../components/WorkspaceNav.astro';
 import type { NavItem } from '../components/WorkspaceNav.astro';
+import { db, one } from '../server/db';
+import { notificationsHref } from '../data/workspace-nav';
 
 interface Props {
   title: string;
@@ -25,17 +33,52 @@ interface Props {
 }
 
 const { title, role, current, items, who, heading, lede, flash } = Astro.props as Props;
+
+const user = Astro.locals.user;
+const unread = user
+  ? (await one<{ n: number }>(
+      db(Astro),
+      'SELECT COUNT(*) AS n FROM notifications WHERE user_id = ? AND read_at IS NULL',
+      user.id,
+    ))?.n ?? 0
+  : 0;
+
+/* The sidebar's Notifications entry gets the same number as the bell, so the
+   two can never disagree. */
+const navItems = items.map((item) =>
+  item.href.startsWith('/workspace/notifications') ? { ...item, count: unread || undefined } : item,
+);
+
+const bellHref = notificationsHref(role);
+const bellLabel = unread
+  ? `Notifications — ${unread} unread`
+  : 'Notifications — nothing unread';
 ---
 
 <Night title={title} noindex current="" quoteBot={false}>
-  <main id="main" class="ws-shell">
+  {/* Night already provides <main id="main">; a second <main> here gave the
+      page two main landmarks and two elements with the skip link's id. */}
+  <div class="ws-shell">
     <div class="wrap ws-grid">
-      <WorkspaceNav role={role} current={current} items={items} who={who} />
+      <WorkspaceNav role={role} current={current} items={navItems} who={who} />
 
       <div class="ws-main">
         <header class="ws-head">
-          <h1>{heading}</h1>
-          {lede && <p class="ws-lede">{lede}</p>}
+          <div>
+            <h1>{heading}</h1>
+            {lede && <p class="ws-lede">{lede}</p>}
+          </div>
+          {user && current !== bellHref && (
+            <a class="ws-bell" href={bellHref} aria-label={bellLabel} title={bellLabel}>
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                <path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" fill="none" stroke="currentColor"
+                      stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" fill="none" stroke="currentColor"
+                      stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              {unread > 0 && <b class="ws-badge">{unread > 99 ? '99+' : unread}</b>}
+            </a>
+          )}
         </header>
 
         {flash && <p class="ws-flash" role="status">{flash}</p>}
@@ -43,5 +86,20 @@ const { title, role, current, items, who, heading, lede, flash } = Astro.props a
         <slot />
       </div>
     </div>
-  </main>
+  </div>
 </Night>
+
+<style>
+  /* Drawn from the same tokens as the sidebar, so it inherits both palettes.
+     44px square keeps it a usable touch target on a phone. */
+  .ws-bell {
+    flex: none; display: inline-flex; align-items: center; gap: 8px;
+    min-width: 44px; min-height: 44px; padding: 0 12px; border-radius: 999px;
+    justify-content: center;
+    background: var(--glass); border: 1px solid var(--glass-border);
+    color: var(--ink-3); text-decoration: none;
+    transition: background .18s var(--easing), color .18s var(--easing);
+  }
+  .ws-bell:hover { background: var(--glass-hover); color: var(--ink); }
+  .ws-bell:focus-visible { outline: 2px solid var(--champagne); outline-offset: 2px; }
+</style>

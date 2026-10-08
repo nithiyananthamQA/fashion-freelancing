@@ -165,9 +165,18 @@ them in that order; only a manual `npm run sync` mid-session causes it.
 - Projects, workspaces and the API are excluded in `robots.txt` and marked
   `noindex`; signed-in responses are `private, no-store`.
 
-## Known open item
+## Production mode
 
-Direct-service leads (the homepage form, the ten service-page forms and the
-quote bot) still write to `localStorage` under `ff_leads`. Moving them to a
-server-side lead endpoint is the one remaining Phase 1 task — see §16 of the
-plan.
+The live site runs as **one workspace**: every account, company and lead is
+visible to the people who should see it, from any device. The demo-era
+per-visitor sandboxes (each browser its own private copy of the product) are
+kept behind `DEMO_SANDBOX=1` for review builds only — never set it on the live
+worker. Migration `0011_single_workspace.sql` moved the sandbox rows across.
+
+Marketing pages are rendered from `public-html` templates plus the editors'
+changes and served from the Cloudflare edge cache (see
+`src/server/site-content.ts`): a saved edit is live at once in the editor's own
+region and everywhere else within about a minute.
+
+Direct-service leads (homepage form, the ten service-page forms and the quote
+bot) post to `/api/leads` and land in *Workspace → Enquiries*.

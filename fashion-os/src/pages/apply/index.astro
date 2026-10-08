@@ -20,7 +20,8 @@ import { passwordProblem } from '../../server/password';
 import { HONEYPOT, parse, trapped } from '../../server/validate';
 import { clientKey, limited, tooManyRequests } from '../../server/rate-limit';
 import { newId, nowIso } from '../../server/ids';
-import { audit } from '../../server/audit';
+import { audit, notifyAdmins } from '../../server/audit';
+import { verificationRequired } from '../../server/guards';
 import { checkUpload, objectKey, putObject } from '../../server/storage';
 import {
   countPortfolio, createDraftProfile, loadOfferings, loadProfile, proposeCustomTag,
@@ -384,6 +385,7 @@ if (Astro.request.method === 'POST') {
       if (count < MIN_PORTFOLIO_ITEMS) errors.submit = `Add at least ${MIN_PORTFOLIO_ITEMS} portfolio pieces first.`;
       else if (!offerings.length) errors.submit = 'Choose your services before submitting.';
       else if (!profile.headline) errors.submit = 'Finish your professional profile before submitting.';
+      else if (verificationRequired(user)) errors.verify = 'Confirm your email first — we sent you a link.';
 
       if (!Object.keys(errors).length) {
         const now = nowIso();
@@ -396,6 +398,13 @@ if (Astro.request.method === 'POST') {
         await audit(database, {
           actorId: user.id, action: 'profile.submitted', entityType: 'specialist_profile',
           entityId: profile.id, request: Astro.request,
+        });
+        // "We read every application by hand" is only true if someone is told one arrived.
+        await notifyAdmins(database, {
+          kind: 'application_submitted',
+          title: `New application: ${user.name}`,
+          body: `${offerings.map((o) => getService(o.service_id)?.name ?? o.service_id).join(', ')} · ${count} portfolio pieces`,
+          link: '/workspace/admin/reviews',
         });
         return Astro.redirect('/workspace/freelancer', 303);
       }
@@ -1206,6 +1215,11 @@ const rateModel = readList(profile?.rate_model ?? null);
               <form method="post" style="margin-top:22px;">
                 <input type="hidden" name="step" value="7" />
                 {errors.submit && <p class="cform-err" role="alert" id="f-submit" style="margin-bottom:12px;">{errors.submit}</p>}
+                {errors.verify && (
+                  <p class="cform-err" role="alert" style="margin-bottom:12px;">
+                    {errors.verify} Lost it? Send a fresh one from <a href="/account">Password &amp; security</a>.
+                  </p>
+                )}
                 <div class="flow-actions">
                   <a class="btn-glass" href="/apply?step=6">Back</a>
                   <span class="spacer"></span>

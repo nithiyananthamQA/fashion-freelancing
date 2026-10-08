@@ -323,7 +323,7 @@ export const WORK_LOCATION = [
 
 /**
  * How a company frames the engagement when it briefs work. Kept separate from
- * RATE_MODEL because this is the buyer's side of the question.
+ * RATE_MODEL because this is the company's side of the question.
  */
 export const ENGAGEMENT = [
   { id: 'fixed', name: 'Fixed project' },

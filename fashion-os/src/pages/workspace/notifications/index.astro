@@ -1,0 +1,163 @@
+---
+/**
+ * /workspace/notifications — everything the site has told this account,
+ * newest first.
+ *
+ * Notifications were written from the first day — a hire request, a reply, an
+ * approval, a delivery — and never shown anywhere, so the only trace of them
+ * was whatever badge a page happened to count. This is the list behind the
+ * bell in the workspace header.
+ *
+ * Each one opens through /workspace/notifications/open, which marks it read on
+ * the way to wherever it points; the same link is in the email copy, so
+ * reading it from the inbox clears it here too.
+ *
+ * Every role has this page, so `?as=` says whose sidebar to draw. It is only a
+ * preference: a role the account does not hold falls back to the one it lands
+ * on after signing in, and the list itself is always the account's own.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, run } from '../../../server/db';
+import { guard, requireUser } from '../../../server/guards';
+import { nowIso } from '../../../server/ids';
+import {
+  adminNav, companyNav, editorNav, freelancerNav, notificationsHref,
+} from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireUser(Astro));
+if (gate.response) return gate.response;
+const user = gate.value;
+
+const database = db(Astro);
+let flash: string | null = null;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  if (String(form.get('action') ?? '') === 'read_all') {
+    const result = await run(
+      database,
+      'UPDATE notifications SET read_at = ? WHERE user_id = ? AND read_at IS NULL',
+      nowIso(), user.id,
+    );
+    const cleared = result.meta.changes ?? 0;
+    flash = cleared
+      ? `${cleared} ${cleared === 1 ? 'notification' : 'notifications'} marked as read.`
+      : 'Everything was already read.';
+  }
+}
+
+type Role = 'freelancer' | 'company' | 'admin' | 'editor';
+
+/* What the account actually holds — the same order /sign-in lands it in. */
+const holds: Record<Role, boolean> = {
+  admin: user.isAdmin,
+  editor: user.role === 'editor',
+  freelancer: Boolean(user.profileId),
+  company: user.companyIds.length > 0,
+};
+const asked = Astro.url.searchParams.get('as') as Role | null;
+const role: Role = asked && Object.hasOwn(holds, asked) && holds[asked]
+  ? asked
+  : (['admin', 'editor', 'freelancer', 'company'] as const).find((r) => holds[r]) ?? 'company';
+
+const nav = role === 'admin' ? adminNav()
+  : role === 'editor' ? editorNav()
+  : role === 'freelancer' ? freelancerNav()
+  : companyNav();
+
+interface Notification {
+  id: string;
+  kind: string;
+  title: string;
+  body: string | null;
+  link: string | null;
+  read_at: string | null;
+  created_at: string;
+}
+
+/* A hundred is months of activity for one account. Older ones are still in
+   the table; they just stop being worth scrolling to. */
+const notifications = await all<Notification>(
+  database,
+  `SELECT id, kind, title, body, link, read_at, created_at
+     FROM notifications
+    WHERE user_id = ?
+    ORDER BY created_at DESC
+    LIMIT 100`,
+  user.id,
+);
+
+const unread = notifications.filter((n) => !n.read_at).length;
+
+const clock = (iso: string) =>
+  new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+const when = (iso: string) => {
+  const date = new Date(iso);
+  const today = new Date().toLocaleDateString('en-GB');
+  const yesterday = new Date(Date.now() - 86_400_000).toLocaleDateString('en-GB');
+  const key = date.toLocaleDateString('en-GB');
+  if (key === today) return `Today at ${clock(iso)}`;
+  if (key === yesterday) return `Yesterday at ${clock(iso)}`;
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+/** The square at the head of the row: a dot while it is unread, nothing once it is not. */
+const mark = (n: Notification) => (n.read_at ? '' : '●');
+---
+
+<Workspace
+  title="Notifications"
+  role={role}
+  current={notificationsHref(role)}
+  items={nav}
+  who={user.name}
+  heading="Notifications"
+  lede={notifications.length
+    ? unread
+      ? `${unread} unread. Opening one marks it read and takes you to it.`
+      : 'You are up to date. Everything the site has told you is below, newest first.'
+    : 'Replies, requests, approvals and anything else that needs you — as it happens.'}
+  flash={flash}
+>
+  {notifications.length === 0 ? (
+    <div class="ws-empty">
+      <h3>Nothing to tell you yet</h3>
+      <p>
+        When a company asks to hire you, a specialist replies to your project,
+        a message arrives or an application is decided, it appears here — and,
+        once email is set up, in your inbox too. Each one links straight to the
+        page where you can act on it.
+      </p>
+      <a class="btn-glass btn-sm" href={nav[0]?.href ?? '/'}>Back to your workspace</a>
+    </div>
+  ) : (
+    <section class="ws-card">
+      <div class="ws-card-head">
+        <h2>{notifications.length === 100 ? 'The latest 100' : 'Everything so far'}</h2>
+        {unread > 0 && (
+          <form method="post">
+            <input type="hidden" name="action" value="read_all" />
+            <button type="submit" class="link-t">Mark all as read</button>
+          </form>
+        )}
+      </div>
+
+      <div class="ws-rows">
+        {notifications.map((n) => (
+          <a class="ws-row" href={`/workspace/notifications/open?id=${encodeURIComponent(n.id)}`}>
+            <span class="mark" aria-hidden="true">{mark(n)}</span>
+            <span class="body">
+              <span class="t" style="white-space:normal;">{n.title}</span>
+              {n.body && <span class="m" style="white-space:pre-wrap;">{n.body}</span>}
+              <span class="m">{when(n.created_at)}</span>
+            </span>
+            {!n.read_at && <span class="pill-tone warn">New</span>}
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+</Workspace>

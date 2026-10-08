@@ -11,10 +11,12 @@
 export const prerender = false;
 
 import Night from '../../layouts/Night.astro';
-import { db, one, run } from '../../server/db';
+import { db, env, one, run } from '../../server/db';
 import { newId, nowIso } from '../../server/ids';
 import { audit, notify } from '../../server/audit';
+import { verificationRequired } from '../../server/guards';
 import { parse } from '../../server/validate';
+import { ACCEPT, MAX_FILES, pickFiles, storeFiles } from '../../server/repo/attachments';
 import { clearDraft, draftValue, readDraft, saveDraft } from '../../server/draft';
 import { mergeCookieShortlist } from '../../server/shortlist';
 import { limited, tooManyRequests } from '../../server/rate-limit';
@@ -45,7 +47,13 @@ const user = Astro.locals.user;
 
 let errors: Record<string, string> = {};
 let sent = false;
+/** Mail is configured and this address is unconfirmed, so the request was held back. */
+let mustVerify = false;
 let draft = readDraft(Astro, DRAFT_KIND);
+
+/* Files need an R2 bucket. Without one the form simply has no file field,
+   exactly as the portfolio step of /apply does, rather than one that fails. */
+const bucket = env(Astro).MEDIA;
 /** Body of a submission that failed validation, so nothing typed is lost. */
 let submitted: FormData | null = null;
 
@@ -62,9 +70,16 @@ if (Astro.request.method === 'POST') {
     );
   }
   if (await limited(database, 'hire', user.id)) return tooManyRequests();
+  mustVerify = verificationRequired(user);
 
   const { f, errors: found } = parse(form);
   errors = found;
+
+  /* Checked with everything else, before any row exists: a bad file costs the
+     company one field, not a request sent without its references. */
+  const uploads = bucket ? await pickFiles(form, 'files') : { files: [], problem: null };
+  if (uploads.problem) errors.files = uploads.problem;
+  if (uploads.files.length && await limited(database, 'upload', user.id)) return tooManyRequests();
 
   /* No company yet? Ask for the two things we actually need right here, rather
      than throwing them onto a separate setup page mid-brief. */
@@ -97,7 +112,7 @@ if (Astro.request.method === 'POST') {
     errors.deadline = 'The deadline cannot be before the start date.';
   }
 
-  if (!Object.keys(errors).length) {
+  if (!Object.keys(errors).length && !mustVerify) {
     const id = newId();
     const now = nowIso();
 
@@ -129,13 +144,16 @@ if (Astro.request.method === 'POST') {
       startDate, deadline, engagement, budgetMin, budgetMax, currency, ndaRequired ? 1 : 0, workLocation,
       now, now,
     );
+    if (bucket && uploads.files.length) {
+      await storeFiles(database, bucket, uploads.files, user.id, { hireRequestId: id });
+    }
 
     await notify(database, {
       userId: target.user_id,
       kind: 'hire_request',
       title: `New request: ${title}`,
-      body: 'A company has asked to work with you. Open it to accept, decline, or ask a question.',
-      link: '/workspace/freelancer',
+      body: 'A company has asked to work with you. Open it to accept, decline, ask a question or send a price.',
+      link: '/workspace/freelancer/requests',
     });
     await audit(database, {
       actorId: user.id, action: 'hire_request.sent', entityType: 'hire_request', entityId: id, request: Astro.request,
@@ -159,6 +177,9 @@ const d = (key: string, fallback = ''): string => {
   return draftValue(draft, key) || fallback;
 };
 const restored = !sent && Object.keys(draft).length > 0;
+/* A file cannot ride in the draft cookie across the sign-in detour, so the
+   field is offered once there is an account to attach it to. */
+const uploadsEnabled = Boolean(bucket) && Boolean(user);
 ---
 
 <Night title={`Request to hire ${target.name} — Fashion Freelancing`} noindex current="specialists" quoteBot={false}>
@@ -198,13 +219,20 @@ const restored = !sent && Object.keys(draft).length > 0;
             {restored && <div class="notice ok">Your brief was saved while you signed in. Everything is still here.</div>}
 
             <div class="flow-panel glass-p">
+              {mustVerify && (
+                <p class="notice bad" role="alert" style="margin-bottom:22px;">
+                  Confirm your email first — we sent you a link. Lost it? Send a fresh one
+                  from <a href="/account">Password &amp; security</a>. Your brief is still here.
+                </p>
+              )}
+
               {Object.keys(errors).length > 0 && (
                 <p class="notice bad" role="alert" style="margin-bottom:22px;">
                   Nothing was lost — check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
                 </p>
               )}
 
-              <form method="post" class="cform" novalidate>
+              <form method="post" class="cform" novalidate enctype={uploadsEnabled ? 'multipart/form-data' : undefined}>
                 {needsCompany && (
                   <fieldset class="fieldset" style="margin-bottom:26px;">
                     <legend>About you</legend>
@@ -341,9 +369,26 @@ const restored = !sent && Object.keys(draft).length > 0;
                   This project needs a mutual NDA before files are shared.
                 </label>
 
+                {uploadsEnabled && (
+                  <label>
+                    <span class="fl">Files</span>
+                    <input class="fi" id="f-files" type="file" name="files" multiple accept={ACCEPT}
+                           aria-invalid={errors.files ? 'true' : undefined} />
+                    <span class="fh">
+                      Tech packs, references, moodboards — JPG, PNG, WebP, AVIF, PDF or MP4, up to {MAX_FILES} files
+                      of 25 MB each. Only {target.name} can open them. If the work needs an NDA first, keep the
+                      confidential ones back until it is signed.
+                    </span>
+                    {errors.files && <span class="cform-err" role="alert">{errors.files}</span>}
+                    {Object.keys(errors).length > 0 && !errors.files && (
+                      <span class="fh">Files are not kept when a form comes back — choose them again before sending.</span>
+                    )}
+                  </label>
+                )}
+
                 <p class="fh" style="margin:0;">
                   Free to send. No payment is taken through this site — you agree the fee directly with
-                  {target.name}. Do not attach files yet; share them once they accept.
+                  {target.name}.{!user && bucket && ' You can attach files once you have signed in.'}
                 </p>
 
                 <button type="submit" class="btn-hot" style="width:100%;margin-top:6px;" data-busy="Sending…">

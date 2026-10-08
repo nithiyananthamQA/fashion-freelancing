@@ -1,0 +1,371 @@
+---
+/**
+ * /workspace/admin/payments — the money recorded against each piece of work,
+ * and the only place it is written.
+ *
+ * The site does not hold money or take a cut: a fee is agreed and settled
+ * between the two sides, and these rows are the record of it. Both sides
+ * already read them — the company on Invoices, the specialist on Payments — so
+ * this page is where operations records an invoice to the company or a payout
+ * to the specialist, and moves either one on as it is paid, fails or is
+ * refunded.
+ *
+ * Work with money still owed sorts first, then whatever changed most recently.
+ * Each row change tells the side it concerns: an invoice is the company's
+ * business, a payout the specialist's. A draft tells nobody — it is our note
+ * to ourselves until it is raised.
+ */
+export const prerender = false;
+
+import Workspace from '../../../layouts/Workspace.astro';
+import { all, db, inClause, one, run } from '../../../server/db';
+import { guard, requireAdmin } from '../../../server/guards';
+import { newId, nowIso } from '../../../server/ids';
+import { audit, notify } from '../../../server/audit';
+import { parse } from '../../../server/validate';
+import { engagementStatusLabel, paymentStatusLabel, statusTone } from '../../../data/labels';
+import { adminNav } from '../../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireAdmin(Astro));
+if (gate.response) return gate.response;
+const admin = gate.value;
+
+const database = db(Astro);
+const tenant = Astro.locals.tenant;
+let flash: string | null = null;
+let errors: Record<string, string> = {};
+/* A form that failed validation is opened again in its own card with what was
+   typed still in it — a mistake must never cost the operator their input. */
+let failedFor: string | null = null;
+let kept: Record<string, string> = {};
+
+const KINDS = ['invoice', 'payout'] as const;
+const STATUSES = ['draft', 'due', 'paid', 'failed', 'refunded'] as const;
+/* The same list a company picks from when it posts a project. */
+const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'AED'] as const;
+
+/** Ours, on this page — "Invoice to the company" / "Payout to the specialist". */
+const KIND_LABEL: Record<(typeof KINDS)[number], string> = {
+  invoice: 'Invoice to the company',
+  payout: 'Payout to the specialist',
+};
+
+/** Buttons say what the operator is doing, not which state they store. */
+const STATUS_ACTION: Record<(typeof STATUSES)[number], string> = {
+  draft: 'Back to draft',
+  due: 'Raise it — now due',
+  paid: 'Mark paid',
+  failed: 'Mark failed',
+  refunded: 'Mark refunded',
+};
+
+const money = (currency: string, amount: number) => `${currency} ${amount.toLocaleString('en-GB')}`;
+
+interface Parties {
+  id: string;
+  title: string;
+  specialist_user: string;
+  company_user: string | null;
+}
+
+/* Who each row concerns, fetched back through a company in this workspace —
+   the id arrives in a form, and a form can be replayed with somebody else's.
+   The company side is whoever asked for the work, falling back to the
+   company's owner, as the work pages do. */
+const partiesOf = (engagementId: string) =>
+  one<Parties>(
+    database,
+    `SELECT e.id, e.title, su.id AS specialist_user,
+            COALESCE(h.created_by, p.created_by,
+              (SELECT m.user_id FROM company_members m
+                WHERE m.company_id = e.company_id
+                ORDER BY CASE WHEN m.role = 'owner' THEN 0 ELSE 1 END
+                LIMIT 1)) AS company_user
+       FROM engagements e
+       JOIN companies c ON c.id = e.company_id
+       JOIN specialist_profiles sp ON sp.id = e.profile_id
+       JOIN users su ON su.id = sp.user_id
+       LEFT JOIN hire_requests h ON h.id = e.hire_request_id
+       LEFT JOIN projects p ON p.id = e.project_id
+      WHERE e.id = ? AND c.tenant IN (?, 'public')`,
+    engagementId, tenant,
+  );
+
+/** Tell the side a row concerns. Drafts are ours alone, so they tell nobody. */
+async function tellAbout(work: Parties, kind: string, status: string, amount: string, reference: string | null) {
+  if (status === 'draft') return;
+  const invoice = kind === 'invoice';
+  const userId = invoice ? work.company_user : work.specialist_user;
+  if (!userId) return;
+  const state = paymentStatusLabel(status).toLowerCase();
+  await notify(database, {
+    userId,
+    kind: invoice ? 'invoice' : 'payout',
+    title: invoice ? `Invoice for ${work.title}: ${amount}, ${state}` : `Payment for ${work.title}: ${amount}, ${state}`,
+    body: reference ? `Reference: ${reference}` : undefined,
+    link: invoice ? '/workspace/company/billing' : '/workspace/freelancer/earnings',
+  });
+}
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const { f, errors: found } = parse(form);
+  errors = found;
+  const action = String(form.get('action') ?? '');
+
+  if (action === 'record') {
+    const engagementId = String(form.get('engagementId') ?? '');
+    const kind = f.choice('kind', 'What it is', KINDS, { required: true });
+    const amount = f.int('amount', 'Amount', { required: true, min: 1, max: 100_000_000 });
+    const currency = f.choice('currency', 'Currency', CURRENCIES, { required: true });
+    const status = f.choice('status', 'Where it stands', STATUSES, { required: true });
+    const reference = f.text('reference', 'Reference', { max: 120 });
+    const work = await partiesOf(engagementId);
+
+    if (!work) {
+      flash = 'That work is not one you can record money against.';
+    } else if (Object.keys(errors).length || !kind || amount === null || !currency || !status) {
+      failedFor = work.id;
+      kept = Object.fromEntries(
+        ['kind', 'amount', 'currency', 'status', 'reference'].map((name) => [name, String(form.get(name) ?? '')]),
+      );
+    } else {
+      const id = newId();
+      const now = nowIso();
+      await run(
+        database,
+        `INSERT INTO payments (id, engagement_id, kind, amount, currency, status, reference, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        id, work.id, kind, amount, currency, status, reference || null, now, now,
+      );
+      await audit(database, {
+        actorId: admin.id, action: 'payment.recorded', entityType: 'payment', entityId: id,
+        detail: { engagementId: work.id, kind, amount, currency, status, reference: reference || null },
+        request: Astro.request,
+      });
+      // The money row is saved. A failed notification must not turn that into
+      // an error page — the natural retry would record the same payment twice.
+      try {
+        await tellAbout(work, kind, status, money(currency, amount), reference || null);
+      } catch (error) {
+        console.error('[payments] notify failed:', error);
+      }
+      flash = `${KIND_LABEL[kind]} of ${money(currency, amount)} recorded on "${work.title}" — ${paymentStatusLabel(status).toLowerCase()}.`;
+    }
+  }
+
+  if (action === 'payment_status') {
+    const paymentId = String(form.get('paymentId') ?? '');
+    const next = f.choice('status', 'Where it stands', STATUSES, { required: true });
+    const payment = await one<{
+      id: string; engagement_id: string; kind: string; amount: number; currency: string;
+      status: string; reference: string | null;
+    }>(
+      database,
+      `SELECT pay.id, pay.engagement_id, pay.kind, pay.amount, pay.currency, pay.status, pay.reference
+         FROM payments pay
+         JOIN engagements e ON e.id = pay.engagement_id
+         JOIN companies c ON c.id = e.company_id
+        WHERE pay.id = ? AND c.tenant IN (?, 'public')`,
+      paymentId, tenant,
+    );
+    const work = payment ? await partiesOf(payment.engagement_id) : null;
+
+    if (!payment || !work || !next) {
+      flash = 'That payment is not one you can change.';
+    } else if (payment.status === next) {
+      flash = `It is already ${paymentStatusLabel(next).toLowerCase()}, so nothing was changed.`;
+    } else {
+      await run(
+        database,
+        'UPDATE payments SET status = ?, updated_at = ? WHERE id = ?',
+        next, nowIso(), payment.id,
+      );
+      await audit(database, {
+        actorId: admin.id, action: 'payment.updated', entityType: 'payment', entityId: payment.id,
+        detail: { from: payment.status, to: next }, request: Astro.request,
+      });
+      await tellAbout(work, payment.kind, next, money(payment.currency, payment.amount), payment.reference);
+      flash = `${KIND_LABEL[payment.kind as (typeof KINDS)[number]]} of ${money(payment.currency, payment.amount)} on "${work.title}" — now ${paymentStatusLabel(next).toLowerCase()}.`;
+    }
+  }
+}
+
+interface Work {
+  id: string;
+  title: string;
+  status: string;
+  updated_at: string;
+  company_name: string;
+  specialist_name: string;
+  owed: number;
+}
+
+interface Payment {
+  id: string;
+  engagement_id: string;
+  kind: string;
+  amount: number;
+  currency: string;
+  status: string;
+  reference: string | null;
+  created_at: string;
+}
+
+/* Work with something still due first: that is where a payment is about to
+   be recorded or moved on. Then the most recently changed. */
+const work = await all<Work>(
+  database,
+  `SELECT e.id, e.title, e.status, e.updated_at, c.name AS company_name, u.name AS specialist_name,
+          (SELECT COUNT(*) FROM payments pay
+            WHERE pay.engagement_id = e.id AND pay.status = 'due') AS owed
+     FROM engagements e
+     JOIN companies c ON c.id = e.company_id
+     JOIN specialist_profiles sp ON sp.id = e.profile_id
+     JOIN users u ON u.id = sp.user_id
+    WHERE c.tenant IN (?, 'public')
+    ORDER BY owed > 0 DESC, e.updated_at DESC
+    LIMIT 50`,
+  tenant,
+);
+
+const ids = inClause(work.map((w) => w.id));
+const payments = ids
+  ? await all<Payment>(
+      database,
+      `SELECT id, engagement_id, kind, amount, currency, status, reference, created_at
+         FROM payments WHERE engagement_id IN (${ids.sql})
+        ORDER BY created_at`,
+      ...ids.params,
+    )
+  : [];
+const paymentsOn = (engagementId: string) => payments.filter((p) => p.engagement_id === engagementId);
+
+const owedCount = work.filter((w) => w.owed > 0).length;
+
+const when = (iso: string) =>
+  new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+/** pill-tone only paints warn, ok and bad — anything else stays neutral. */
+const tone = (value: string) => {
+  const t = statusTone(value);
+  return t === 'info' ? 'pill-tone' : `pill-tone ${t}`;
+};
+
+---
+
+<Workspace
+  title="Payments"
+  role="admin"
+  current="/workspace/admin/payments"
+  items={adminNav()}
+  who={admin.name}
+  heading="Payments"
+  lede={work.length
+    ? `${work.length} ${work.length === 1 ? 'piece of work' : 'pieces of work'}${owedCount ? ` · ${owedCount} with money still due` : ''}. Record an invoice or a payout, and move it on as it is paid.`
+    : 'Invoices to companies and payouts to specialists, recorded against the work they are for.'}
+  flash={flash}
+>
+  {work.length === 0 ? (
+    <div class="ws-empty">
+      <h3>No work has started yet</h3>
+      <p>
+        Money is recorded against a piece of work, so this page fills up once a
+        company hires somebody — through a request to hire or a reply to a
+        project. Then you can record the invoice to the company and the payout
+        to the specialist, and both sides see it in their own workspace.
+      </p>
+      <a class="btn-glass btn-sm" href="/workspace/admin/projects">See posted projects</a>
+    </div>
+  ) : (
+    <div class="stack-sm">
+      {work.map((w) => (
+        <article class="panel glass-p">
+          <div class="ws-row-head">
+            <div>
+              <h2 style="margin:0;">{w.title}</h2>
+              <p class="ws-sub">{w.company_name} with {w.specialist_name} · last changed {when(w.updated_at)}</p>
+            </div>
+            <span class={tone(w.status)}>{engagementStatusLabel(w.status)}</span>
+          </div>
+
+          {paymentsOn(w.id).length === 0 ? (
+            <p class="ws-sub">Nothing recorded against this work yet.</p>
+          ) : (
+            <div class="ws-rows">
+              {paymentsOn(w.id).map((p) => (
+                <div class="ws-row" style="flex-wrap:wrap;">
+                  <span class="body">
+                    <span class="t">{money(p.currency, p.amount)} · {KIND_LABEL[p.kind as (typeof KINDS)[number]]}</span>
+                    <span class="m">
+                      Recorded {when(p.created_at)}{p.reference ? ` · ${p.reference}` : ''}
+                    </span>
+                  </span>
+                  <span class={tone(p.status)}>{paymentStatusLabel(p.status)}</span>
+                  <form method="post" style="display:flex;flex-wrap:wrap;gap:6px;">
+                    <input type="hidden" name="action" value="payment_status" />
+                    <input type="hidden" name="paymentId" value={p.id} />
+                    {STATUSES.filter((s) => s !== p.status).map((s) => (
+                      <button class="link-t" name="status" value={s}>{STATUS_ACTION[s]}</button>
+                    ))}
+                  </form>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <details style="margin-top:14px;" open={failedFor === w.id}>
+            <summary class="btn-glass btn-sm" style="display:inline-flex;list-style:none;">Record money on this work</summary>
+            <form method="post" class="cform" style="margin-top:14px;" novalidate>
+              <input type="hidden" name="action" value="record" />
+              <input type="hidden" name="engagementId" value={w.id} />
+              <div class="row2">
+                <label>
+                  <span class="fl">What it is<span class="rq" aria-hidden="true">*</span></span>
+                  <select class="fi" name="kind" required>
+                    {KINDS.map((k) => <option value={k} selected={failedFor === w.id && kept.kind === k}>{KIND_LABEL[k]}</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span class="fl">Where it stands<span class="rq" aria-hidden="true">*</span></span>
+                  <select class="fi" name="status" required>
+                    {STATUSES.filter((s) => s !== 'failed' && s !== 'refunded').map((s) => (
+                      <option value={s} selected={failedFor === w.id && kept.status ? kept.status === s : s === 'due'}>{paymentStatusLabel(s)}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <div class="row2">
+                <label>
+                  <span class="fl">Amount<span class="rq" aria-hidden="true">*</span></span>
+                  <input class="fi" type="number" name="amount" min="1" step="1" required
+                         value={failedFor === w.id ? kept.amount : undefined}
+                         aria-invalid={failedFor === w.id && errors.amount ? 'true' : undefined} />
+                  {failedFor === w.id && errors.amount && <span class="cform-err" role="alert">{errors.amount}</span>}
+                </label>
+                <label>
+                  <span class="fl">Currency<span class="rq" aria-hidden="true">*</span></span>
+                  <select class="fi" name="currency" required>
+                    {CURRENCIES.map((code) => <option value={code} selected={failedFor === w.id && kept.currency === code}>{code}</option>)}
+                  </select>
+                </label>
+              </div>
+              <label>
+                <span class="fl">Reference</span>
+                <input class="fi" type="text" name="reference" maxlength="120"
+                       value={failedFor === w.id ? kept.reference : undefined}
+                       placeholder="Invoice number, transfer id — whatever both sides will recognise" />
+              </label>
+              <button class="btn-hot btn-sm" style="justify-self:start;">Record it</button>
+              <p class="ws-sub" style="margin:0;">
+                An invoice is shown to the company, a payout to the specialist,
+                and whoever it concerns is told — unless it is a draft, which
+                stays here until you move it on.
+              </p>
+            </form>
+          </details>
+        </article>
+      ))}
+    </div>
+  )}
+</Workspace>

@@ -2,7 +2,7 @@
 /**
  * /workspace/company/saved — the people this company put aside while comparing.
  *
- * The shortlist starts before anyone signs in, so by the time a buyer reaches
+ * The shortlist starts before anyone signs in, so by the time a company reaches
  * the workspace it is often the longest list they own — and on the old
  * single-page workspace it was a stack of bare names near the bottom, with no
  * way to tell who was free next week or to clear out someone they had gone off.
@@ -71,7 +71,7 @@ interface Saved {
   saved_at: string;
   saved_by: string;
   saved_by_name: string;
-  /** 1 when their public page is live, so there is somewhere to send the buyer. */
+  /** 1 when their public page is live, so there is somewhere to send the company. */
   listed: number;
 }
 

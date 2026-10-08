@@ -1,7 +1,7 @@
 ---
 /**
  * /workspace/company/team — everyone who can sign in and act on this company
- * account.
+ * account, and how an owner brings someone else onto it.
  *
  * A message a colleague sent, a project a colleague posted and a hire a
  * colleague made all read as "yours" everywhere else in the company
@@ -10,14 +10,22 @@
  * that list: who is on the account, what each of them can do, and which of
  * them is the reader.
  *
- * Read-only. Adding and removing people is not open yet, so the page says so
- * rather than showing controls that do nothing.
+ * Inviting used to be "not open yet — ask us". Now an owner types an address:
+ * someone who already has an account joins at once; anyone else gets an email
+ * with a link, and joins the first time they open the company workspace after
+ * signing up with that address.
  */
 export const prerender = false;
 
 import Workspace from '../../../layouts/Workspace.astro';
-import { all, db, one } from '../../../server/db';
+import { all, db, env, one, run } from '../../../server/db';
 import { guard, requireCompany } from '../../../server/guards';
+import { newId, newToken, nowIso, sha256 } from '../../../server/ids';
+import { audit, notify } from '../../../server/audit';
+import { sendMail } from '../../../server/mail';
+import { parse } from '../../../server/validate';
+import { limited, tooManyRequests } from '../../../server/rate-limit';
+import { tenantOf } from '../../../server/tenant';
 import { accountStatusLabel, companyRoleLabel } from '../../../data/labels';
 import { companyNav } from '../../../data/workspace-nav';
 
@@ -26,12 +34,131 @@ if (gate.response) return gate.response;
 const { user, companyId } = gate.value;
 
 const database = db(Astro);
+let flash: string | null = null;
+let inviteError: string | null = null;
 
 const company = await one<{ name: string }>(
   database,
   'SELECT name FROM companies WHERE id = ?',
   companyId,
 );
+
+/* Only an owner may add people or withdraw an invitation — proved here from
+   the membership row on every post, never from the form. */
+const membership = await one<{ role: string }>(
+  database,
+  'SELECT role FROM company_members WHERE company_id = ? AND user_id = ?',
+  companyId, user.id,
+);
+const isOwner = membership?.role === 'owner';
+
+if (Astro.request.method === 'POST' && isOwner) {
+  const form = await Astro.request.formData();
+  const action = String(form.get('action') ?? '');
+
+  if (action === 'invite') {
+    // Every invitation is an email sent to an address we were handed, so it is
+    // limited like any other message one person sends another.
+    if (await limited(database, 'message', user.id)) return tooManyRequests();
+    const { f, errors } = parse(form);
+    const email = f.email('email');
+    const companyName = company?.name ?? 'your company';
+
+    /* Scoped to the company's own workspace, as every other lookup is: an
+       address is only unique per workspace (0005). */
+    const existing = errors.email ? null : await one<{ id: string; name: string; companies: number; here: number }>(
+      database,
+      `SELECT u.id, u.name,
+              (SELECT COUNT(*) FROM company_members m WHERE m.user_id = u.id) AS companies,
+              (SELECT COUNT(*) FROM company_members m WHERE m.user_id = u.id AND m.company_id = ?1) AS here
+         FROM users u
+         JOIN companies c ON c.id = ?1
+        WHERE u.email = ?2 AND u.tenant = c.tenant AND u.status = 'active'`,
+      companyId, email,
+    );
+
+    if (errors.email) {
+      inviteError = errors.email;
+    } else if (email === user.email) {
+      inviteError = 'That is your own address — you are already on the account.';
+    } else if (existing && existing.here > 0) {
+      flash = `${existing.name} is already on ${companyName}.`;
+    } else if (existing && existing.companies > 0) {
+      /* An account acts for one company at a time — every company page opens
+         the first one it belongs to — so a second membership would be a door
+         they could never walk through. Better to say so than to add them. */
+      inviteError = `${existing.name} already acts for another company here, and an account can only act for one. They would need to use a different email address.`;
+    } else if (existing) {
+      const now = nowIso();
+      await database.batch([
+        database.prepare(
+          "INSERT INTO company_members (company_id, user_id, role, created_at) VALUES (?, ?, 'member', ?)",
+        ).bind(companyId, existing.id, now),
+        // an invitation sent before they had an account is settled by this too
+        database.prepare(
+          'UPDATE company_invites SET accepted_at = ? WHERE company_id = ? AND email = ? AND accepted_at IS NULL',
+        ).bind(now, companyId, email),
+      ]);
+      await notify(database, {
+        userId: existing.id,
+        kind: 'company_member_added',
+        title: `You were added to ${companyName}`,
+        body: `${user.name} added you. Its projects, requests and work are now in your company workspace.`,
+        link: '/workspace/company',
+      });
+      await audit(database, {
+        actorId: user.id, action: 'company.member_added', entityType: 'company', entityId: companyId,
+        detail: { member: existing.id }, request: Astro.request,
+      });
+      flash = `${existing.name} already had an account, so they are on the team now and have been told.`;
+    } else {
+      /* Nobody with that address yet. The invitation waits, and the link both
+         sends them through sign-up and, once they arrive, proves they own the
+         address it was sent to. Inviting the same address again replaces the
+         old link rather than adding a second row. */
+      const token = newToken();
+      const now = nowIso();
+      await run(
+        database,
+        `INSERT INTO company_invites (id, company_id, email, invited_by, token_hash, created_at)
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON CONFLICT (company_id, email)
+         DO UPDATE SET invited_by = excluded.invited_by, token_hash = excluded.token_hash,
+                       created_at = excluded.created_at, accepted_at = NULL`,
+        newId(), companyId, email, user.id, await sha256(token), now,
+      );
+      const runtime = env(Astro);
+      const next = `/workspace/company?invite=${token}`;
+      await sendMail(database, runtime, {
+        to: email,
+        tenant: tenantOf(Astro),
+        subject: `${user.name} invited you to ${companyName} — Fashion Freelancing`,
+        body:
+          `Hi,\n\n` +
+          `${user.name} has invited you to join ${companyName} on Fashion Freelancing, so you can post ` +
+          `projects, read replies from specialists and follow the work with the rest of the team.\n\n` +
+          `Create your account with this email address (${email}), using this link:\n\n` +
+          `${runtime.SITE_URL}/sign-in?next=${encodeURIComponent(next)}\n\n` +
+          `You join ${companyName} the moment you arrive. If you were not expecting this, ignore it — ` +
+          `nothing happens unless you sign up.\n`,
+      });
+      await audit(database, {
+        actorId: user.id, action: 'company.member_invited', entityType: 'company', entityId: companyId,
+        detail: { email }, request: Astro.request,
+      });
+      flash = `Invitation sent to ${email}. They join the moment they sign up with that address.`;
+    }
+  } else if (action === 'cancel') {
+    const result = await run(
+      database,
+      'DELETE FROM company_invites WHERE id = ? AND company_id = ? AND accepted_at IS NULL',
+      String(form.get('inviteId') ?? ''), companyId,
+    );
+    flash = result.meta.changes > 0
+      ? 'Invitation withdrawn. The link in their email no longer does anything.'
+      : 'That invitation had already been used or withdrawn.';
+  }
+}
 
 const members = await all<{
   user_id: string; name: string; email: string; role: string;
@@ -44,6 +171,16 @@ const members = await all<{
     WHERE m.company_id = ?
     -- owners first, then in the order people joined
     ORDER BY CASE WHEN m.role = 'owner' THEN 0 ELSE 1 END, m.created_at`,
+  companyId,
+);
+
+const invites = await all<{ id: string; email: string; created_at: string; invited_by_name: string }>(
+  database,
+  `SELECT i.id, i.email, i.created_at, u.name AS invited_by_name
+     FROM company_invites i
+     JOIN users u ON u.id = i.invited_by
+    WHERE i.company_id = ? AND i.accepted_at IS NULL
+    ORDER BY i.created_at DESC`,
   companyId,
 );
 
@@ -65,20 +202,21 @@ const nav = companyNav();
   lede={members.length > 1
     ? `${members.length} people can sign in to ${company?.name ?? 'this account'} and act on its behalf.`
     : `You are the only person on ${company?.name ?? 'this account'} so far.`}
+  flash={flash}
 >
-  {members.length === 0 ? (
-    <div class="ws-empty">
-      <h3>Nobody on this account yet</h3>
-      <p>
-        Everyone who can sign in to this company — post projects, read replies,
-        hire people and answer messages — is listed here with what they are
-        allowed to do. Your own account should already be one of them.
-      </p>
-      <a class="btn-glass btn-sm" href="/workspace/company">Back to your overview</a>
-    </div>
-  ) : (
-    <div class="stack-sm">
-      {members.map((m) => (
+  <div class="stack-sm">
+    {members.length === 0 ? (
+      <div class="ws-empty">
+        <h3>Nobody on this account yet</h3>
+        <p>
+          Everyone who can sign in to this company — post projects, read replies,
+          hire people and answer messages — is listed here with what they are
+          allowed to do. Your own account should already be one of them.
+        </p>
+        <a class="btn-glass btn-sm" href="/workspace/company">Back to your overview</a>
+      </div>
+    ) : (
+      members.map((m) => (
         <article class="panel glass-p">
           <div class="ws-row-head" style="margin-bottom:0;">
             <div>
@@ -95,13 +233,76 @@ const nav = companyNav();
             </div>
           </div>
         </article>
-      ))}
+      ))
+    )}
 
-      <p class="ws-sub">
-        {owners === 1 ? 'The owner' : 'Owners'} set the company up and can act on
-        everything it does. Inviting more people is not open yet — until it is,
-        anyone who needs access has to be added by us.
-      </p>
-    </div>
-  )}
+    {invites.map((invite) => (
+      <article class="panel glass-p">
+        <div class="ws-row-head" style="margin-bottom:0;">
+          <div>
+            <h2 style="margin:0;">{invite.email}</h2>
+            <p class="ws-sub">
+              Invited by {invite.invited_by_name} on {when(invite.created_at)} · joins when they sign up with this address
+            </p>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+            <span class="pill-tone warn">Invited</span>
+            {isOwner && (
+              <form method="post">
+                <input type="hidden" name="inviteId" value={invite.id} />
+                <button class="btn-glass btn-sm" name="action" value="cancel">Withdraw</button>
+              </form>
+            )}
+          </div>
+        </div>
+      </article>
+    ))}
+
+    <section class="panel glass-p">
+      <div class="ws-row-head">
+        <div>
+          <h2 style="margin:0;">Add someone</h2>
+          <p class="ws-sub">
+            {owners === 1 ? 'The owner' : 'Owners'} set the company up and can act on everything it
+            does. Anyone added here joins as a team member: they can post projects, read replies, hire
+            people and answer messages for {company?.name ?? 'the company'}.
+          </p>
+        </div>
+      </div>
+
+      {isOwner ? (
+        <form method="post" class="cform" novalidate>
+          <label>
+            <span class="fl">Their work email<span class="rq" aria-hidden="true">*</span></span>
+            <input class="fi" type="email" name="email" required maxlength="254" autocomplete="off"
+                   placeholder="name@company.com" aria-invalid={inviteError ? 'true' : undefined} />
+            <span class="fh">
+              If they already have an account they join straight away. If not, we email them a link to
+              sign up with this address.
+            </span>
+            {inviteError && <span class="cform-err" role="alert">{inviteError}</span>}
+          </label>
+          <button class="btn-hot btn-sm" name="action" value="invite" style="justify-self:start;" data-busy="Inviting…">
+            Invite
+          </button>
+        </form>
+      ) : (
+        <p class="ws-sub" style="margin:0;">
+          Only an owner can add people. Ask {owners === 1 ? 'the owner' : 'one of the owners'} above.
+        </p>
+      )}
+    </section>
+
+    <section class="panel glass-p">
+      <div class="ws-row-head" style="margin-bottom:0;">
+        <div>
+          <h2 style="margin:0;">Password &amp; security</h2>
+          <p class="ws-sub">
+            Your own sign-in — change your password, confirm your email, or sign out of every device.
+          </p>
+        </div>
+        <a class="btn-glass btn-sm" href="/account">Password &amp; security</a>
+      </div>
+    </section>
+  </div>
 </Workspace>

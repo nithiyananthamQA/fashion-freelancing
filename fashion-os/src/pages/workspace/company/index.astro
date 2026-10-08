@@ -11,12 +11,67 @@ export const prerender = false;
 
 import Workspace from '../../../layouts/Workspace.astro';
 import { all, db, one } from '../../../server/db';
-import { guard, requireCompany } from '../../../server/guards';
+import { guard, requireCompany, verificationRequired } from '../../../server/guards';
+import { nowIso, sha256 } from '../../../server/ids';
+import { audit, notify } from '../../../server/audit';
+import { listThreads } from '../../../server/repo/threads';
 import { getService } from '../../../data/taxonomy';
 import {
   engagementStatusLabel, hireStatusForCompany, projectStatusForCompany, statusTone,
 } from '../../../data/labels';
 import { companyNav } from '../../../data/workspace-nav';
+
+/*
+ * Someone a company owner invited by email (/workspace/company/team) arrives
+ * here from the link in that email, usually straight out of sign-up and with
+ * no company yet — which would otherwise send them off to set up a company of
+ * their own. So before the guard: an open invitation for this account's
+ * address joins them to the company that sent it.
+ *
+ * The address alone is not proof — anyone can sign up with any address. Either
+ * the token from the email comes with them (whoever has it read that inbox), or
+ * the account's address is confirmed. Without either, they are sent to confirm
+ * it first, and the invitation is still waiting when they come back.
+ */
+const arriving = Astro.locals.user;
+if (arriving && arriving.companyIds.length === 0) {
+  const database = db(Astro);
+  const invite = await one<{ id: string; company_id: string; token_hash: string; invited_by: string; company: string }>(
+    database,
+    `SELECT i.id, i.company_id, i.token_hash, i.invited_by, c.name AS company
+       FROM company_invites i
+       JOIN companies c ON c.id = i.company_id
+       JOIN users u ON u.id = ? AND u.email = i.email AND u.tenant = c.tenant
+      WHERE i.accepted_at IS NULL
+      ORDER BY i.created_at DESC
+      LIMIT 1`,
+    arriving.id,
+  );
+  if (invite) {
+    const token = Astro.url.searchParams.get('invite');
+    const fromTheEmail = Boolean(token) && invite.token_hash === await sha256(token ?? '');
+    if (!fromTheEmail && verificationRequired(arriving)) return Astro.redirect('/account', 303);
+
+    const now = nowIso();
+    await database.batch([
+      database.prepare(
+        `INSERT INTO company_members (company_id, user_id, role, created_at) VALUES (?, ?, 'member', ?)
+         ON CONFLICT (company_id, user_id) DO NOTHING`,
+      ).bind(invite.company_id, arriving.id, now),
+      database.prepare('UPDATE company_invites SET accepted_at = ? WHERE id = ?').bind(now, invite.id),
+    ]);
+    await audit(database, {
+      actorId: arriving.id, action: 'company.member_added', entityType: 'company', entityId: invite.company_id,
+      detail: { via: 'invite' }, request: Astro.request,
+    });
+    await notify(database, {
+      userId: invite.invited_by, kind: 'company_member_joined',
+      title: `${arriving.name} joined ${invite.company}`, link: '/workspace/company/team',
+    });
+    // The session's company list was read before the join; a fresh request reads it again.
+    return Astro.redirect('/workspace/company', 303);
+  }
+}
 
 const gate = await guard(Astro, () => requireCompany(Astro));
 if (gate.response) return gate.response;
@@ -28,7 +83,7 @@ const company = await one<{ name: string }>(
   database, 'SELECT name FROM companies WHERE id = ?', companyId,
 );
 
-const [projects, applications, requests, engagements, saved, unanswered, invoiced] = await Promise.all([
+const [projects, applications, requests, engagements, saved, threads, invoiced] = await Promise.all([
   all<{ id: string; title: string; service_id: string; status: string; applicants: number }>(
     database,
     `SELECT p.id, p.title, p.service_id, p.status,
@@ -84,16 +139,8 @@ const [projects, applications, requests, engagements, saved, unanswered, invoice
       ORDER BY s.created_at DESC`,
     companyId,
   ),
-  /* threads where the specialist spoke last */
-  one<{ n: number }>(
-    database,
-    `SELECT COUNT(*) AS n FROM hire_requests h
-      WHERE h.company_id = ?1
-        AND EXISTS (SELECT 1 FROM messages m WHERE m.hire_request_id = h.id)
-        AND (SELECT m2.sender_id FROM messages m2
-              WHERE m2.hire_request_id = h.id ORDER BY m2.created_at DESC LIMIT 1) <> ?2`,
-    companyId, user.id,
-  ),
+  /* every thread — requests, replies and work — to count the ones where the specialist spoke last */
+  listThreads(database, { as: 'company', companyId }),
   one<{ total: number; currency: string | null }>(
     database,
     `SELECT COALESCE(SUM(pay.amount), 0) AS total, MAX(pay.currency) AS currency
@@ -103,10 +150,10 @@ const [projects, applications, requests, engagements, saved, unanswered, invoice
   ),
 ]);
 
-const openRequests = requests.filter((r) => ['sent', 'viewed', 'question'].includes(r.status));
-const live = engagements.filter((e) => !['completed', 'cancelled'].includes(e.status));
+const openRequests = requests.filter((r) => ['sent', 'viewed', 'question', 'proposal'].includes(r.status));
+const live = engagements.filter((e) => !['completed', 'closed'].includes(e.status));
 const openProjects = projects.filter((p) => ['published', 'responding', 'shortlisted'].includes(p.status));
-const waiting = unanswered?.n ?? 0;
+const waiting = threads.filter((t) => t.theirsLast && t.open).length;
 
 const money = (n: number, ccy: string | null) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: ccy || 'USD', maximumFractionDigits: 0 }).format(n);

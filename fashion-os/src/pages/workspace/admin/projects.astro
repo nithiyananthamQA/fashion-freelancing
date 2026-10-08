@@ -10,19 +10,27 @@
  * posted it, what it asks for, how many specialists have replied, and the
  * close action under it. Closed briefs sink to the bottom; they are history,
  * not work.
+ *
+ * It is also where a brief gets matched by hand. Posting a project promises
+ * "our team will match it by hand" whenever the automatic match finds nobody,
+ * and the directory says the same to a company whose filters came up empty —
+ * so an open brief carries a way to search the approved specialists and invite
+ * the right ones. Each invitation is the same row automatic matching writes,
+ * so the specialist sees it on /projects exactly as if the matcher had found
+ * them, with our reason in place of the generated one.
  */
 export const prerender = false;
 
 import Workspace from '../../../layouts/Workspace.astro';
-import { all, db, run } from '../../../server/db';
+import { all, db, inClause, run } from '../../../server/db';
 import { guard, requireAdmin } from '../../../server/guards';
-import { nowIso } from '../../../server/ids';
-import { audit } from '../../../server/audit';
+import { newId, nowIso } from '../../../server/ids';
+import { audit, notify } from '../../../server/audit';
 import { parse } from '../../../server/validate';
 import { ownedProject } from '../../../server/tenant';
 import { getService } from '../../../data/taxonomy';
 import {
-  engagementLabel, projectStatusForAdmin, statusTone, workLocationLabel,
+  availabilityLabel, engagementLabel, projectStatusForAdmin, statusTone, workLocationLabel,
 } from '../../../data/labels';
 import { adminNav } from '../../../data/workspace-nav';
 
@@ -33,6 +41,17 @@ const admin = gate.value;
 const database = db(Astro);
 const tenant = Astro.locals.tenant;
 let flash: string | null = null;
+
+/** Still reachable by a specialist, so still worth an operator's attention. */
+const OPEN = ['submitted', 'published', 'responding', 'shortlisted'];
+
+/* The statuses in which an invited specialist can actually open the brief
+   (see assertProjectVisibleToSpecialist). Inviting somebody to a brief outside
+   these would send them a notification that leads to a 404. */
+const MATCHABLE = ['published', 'responding', 'shortlisted'];
+
+/** Most people one hand-match should reach — a shortlist, not a broadcast. */
+const MAX_INVITES = 10;
 
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
@@ -66,6 +85,94 @@ if (Astro.request.method === 'POST') {
       flash = `"${project.title}" is closed. Specialists no longer see it, and no new replies can arrive.`;
     }
   }
+
+  if (String(form.get('action') ?? '') === 'invite') {
+    const projectId = String(form.get('projectId') ?? '');
+    const reason = f.text('reason', 'Why them', { max: 300 });
+    const picked = [...new Set(
+      form.getAll('profileId').filter((v): v is string => typeof v === 'string' && v.length > 0),
+    )].slice(0, MAX_INVITES);
+
+    const project = await ownedProject<{
+      id: string; title: string; status: string; visibility: string; service_id: string; created_by: string;
+    }>(database, projectId, tenant, 'p.id, p.title, p.status, p.visibility, p.service_id, p.created_by');
+
+    /* A confidential brief was promised to reach nobody until the company
+       invites them itself (projects/new.astro), so operations does not get to
+       break that promise either. */
+    if (!project || !MATCHABLE.includes(project.status) || project.visibility === 'private') {
+      flash = 'That project is not open to invitations, so nobody was invited.';
+    } else if (picked.length === 0) {
+      flash = 'Tick at least one specialist to invite.';
+    } else {
+      /* Re-checked on write, as everything else on this page: approved, still
+         able to sign in, in this workspace, and not already invited to or
+         replying on this brief. The ticked ids came from a form. */
+      const ids = inClause(picked)!;
+      const invitees = await all<{ id: string; user_id: string; name: string }>(
+        database,
+        `SELECT p.id, p.user_id, u.name
+           FROM specialist_profiles p
+           JOIN users u ON u.id = p.user_id
+          WHERE p.id IN (${ids.sql})
+            AND p.status = 'approved' AND u.status = 'active' AND u.tenant IN (?, 'public')
+            AND NOT EXISTS (SELECT 1 FROM project_invites i WHERE i.project_id = ? AND i.profile_id = p.id)
+            AND NOT EXISTS (SELECT 1 FROM applications a WHERE a.project_id = ? AND a.profile_id = p.id)`,
+        ...ids.params, tenant, project.id, project.id,
+      );
+
+      if (invitees.length === 0) {
+        flash = 'Everyone you ticked has already been invited or has already replied.';
+      } else {
+        const now = nowIso();
+        // Shown to the specialist after "Recommended because:" on /projects.
+        const because = reason || 'our team picked you for this brief by hand.';
+        await database.batch(
+          invitees.map((invitee) =>
+            database.prepare(
+              `INSERT OR IGNORE INTO project_invites (id, project_id, profile_id, reason, status, created_at)
+               VALUES (?, ?, ?, ?, 'sent', ?)`,
+            ).bind(newId(), project.id, invitee.id, because, now),
+          ),
+        );
+
+        const names = invitees.map((invitee) => invitee.name);
+        // The invitations are committed. A failed notification is logged, not
+        // thrown: a retry would find everyone "already invited" and tell nobody.
+        try {
+          const service = getService(project.service_id)?.name ?? 'new';
+          for (const invitee of invitees) {
+            await notify(database, {
+              userId: invitee.user_id,
+              kind: 'project_invite',
+              title: `New ${service} project: ${project.title}`,
+              body: reason
+                ? `Our team picked you for this one: ${reason}`
+                : 'Our team picked you for this one by hand. Have a look and reply if it suits you.',
+              link: '/projects',
+            });
+          }
+
+          await notify(database, {
+            userId: project.created_by,
+            kind: 'project_matched',
+            title: `We matched ${names.length} ${names.length === 1 ? 'specialist' : 'specialists'} to ${project.title}`,
+            body: `${names.join(', ')} ${names.length === 1 ? 'has' : 'have'} been invited. Their replies will arrive in your workspace.`,
+            link: '/workspace/company/replies',
+          });
+        } catch (error) {
+          console.error('[admin/projects] match notifications failed:', error);
+        }
+
+        await audit(database, {
+          actorId: admin.id, action: 'project.matched', entityType: 'project', entityId: project.id,
+          detail: { invited: invitees.map((invitee) => invitee.id), reason: reason || null },
+          request: Astro.request,
+        });
+        flash = `Invited ${names.join(', ')} to "${project.title}". They have been told, and so has the company.`;
+      }
+    }
+  }
 }
 
 interface Project {
@@ -80,6 +187,7 @@ interface Project {
   currency: string | null;
   work_location: string | null;
   deadline: string | null;
+  visibility: string;
   created_at: string;
   company_name: string;
   applicants: number;
@@ -94,7 +202,7 @@ const projects = await all<Project>(
   database,
   `SELECT p.id, p.title, p.status, p.service_id, p.brief, p.engagement,
           p.budget_min, p.budget_max, p.currency, p.work_location, p.deadline,
-          p.created_at, c.name AS company_name,
+          p.visibility, p.created_at, c.name AS company_name,
           (SELECT COUNT(*) FROM applications a
              JOIN specialist_profiles ap ON ap.id = a.profile_id
              JOIN users au ON au.id = ap.user_id
@@ -112,9 +220,57 @@ const projects = await all<Project>(
   tenant,
 );
 
-/** Still reachable by a specialist, so still worth an operator's attention. */
-const OPEN = ['submitted', 'published', 'responding', 'shortlisted'];
 const open = projects.filter((p) => OPEN.includes(p.status)).length;
+
+/*
+ * The hand-match panel, open on one brief at a time (?match=<id>, ?q= to
+ * search). With no search it lists everyone approved who offers the brief's
+ * service — the people the automatic match would have considered. A search
+ * looks across every approved specialist by name, headline, service, skill or
+ * tool, because the right person for a brief sometimes lists it as their
+ * second service, or under a different name.
+ */
+interface Candidate {
+  id: string;
+  name: string;
+  headline: string | null;
+  availability: string | null;
+  service_id: string | null;
+  offers: number;
+  invited: number;
+  replied: number;
+}
+
+const matchId = Astro.url.searchParams.get('match') ?? '';
+const query = (Astro.url.searchParams.get('q') ?? '').trim().slice(0, 80);
+const matching = projects.find((p) => p.id === matchId && MATCHABLE.includes(p.status) && p.visibility !== 'private') ?? null;
+
+const candidates = matching
+  ? await all<Candidate>(
+      database,
+      `SELECT p.id, u.name, p.headline, p.availability,
+              (SELECT o.service_id FROM specialist_service_offerings o
+                WHERE o.profile_id = p.id ORDER BY o.is_primary DESC LIMIT 1) AS service_id,
+              EXISTS (SELECT 1 FROM specialist_service_offerings o
+                       WHERE o.profile_id = p.id AND o.service_id = ?2) AS offers,
+              EXISTS (SELECT 1 FROM project_invites i WHERE i.project_id = ?3 AND i.profile_id = p.id) AS invited,
+              EXISTS (SELECT 1 FROM applications a WHERE a.project_id = ?3 AND a.profile_id = p.id) AS replied
+         FROM specialist_profiles p
+         JOIN users u ON u.id = p.user_id
+        WHERE p.status = 'approved' AND u.status = 'active' AND u.tenant IN (?1, 'public')
+          AND (CASE WHEN ?4 = ''
+                    THEN EXISTS (SELECT 1 FROM specialist_service_offerings o
+                                  WHERE o.profile_id = p.id AND o.service_id = ?2)
+                    ELSE (lower(u.name) LIKE ?5
+                          OR EXISTS (SELECT 1 FROM specialist_search s
+                                      WHERE s.profile_id = p.id AND s.haystack LIKE ?5))
+               END)
+        -- people who offer this exact service first, the featured among them first
+        ORDER BY offers DESC, p.featured DESC, u.name
+        LIMIT 30`,
+      tenant, matching.service_id, matching.id, query, `%${query.toLowerCase()}%`,
+    )
+  : [];
 
 const day = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
@@ -136,14 +292,14 @@ const facts = (p: Project): string[] => [
   p.deadline ? `Due ${day(p.deadline)}` : null,
 ].filter((x): x is string => Boolean(x));
 
-/** Who has answered it, and who was pointed at it by hand. */
+/** Who has answered it, and who was pointed at it — by the matcher or by us. */
 function reach(p: Project): string {
   const replies = p.applicants === 0
     ? 'No replies yet'
     : p.applicants === 1 ? '1 specialist has replied' : `${p.applicants} specialists have replied`;
   const invited = p.invited === 0
-    ? ''
-    : p.invited === 1 ? ' · 1 invited by hand' : ` · ${p.invited} invited by hand`;
+    ? ' · nobody invited yet'
+    : p.invited === 1 ? ' · 1 invited' : ` · ${p.invited} invited`;
   return replies + invited;
 }
 
@@ -188,7 +344,7 @@ const nav = adminNav();
   ) : (
     <div class="stack-sm">
       {projects.map((project) => (
-        <article class="panel glass-p">
+        <article class="panel glass-p" id={`p-${project.id}`}>
           <div class="ws-row-head">
             <div>
               <h2 style="margin:0;">{project.title}</h2>
@@ -207,6 +363,92 @@ const nav = adminNav();
               <p>{excerpt(project.brief)}</p>
             </div>
           </div>
+
+          {MATCHABLE.includes(project.status) && (
+            project.visibility === 'private' ? (
+              <p class="ws-sub" style="margin-top:14px;">
+                Confidential — the company chose to invite people itself, so it
+                cannot be matched from here.
+              </p>
+            ) : matching?.id !== project.id ? (
+              <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;">
+                <a class="btn-glass btn-sm" href={`?match=${encodeURIComponent(project.id)}#p-${project.id}`}>
+                  Match specialists by hand
+                </a>
+              </div>
+            ) : (
+              <div class="panel glass-p" style="margin-top:14px;">
+                <div class="ws-row-head">
+                  <div>
+                    <h2 style="margin:0;">Match by hand</h2>
+                    <p class="ws-sub">
+                      {query
+                        ? `Approved specialists matching "${query}".`
+                        : `Approved specialists who offer ${serviceName(project.service_id)}. Search to look wider.`}
+                    </p>
+                  </div>
+                  <a class="link-t" href={`?#p-${project.id}`}>Done</a>
+                </div>
+
+                <form method="get" class="cform" role="search">
+                  <input type="hidden" name="match" value={project.id} />
+                  <label>
+                    <span class="fl">Find a specialist</span>
+                    <input class="fi" type="search" name="q" value={query} maxlength="80"
+                           placeholder="A name, a service, a skill or a tool" />
+                  </label>
+                  <button class="btn-glass btn-sm" style="justify-self:start;">Search</button>
+                </form>
+
+                {candidates.length === 0 ? (
+                  <div class="ws-empty" style="margin-top:14px;">
+                    <h3>Nobody approved matches that</h3>
+                    <p>
+                      {query
+                        ? 'Try a shorter search — part of a name, or a single skill.'
+                        : 'No approved specialist offers this service yet. Search by a related skill, or approve someone from the applications queue.'}
+                    </p>
+                    <a class="btn-glass btn-sm" href="/workspace/admin/reviews">Open the applications queue</a>
+                  </div>
+                ) : (
+                  <form method="post" class="cform" style="margin-top:14px;">
+                    <input type="hidden" name="action" value="invite" />
+                    <input type="hidden" name="projectId" value={project.id} />
+                    <fieldset class="fieldset" style="margin:0;">
+                      <legend class="fl">Who to invite (up to {MAX_INVITES})</legend>
+                      <div class="opts col">
+                        {candidates.map((c) => (
+                          <label class="opt">
+                            <input type="checkbox" name="profileId" value={c.id}
+                                   disabled={c.invited === 1 || c.replied === 1} />
+                            <span>
+                              <b>{c.name}</b>
+                              {' — '}{[
+                                getService(c.service_id)?.name ?? 'No main service',
+                                availabilityLabel(c.availability) || null,
+                                c.replied === 1 ? 'already replied' : c.invited === 1 ? 'already invited' : null,
+                              ].filter(Boolean).join(' · ')}
+                              {c.headline && <span class="ws-sub" style="display:block;">{c.headline}</span>}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+                    <label>
+                      <span class="fl">Why them</span>
+                      <input class="fi" type="text" name="reason" maxlength="300"
+                             placeholder="They see this as “Recommended because: …”" />
+                    </label>
+                    <button class="btn-hot btn-sm" style="justify-self:start;">Invite the ones ticked</button>
+                    <p class="ws-sub" style="margin:0;">
+                      Each one is told and sees the brief on their projects page;
+                      the company is told who was invited.
+                    </p>
+                  </form>
+                )}
+              </div>
+            )
+          )}
 
           {project.status === 'closed' ? (
             <p class="ws-sub" style="margin-top:14px;">

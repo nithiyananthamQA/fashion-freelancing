@@ -9,12 +9,17 @@
  * Every figure is scoped to the caller's workspace plus the shared demo
  * content, exactly as the queues themselves are — an admin sees the totals
  * for what they can actually act on, not for the whole database.
+ *
+ * Two queues have nobody else to notice them: work in dispute, which stops
+ * until we decide, and email that never left — a confirmation or reset link
+ * somebody is waiting for. Both sit with the others in "Waiting on you".
  */
 export const prerender = false;
 
 import Workspace from '../../../layouts/Workspace.astro';
 import { all, db, one } from '../../../server/db';
 import { guard, requireAdmin } from '../../../server/guards';
+import { RETRY_WINDOW_MS } from '../../../server/mail';
 import { adminNav } from '../../../data/workspace-nav';
 
 const gate = await guard(Astro, () => requireAdmin(Astro));
@@ -37,7 +42,7 @@ const [counts, queues, recent] = await Promise.all([
         WHERE e.status = 'active' AND c.tenant IN (?1, 'public')) AS engagements`,
     tenant,
   ),
-  one<{ reviews: number; portfolio: number; tags: number; leads: number }>(
+  one<{ reviews: number; portfolio: number; tags: number; leads: number; disputes: number; mail: number; mail_failed: number }>(
     database,
     `SELECT
       (SELECT COUNT(*) FROM specialist_profiles p JOIN users u ON u.id = p.user_id
@@ -50,8 +55,18 @@ const [counts, queues, recent] = await Promise.all([
                 WHERE s.status = 'pending' AND (su.tenant IS NULL OR su.tenant IN (?1, 'public')))
             + (SELECT COUNT(*) FROM tools t LEFT JOIN users tu ON tu.id = t.created_by
                 WHERE t.status = 'pending' AND (tu.tenant IS NULL OR tu.tenant IN (?1, 'public')))) AS tags,
-      (SELECT COUNT(*) FROM leads WHERE status = 'new' AND tenant IN (?1, 'public')) AS leads`,
+      (SELECT COUNT(*) FROM leads WHERE status = 'new' AND tenant IN (?1, 'public')) AS leads,
+      (SELECT COUNT(*) FROM engagements e JOIN companies c ON c.id = e.company_id
+        WHERE e.status = 'disputed' AND c.tenant IN (?1, 'public')) AS disputes,
+      (SELECT COUNT(*) FROM outbound_email
+        WHERE status IN ('queued', 'failed') AND tenant IN (?1, 'public') AND created_at > ?2) AS mail,
+      (SELECT COUNT(*) FROM outbound_email
+        WHERE status = 'failed' AND tenant IN (?1, 'public') AND created_at > ?2) AS mail_failed`,
     tenant,
+    // Only the window the retry button works in (three days). Anything older
+    // was a link that has expired or news that has been read in the workspace
+    // since; counting it would keep this queue from ever emptying.
+    new Date(Date.now() - RETRY_WINDOW_MS).toISOString(),
   ),
   all<{ action: string; entity_type: string; created_at: string; actor: string | null }>(
     database,
@@ -68,9 +83,12 @@ const q = {
   portfolio: queues?.portfolio ?? 0,
   tags: queues?.tags ?? 0,
   leads: queues?.leads ?? 0,
+  disputes: queues?.disputes ?? 0,
+  mail: queues?.mail ?? 0,
+  mailFailed: queues?.mail_failed ?? 0,
 };
 const moderation = q.portfolio + q.tags;
-const outstanding = q.reviews + moderation + q.leads;
+const outstanding = q.reviews + moderation + q.leads + q.disputes + q.mail;
 
 /* The activity log records machine actions; nobody should have to read
    "profile.approved" to know what happened. */
@@ -93,6 +111,19 @@ const SAID: Record<string, string> = {
   'engagement.completed': 'finished work',
   'portfolio.moderated': 'moderated a portfolio item',
   'taxonomy.tag_approved': 'approved a new tag',
+  'lead.created': 'sent a project enquiry',
+  'lead.updated': 'moved an enquiry on',
+  'lead.note_added': 'added a note to an enquiry',
+  'user.suspended': 'suspended an account',
+  'user.reactivated': 'reactivated an account',
+  'user.closed': 'closed an account',
+  'user.role_changed': 'changed what an account can do',
+  'project.matched': 'matched specialists to a project by hand',
+  'engagement.disputed': 'raised an issue on a piece of work',
+  'engagement.dispute_resolved': 'settled a dispute',
+  'payment.recorded': 'recorded a payment',
+  'payment.updated': 'updated a payment',
+  'mail.retried': 'retried undelivered email',
 };
 const said = (a: string) => SAID[a] ?? a.replace(/[._]/g, ' ');
 
@@ -103,6 +134,7 @@ const nav = adminNav({
   reviews: q.reviews || undefined,
   moderation: moderation || undefined,
   enquiries: q.leads || undefined,
+  disputes: q.disputes || undefined,
 });
 ---
 
@@ -147,7 +179,7 @@ const nav = adminNav({
         {outstanding === 0 ? (
           <div class="ws-empty">
             <h3>Nothing in the queues</h3>
-            <p>Applications, portfolio items, new tags and enquiries appear here as they arrive.</p>
+            <p>Applications, portfolio items, new tags, enquiries, disputes and undelivered email appear here as they arrive.</p>
           </div>
         ) : (
           <div class="ws-rows">
@@ -181,6 +213,30 @@ const nav = adminNav({
                 <span class="pill-tone warn">Needs a reply</span>
               </a>
             )}
+            {q.disputes > 0 && (
+              <a class="ws-row" href="/workspace/admin/disputes">
+                <span class="mark">{q.disputes}</span>
+                <span class="body">
+                  <span class="t">Work in dispute</span>
+                  <span class="m">An issue was raised and the work is stopped until you settle it</span>
+                </span>
+                <span class="pill-tone bad">Needs a decision</span>
+              </a>
+            )}
+            {q.mail > 0 && (
+              <a class="ws-row" href="/workspace/admin/activity">
+                <span class="mark">{q.mail}</span>
+                <span class="body">
+                  <span class="t">Email not delivered</span>
+                  <span class="m">
+                    {q.mailFailed > 0
+                      ? `${q.mailFailed} failed to send · ${q.mail - q.mailFailed} still waiting`
+                      : 'From the last three days — written down, but not sent yet'}
+                  </span>
+                </span>
+                <span class={q.mailFailed > 0 ? 'pill-tone bad' : 'pill-tone warn'}>Somebody is waiting</span>
+              </a>
+            )}
           </div>
         )}
       </section>
@@ -200,13 +256,19 @@ const nav = adminNav({
           <a class="ws-row" href="/workspace/admin/projects">
             <span class="body">
               <span class="t">Posted projects</span>
-              <span class="m">See who replied, or close a project</span>
+              <span class="m">See who replied, match specialists by hand, or close a project</span>
+            </span>
+          </a>
+          <a class="ws-row" href="/workspace/admin/payments">
+            <span class="body">
+              <span class="t">Payments</span>
+              <span class="m">Record invoices and payouts against work, and mark them paid</span>
             </span>
           </a>
           <a class="ws-row" href="/workspace/admin/people">
             <span class="body">
               <span class="t">People</span>
-              <span class="m">Everyone with an account in this workspace</span>
+              <span class="m">Everyone with an account — and suspending or closing one</span>
             </span>
           </a>
         </div>

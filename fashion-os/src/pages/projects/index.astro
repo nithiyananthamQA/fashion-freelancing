@@ -10,12 +10,13 @@ export const prerender = false;
 
 import Night from '../../layouts/Night.astro';
 import { all, db, one, run } from '../../server/db';
-import { guard, requireApprovedSpecialist } from '../../server/guards';
+import { guard, requireApprovedSpecialist, verificationRequired } from '../../server/guards';
 import { newId, nowIso } from '../../server/ids';
 import { notify } from '../../server/audit';
 import { parse } from '../../server/validate';
+import { ATTACHMENT_COLUMNS, fileHref, fileSize, filesBy, type Attachment } from '../../server/repo/attachments';
 import { getService } from '../../data/taxonomy';
-import { engagementLabel, workLocationLabel } from '../../data/labels';
+import { applicationStatusLabel, engagementLabel, workLocationLabel } from '../../data/labels';
 import { PUBLIC_TENANT } from '../../server/tenant';
 
 const gate = await guard(Astro, () => requireApprovedSpecialist(Astro));
@@ -24,6 +25,10 @@ const { user, profileId } = gate.value;
 
 const database = db(Astro);
 let applied: string | null = null;
+/** A reply that was already decided, so a second one was not sent. */
+let kept: { title: string; status: string } | null = null;
+/** Mail is configured and this address is unconfirmed, so nothing is sent yet. */
+let mustVerify = false;
 let errors: Record<string, string> = {};
 
 if (Astro.request.method === 'POST') {
@@ -36,9 +41,9 @@ if (Astro.request.method === 'POST') {
   const timeline = f.text('timeline', 'Timeline', { max: 200 });
 
   // Re-check visibility on write, exactly as on read — a form can be replayed.
-  const visible = await one<{ id: string; title: string; company_id: string; created_by: string }>(
+  const visible = await one<{ id: string; title: string; company_id: string; created_by: string; currency: string | null }>(
     database,
-    `SELECT p.id, p.title, p.company_id, p.created_by FROM projects p
+    `SELECT p.id, p.title, p.company_id, p.created_by, p.currency FROM projects p
        JOIN companies c ON c.id = p.company_id
       WHERE p.id = ?
         AND c.tenant IN (?, ?)
@@ -53,18 +58,38 @@ if (Astro.request.method === 'POST') {
   );
 
   if (!visible) errors.pitch = 'That project is no longer open.';
+  mustVerify = verificationRequired(user);
 
-  if (!Object.keys(errors).length && visible) {
+  if (!Object.keys(errors).length && visible && !mustVerify) {
     const now = nowIso();
-    await run(
+    /* One reply per project, and a decision on it stands. The upsert used to
+       overwrite whatever was there with 'submitted', so posting the form again
+       quietly undid a decline, a shortlist or even a hire. Only a reply the
+       specialist took back themselves may be sent again; anything else is
+       left exactly as the company decided it. */
+    const result = await run(
       database,
-      `INSERT INTO applications (id, project_id, profile_id, pitch, price, timeline, status, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, 'submitted', ?, ?)
+      // the price was typed against the project's currency, so it is stored in it
+      `INSERT INTO applications (id, project_id, profile_id, pitch, price, currency, timeline, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'submitted', ?, ?)
        ON CONFLICT (project_id, profile_id)
-       DO UPDATE SET pitch = excluded.pitch, price = excluded.price,
-                     timeline = excluded.timeline, status = 'submitted', updated_at = excluded.updated_at`,
-      newId(), visible.id, profileId, pitch, price, timeline || null, now, now,
+       DO UPDATE SET pitch = excluded.pitch, price = excluded.price, currency = excluded.currency,
+                     timeline = excluded.timeline, status = 'submitted', updated_at = excluded.updated_at
+        WHERE applications.status = 'withdrawn'`,
+      newId(), visible.id, profileId, pitch, price, visible.currency ?? 'USD', timeline || null, now, now,
     );
+    if (result.meta.changes === 0) {
+      const existing = await one<{ status: string }>(
+        database,
+        'SELECT status FROM applications WHERE project_id = ? AND profile_id = ?',
+        visible.id, profileId,
+      );
+      kept = { title: visible.title, status: existing?.status ?? 'submitted' };
+    }
+  }
+
+  if (!Object.keys(errors).length && visible && !mustVerify && !kept) {
+    const now = nowIso();
     await run(
       database,
       "UPDATE project_invites SET status = 'applied' WHERE project_id = ? AND profile_id = ?",
@@ -78,9 +103,9 @@ if (Astro.request.method === 'POST') {
     await notify(database, {
       userId: visible.created_by,
       kind: 'application',
-      title: `New application: ${visible.title}`,
-      body: `${user.name} applied to your project.`,
-      link: '/workspace/company',
+      title: `New reply: ${visible.title}`,
+      body: `${user.name} replied to your project.`,
+      link: '/workspace/company/replies',
     });
     applied = visible.title;
   }
@@ -119,6 +144,19 @@ const projects = await all<Row>(
   profileId, Astro.locals.tenant, PUBLIC_TENANT,
 );
 
+/* Files the company attached to the brief. Readable by anyone this page shows
+   the project to — /api/files applies the same visibility rule. */
+const briefFiles = filesBy(
+  await all<Attachment>(
+    database,
+    `SELECT ${ATTACHMENT_COLUMNS} FROM attachments at
+      WHERE at.scan_status = 'clean' AND at.message_id IS NULL
+        AND at.project_id IN (${projects.map(() => '?').join(',') || 'NULL'})`,
+    ...projects.map((p) => p.id),
+  ),
+  'project_id',
+);
+
 /* Mark invitations as seen so the company can tell read from unread (§9). */
 await run(
   database,
@@ -155,7 +193,25 @@ const money = (row: Row): string | null => {
 
   <section class="sec" style="padding-top:0;">
     <div class="wrap">
+      {mustVerify && (
+        <div class="notice bad" role="alert" style="margin-bottom:20px;">
+          Confirm your email first — we sent you a link. Lost it? Send a fresh one
+          from <a href="/account">Password &amp; security</a>.
+        </div>
+      )}
+      {/* a rejected reply used to vanish without a word; say what stopped it */}
+      {Object.keys(errors).length > 0 && (
+        <div class="notice bad" role="alert" style="margin-bottom:20px;">
+          Your reply was not sent — {Object.values(errors)[0]}
+        </div>
+      )}
       {applied && <div class="notice ok" style="margin-bottom:20px;">Your reply to “{applied}” is with the company.</div>}
+      {kept && (
+        <div class="notice" style="margin-bottom:20px;">
+          You have already replied to “{kept.title}”, and it stands as {applicationStatusLabel(kept.status).toLowerCase()} —
+          so nothing new was sent. <a href="/workspace/freelancer/replies">See your reply</a>.
+        </div>
+      )}
 
       {projects.length === 0 ? (
         <div class="net-empty glass-p">
@@ -178,8 +234,8 @@ const money = (row: Row): string | null => {
                     <p class="spec-service">{service?.name} · {project.company_name}</p>
                     <h3 style="font-size:19px;margin-top:6px;">{project.title}</h3>
                   </div>
-                  {project.applied_status
-                    ? <span class="pill-status ok">{project.applied_status === 'shortlisted' ? 'Shortlisted' : 'Replied'}</span>
+                  {project.applied_status && project.applied_status !== 'withdrawn'
+                    ? <span class="pill-status ok">{project.applied_status === 'submitted' ? 'Replied' : applicationStatusLabel(project.applied_status)}</span>
                     : project.invite_reason && <span class="pill-status info">Invited</span>}
                 </div>
 
@@ -198,11 +254,24 @@ const money = (row: Row): string | null => {
                   {project.nda_required === 1 && <span>NDA required</span>}
                 </div>
 
+                {briefFiles(project.id).length > 0 && (
+                  <div class="row-sm" style="margin-top:14px;">
+                    {briefFiles(project.id).map((file) => (
+                      <a class="btn-glass btn-sm" href={fileHref(file)} target="_blank" rel="noopener">
+                        {file.filename} · {fileSize(file.size_bytes)}
+                      </a>
+                    ))}
+                  </div>
+                )}
+
                 {project.invite_reason && <p class="why">{project.invite_reason}</p>}
 
-                {!project.applied_status && (
+                {/* a reply they took back can be sent again; a decided one cannot */}
+                {(!project.applied_status || project.applied_status === 'withdrawn') && (
                   <details style="margin-top:16px;">
-                    <summary class="btn-hot btn-sm" style="display:inline-flex;list-style:none;">Reply to this project</summary>
+                    <summary class="btn-hot btn-sm" style="display:inline-flex;list-style:none;">
+                      {project.applied_status === 'withdrawn' ? 'Reply again' : 'Reply to this project'}
+                    </summary>
                     <form method="post" class="cform" style="margin-top:16px;" novalidate>
                       <input type="hidden" name="projectId" value={project.id} />
                       <label>

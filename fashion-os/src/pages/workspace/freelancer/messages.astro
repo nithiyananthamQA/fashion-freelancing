@@ -7,15 +7,19 @@
  * they replied to, and work already under way. On the old single-page
  * workspace each thread was buried inside whichever card it belonged to, so
  * there was no way to answer "who is waiting on me?" without scrolling the
- * whole page. This gathers them and puts the ones awaiting a reply first.
+ * whole page. This gathers them and puts the ones awaiting a reply first, each
+ * saying which of the three it hangs off.
  */
 export const prerender = false;
 
 import Workspace from '../../../layouts/Workspace.astro';
-import { all, db, one, run } from '../../../server/db';
+import { db } from '../../../server/db';
 import { guard, requireSpecialist } from '../../../server/guards';
-import { newId, nowIso } from '../../../server/ids';
-import { notify } from '../../../server/audit';
+import { parse } from '../../../server/validate';
+import { limited, tooManyRequests } from '../../../server/rate-limit';
+import { findThread, listThreads, sendMessage, type Side, type Thread } from '../../../server/repo/threads';
+import { fileHref, fileSize } from '../../../server/repo/attachments';
+import { threadKindForSpecialist, threadStatusForSpecialist } from '../../../data/labels';
 import { freelancerNav } from '../../../data/workspace-nav';
 
 const gate = await guard(Astro, () => requireSpecialist(Astro));
@@ -23,90 +27,46 @@ if (gate.response) return gate.response;
 const { user, profileId } = gate.value;
 
 const database = db(Astro);
+const side: Side = { as: 'specialist', profileId, userId: user.id };
 let flash: string | null = null;
 
-/* Reply into a thread. The thread is identified by the hire request it
-   belongs to, and that request must belong to this specialist — the id
-   arrives in a form, and a form can be replayed. */
+/* Reply into a thread. The thread is named by what it hangs off, and that
+   must belong to this specialist — the key arrives in a form, and a form can
+   be replayed, so findThread proves it again on write. */
 if (Astro.request.method === 'POST') {
+  if (await limited(database, 'message', user.id)) return tooManyRequests();
   const form = await Astro.request.formData();
-  const requestId = String(form.get('requestId') ?? '');
-  const body = String(form.get('body') ?? '').trim();
+  const { f, errors } = parse(form);
+  const body = f.text('body', 'Your reply', { required: true, min: 2, max: 3000 });
+  const thread = await findThread(database, side, String(form.get('thread') ?? ''));
 
-  const owned = await one<{ id: string; created_by: string; title: string }>(
-    database,
-    'SELECT id, created_by, title FROM hire_requests WHERE id = ? AND profile_id = ?',
-    requestId, profileId,
-  );
-
-  if (owned && body.length >= 2) {
-    const now = nowIso();
-    await run(
-      database,
-      'INSERT INTO messages (id, hire_request_id, sender_id, body, created_at) VALUES (?, ?, ?, ?, ?)',
-      newId(), owned.id, user.id, body.slice(0, 3000), now,
-    );
-    await notify(database, {
-      userId: owned.created_by,
-      kind: 'message',
-      title: `New message about ${owned.title}`,
-      body: body.slice(0, 140),
-      link: '/workspace/company/messages',
-    });
-    flash = 'Message sent.';
-  } else if (owned) {
-    flash = 'Write a little more before sending.';
+  if (!thread) {
+    flash = 'That conversation could not be found.';
+  } else if (!thread.open) {
+    flash = 'That conversation is closed, so your message was not sent.';
+  } else if (body) {
+    await sendMessage(database, side, thread, user, body);
+    flash = `Sent to ${thread.otherName}.`;
+  } else {
+    flash = errors.body ?? 'Write a little more before sending.';
   }
 }
 
-interface Thread {
-  request_id: string;
-  title: string;
-  company_name: string;
-  status: string;
-  last_at: string | null;
-  total: number;
-  /** 1 when the other side spoke last, so the ball is with us. */
-  theirs_last: number;
-}
+/* Only threads somebody has written in. Waiting on us first, then most
+   recently active. */
+const threads = (await listThreads(database, side))
+  .filter((t) => t.messages.length > 0)
+  .sort((a, b) =>
+    Number(b.theirsLast) - Number(a.theirsLast) || (b.lastAt ?? '').localeCompare(a.lastAt ?? ''));
 
-const threads = await all<Thread>(
-  database,
-  `SELECT h.id AS request_id, h.title, c.name AS company_name, h.status,
-          MAX(m.created_at) AS last_at,
-          COUNT(m.id) AS total,
-          CASE WHEN (
-            SELECT m2.sender_id FROM messages m2
-             WHERE m2.hire_request_id = h.id
-             ORDER BY m2.created_at DESC LIMIT 1
-          ) = ?2 THEN 0 ELSE 1 END AS theirs_last
-     FROM hire_requests h
-     JOIN companies c ON c.id = h.company_id
-     LEFT JOIN messages m ON m.hire_request_id = h.id
-    WHERE h.profile_id = ?1
-    GROUP BY h.id
-    HAVING total > 0
-    -- waiting on us first, then most recently active
-    ORDER BY theirs_last DESC, last_at DESC`,
-  profileId, user.id,
-);
+// a closed thread owes nobody anything, whoever spoke last
+const awaiting = threads.filter((t) => t.theirsLast && t.open).length;
 
-const messages = await all<{
-  hire_request_id: string; body: string; created_at: string; sender_name: string; mine: number;
-}>(
-  database,
-  `SELECT m.hire_request_id, m.body, m.created_at, u.name AS sender_name,
-          CASE WHEN m.sender_id = ?2 THEN 1 ELSE 0 END AS mine
-     FROM messages m
-     JOIN users u ON u.id = m.sender_id
-     JOIN hire_requests h ON h.id = m.hire_request_id
-    WHERE h.profile_id = ?1
-    ORDER BY m.created_at`,
-  profileId, user.id,
-);
-
-const byThread = (id: string) => messages.filter((m) => m.hire_request_id === id);
-const awaiting = threads.filter((t) => t.theirs_last === 1).length;
+/** The page where the thing a thread hangs off can be acted on, not just discussed. */
+const home = (t: Thread): { href: string; label: string } =>
+  t.kind === 'request' ? { href: '/workspace/freelancer/requests', label: 'Open the request' }
+    : t.kind === 'reply' ? { href: '/workspace/freelancer/replies', label: 'Open your reply' }
+    : { href: `/workspace/freelancer/work#work-${t.id}`, label: 'Open the work' };
 
 const when = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
@@ -123,15 +83,16 @@ const nav = freelancerNav({ messages: awaiting || undefined });
   heading="Messages"
   lede={awaiting
     ? `${awaiting} ${awaiting === 1 ? 'conversation is' : 'conversations are'} waiting on your reply.`
-    : 'Every conversation about work you have been asked to do.'}
+    : 'Every conversation about work you have been asked for, replied to or been hired to do.'}
   flash={flash}
 >
   {threads.length === 0 ? (
     <div class="ws-empty">
       <h3>No conversations yet</h3>
       <p>
-        When a company asks to work with you, their brief and any questions
-        appear here. You can answer without leaving this page.
+        When a company asks to work with you, asks about a reply you sent to
+        their project, or writes about work under way, the thread appears here.
+        You can answer without leaving this page.
       </p>
       <a class="btn-glass btn-sm" href="/workspace/freelancer">Back to your overview</a>
     </div>
@@ -142,29 +103,48 @@ const nav = freelancerNav({ messages: awaiting || undefined });
           <div class="ws-row-head">
             <div>
               <h2 style="margin:0;">{t.title}</h2>
-              <p class="ws-sub">{t.company_name} · {t.total} {t.total === 1 ? 'message' : 'messages'} · {when(t.last_at)}</p>
+              <p class="ws-sub">
+                {threadKindForSpecialist(t.kind)} · {t.otherName} · {t.messages.length} {t.messages.length === 1 ? 'message' : 'messages'} · {when(t.lastAt)} · {threadStatusForSpecialist(t.kind, t.status)}
+              </p>
             </div>
-            {t.theirs_last === 1 && <span class="pill-tone warn">Needs your reply</span>}
+            {t.theirsLast && t.open && <span class="pill-tone warn">Needs your reply</span>}
           </div>
 
           <div class="thread">
-            {byThread(t.request_id).map((m) => (
-              <div class={`msg ${m.mine === 1 ? 'mine' : ''}`}>
+            {t.messages.map((m) => (
+              <div class={`msg ${m.mine ? 'mine' : ''}`}>
                 <p class="who">{m.sender_name}</p>
                 <p>{m.body}</p>
+                {m.files.length > 0 && (
+                  <div class="row-sm" style="margin-top:10px;">
+                    {m.files.map((file) => (
+                      <a class="btn-glass btn-sm" href={fileHref(file)} target="_blank" rel="noopener">
+                        {file.filename} · {fileSize(file.size_bytes)}
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
 
-          <form method="post" class="cform" style="margin-top:14px;">
-            <input type="hidden" name="requestId" value={t.request_id} />
-            <label>
-              <span class="fl">Your reply</span>
-              <textarea class="fi" name="body" rows="3" required minlength="2"
-                        placeholder="Answer their question, or tell them what you need to quote."></textarea>
-            </label>
-            <button class="btn-hot btn-sm" style="justify-self:start;">Send reply</button>
-          </form>
+          {t.open ? (
+            <form method="post" class="cform" style="margin-top:14px;">
+              <input type="hidden" name="thread" value={t.key} />
+              <label>
+                <span class="fl">Your reply</span>
+                <textarea class="fi" name="body" rows="3" required minlength="2"
+                          placeholder="Answer their question, or tell them what you need to quote."></textarea>
+              </label>
+              <button class="btn-hot btn-sm" style="justify-self:start;" data-busy="Sending…">Send reply</button>
+            </form>
+          ) : (
+            <p class="ws-sub" style="margin-top:12px;">
+              This conversation is closed — what it was about has been settled.
+            </p>
+          )}
+
+          <a class="btn-glass btn-sm" href={home(t).href} style="margin-top:12px;">{home(t).label}</a>
         </article>
       ))}
     </div>

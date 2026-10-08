@@ -50,6 +50,8 @@ SITE_URL = "https://fashionfreelancing.com"
 # Outbound mail: leave unset to queue verification / notification mail in the
 # outbound_email table instead of sending it (see src/server/mail.ts).
 # MAIL_FROM = "no-reply@fashionfreelancing.com"
+# MAIL_REPLY_TO = "hello@fashionfreelancing.com"   # where replies to our mail go
+# LEADS_TO = "hello@fashionfreelancing.com"        # every new enquiry, comma-separated
 
 # Per-visitor demo sandboxes (src/server/tenant.ts). Leave UNSET for the live
 # site, which is one shared workspace. "1" gives every browser its own private

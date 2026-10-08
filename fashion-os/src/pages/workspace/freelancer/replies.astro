@@ -17,6 +17,10 @@ import { all, db, one, run } from '../../../server/db';
 import { guard, requireSpecialist } from '../../../server/guards';
 import { nowIso } from '../../../server/ids';
 import { notify } from '../../../server/audit';
+import { parse } from '../../../server/validate';
+import { limited, tooManyRequests } from '../../../server/rate-limit';
+import { OPEN_PROJECT } from '../../../server/repo/engagements';
+import { findThread, listThreads, sendMessage, threadKey, threadOf, type Side } from '../../../server/repo/threads';
 import { freelancerNav } from '../../../data/workspace-nav';
 import { getService } from '../../../data/taxonomy';
 import { applicationStatusLabel, engagementLabel, statusTone } from '../../../data/labels';
@@ -26,39 +30,57 @@ if (gate.response) return gate.response;
 const { user, profileId } = gate.value;
 
 const database = db(Astro);
+const side: Side = { as: 'specialist', profileId, userId: user.id };
 let flash: string | null = null;
 
-/* Take a reply back. The id arrives in a form and a form can be replayed, so
-   ownership is re-checked on write — and only a reply still awaiting a
-   decision can be withdrawn, never one already hired or declined. */
+/* Take a reply back, or answer the company in the reply's own thread. The id
+   arrives in a form and a form can be replayed, so ownership is re-checked on
+   write — only a reply still awaiting a decision can be withdrawn, never one
+   already hired or declined, and its thread closes at the same moment. */
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
   const applicationId = String(form.get('applicationId') ?? '');
+  const action = String(form.get('action') ?? '');
 
-  const owned = await one<{ id: string; title: string; created_by: string }>(
-    database,
-    `SELECT a.id, p.title, p.created_by
-       FROM applications a
-       JOIN projects p ON p.id = a.project_id
-      WHERE a.id = ? AND a.profile_id = ? AND a.status IN ('submitted', 'shortlisted')`,
-    applicationId, profileId,
-  );
-
-  if (owned) {
-    await run(
+  if (action === 'message') {
+    if (await limited(database, 'message', user.id)) return tooManyRequests();
+    const { f, errors } = parse(form);
+    const body = f.text('body', 'Your message', { required: true, min: 2, max: 3000 });
+    const thread = await findThread(database, side, threadKey('reply', applicationId));
+    if (!thread || !thread.open) {
+      flash = 'This reply has been decided, so its conversation is closed.';
+    } else if (body) {
+      await sendMessage(database, side, thread, user, body);
+      flash = `Sent to ${thread.otherName}.`;
+    } else {
+      flash = errors.body ?? 'Write a little more before sending.';
+    }
+  } else if (action === 'withdraw') {
+    const owned = await one<{ id: string; title: string; created_by: string }>(
       database,
-      "UPDATE applications SET status = 'withdrawn', updated_at = ? WHERE id = ?",
-      nowIso(), owned.id,
+      `SELECT a.id, p.title, p.created_by
+         FROM applications a
+         JOIN projects p ON p.id = a.project_id
+        WHERE a.id = ? AND a.profile_id = ? AND a.status IN ('submitted', 'shortlisted')`,
+      applicationId, profileId,
     );
-    await notify(database, {
-      userId: owned.created_by,
-      kind: 'application_withdrawn',
-      title: `${user.name} withdrew their reply to ${owned.title}`,
-      link: '/workspace/company',
-    });
-    flash = 'Reply withdrawn. The company has been told.';
-  } else {
-    flash = 'That reply can no longer be withdrawn — it has already been decided.';
+
+    if (owned) {
+      await run(
+        database,
+        "UPDATE applications SET status = 'withdrawn', updated_at = ? WHERE id = ? AND status IN ('submitted', 'shortlisted')",
+        nowIso(), owned.id,
+      );
+      await notify(database, {
+        userId: owned.created_by,
+        kind: 'application_withdrawn',
+        title: `${user.name} withdrew their reply to ${owned.title}`,
+        link: '/workspace/company/replies',
+      });
+      flash = 'Reply withdrawn. The company has been told — you can reply again while the project is open.';
+    } else {
+      flash = 'That reply can no longer be withdrawn — it has already been decided.';
+    }
   }
 }
 
@@ -74,13 +96,14 @@ interface Reply {
   service_id: string;
   engagement: string | null;
   project_status: string;
+  project_currency: string | null;
   company_name: string;
 }
 
 const replies = await all<Reply>(
   database,
   `SELECT a.id, a.pitch, a.price, a.currency, a.timeline, a.status, a.created_at,
-          p.title, p.service_id, p.engagement, p.status AS project_status,
+          p.title, p.service_id, p.engagement, p.status AS project_status, p.currency AS project_currency,
           c.name AS company_name
      FROM applications a
      JOIN projects p ON p.id = a.project_id
@@ -92,15 +115,24 @@ const replies = await all<Reply>(
   profileId,
 );
 
+const threads = await listThreads(database, side);
+const messagesOf = (id: string) => threadOf(threads, 'reply', id)?.messages ?? [];
+
 const open = replies.filter((r) => r.status === 'submitted' || r.status === 'shortlisted').length;
+
+/* A reply taken back can be sent again — but only while the project is still
+   taking replies, and from /projects, where the brief is in front of them. */
+const canReplyAgain = (r: Reply) =>
+  r.status === 'withdrawn' && (OPEN_PROJECT as readonly string[]).includes(r.project_status);
 
 /* A reply nobody ever answered: the project moved on without a decision on it. */
 const wentQuiet = (r: Reply) =>
   r.status === 'submitted'
   && ['hired', 'in_progress', 'delivered', 'completed', 'closed'].includes(r.project_status);
 
+/* The price was typed against the project's currency; older rows stored only the default. */
 const money = (r: Reply) =>
-  r.price === null ? 'No price given' : `${r.currency ?? 'USD'} ${r.price.toLocaleString('en-GB')}`;
+  r.price === null ? 'No price given' : `${r.project_currency ?? r.currency ?? 'USD'} ${r.price.toLocaleString('en-GB')}`;
 
 const when = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
@@ -164,16 +196,48 @@ const nav = freelancerNav({ replies: open || undefined });
 
           {wentQuiet(r) && (
             <p class="ws-sub">
-              This project has since been filled, and no decision was recorded
-              against your reply.
+              This project has since been {r.project_status === 'closed' ? 'closed' : 'filled'}, and no
+              decision was recorded against your reply.
             </p>
+          )}
+
+          {messagesOf(r.id).length > 0 && (
+            <div class="thread" style="margin-top:14px;">
+              {messagesOf(r.id).map((m) => (
+                <div class={`msg ${m.mine ? 'mine' : ''}`}>
+                  <p class="who">{m.sender_name}</p>
+                  <p>{m.body}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {(r.status === 'submitted' || r.status === 'shortlisted') && messagesOf(r.id).length > 0 && (
+            <form method="post" class="cform" style="margin-top:14px;">
+              <input type="hidden" name="applicationId" value={r.id} />
+              <label>
+                <span class="fl">Your reply to {r.company_name}</span>
+                <textarea class="fi" name="body" rows="3" required minlength="2"
+                          placeholder="Answer what they asked. Your offer above stays as it is."></textarea>
+              </label>
+              <button class="btn-hot btn-sm" name="action" value="message"
+                      style="justify-self:start;" data-busy="Sending…">Send</button>
+            </form>
           )}
 
           {(r.status === 'submitted' || r.status === 'shortlisted') && (
             <form method="post" style="margin-top:14px;">
               <input type="hidden" name="applicationId" value={r.id} />
-              <button class="btn-glass btn-sm">Withdraw this reply</button>
+              <button class="btn-glass btn-sm" name="action" value="withdraw">Withdraw this reply</button>
             </form>
+          )}
+
+          {canReplyAgain(r) && (
+            <a class="btn-glass btn-sm" href="/projects" style="margin-top:14px;">Reply again from Projects</a>
+          )}
+
+          {r.status === 'hired' && (
+            <a class="btn-glass btn-sm" href="/workspace/freelancer/work" style="margin-top:14px;">See the work</a>
           )}
         </article>
       ))}

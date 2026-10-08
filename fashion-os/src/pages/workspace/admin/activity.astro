@@ -9,12 +9,20 @@
  * holds live confirmation and password-reset links that somebody is sitting
  * waiting for. Read together they answer one question — what has this
  * workspace been doing, and is anyone stuck waiting on us?
+ *
+ * Mail that did not go out can be sent again from here. Without that, a
+ * message queued before the provider was set up, or one that failed during a
+ * provider outage, stayed stuck for good; the button works through the most
+ * recent ones, and stops trying any one message after a fixed number of
+ * attempts (src/server/mail.ts).
  */
 export const prerender = false;
 
 import Workspace from '../../../layouts/Workspace.astro';
 import { all, db, env } from '../../../server/db';
 import { guard, requireAdmin } from '../../../server/guards';
+import { audit } from '../../../server/audit';
+import { MAX_SEND_ATTEMPTS, canSendMail, retryQueuedMail } from '../../../server/mail';
 import { activityLabel, mailStatusLabel } from '../../../data/labels';
 import { adminNav } from '../../../data/workspace-nav';
 
@@ -24,6 +32,28 @@ const admin = gate.value;
 
 const database = db(Astro);
 const tenant = Astro.locals.tenant;
+const runtime = env(Astro);
+let flash: string | null = null;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  if (String(form.get('action') ?? '') === 'retry_mail') {
+    const result = await retryQueuedMail(database, runtime, 20, tenant);
+    if (!result.configured) {
+      flash = 'No mail provider is configured, so there is nothing to send them with yet.';
+    } else if (result.sent + result.failed === 0) {
+      flash = 'Nothing recent is waiting to be sent again.';
+    } else {
+      await audit(database, {
+        actorId: admin.id, action: 'mail.retried', entityType: 'outbound_email', entityId: 'queue',
+        detail: { sent: result.sent, failed: result.failed }, request: Astro.request,
+      });
+      flash = result.failed === 0
+        ? `${result.sent} ${result.sent === 1 ? 'message' : 'messages'} sent.`
+        : `${result.sent} sent, ${result.failed} still failing — the reason is on each one below.`;
+    }
+  }
+}
 
 interface Entry {
   action: string;
@@ -38,6 +68,7 @@ interface Message {
   body: string;
   status: string;
   error: string | null;
+  attempts: number;
   created_at: string;
 }
 
@@ -60,7 +91,7 @@ const [activity, undelivered] = await Promise.all([
      is the one that will never retry on its own. */
   all<Message>(
     database,
-    `SELECT id, to_email, subject, body, status, error, created_at
+    `SELECT id, to_email, subject, body, status, error, attempts, created_at
        FROM outbound_email
       WHERE status IN ('queued', 'failed') AND tenant IN (?, 'public')
       ORDER BY created_at DESC
@@ -72,8 +103,13 @@ const [activity, undelivered] = await Promise.all([
 /* Whether anything will ever pick the queue up. Without both of these every
    message stops at 'queued' forever, and the only way the link reaches the
    person waiting is somebody copying it off this page. */
-const runtime = env(Astro);
-const canSend = Boolean(runtime.RESEND_API_KEY && runtime.MAIL_FROM);
+const canSend = canSendMail(runtime);
+/* Until a provider is configured this page IS the delivery channel, so the
+   sign-in and reset links in a queued message are shown for an admin to pass
+   on. Once mail really sends, nobody needs to read them here — and a reset
+   link is a key to someone's account — so their tokens are hidden. */
+const hasToken = (body: string) => /[?&]token=/.test(body);
+const shown = (body: string) => canSend ? body.replace(/([?&]token=)[^\s&]+/g, '$1•••') : body;
 
 const clock = (iso: string) =>
   new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
@@ -116,6 +152,7 @@ const nav = adminNav();
   lede={undelivered.length
     ? `${undelivered.length} ${undelivered.length === 1 ? 'message has' : 'messages have'} not reached anyone yet.`
     : 'Everything that has happened here, and any message still waiting to go out.'}
+  flash={flash}
 >
   {activity.length === 0 && undelivered.length === 0 ? (
     <div class="ws-empty">
@@ -193,6 +230,17 @@ const nav = adminNav();
           </div>
           {undelivered.length > 0 && <span class="pill-tone warn">{undelivered.length} not delivered</span>}
         </div>
+
+        {canSend && undelivered.length > 0 && (
+          <form method="post" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+            <input type="hidden" name="action" value="retry_mail" />
+            <button class="btn-hot btn-sm" data-busy="Sending…">Try sending them again</button>
+            <span class="ws-sub" style="margin:0;">
+              The 20 most recent from the last three days, one at a time. A
+              message is given up on after {MAX_SEND_ATTEMPTS} tries.
+            </span>
+          </form>
+        )}
       </section>
 
       {undelivered.length === 0 ? (
@@ -212,7 +260,14 @@ const nav = adminNav();
             <div class="ws-row-head">
               <div>
                 <h2 style="margin:0;">{message.subject}</h2>
-                <p class="ws-sub">To {message.to_email} · written {when(message.created_at)} at {clock(message.created_at)}</p>
+                <p class="ws-sub">
+                  To {message.to_email} · written {when(message.created_at)} at {clock(message.created_at)}
+                  {message.attempts > 0 && (
+                    <span> · {message.attempts >= MAX_SEND_ATTEMPTS
+                      ? `gave up after ${message.attempts} tries — send it by hand`
+                      : `tried ${message.attempts} ${message.attempts === 1 ? 'time' : 'times'}`}</span>
+                  )}
+                </p>
               </div>
               <span class={`pill-tone ${message.status === 'failed' ? 'bad' : 'warn'}`}>
                 {mailStatusLabel(message.status)}
@@ -224,7 +279,7 @@ const nav = adminNav();
                 <p class="who">What it says</p>
                 {/* Kept as typed: the line breaks are the message, and the sign-in
                     link inside it has to survive being copied out. */}
-                <p style="white-space:pre-wrap;word-break:break-word;">{message.body}</p>
+                <p style="white-space:pre-wrap;word-break:break-word;">{shown(message.body)}</p>
               </div>
 
               {message.error && (
@@ -236,10 +291,12 @@ const nav = adminNav();
             </div>
 
             <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;">
-              <a class="btn-glass btn-sm"
-                 href={`mailto:${message.to_email}?subject=${encodeURIComponent(message.subject)}&body=${encodeURIComponent(message.body)}`}>
-                Send it by hand
-              </a>
+              {!(canSend && hasToken(message.body)) && (
+                <a class="btn-glass btn-sm"
+                   href={`mailto:${message.to_email}?subject=${encodeURIComponent(message.subject)}&body=${encodeURIComponent(message.body)}`}>
+                  Send it by hand
+                </a>
+              )}
             </div>
           </article>
         ))

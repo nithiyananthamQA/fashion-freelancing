@@ -1,22 +1,35 @@
 ---
 /**
  * /workspace/freelancer/work — everything a company has actually hired this
- * specialist for: what is still open, what is finished, and the money recorded
- * against each one.
+ * specialist for: what is still open, what is finished, the conversation about
+ * each job, and the money recorded against it.
  *
  * An engagement is created the moment a request to hire is accepted or a reply
  * is picked, and on the old single-page workspace it was one line of title and
  * status. That answers "how many?" but not the two questions a specialist
  * really has — what did they ask me for, and have I been paid. Both sit one
  * join away, so both are here, with the unfinished work first.
+ *
+ * Handing over used to be a bare status change: no note, no files, so the
+ * work itself had to travel by some other route and the company was asked to
+ * review something it could not see. The hand-over now carries both, into the
+ * job's own thread, where the company's notes on it land too.
  */
 export const prerender = false;
 
 import Workspace from '../../../layouts/Workspace.astro';
-import { all, db, one, run } from '../../../server/db';
+import { all, db, env } from '../../../server/db';
 import { guard, requireSpecialist } from '../../../server/guards';
-import { nowIso } from '../../../server/ids';
-import { notify } from '../../../server/audit';
+import { audit, notify, notifyAdmins } from '../../../server/audit';
+import { parse } from '../../../server/validate';
+import { limited, tooManyRequests } from '../../../server/rate-limit';
+import { LIVE_WORK, moveEngagement } from '../../../server/repo/engagements';
+import {
+  excerpt, findThread, listThreads, postMessage, sendMessage, threadKey, threadOf, type Side,
+} from '../../../server/repo/threads';
+import {
+  ACCEPT, ATTACHMENT_COLUMNS, MAX_FILES, fileHref, fileSize, filesBy, pickFiles, storeFiles, type Attachment,
+} from '../../../server/repo/attachments';
 import { getService } from '../../../data/taxonomy';
 import {
   engagementLabel, engagementStatusLabel,
@@ -29,49 +42,98 @@ if (gate.response) return gate.response;
 const { user, profileId } = gate.value;
 
 const database = db(Astro);
+const side: Side = { as: 'specialist', profileId, userId: user.id };
 let flash: string | null = null;
 
-/* Hand the work over for review. The id arrives in a form and a form can be
-   replayed with somebody else's, so ownership is proved again on write — and
-   only work still open can be delivered, never something already finished. */
+/* Files need an R2 bucket. Without one the hand-over is a note only, as the
+   portfolio step of /apply falls back to a link. */
+const bucket = env(Astro).MEDIA;
+
+/* Hand the work over, raise an issue, or write into the job's thread. The id
+   arrives in a form and a form can be replayed with somebody else's, so
+   ownership is proved again on write (findThread) — and only work still open
+   can be delivered, never something already finished (moveEngagement). */
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
-  const engagementId = String(form.get('engagementId') ?? '');
+  const action = String(form.get('action') ?? '');
+  const thread = await findThread(database, side, threadKey('work', String(form.get('engagementId') ?? '')));
+  const { f, errors } = parse(form);
 
-  const owned = await one<{ id: string; title: string; buyer_id: string | null }>(
-    database,
-    `SELECT e.id, e.title,
-            -- whoever asked for the work, falling back to whoever owns the company
-            COALESCE(h.created_by, p.created_by,
-              (SELECT m.user_id FROM company_members m
-                WHERE m.company_id = e.company_id
-                ORDER BY CASE WHEN m.role = 'owner' THEN 0 ELSE 1 END
-                LIMIT 1)) AS buyer_id
-       FROM engagements e
-       LEFT JOIN hire_requests h ON h.id = e.hire_request_id
-       LEFT JOIN projects p ON p.id = e.project_id
-      WHERE e.id = ? AND e.profile_id = ? AND e.status IN ('active', 'revision')`,
-    engagementId, profileId,
-  );
-
-  if (owned) {
-    await run(
-      database,
-      "UPDATE engagements SET status = 'delivered', updated_at = ? WHERE id = ?",
-      nowIso(), owned.id,
-    );
-    if (owned.buyer_id) {
-      await notify(database, {
-        userId: owned.buyer_id,
-        kind: 'engagement_delivered',
-        title: `${user.name} delivered: ${owned.title}`,
-        body: 'It is waiting for your review.',
-        link: '/workspace/company/work',
-      });
+  if (!thread) {
+    flash = 'That work could not be found.';
+  } else if (action === 'message') {
+    if (await limited(database, 'message', user.id)) return tooManyRequests();
+    const body = f.text('body', 'Your message', { required: true, min: 2, max: 3000 });
+    if (body) {
+      await sendMessage(database, side, thread, user, body);
+      flash = `Sent to ${thread.otherName}.`;
+    } else {
+      flash = errors.body ?? 'Write a little more before sending.';
     }
-    flash = 'Marked as delivered. The company has been asked to review it.';
-  } else {
-    flash = 'That work can no longer be marked as delivered.';
+  } else if (action === 'deliver') {
+    const note = f.text('note', 'Your note', { max: 3000 });
+    // Every file is checked before the status moves, so a bad one costs nothing.
+    const uploads = bucket ? await pickFiles(form, 'files') : { files: [], problem: null };
+    if (uploads.files.length && await limited(database, 'upload', user.id)) return tooManyRequests();
+
+    if (errors.note || uploads.problem) {
+      flash = `Nothing was handed over — ${errors.note ?? uploads.problem}`;
+    } else if (await moveEngagement(database, thread.id, ['active', 'revision'], 'delivered')) {
+      /* The note and the files go into the thread together, so the company
+         reads what was handed over next to what it was handed over with. */
+      if (note || uploads.files.length) {
+        const count = uploads.files.length;
+        const messageId = await postMessage(
+          database, thread, user.id,
+          note || `Handed over ${count} ${count === 1 ? 'file' : 'files'}.`,
+        );
+        if (bucket && count) {
+          await storeFiles(database, bucket, uploads.files, user.id, { engagementId: thread.id, messageId });
+        }
+      }
+      if (thread.recipientId) {
+        await notify(database, {
+          userId: thread.recipientId,
+          kind: 'engagement_delivered',
+          title: `${user.name} delivered: ${thread.title}`,
+          body: note ? excerpt(note) : 'It is waiting for your review.',
+          link: '/workspace/company/work',
+        });
+      }
+      flash = 'Marked as delivered. The company has been asked to review it.';
+    } else {
+      flash = 'That work can no longer be marked as delivered.';
+    }
+  } else if (action === 'issue') {
+    if (await limited(database, 'message', user.id)) return tooManyRequests();
+    const issue = f.text('issue', 'What has gone wrong', { required: true, min: 20, max: 2000 });
+    if (!issue) {
+      flash = `Nothing was raised — ${errors.issue ?? 'say what has gone wrong.'}`;
+    } else if (await moveEngagement(database, thread.id, LIVE_WORK, 'disputed')) {
+      await postMessage(database, thread, user.id, `Issue raised:\n\n${issue}`);
+      if (thread.recipientId) {
+        await notify(database, {
+          userId: thread.recipientId,
+          kind: 'engagement_disputed',
+          title: `Issue raised: ${thread.title}`,
+          body: excerpt(issue),
+          link: '/workspace/company/work',
+        });
+      }
+      await audit(database, {
+        actorId: user.id, action: 'engagement.disputed', entityType: 'engagement', entityId: thread.id,
+        detail: { raisedBy: 'specialist' }, request: Astro.request,
+      });
+      await notifyAdmins(database, {
+        kind: 'engagement_disputed',
+        title: `Issue raised: ${thread.title}`,
+        body: `${user.name}, on work for ${thread.otherName}: ${excerpt(issue)}`,
+        link: '/workspace/admin/disputes',
+      });
+      flash = 'Raised. Our team has been told and will be in touch, and so has the company.';
+    } else {
+      flash = 'An issue can only be raised on work still under way.';
+    }
   }
 }
 
@@ -89,6 +151,10 @@ interface Job {
   engagement: string | null;
   deadline: string | null;
   from_project: number;
+  /** What was agreed: the price sent back on a request, or the price on the reply. */
+  agreed_amount: number | null;
+  agreed_currency: string | null;
+  agreed_timeline: string | null;
 }
 
 interface Payment {
@@ -113,11 +179,15 @@ const jobs = await all<Job>(
           COALESCE(h.deliverables, p.deliverables) AS deliverables,
           COALESCE(h.engagement, p.engagement)     AS engagement,
           COALESCE(h.deadline, p.deadline)         AS deadline,
-          CASE WHEN e.project_id IS NULL THEN 0 ELSE 1 END AS from_project
+          CASE WHEN e.project_id IS NULL THEN 0 ELSE 1 END AS from_project,
+          COALESCE(h.proposal_amount, a.price)                        AS agreed_amount,
+          COALESCE(h.proposal_currency, h.currency, p.currency, a.currency) AS agreed_currency,
+          COALESCE(h.proposal_timeline, a.timeline)                   AS agreed_timeline
      FROM engagements e
      JOIN companies c ON c.id = e.company_id
      LEFT JOIN hire_requests h ON h.id = e.hire_request_id
      LEFT JOIN projects p ON p.id = e.project_id
+     LEFT JOIN applications a ON a.project_id = e.project_id AND a.profile_id = e.profile_id
     WHERE e.profile_id = ?
     -- still open first, then whatever moved most recently
     ORDER BY CASE WHEN e.status IN ('completed', 'closed') THEN 1 ELSE 0 END,
@@ -131,12 +201,30 @@ const payments = await all<Payment>(
           y.reference, y.created_at
      FROM payments y
      JOIN engagements e ON e.id = y.engagement_id
-    WHERE e.profile_id = ?
+    -- a draft is our team's note to itself until it is raised
+    WHERE e.profile_id = ? AND y.status != 'draft'
     ORDER BY y.created_at DESC`,
   profileId,
 );
 
+const threads = await listThreads(database, side);
+
+/* The files that came with the brief, filed under the work they became. */
+const briefFiles = filesBy(
+  await all<Attachment & { work_id: string }>(
+    database,
+    `SELECT ${ATTACHMENT_COLUMNS}, e.id AS work_id
+       FROM attachments at
+       JOIN engagements e ON at.hire_request_id = e.hire_request_id OR at.project_id = e.project_id
+      WHERE e.profile_id = ? AND at.message_id IS NULL AND at.scan_status = 'clean'`,
+    profileId,
+  ),
+  'work_id',
+);
+
 const forJob = (id: string) => payments.filter((y) => y.engagement_id === id);
+const messagesOf = (id: string) => threadOf(threads, 'work', id)?.messages ?? [];
+const isLive = (j: Job) => (LIVE_WORK as readonly string[]).includes(j.status);
 
 const open = jobs.filter((j) => !['completed', 'closed'].includes(j.status)).length;
 
@@ -155,6 +243,13 @@ const facts = (j: Job): string => {
   parts.push(j.from_project === 1 ? 'From a posted project' : 'From a request to hire');
   parts.push(`Started ${when(j.created_at)}`);
   return parts.join(' · ');
+};
+
+/** The terms both sides agreed to, if a figure was ever put on them. */
+const agreed = (j: Job): string | null => {
+  if (j.agreed_amount === null) return null;
+  const price = `${j.agreed_currency ?? 'USD'} ${j.agreed_amount.toLocaleString('en-GB')}`;
+  return j.agreed_timeline ? `${price} · ${j.agreed_timeline}` : price;
 };
 
 const tone = (status: string) => {
@@ -184,79 +279,167 @@ const nav = freelancerNav({ work: open || undefined });
       <p>
         Work appears here the moment a company hires you — either by you
         accepting a request to work with them, or by them picking your reply to
-        a posted project. The brief, the state of the job and every payment
-        recorded against it then stay on this page.
+        a posted project. The brief, the conversation, the state of the job and
+        every payment recorded against it then stay on this page.
       </p>
       <a class="btn-hot btn-sm" href="/workspace/freelancer/requests">Answer your requests to hire</a>
     </div>
   ) : (
     <div class="stack-sm">
-      {jobs.map((j) => (
-        <article class="panel glass-p">
-          <div class="ws-row-head">
-            <div>
-              <h2 style="margin:0;">{j.title}</h2>
-              <p class="ws-sub">{facts(j)}</p>
-            </div>
-            <span class={tone(j.status)}>{engagementStatusLabel(j.status)}</span>
-          </div>
-
-          {j.brief && (
-            <div class="thread">
-              <div class="msg">
-                <p class="who">What they asked for</p>
-                <p>{j.brief}</p>
+      {jobs.map((j) => {
+        const thread = messagesOf(j.id);
+        const files = briefFiles(j.id);
+        return (
+          <article class="panel glass-p" id={`work-${j.id}`}>
+            <div class="ws-row-head">
+              <div>
+                <h2 style="margin:0;">{j.title}</h2>
+                <p class="ws-sub">{facts(j)}</p>
               </div>
+              <span class={tone(j.status)}>{engagementStatusLabel(j.status)}</span>
             </div>
-          )}
 
-          {j.deliverables && (
-            <p class="ws-sub">What they need delivered: {j.deliverables}</p>
-          )}
+            {j.brief && (
+              <div class="thread">
+                <div class="msg">
+                  <p class="who">What they asked for</p>
+                  <p>{j.brief}</p>
+                </div>
+              </div>
+            )}
 
-          {j.status === 'delivered' && (
-            <p class="ws-sub">You have handed this over. It is with {j.company_name} to review.</p>
-          )}
+            {j.deliverables && (
+              <p class="ws-sub">What they need delivered: {j.deliverables}</p>
+            )}
 
-          {j.status === 'disputed' && (
-            <p class="ws-sub">
-              {j.company_name} has raised a dispute on this work. Our team will
-              be in touch — anything you send in Messages becomes part of it.
-            </p>
-          )}
+            {agreed(j) && <p class="ws-sub">Agreed: {agreed(j)}</p>}
 
-          <div class="stack-sm" style="margin-top:14px;">
-            {forJob(j.id).length === 0 ? (
-              <p class="ws-sub" style="margin:0;">
-                No payments recorded against this work yet. The company raises
-                the invoice from their side, and every invoice and payout then
-                shows up on this line.
+            {files.length > 0 && (
+              <div class="row-sm" style="margin-top:10px;">
+                {files.map((file) => (
+                  <a class="btn-glass btn-sm" href={fileHref(file)} target="_blank" rel="noopener">
+                    {file.filename} · {fileSize(file.size_bytes)}
+                  </a>
+                ))}
+              </div>
+            )}
+
+            {j.status === 'delivered' && (
+              <p class="ws-sub">You have handed this over. It is with {j.company_name} to review.</p>
+            )}
+
+            {j.status === 'revision' && (
+              <p class="ws-sub">
+                {j.company_name} asked for changes on {when(j.updated_at)} — their notes are in the
+                thread below.
               </p>
-            ) : forJob(j.id).map((y) => (
-              <div class="ws-row-head" style="margin:0;">
+            )}
+
+            {j.status === 'closed' && (
+              <p class="ws-sub">{j.company_name} closed this on {when(j.updated_at)}, before it was finished.</p>
+            )}
+
+            {j.status === 'disputed' && (
+              <p class="ws-sub">
+                This work is in dispute. Our team will be in touch — anything
+                either side writes in the thread below becomes part of it.
+              </p>
+            )}
+
+            <div class="stack-sm" style="margin-top:14px;">
+              {forJob(j.id).length === 0 ? (
                 <p class="ws-sub" style="margin:0;">
-                  {paymentKindLabel(y.kind)} · {money(y)}
-                  {y.reference && <span> · {y.reference}</span>}
-                  <span> · {when(y.created_at)}</span>
+                  No payments recorded against this work yet. Once an invoice or a
+                  payout is recorded it shows up on this line and under Payments.
                 </p>
-                <span class={tone(y.status)}>{paymentStatusLabel(y.status)}</span>
+              ) : forJob(j.id).map((y) => (
+                <div class="ws-row-head" style="margin:0;">
+                  <p class="ws-sub" style="margin:0;">
+                    {paymentKindLabel(y.kind)} · {money(y)}
+                    {y.reference && <span> · {y.reference}</span>}
+                    <span> · {when(y.created_at)}</span>
+                  </p>
+                  <span class={tone(y.status)}>{paymentStatusLabel(y.status)}</span>
+                </div>
+              ))}
+            </div>
+
+            {thread.length > 0 && (
+              <div class="thread" style="margin-top:14px;">
+                {thread.map((m) => (
+                  <div class={`msg ${m.mine ? 'mine' : ''}`}>
+                    <p class="who">{m.sender_name} · {when(m.created_at)}</p>
+                    <p>{m.body}</p>
+                    {m.files.length > 0 && (
+                      <div class="row-sm" style="margin-top:10px;">
+                        {m.files.map((file) => (
+                          <a class="btn-glass btn-sm" href={fileHref(file)} target="_blank" rel="noopener">
+                            {file.filename} · {fileSize(file.size_bytes)}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
 
-          {(j.status === 'active' || j.status === 'revision') && (
-            <form method="post" style="margin-top:14px;">
+            {(j.status === 'active' || j.status === 'revision') && (
+              <form method="post" class="cform" style="margin-top:14px;"
+                    enctype={bucket ? 'multipart/form-data' : undefined}>
+                <input type="hidden" name="engagementId" value={j.id} />
+                <label>
+                  <span class="fl">{j.status === 'revision' ? 'What you changed' : 'A note with the hand-over'}</span>
+                  <textarea class="fi" name="note" rows="2"
+                            placeholder="Optional — what is included, where to find it, anything they should check first."></textarea>
+                </label>
+                {bucket && (
+                  <label>
+                    <span class="fl">Files</span>
+                    <input class="fi" type="file" name="files" multiple accept={ACCEPT} />
+                    <span class="fh">
+                      JPG, PNG, WebP, AVIF, PDF or MP4, up to {MAX_FILES} files of 25 MB each. Source files in other
+                      formats still go by link in the note.
+                    </span>
+                  </label>
+                )}
+                <button class="btn-hot btn-sm" name="action" value="deliver" style="justify-self:start;" data-busy="Handing over…">
+                  {j.status === 'revision' ? 'Send the changes back' : 'Mark as delivered'}
+                </button>
+              </form>
+            )}
+
+            <form method="post" class="cform" style="margin-top:14px;">
               <input type="hidden" name="engagementId" value={j.id} />
-              <button class="btn-hot btn-sm">
-                {j.status === 'revision' ? 'Send the changes back' : 'Mark as delivered'}
-              </button>
+              <label>
+                <span class="fl">{thread.length ? 'Your reply' : `Message ${j.company_name}`}</span>
+                <textarea class="fi" name="body" rows="2" required minlength="2"
+                          placeholder="Anything about this piece of work — both of you see the whole thread here."></textarea>
+              </label>
+              <button class="btn-glass btn-sm" name="action" value="message"
+                      style="justify-self:start;" data-busy="Sending…">Send</button>
             </form>
-          )}
 
-          <a class="btn-glass btn-sm" href="/workspace/freelancer/messages"
-             style="margin-top:14px;">Message {j.company_name}</a>
-        </article>
-      ))}
+            {isLive(j) && (
+              <details style="margin-top:14px;">
+                <summary class="btn-glass btn-sm" style="display:inline-flex;list-style:none;">Raise an issue</summary>
+                <form method="post" class="cform" style="margin-top:12px;">
+                  <input type="hidden" name="engagementId" value={j.id} />
+                  <label>
+                    <span class="fl">What has gone wrong</span>
+                    <textarea class="fi" name="issue" rows="3" required minlength="20"
+                              placeholder="What was agreed, what has happened instead, and what you have tried."></textarea>
+                    <span class="fh">
+                      Our team is told straight away and steps in. The work is paused as disputed until it is settled.
+                    </span>
+                  </label>
+                  <button class="btn-hot btn-sm" name="action" value="issue" style="justify-self:start;">Raise it with our team</button>
+                </form>
+              </details>
+            )}
+          </article>
+        );
+      })}
     </div>
   )}
 </Workspace>

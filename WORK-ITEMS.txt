@@ -1,5 +1,6 @@
 Fashion Freelancing - Work Items
 fashionfreelancing.com
+Updated 2026-10-08
 
 
 COMPLETED
@@ -7,90 +8,70 @@ COMPLETED
 [x] Nameservers updated in Hostinger
 [x] Email records moved (Hostinger mail working)
 [x] Website live on fashionfreelancing.com
-[x] www.fashionfreelancing.com live
-[x] Sitemap updated with domain URLs
+[x] www.fashionfreelancing.com live (now 301s to the apex for worker pages)
+[x] Sitemap updated with domain URLs (now generated live, lists approved profiles)
 [x] robots.txt updated
 [x] Site URL updated to main domain
 
 
+SPEED (done 2026-10-08)
+[x] Marketing pages served from the Cloudflare edge cache (no database trip per visit)
+[x] No cookie / session lookup on marketing pages
+[x] 3D page: model loads on tap on phones, after load on desktop (3.6 MB -> 0.2 MB first load)
+[x] Fonts self-hosted + preloaded (no Google Fonts round trips, no layout shift)
+[x] Shared CSS/JS minified at build
+[x] ~50 MB of unused images removed from the deployed folder
+[x] Cache headers checked; HSTS added
+[ ] Turn on D1 read replication (Cloudflare dashboard) - speeds up signed-in pages
+
+
+SEO (done 2026-10-08, except owner steps)
+[x] Canonical tags on all pages
+[x] Share card image (og:image) - one per page
+[x] Open Graph + Twitter tags on all pages
+[x] Schema markup: Organization, WebSite, Service, FAQ, Breadcrumb, AboutPage
+[x] Meta descriptions on all pages, titles/descriptions trimmed to Google length
+[x] Favicon set (ico, svg, apple touch icon, manifest)
+[x] Clean URLs everywhere (no .html redirects), short URLs 301 in one hop
+[ ] OWNER: turn OFF "Manage robots.txt" (AI Crawl Control) in Cloudflare - it adds
+    a line Google flags as an error and blocks some search crawlers
+[ ] OWNER: Google Search Console - verify domain (DNS TXT in Cloudflare), submit /sitemap.xml
+[ ] OWNER: Bing Webmaster Tools - import from Search Console
+
+
 EMAIL & NOTIFICATIONS
-[ ] Email sending setup (Resend)
-[ ] Sender email - no-reply@fashionfreelancing.com
-[ ] Domain verification for sending
-[ ] SPF record update
-[ ] Sign-up verification email
-[ ] Password reset email
-[ ] Job / enquiry notification emails
-[ ] Bounce handling
-[ ] Email routing - check before enabling, it replaces the Hostinger mail records
+[x] Code: verification, reset, every in-product notification, new-lead alerts
+[x] Code: retry button for failed/queued mail (Workspace -> Activity)
+[ ] OWNER: Resend account, verify domain (DKIM + SPF include merged into Hostinger SPF)
+[ ] OWNER: set RESEND_API_KEY (secret), MAIL_FROM, MAIL_REPLY_TO, LEADS_TO (variables)
+[ ] OWNER: confirm mailbox hello@fashionfreelancing.com exists in Hostinger
+[ ] Bounce handling (needs Resend webhook)
 
 
 LOGIN
-[ ] Google sign-in
-[ ] Session security key
-[ ] Login rate limit
-[ ] Forgot password flow
-
-
-SEO
-[ ] Canonical tags on all pages
-[ ] Share card image (og:image)
-[ ] Open Graph tags on remaining pages
-[ ] Schema markup on remaining pages
-[ ] Meta descriptions on remaining pages
-[ ] Favicon set (ico, apple touch icon)
-[ ] Google Search Console setup
-[ ] Sitemap submission
-[ ] Bing Webmaster Tools
-
-
-LIGHTHOUSE & PERFORMANCE
-[ ] Lighthouse audit - all pages
-[ ] Image compression (WebP)
-[ ] Cache headers check
-[ ] Font loading
-[ ] JS size check
-[ ] Core Web Vitals
+[x] Session security key - not needed (sessions are random tokens hashed in D1)
+[x] Login rate limit (per IP and per account)
+[x] Forgot password flow; change password + sign out everywhere at /account
+[x] Accounts work on every device (single workspace, migration 0011)
+[ ] Google sign-in (needs Google OAuth client id/secret)
 
 
 ALERTS & MONITORING
-[ ] Workers logs
-[ ] Error alerts
-[ ] Uptime monitoring
-[ ] Analytics
+[x] Workers logs enabled (wrangler.toml [observability])
+[x] Analytics - Cloudflare Web Analytics already on (cookieless)
+[ ] OWNER: Cloudflare notifications for Worker errors
+[ ] OWNER: uptime monitor (e.g. UptimeRobot / Better Stack on / and /specialists)
 
 
-DASHBOARD & BACKEND
-[ ] Post job
-[ ] Job status flow
-[ ] Company dashboard
-[ ] Freelancer dashboard
-[ ] Admin dashboard
-[ ] Specialist apply flow
-[ ] Messages
-[ ] File upload
-[ ] Admin moderation
-[ ] Billing
+DASHBOARD & BACKEND  (see git log for detail)
+[x] Notifications page + bell; email copy of each notification
+[x] Admin: suspend/reactivate/close accounts, manual match, lead notes, disputes, payments record
+[ ] Online payments (Razorpay or Stripe keys + webhook)
 
 
 TESTING
-[ ] Test setup
-[ ] Sign-up / login testing
-[ ] Post job to status testing
-[ ] Dashboard testing (all roles)
-[ ] Email testing
-[ ] Broken link check
-[ ] Accessibility check
-[ ] Mobile testing
-[ ] Cross-browser testing
-
-
-PRIORITY ORDER
-1. Canonical tags
-2. Search Console + sitemap
-3. Email sending + session key
-4. Lighthouse audit
-5. Testing setup
+[ ] Automated test setup
+[ ] Cross-browser / real-device pass after deploy
 
 
 REFERENCE
@@ -113,4 +94,3 @@ Mail records - keep "DNS only" in Cloudflare
   CNAME  hostingermail-c._domainkey
   CNAME  autoconfig
   CNAME  autodiscover
-  

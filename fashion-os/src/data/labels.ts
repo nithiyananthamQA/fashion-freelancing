@@ -96,6 +96,23 @@ const ENGAGEMENT_STATUS: Record<string, string> = {
 };
 
 /**
+ * What a conversation hangs off. One inbox holds three kinds of thread, and
+ * "Reply" alone does not say whether it is the reader's reply or someone's
+ * reply to them — so, like the statuses above, each side gets its own words.
+ */
+const THREAD_KIND_COMPANY: Record<string, string> = {
+  request: 'Your request to hire',
+  reply: 'Their reply to your project',
+  work: 'Work in progress',
+};
+
+const THREAD_KIND_SPECIALIST: Record<string, string> = {
+  request: 'Request to hire you',
+  reply: 'Your reply to a project',
+  work: 'Work in progress',
+};
+
+/**
  * Money recorded against a piece of work. "Invoice" is what the company owes,
  * "payout" is what reaches the specialist, and both sides see the same row —
  * so the labels name who the money moves between rather than the direction.
@@ -207,8 +224,16 @@ const ACTIVITY: Record<string, string> = {
   'user.signed_in': 'signed in',
   'user.email_verified': 'confirmed their email',
   'user.password_reset': 'reset their password',
+  'user.password_changed': 'changed their password',
+  'user.sessions_revoked': 'signed out of every device',
+  'user.verification_resent': 'asked for a fresh confirmation link',
+  'user.suspended': 'suspended an account',
+  'user.reactivated': 'gave an account its access back',
+  'user.closed': 'closed an account',
+  'user.role_changed': 'changed what someone can do',
   'company.created': 'set up a company',
   'company.member_added': 'added someone to a company',
+  'company.member_invited': 'invited someone to a company',
   'profile.created': 'started an application',
   'profile.submitted': 'submitted an application for review',
   'profile.approved': 'approved a specialist',
@@ -227,6 +252,15 @@ const ACTIVITY: Record<string, string> = {
   'engagement.created': 'started a piece of work',
   'engagement.completed': 'finished a piece of work',
   'payment.recorded': 'recorded a payment',
+  'payment.updated': 'changed where a payment stands',
+  'lead.created': 'sent a project enquiry',
+  'lead.updated': 'moved an enquiry on',
+  'lead.note_added': 'added a note to an enquiry',
+  'project.matched': 'matched specialists to a project by hand',
+  'engagement.disputed': 'raised an issue on a piece of work',
+  'engagement.closed': 'closed a piece of work before it was finished',
+  'engagement.dispute_resolved': 'settled a dispute',
+  'mail.retried': 'tried sending an email again',
 };
 
 /**
@@ -258,9 +292,22 @@ export const leadStatusLabel = pick(LEAD_STATUS);
 export const leadSourceLabel = pick(LEAD_SOURCE);
 export const tagKindLabel = pick(TAG_KIND);
 export const tagStatusLabel = pick(TAG_STATUS);
+export const threadKindForCompany = pick(THREAD_KIND_COMPANY);
+export const threadKindForSpecialist = pick(THREAD_KIND_SPECIALIST);
 export const companyRoleLabel = pick(COMPANY_ROLE);
 export const accountStatusLabel = pick(ACCOUNT_STATUS);
 export const mailStatusLabel = pick(MAIL_STATUS);
+
+/** A thread's state is the state of whatever it hangs off, in that thing's own words. */
+export const threadStatusForCompany = (kind: string, status: string): string =>
+  kind === 'request' ? hireStatusForCompany(status)
+    : kind === 'reply' ? applicationStatusLabel(status)
+    : engagementStatusLabel(status);
+
+export const threadStatusForSpecialist = (kind: string, status: string): string =>
+  kind === 'request' ? hireStatusForSpecialist(status)
+    : kind === 'reply' ? applicationStatusLabel(status)
+    : engagementStatusLabel(status);
 
 /** Actions read `thing.what_happened`, so the fallback flattens both marks. */
 export const activityLabel = (action: string | null | undefined): string =>

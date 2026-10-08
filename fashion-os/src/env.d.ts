@@ -28,6 +28,10 @@ declare global {
     /** Both must be set for mail to leave the building — see src/server/mail.ts. */
     MAIL_FROM?: string;
     RESEND_API_KEY?: string;
+    /** Default Reply-To on outbound mail (src/server/mail.ts). */
+    MAIL_REPLY_TO?: string;
+    /** Comma-separated addresses that receive every new enquiry (src/pages/api/leads.ts). */
+    LEADS_TO?: string;
     /**
      * "1" turns on the per-visitor demo sandboxes (src/server/tenant.ts).
      * Unset in production, which is one shared workspace.
