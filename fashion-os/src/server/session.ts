@@ -9,6 +9,8 @@ import { isoIn, newId, newToken, nowIso, sha256 } from './ids';
 
 export const SESSION_COOKIE = 'ff_sid';
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+/** Sent mail is kept this long for the operations view, then pruned. */
+const SENT_MAIL_TTL_MS = 90 * 24 * 60 * 60 * 1000;
 
 export interface SessionUser {
   id: string;
@@ -71,6 +73,22 @@ export async function destroySession(ctx: APIContext, database: D1Database): Pro
   ctx.cookies.delete(SESSION_COOKIE, { path: '/' });
 }
 
+/**
+ * "Sign out everywhere": every session this account holds, on every device,
+ * this one included. The rows are the sessions, so deleting them is the whole
+ * revocation — there is no signed cookie that could outlive it.
+ */
+export async function destroyAllSessions(ctx: Ctx, database: D1Database, userId: string): Promise<void> {
+  await run(database, 'DELETE FROM sessions WHERE user_id = ?', userId);
+  ctx.cookies.delete(SESSION_COOKIE, { path: '/' });
+}
+
+/** The stored id (the hash) of this request's session, or null when signed out. */
+export async function currentSessionId(ctx: Ctx): Promise<string | null> {
+  const token = ctx.cookies.get(SESSION_COOKIE)?.value;
+  return token ? sha256(token) : null;
+}
+
 /** Resolve the signed-in account for a request. Returns null when signed out. */
 export async function loadUser(ctx: Ctx, database: D1Database): Promise<SessionUser | null> {
   const token = ctx.cookies.get(SESSION_COOKIE)?.value;
@@ -118,13 +136,22 @@ export async function loadUser(ctx: Ctx, database: D1Database): Promise<SessionU
   };
 }
 
-/** Drop sessions and one-time tokens that have already expired. */
+/**
+ * Drop sessions, one-time tokens and rate-limit windows that have already
+ * expired, and mail that was delivered long enough ago to be of no use to the
+ * operations view. Nothing else ever deletes them, so the middleware runs this
+ * now and then, after the response has gone (src/middleware.ts).
+ *
+ * Queued and failed mail is kept: without a provider a queued row IS the
+ * delivery (src/server/mail.ts), and a failure is what someone needs to see.
+ */
 export async function pruneExpired(database: D1Database): Promise<void> {
   const now = nowIso();
   await database.batch([
     database.prepare('DELETE FROM sessions WHERE expires_at <= ?').bind(now),
     database.prepare('DELETE FROM auth_tokens WHERE expires_at <= ?').bind(now),
     database.prepare('DELETE FROM rate_limits WHERE expires_at <= ?').bind(now),
+    database.prepare("DELETE FROM outbound_email WHERE status = 'sent' AND created_at <= ?").bind(isoIn(-SENT_MAIL_TTL_MS)),
   ]);
 }
 

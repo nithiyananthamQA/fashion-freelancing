@@ -14,6 +14,14 @@ interface Props {
   current?: string;
   /** Signed-in and confidential pages must never be indexed (§7, §13). */
   noindex?: boolean;
+  /**
+   * The one address search engines should credit for this page. Defaults to
+   * the path without its query string, so filtered and paginated copies of a
+   * page fold into it.
+   */
+  canonical?: string;
+  /** Share-card image (1200×630) for link previews; the homepage card by default. */
+  image?: string;
   /** Wide pages (the directory) drop the narrow reading measure. */
   wide?: boolean;
   /**
@@ -31,8 +39,9 @@ const {
   quoteBot = true,
 } = Astro.props;
 
-const FONTS =
-  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap';
+const SITE = 'https://fashionfreelancing.com';
+const canonical = Astro.props.canonical ?? `${SITE}${Astro.url.pathname.replace(/\/+$/, '') || '/'}`;
+const image = Astro.props.image ?? `${SITE}/assets/img/og/home.jpg`;
 
 /**
  * Shared assets are stamped with a hash of their contents so a deploy reaches
@@ -64,15 +73,31 @@ if('IntersectionObserver' in window)d.className+=' rv-on';})();</script>
   <title>{title}</title>
   <meta name="description" content={description} />
   {noindex && <meta name="robots" content="noindex, nofollow" />}
-  <link rel="icon" href="/favicon.svg" />
+  {!noindex && (
+    <Fragment>
+      <link rel="canonical" href={canonical} />
+      <meta property="og:type" content="website" />
+      <meta property="og:site_name" content="Fashion Freelancing" />
+      <meta property="og:url" content={canonical} />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:image" content={image} />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={image} />
+    </Fragment>
+  )}
+  <link rel="icon" href="/favicon.ico" sizes="48x48" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <!-- fonts load without blocking first paint; the metric-matched fallbacks in
-       night.css render immediately so the swap causes no layout shift -->
-  <link rel="preload" as="style" href={FONTS} />
-  <link rel="stylesheet" href={FONTS} media="print" onload="this.media='all';this.onload=null" />
-  <noscript><link rel="stylesheet" href={FONTS} /></noscript>
+  <!-- fonts are self-hosted (@font-face in styles.css) and the two the first
+       paint needs are preloaded; the metric-matched fallbacks in night.css
+       cover the rest without layout shift -->
+  <link rel="preload" href="/assets/fonts/pjs-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/assets/fonts/instrument-latin.woff2" as="font" type="font/woff2" crossorigin />
 
   <link rel="stylesheet" href={asset("styles.css")} />
   <link rel="stylesheet" href={asset("night.css")} />

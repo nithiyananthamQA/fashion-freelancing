@@ -1,34 +1,125 @@
 ---
-/** /sign-in/verify?token=… — consumes an email verification link. */
+/**
+ * /sign-in/verify?token=… — confirms an email address.
+ *
+ * Opening the link only shows a button; pressing it (a POST) is what uses the
+ * token. Mail scanners and link previews fetch every URL in a message before a
+ * person ever sees it, and when a GET consumed the token they burned it first:
+ * the owner then clicked a link that had already "expired".
+ *
+ * A dead link offers a fresh one to a signed-in account that still needs it,
+ * so the flow never ends at "sign in and we will send one" with no button.
+ */
 export const prerender = false;
 
 import Night from '../../layouts/Night.astro';
-import { db } from '../../server/db';
-import { consumeToken, markEmailVerified } from '../../server/auth';
+import { db, env } from '../../server/db';
+import { consumeToken, issueEmailVerification, markEmailVerified, tokenIsLive } from '../../server/auth';
+import { limited, windowInWords } from '../../server/rate-limit';
+import { tenantOf } from '../../server/tenant';
 
 const database = db(Astro);
-const token = Astro.url.searchParams.get('token');
-const userId = token ? await consumeToken(database, 'verify_email', token) : null;
-if (userId) await markEmailVerified(database, userId, Astro.request);
+const user = Astro.locals.user;
+
+type State = 'ready' | 'confirmed' | 'expired' | 'resent' | 'resend-limited';
+let state: State;
+let token = Astro.url.searchParams.get('token') ?? '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  if (form.get('intent') === 'resend') {
+    // Only an account that is signed in and still unconfirmed can ask, and
+    // only a few times an hour — each one is an email we send on its behalf.
+    if (!user || user.emailVerified) state = 'expired';
+    else if (await limited(database, 'verifyResend', user.id)) state = 'resend-limited';
+    else {
+      await issueEmailVerification(database, env(Astro), user.id, user.name, user.email, tenantOf(Astro));
+      state = 'resent';
+    }
+  } else {
+    token = String(form.get('token') ?? '');
+    const userId = token ? await consumeToken(database, 'verify_email', token) : null;
+    if (userId) await markEmailVerified(database, userId, Astro.request);
+    state = userId ? 'confirmed' : 'expired';
+  }
+} else {
+  // Looking is free; only the button spends the token.
+  state = (await tokenIsLive(database, 'verify_email', token)) ? 'ready' : 'expired';
+}
+
+/* A dead link is only a dead end for someone who can do nothing about it. */
+const canResend = state === 'expired' && user !== null && !user.emailVerified;
+const alreadyConfirmed = state === 'expired' && user !== null && user.emailVerified;
 ---
-<Night title="Email confirmed — Fashion Freelancing" noindex current="" quoteBot={false}>
+<Night title={state === 'confirmed' ? 'Email confirmed — Fashion Freelancing' : 'Confirm your email — Fashion Freelancing'} noindex current="" quoteBot={false}>
   <section class="net-hero">
     <div class="wrap">
       <div class="flow" style="max-width:520px;">
         <div class="flow-panel glass-p sent-ok">
-          {userId ? (
+          {state === 'ready' && (
+            <>
+              <h3>Confirm your email.</h3>
+              <p>One click finishes setting up your account.</p>
+              <form method="post" style="margin-top:24px;">
+                <input type="hidden" name="intent" value="confirm" />
+                <input type="hidden" name="token" value={token} />
+                <button type="submit" class="btn-hot">Confirm my email</button>
+              </form>
+            </>
+          )}
+
+          {state === 'confirmed' && (
             <>
               <div class="ok" aria-hidden="true">✓</div>
               <h3>Email confirmed.</h3>
               <p>Your account is verified. You can carry on where you left off.</p>
               <a class="btn-hot" href="/specialists" style="margin-top:24px;">Browse specialists</a>
             </>
-          ) : (
+          )}
+
+          {state === 'resent' && user && (
             <>
-              <h3>That link has expired.</h3>
-              <p>Verification links last 24 hours and can only be used once. Sign in and we will send a fresh one.</p>
-              <a class="btn-hot" href="/sign-in" style="margin-top:24px;">Sign in</a>
+              <div class="ok" aria-hidden="true">✓</div>
+              <h3>Check your email.</h3>
+              <p>A fresh link is on its way to {user.email}. It lasts 24 hours.</p>
             </>
+          )}
+
+          {state === 'resend-limited' && (
+            <>
+              <h3>A link is already on its way.</h3>
+              <p>
+                We have sent several in the last hour. Give the latest one a few minutes, check
+                your spam folder, and try again in {windowInWords('verifyResend')} if nothing arrives.
+              </p>
+            </>
+          )}
+
+          {state === 'expired' && (
+            alreadyConfirmed ? (
+              <>
+                <div class="ok" aria-hidden="true">✓</div>
+                <h3>Your email is already confirmed.</h3>
+                <p>There is nothing left to do here.</p>
+                <a class="btn-hot" href="/account" style="margin-top:24px;">Your account</a>
+              </>
+            ) : (
+              <>
+                <h3>That link has expired.</h3>
+                <p>Verification links last 24 hours and can only be used once.</p>
+                {canResend ? (
+                  <form method="post" style="margin-top:24px;">
+                    <input type="hidden" name="intent" value="resend" />
+                    <button type="submit" class="btn-hot">Send a fresh link</button>
+                  </form>
+                ) : (
+                  <>
+                    <p>Sign in and we will offer you a fresh one.</p>
+                    <a class="btn-hot" href={`/sign-in?next=${encodeURIComponent('/sign-in/verify')}`} style="margin-top:24px;">Sign in</a>
+                  </>
+                )}
+              </>
+            )
           )}
         </div>
       </div>

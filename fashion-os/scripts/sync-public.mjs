@@ -94,15 +94,20 @@ for (const file of readdirSync(join(templates, 'pages', 'services'))) {
     rmSync(join(templates, 'pages', 'services', file), { force: true });
   }
 }
-// the 404 page as a template too: worker routes answer unknown paths with it
-if (existsSync(join(publicHtml, 'pages', '404.html'))) cpSync(join(publicHtml, 'pages', '404.html'), join(templates, '404.html'));
+// the 404 and 500 pages as templates too: worker routes answer unknown paths
+// and server errors with them
+for (const file of ['404.html', '500.html']) {
+  if (existsSync(join(publicHtml, 'pages', file))) cpSync(join(publicHtml, 'pages', file), join(templates, file));
+}
 rmSync(join(dest, 'index.html'), { force: true });
 
-// 3. robots + sitemap
-for (const file of ['robots.txt', 'sitemap.xml']) {
+// 3. robots. The sitemap is a worker route now (src/pages/sitemap.xml.ts) so
+//    it lists approved profiles; a file left in public/ would shadow it.
+for (const file of ['robots.txt']) {
   const from = join(publicHtml, file);
   if (existsSync(from)) cpSync(from, join(dest, file));
 }
+rmSync(join(dest, 'sitemap.xml'), { force: true });
 
 // 4. top-level 404 so Cloudflare Pages serves it for unknown routes.
 //    The source 404 lives in /pages/ and uses ../ relative paths — rewrite

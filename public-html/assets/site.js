@@ -14,7 +14,14 @@
   const inServicesDir = /\/pages\/services\//i.test(location.pathname);
   const inPagesDir = /\/pages\//i.test(location.pathname);
   const ROOT = !isFile ? '/' : inServicesDir ? '../../' : inPagesDir ? '../' : './';
-  const r = (p) => ROOT + p.replace(/^\/+/, '');
+  // Over http(s) a page is linked at the one address it lives at — / and
+  // /pages/x, never index.html or x.html — because every .html form costs the
+  // visitor a redirect and splits the page's search ranking.
+  const r = (p) => {
+    p = p.replace(/^\/+/, '');
+    if (isFile) return ROOT + p;
+    return ROOT + p.replace(/^index\.html/, '').replace(/^(pages\/[^#?]*)\.html/, '$1');
+  };
 
   // Expose path resolver for pages that need it
   window.FF_ROOT = ROOT;
@@ -196,7 +203,7 @@
         </div>
 
         <details class="footer-acc">
-          <summary class="footer-acc-head"><h5>Design &amp; development</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
+          <summary class="footer-acc-head"><h2 class="footer-h">Design &amp; development</h2><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
           <ul>
             <li><a href="${r("pages/services/tech-pack.html")}">Tech packs</a></li>
             <li><a href="${r("pages/services/3d-virtual-sampling.html")}">3D virtual sampling</a></li>
@@ -207,7 +214,7 @@
         </details>
 
         <details class="footer-acc">
-          <summary class="footer-acc-head"><h5>AI &amp; digital</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
+          <summary class="footer-acc-head"><h2 class="footer-h">AI &amp; digital</h2><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
           <ul>
             <li><a href="${r("pages/services/web-development.html")}">Web development</a></li>
             <li><a href="${r("pages/services/ai-agent.html")}">AI customer agent</a></li>
@@ -218,7 +225,7 @@
         </details>
 
         <details class="footer-acc">
-          <summary class="footer-acc-head"><h5>Company</h5><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
+          <summary class="footer-acc-head"><h2 class="footer-h">Company</h2><span class="footer-acc-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><line x1="6" y1="1" x2="6" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
           <ul>
             <li><a href="${r("index.html")}">Our services</a></li>
             <li><a href="${r("pages/about.html")}">About us</a></li>
@@ -236,6 +243,7 @@
         <div style="display:flex;gap:20px;">
           <a href="${r("pages/privacy.html")}">Privacy</a>
           <a href="${r("pages/terms.html")}">Terms</a>
+          <a href="${r("pages/cookies.html")}">Cookies</a>
         </div>
       </div>
     </div>

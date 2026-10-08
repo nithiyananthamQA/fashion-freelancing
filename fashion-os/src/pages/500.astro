@@ -1,0 +1,12 @@
+---
+/**
+ * Astro renders this when a server-rendered route throws. The visitor gets the
+ * site's own error page with a 500 status; the error itself goes to the
+ * Workers logs, never to the browser.
+ */
+export const prerender = false;
+import { serverErrorResponse } from '../server/site-content';
+const { error } = Astro.props as { error?: unknown };
+console.error('[500]', Astro.url.pathname, error);
+return serverErrorResponse();
+---

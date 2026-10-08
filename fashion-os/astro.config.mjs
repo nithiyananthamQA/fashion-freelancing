@@ -19,6 +19,12 @@ export default defineConfig({
    * provision, and the session runtime is dropped from the bundle.
    */
   session: false,
+  /**
+   * Reject cross-site form posts to every server-rendered route. Astro's
+   * default today, pinned here so an upgrade can never quietly turn off the
+   * only CSRF defence the forms rely on (with SameSite=Lax cookies).
+   */
+  security: { checkOrigin: true },
   adapter: cloudflare({
     imageService: 'passthrough',
   }),

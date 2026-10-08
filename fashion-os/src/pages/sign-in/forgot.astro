@@ -10,7 +10,7 @@ import Night from '../../layouts/Night.astro';
 import { db, env } from '../../server/db';
 import { issuePasswordReset } from '../../server/auth';
 import { parse, trapped, HONEYPOT } from '../../server/validate';
-import { clientKey, limited, tooManyRequests } from '../../server/rate-limit';
+import { accountKey, clientKey, limited, tooManyRequests } from '../../server/rate-limit';
 
 const database = db(Astro);
 let sent = false;
@@ -19,13 +19,19 @@ let errors: Record<string, string> = {};
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
   if (trapped(form)) return Astro.redirect('/sign-in');
-  if (await limited(database, 'signIn', clientKey(Astro.request))) return tooManyRequests();
+  // Its own bucket. It used to spend `signIn`'s, so a few reset requests
+  // locked the same person out of signing in with the password they then chose.
+  if (await limited(database, 'resetRequest', clientKey(Astro.request))) return tooManyRequests();
 
   const { f, errors: found } = parse(form);
   errors = found;
   const email = f.email('email');
   if (!Object.keys(errors).length) {
-    await issuePasswordReset(database, env(Astro), email, Astro.locals.tenant);
+    // Past a few links an hour the address simply stops getting more, and the
+    // screen stays the same — saying so would tell a stranger it has an account.
+    if (!(await limited(database, 'resetAccount', await accountKey(email)))) {
+      await issuePasswordReset(database, env(Astro), email, Astro.locals.tenant);
+    }
     sent = true;
   }
 }

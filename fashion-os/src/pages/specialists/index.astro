@@ -46,9 +46,14 @@ const title = service
   ? `Find a ${service.name} specialist — Fashion Freelancing`
   : 'Find a specialist — Fashion Freelancing';
 const heading = service ? `Find a ${service.name} specialist.` : 'Find a specialist.';
+/* Searches, filters and later pages all fold into the directory itself, or
+   into its one-service view, so search engines index one copy of each. */
+const SITE = 'https://fashionfreelancing.com';
+const canonical = service ? `${SITE}/specialists?service=${service.id}` : `${SITE}/specialists`;
+const shareImage = service ? `${SITE}/assets/img/og/${service.page.split('/').pop()}.jpg` : undefined;
 ---
 
-<Night title={title} current="specialists" wide
+<Night title={title} current="specialists" wide canonical={canonical} image={shareImage}
   description="Browse approved fashion specialists by service, specialty, skills and tools. No account needed to look.">
 
   <section class="net-hero">

@@ -1,0 +1,203 @@
+---
+/**
+ * /account — how this account signs in, whichever role it holds: change the
+ * password, get a fresh confirmation link, end every session.
+ *
+ * It sits outside the role workspaces because it belongs to the person, not to
+ * a company or a profile — one account can be both (plan §3), and an admin or
+ * an editor has neither. The sidebar is borrowed from whichever workspace the
+ * account normally lives in, so it reads as part of the same place.
+ *
+ * Until this page existed the only way to change a password was to pretend to
+ * have forgotten it, and the only way to end a session on a lost laptop was to
+ * wait thirty days.
+ */
+export const prerender = false;
+
+import Workspace from '../../layouts/Workspace.astro';
+import type { NavItem } from '../../components/WorkspaceNav.astro';
+import { db, env, one } from '../../server/db';
+import { guard, requireUser } from '../../server/guards';
+import { changePassword, issueEmailVerification } from '../../server/auth';
+import { passwordProblem } from '../../server/password';
+import { currentSessionId } from '../../server/session';
+import { limited, windowInWords } from '../../server/rate-limit';
+import { hasErrors, parse } from '../../server/validate';
+import { nowIso } from '../../server/ids';
+import { tenantOf } from '../../server/tenant';
+import { adminNav, companyNav, editorNav, freelancerNav } from '../../data/workspace-nav';
+
+const gate = await guard(Astro, () => requireUser(Astro));
+if (gate.response) return gate.response;
+const user = gate.value;
+
+const database = db(Astro);
+
+/* Same precedence as landingFor in src/server/auth.ts: the sidebar is the one
+   this account was sent to when it signed in. An account with no role yet is
+   on the company journey — it landed on the directory. */
+const shell: { role: 'freelancer' | 'company' | 'admin' | 'editor'; items: NavItem[] } =
+  user.isAdmin ? { role: 'admin', items: adminNav() }
+  : user.role === 'editor' ? { role: 'editor', items: editorNav() }
+  : user.profileId ? { role: 'freelancer', items: freelancerNav() }
+  : { role: 'company', items: companyNav() };
+
+let errors: Record<string, string> = {};
+let flash: string | null = null;
+
+/* Every action here is on the caller's own account: the id comes off the
+   session and the forms carry none, so there is nothing to replay with
+   somebody else's. */
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const intent = form.get('intent');
+
+  if (intent === 'password') {
+    const { f, errors: found } = parse(form);
+    errors = found;
+    // Read exactly as sign-up and sign-in read them, so the password saved
+    // here is the one the sign-in form will compare against.
+    const current = f.text('current', 'Current password', { required: true, max: 200 });
+    const password = f.text('password', 'New password', { required: true, max: 200 });
+    const confirm = f.text('confirm', 'Confirmation', { required: true, max: 200 });
+    const problem = password ? passwordProblem(password) : null;
+    if (problem) errors.password = problem;
+    else if (password && confirm && password !== confirm) errors.confirm = 'Those two passwords do not match.';
+
+    if (!hasErrors(errors)) {
+      // A session someone else is holding must not get unlimited guesses at
+      // the current password.
+      if (await limited(database, 'passwordChange', user.id)) {
+        errors.current = `Too many attempts. Wait ${windowInWords('passwordChange')} and try again.`;
+      } else {
+        const result = await changePassword(
+          database, user.id, current, password, Astro.request, await currentSessionId(Astro),
+        );
+        if (result.ok) flash = 'Password changed. Every other device has been signed out; this one stays signed in.';
+        else errors[result.field] = result.message;
+      }
+    }
+    if (hasErrors(errors)) flash = 'Your password was not changed — check the highlighted field below.';
+  } else if (intent === 'verify' && !user.emailVerified) {
+    // Shares its bucket with the button on /sign-in/verify: one account, one
+    // allowance, whichever page asks.
+    if (await limited(database, 'verifyResend', user.id)) {
+      flash = `We have sent several links in the last hour. Check your spam folder, or try again in ${windowInWords('verifyResend')}.`;
+    } else {
+      await issueEmailVerification(database, env(Astro), user.id, user.name, user.email, tenantOf(Astro));
+      flash = `A fresh link is on its way to ${user.email}. It lasts 24 hours.`;
+    }
+  }
+}
+
+/* Counted after any password change above, so the number reflects it. */
+const sessions = await one<{ n: number }>(
+  database,
+  'SELECT COUNT(*) AS n FROM sessions WHERE user_id = ? AND expires_at > ?',
+  user.id, nowIso(),
+);
+const signedIn = sessions?.n ?? 1;
+---
+
+<Workspace
+  title="Your account"
+  role={shell.role}
+  current="/account"
+  items={shell.items}
+  who={user.name}
+  heading="Your account"
+  lede="How you sign in, and where you are signed in."
+  flash={flash}
+>
+  <div class="stack-sm">
+    <section class="panel glass-p">
+      <div class="ws-row-head">
+        <div>
+          <h2 style="margin:0;">Email</h2>
+          <p class="ws-sub">{user.email}</p>
+        </div>
+        <span class={`pill-tone ${user.emailVerified ? 'ok' : 'warn'}`}>
+          {user.emailVerified ? 'Confirmed' : 'Not confirmed yet'}
+        </span>
+      </div>
+      {user.emailVerified ? (
+        <p>This is the address you sign in with, and where password resets are sent.</p>
+      ) : (
+        <>
+          <p>
+            We emailed a confirmation link when the account was created. Those links last 24 hours —
+            if yours has expired or never arrived, send a fresh one.
+          </p>
+          <form method="post">
+            <input type="hidden" name="intent" value="verify" />
+            <button type="submit" class="btn-glass btn-sm">Send a fresh link</button>
+          </form>
+        </>
+      )}
+    </section>
+
+    <section class="panel glass-p">
+      <div class="ws-row-head">
+        <div>
+          <h2 style="margin:0;">Password</h2>
+          <p class="ws-sub">Changing it signs you out everywhere except here.</p>
+        </div>
+      </div>
+
+      <form method="post" class="cform" novalidate>
+        <input type="hidden" name="intent" value="password" />
+        {/* Lets a password manager file the new password under the right account. */}
+        <input type="email" name="username" value={user.email} autocomplete="username" hidden readonly />
+
+        <label>
+          <span class="fl">Current password<span class="rq" aria-hidden="true">*</span></span>
+          <input class="fi" type="password" name="current" required autocomplete="current-password"
+                 aria-invalid={errors.current ? 'true' : undefined} />
+          {errors.current && <span class="cform-err" role="alert">{errors.current}</span>}
+        </label>
+
+        <div class="row2">
+          <label>
+            <span class="fl">New password<span class="rq" aria-hidden="true">*</span></span>
+            <input class="fi" type="password" name="password" required autocomplete="new-password"
+                   aria-invalid={errors.password ? 'true' : undefined} />
+            {errors.password
+              ? <span class="cform-err" role="alert">{errors.password}</span>
+              : <span class="fh">At least 10 characters. Length matters more than symbols.</span>}
+          </label>
+
+          <label>
+            <span class="fl">Confirm new password<span class="rq" aria-hidden="true">*</span></span>
+            <input class="fi" type="password" name="confirm" required autocomplete="new-password"
+                   aria-invalid={errors.confirm ? 'true' : undefined} />
+            {errors.confirm && <span class="cform-err" role="alert">{errors.confirm}</span>}
+          </label>
+        </div>
+
+        <button class="btn-hot btn-sm" style="justify-self:start;">Change password</button>
+      </form>
+      <p class="fh" style="margin-top:14px;">
+        Forgotten the current one? <a href="/sign-in/forgot">Reset it by email</a> instead.
+      </p>
+    </section>
+
+    <section class="panel glass-p">
+      <div class="ws-row-head">
+        <div>
+          <h2 style="margin:0;">Where you are signed in</h2>
+          <p class="ws-sub">
+            {signedIn === 1 ? 'Only here, as far as we know.' : `${signedIn} browsers or devices, this one included.`}
+          </p>
+        </div>
+      </div>
+      <p>
+        Signed in on a computer that was not yours, or lost a phone? This ends every session at once,
+        including this one. Your password does not change.
+      </p>
+      <form method="post" action="/api/sign-out">
+        <input type="hidden" name="everywhere" value="1" />
+        <button type="submit" class="btn-glass btn-sm">Sign out everywhere</button>
+      </form>
+    </section>
+  </div>
+</Workspace>

@@ -184,11 +184,8 @@
     });
     body.set('source', 'quote-bot');
     return fetch('/api/leads', { method: 'POST', body: body })
-      .then(function (r) { if (!r.ok) throw new Error('lead ' + r.status); })
-      .catch(function () {
-        /* The closing message already gives the email address, so the person
-           still has a way through even if this call fails. */
-      });
+      .then(function (r) { if (!r.ok) throw new Error('lead ' + r.status); return true; })
+      .catch(function () { return false; });
   }
 
   /* ---------- the flow — dedicated to the current services setup ---------- */
@@ -247,10 +244,17 @@
       }, function (v) {
         lead.email = v;
         lead.ts = new Date().toISOString();
-        saveLead(lead);
         finished = true;
-        botSay('Done — brief received. A real person will reply to ' + v + ' within 24 hours with a fixed quote.', function () {
-          botSay('Have files to share (sketches, tech packs, photos)? Send them to hello@fashionos.app and mention your name.');
+        /* Say it was received only once the server has it; otherwise hand over
+           the address so the brief still has a way through. */
+        saveLead(lead).then(function (ok) {
+          if (ok) {
+            botSay('Done — brief received. A real person will reply to ' + v + ' within 24 hours with a fixed quote.', function () {
+              botSay('Have files to share (sketches, tech packs, photos)? Send them to hello@fashionfreelancing.com and mention your name.');
+            });
+          } else {
+            botSay('Hmm — that didn’t reach us. Please email your brief to hello@fashionfreelancing.com and we’ll quote within 24 hours.');
+          }
         });
       });
     });

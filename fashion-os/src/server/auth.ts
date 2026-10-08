@@ -9,6 +9,7 @@ import { one, run } from './db';
 import { isoIn, newId, newToken, nowIso, sha256 } from './ids';
 import { hashPassword, needsRehash, verifyPassword } from './password';
 import { audit } from './audit';
+import { safeNext } from './guards';
 import { resetPasswordMessage, sendMail, verifyEmailMessage } from './mail';
 import { PUBLIC_TENANT } from './tenant';
 
@@ -22,7 +23,7 @@ export interface NewAccount {
   country?: string | null;
   timezone?: string | null;
   acceptedTerms: boolean;
-  /** The visitor's private workspace — see src/server/tenant.ts. */
+  /** 'public' in production; the visitor's sandbox under DEMO_SANDBOX — see src/server/tenant.ts. */
   tenant: string;
 }
 
@@ -38,7 +39,8 @@ export async function signUp(
 ): Promise<SignUpResult> {
   const email = account.email.toLowerCase();
   // Email is unique per workspace, not globally: two reviewers must both be
-  // able to sign up as "test@test.com" in their own sandbox.
+  // able to sign up as "test@test.com" in their own sandbox. In production
+  // there is one workspace, so this is the plain global check.
   const existing = await one<{ id: string }>(
     database, 'SELECT id FROM users WHERE email = ? AND tenant = ?', email, account.tenant,
   );
@@ -85,10 +87,15 @@ export async function signIn(
   tenant: string,
 ): Promise<SignInResult> {
   // Scoped to the workspace so one visitor can never sign in as another's
-  // test account, even if they guess the address.
+  // test account, even if they guess the address. In sandbox mode the same
+  // address can exist in the visitor's own workspace AND in 'public'; their
+  // own account wins, rather than whichever row SQLite happened to return.
+  // In production `tenant` is 'public' and the unique index allows one row.
   const row = await one<{ id: string; password_hash: string; status: string }>(
     database,
-    "SELECT id, password_hash, status FROM users WHERE email = ? AND tenant IN (?, 'public')",
+    `SELECT id, password_hash, status FROM users
+      WHERE email = ? AND tenant IN (?, 'public')
+      ORDER BY tenant = 'public' LIMIT 1`,
     email.toLowerCase(),
     tenant,
   );
@@ -151,15 +158,19 @@ export async function issuePasswordReset(
   email: string,
   tenant: string,
 ): Promise<void> {
-  // Scoped like signIn. An address is only unique per workspace, so an unscoped
-  // lookup would mint a reset token against whichever workspace's account
-  // SQLite happened to return — letting one visitor take over another's.
+  // Scoped like signIn, and resolved the same way, so the reset lands on the
+  // very account a sign-in with that address would open. An unscoped lookup
+  // would mint a token against whichever sandbox's account SQLite returned —
+  // letting one visitor take over another's.
   const user = await one<{ id: string; name: string }>(
     database,
-    "SELECT id, name FROM users WHERE email = ? AND status = ? AND tenant IN (?, ?)",
+    `SELECT id, name FROM users
+      WHERE email = ? AND status = ? AND tenant IN (?, ?)
+      ORDER BY tenant = ? LIMIT 1`,
     email.toLowerCase(),
     'active',
     tenant,
+    PUBLIC_TENANT,
     PUBLIC_TENANT,
   );
   // Return silently for an unknown address — the caller always shows the same
@@ -179,6 +190,28 @@ export async function issuePasswordReset(
   );
   const message = resetPasswordMessage(env.SITE_URL, user.name, token);
   await sendMail(database, env, { to: email.toLowerCase(), tenant, ...message });
+}
+
+/**
+ * Whether a one-time token would still be accepted, without using it up.
+ * Lets a page say "this link has expired" when it opens instead of after the
+ * visitor has pressed the button.
+ */
+export async function tokenIsLive(
+  database: D1Database,
+  purpose: 'verify_email' | 'reset_password',
+  token: string,
+): Promise<boolean> {
+  if (!token) return false;
+  const row = await one<{ id: string }>(
+    database,
+    `SELECT id FROM auth_tokens
+      WHERE token_hash = ? AND purpose = ? AND used_at IS NULL AND expires_at > ?`,
+    await sha256(token),
+    purpose,
+    nowIso(),
+  );
+  return row !== null;
 }
 
 /** Consume a one-time token. Returns the user id, or null if it is invalid. */
@@ -210,6 +243,8 @@ export async function setPassword(
   userId: string,
   password: string,
   request: Request,
+  /** The session hash to leave signed in — the person who made the change. */
+  keepSessionId: string | null = null,
 ): Promise<void> {
   const now = nowIso();
   await run(
@@ -219,10 +254,39 @@ export async function setPassword(
     now,
     userId,
   );
-  // Every existing session is invalidated — a password reset must log out
-  // whoever might already be signed in with the old credentials.
-  await run(database, 'DELETE FROM sessions WHERE user_id = ?', userId);
+  // Every other session is invalidated — a new password must log out whoever
+  // might already be signed in with the old one. A reset keeps none; a change
+  // from the account page keeps the browser it was made in.
+  await run(database, 'DELETE FROM sessions WHERE user_id = ? AND id IS NOT ?', userId, keepSessionId);
   await audit(database, { actorId: userId, action: 'user.password_reset', entityType: 'user', entityId: userId, request });
+}
+
+export type ChangePasswordResult =
+  | { ok: true }
+  | { ok: false; field: 'current' | 'password'; message: string };
+
+/**
+ * A signed-in password change. The current password is asked for again: a
+ * session left open on a shared computer must not be enough to lock the owner
+ * out of their own account.
+ */
+export async function changePassword(
+  database: D1Database,
+  userId: string,
+  current: string,
+  next: string,
+  request: Request,
+  keepSessionId: string | null,
+): Promise<ChangePasswordResult> {
+  const row = await one<{ password_hash: string }>(database, 'SELECT password_hash FROM users WHERE id = ?', userId);
+  if (!row || !(await verifyPassword(current, row.password_hash))) {
+    return { ok: false, field: 'current', message: 'That is not your current password.' };
+  }
+  if (current === next) {
+    return { ok: false, field: 'password', message: 'Choose a password you are not already using.' };
+  }
+  await setPassword(database, userId, next, request, keepSessionId);
+  return { ok: true };
 }
 
 /**
@@ -234,7 +298,8 @@ export function landingFor(
   roles: { companyIds: string[]; profileId: string | null; isAdmin: boolean; role?: string },
 ): string {
   // Only same-origin paths — never redirect to an attacker-supplied host.
-  if (next && next.startsWith('/') && !next.startsWith('//')) return next;
+  const safe = safeNext(next, null);
+  if (safe) return safe;
   if (roles.isAdmin) return '/workspace/admin';
   if (roles.role === 'editor') return '/workspace/content';
   if (roles.profileId) return '/workspace/freelancer';

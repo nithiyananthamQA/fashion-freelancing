@@ -11,12 +11,13 @@ export const prerender = false;
 import Night from '../../layouts/Night.astro';
 import { db, env } from '../../server/db';
 import { landingFor, signIn, signUp } from '../../server/auth';
+import { safeNext } from '../../server/guards';
 import { createSession, setSessionCookie } from '../../server/session';
 import { mergeCookieShortlist } from '../../server/shortlist';
 import { one } from '../../server/db';
 import { passwordProblem } from '../../server/password';
 import { HONEYPOT, parse, trapped } from '../../server/validate';
-import { clientKey, limited, tooManyRequests } from '../../server/rate-limit';
+import { accountKey, clientKey, limited, tooManyRequests, windowInWords } from '../../server/rate-limit';
 
 const database = db(Astro);
 const runtimeEnv = env(Astro);
@@ -30,12 +31,14 @@ let mode = Astro.url.searchParams.get('mode') === 'create' ? 'create' : 'signin'
 let errors: Record<string, string> = {};
 let values = { name: '', email: '' };
 const note = Astro.url.searchParams.get('note');
-let next = Astro.url.searchParams.get('next');
+/* Checked on the way in, not only on the way out: `next` is echoed into the
+   form and the "other mode" link, so an unsafe one must not survive a round trip. */
+let next = safeNext(Astro.url.searchParams.get('next'), null);
 
 if (Astro.request.method === 'POST') {
   const form = await Astro.request.formData();
   mode = form.get('mode') === 'create' ? 'create' : 'signin';
-  next = typeof form.get('next') === 'string' ? (form.get('next') as string) : next;
+  next = form.has('next') ? safeNext(form.get('next'), null) : next;
 
   if (trapped(form)) return Astro.redirect('/specialists');
 
@@ -76,7 +79,12 @@ if (Astro.request.method === 'POST') {
       }
     }
   } else if (!Object.keys(errors).length) {
-    const result = await signIn(database, Astro.request, email, password, Astro.locals.tenant);
+    /* Per account as well as per address, so guesses spread across many
+       machines still run out. Said in the form rather than as a bare 429: the
+       person most likely to see it is the owner, and they need the way out. */
+    const result = await limited(database, 'signInAccount', await accountKey(email))
+      ? { ok: false as const, message: `Too many attempts for this account. Wait ${windowInWords('signInAccount')}, or reset your password below.` }
+      : await signIn(database, Astro.request, email, password, Astro.locals.tenant);
     if (!result.ok) {
       errors.password = result.message;
     } else {
@@ -130,6 +138,9 @@ const otherModeUrl = `/sign-in?mode=${creating ? 'signin' : 'create'}${next ? `&
         )}
         {note === 'save' && (
           <div class="notice">Sign in to save specialists to your company's shortlist.</div>
+        )}
+        {note === 'everywhere' && (
+          <div class="notice" role="status">You are signed out on every device, this one included.</div>
         )}
 
         <div class="flow-panel glass-p">

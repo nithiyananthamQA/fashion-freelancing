@@ -6,7 +6,7 @@
  * returns directly, so a guard can never be forgotten halfway down a handler.
  */
 import type { APIContext, AstroGlobal } from 'astro';
-import { one, type Ctx } from './db';
+import { env, one, type Ctx } from './db';
 import type { SessionUser } from './session';
 
 export class GuardRedirect extends Error {
@@ -16,6 +16,33 @@ export class GuardRedirect extends Error {
 }
 
 const user = (ctx: Ctx): SessionUser | null => (ctx.locals as App.Locals).user;
+
+/**
+ * A user-supplied `next`, only if it is a path on this site; otherwise the
+ * fallback. Every redirect to a `next` taken from a query string or a form
+ * goes through this.
+ *
+ * `startsWith('/') && !startsWith('//')` is not enough. Browsers read `\` as
+ * `/` in a URL, so `/\evil.com` is the protocol-relative `//evil.com`; and they
+ * silently drop tabs and newlines, so `/<TAB>/evil.com` is too. Rather than
+ * chase every spelling, the value is resolved against a placeholder origin and
+ * kept only when it is still on that origin — the same judgement the browser
+ * will make — and the normalised path is what gets returned.
+ */
+export function safeNext<T extends string | null>(value: unknown, fallback: T): string | T {
+  if (typeof value !== 'string' || value.length > 2000) return fallback;
+  if (!value.startsWith('/') || value.startsWith('//')) return fallback;
+  // Backslashes and control characters have no business in a path we built.
+  if (/[\\\u0000-\u001f\u007f]/.test(value)) return fallback;
+  try {
+    const base = 'https://next.invalid';
+    const url = new URL(value, base);
+    if (url.origin !== base) return fallback;
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return fallback;
+  }
+}
 
 /** Where to send someone after signing in — preserves the page they wanted. */
 export function signInUrl(ctx: Ctx, note?: string): string {
@@ -60,6 +87,19 @@ export function requireSpecialist(ctx: Ctx): { user: SessionUser; profileId: str
   const current = requireUser(ctx);
   if (!current.profileId) throw new GuardRedirect(redirect('/apply'));
   return { user: current, profileId: current.profileId };
+}
+
+/**
+ * True when this account has to confirm its email before acting on it —
+ * sending a hire request, publishing a project, submitting an application.
+ *
+ * Only while mail is actually configured. Without a provider the confirmation
+ * link sits in the outbound_email queue for an admin to read out, so demanding
+ * it would strand every new account at the first thing it tried to do.
+ */
+export function verificationRequired(account: SessionUser): boolean {
+  const runtime = env();
+  return Boolean(runtime.RESEND_API_KEY && runtime.MAIL_FROM) && !account.emailVerified;
 }
 
 /** A content editor or an admin. Like the admin pages, nobody else learns the route exists. */

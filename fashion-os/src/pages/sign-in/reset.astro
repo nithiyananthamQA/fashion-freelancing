@@ -7,6 +7,7 @@ import { db } from '../../server/db';
 import { consumeToken, setPassword } from '../../server/auth';
 import { passwordProblem } from '../../server/password';
 import { parse } from '../../server/validate';
+import { clientKey, limited, tooManyRequests } from '../../server/rate-limit';
 
 const database = db(Astro);
 let errors: Record<string, string> = {};
@@ -16,6 +17,9 @@ let done = false;
 const token = Astro.url.searchParams.get('token') ?? '';
 
 if (Astro.request.method === 'POST') {
+  // A guessed token is hopeless (256 bits), but an unthrottled form is still a
+  // free lookup against the token table — limited like every credential form.
+  if (await limited(database, 'resetSubmit', clientKey(Astro.request))) return tooManyRequests();
   const form = await Astro.request.formData();
   const { f, errors: found } = parse(form);
   errors = found;

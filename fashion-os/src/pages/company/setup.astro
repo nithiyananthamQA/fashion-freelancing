@@ -10,7 +10,7 @@ export const prerender = false;
 
 import Night from '../../layouts/Night.astro';
 import { db } from '../../server/db';
-import { guard, requireUser } from '../../server/guards';
+import { guard, requireUser, safeNext } from '../../server/guards';
 import { newId, nowIso } from '../../server/ids';
 import { audit } from '../../server/audit';
 import { parse } from '../../server/validate';
@@ -21,8 +21,7 @@ if (gate.response) return gate.response;
 const user = gate.value;
 
 const database = db(Astro);
-const rawNext = Astro.url.searchParams.get('next');
-const next = rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/workspace/company';
+const next = safeNext(Astro.url.searchParams.get('next'), '/workspace/company');
 
 /* Already set up — nothing to collect twice. */
 if (user.companyIds.length) return Astro.redirect(next);

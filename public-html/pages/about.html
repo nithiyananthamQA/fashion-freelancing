@@ -14,12 +14,29 @@ if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title data-cms="head.title">About Us - Fashion Freelancing</title>
-<meta name="description" data-cms="head.description" content="Fashion Freelancing is a fashion design and production-services studio — one team for tech packs, 3D sampling, patterns, prints, AI photography, listings, websites and brand design. Fixed quotes, two revision rounds, full ownership." />
+<link rel="canonical" href="https://fashionfreelancing.com/pages/about" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Fashion Freelancing" />
+<meta property="og:url" content="https://fashionfreelancing.com/pages/about" />
+<meta property="og:title" content="About Us - Fashion Freelancing" />
+<meta property="og:description" content="A fashion design and production studio — tech packs, 3D sampling, patterns, prints, AI photography, listings and websites. Fixed quotes, you own the work." />
+<meta property="og:image" content="https://fashionfreelancing.com/assets/img/og/about.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="About Us - Fashion Freelancing" />
+<meta name="twitter:description" content="A fashion design and production studio — tech packs, 3D sampling, patterns, prints, AI photography, listings and websites. Fixed quotes, you own the work." />
+<meta name="twitter:image" content="https://fashionfreelancing.com/assets/img/og/about.jpg" />
+<meta name="description" data-cms="head.description" content="A fashion design and production studio — tech packs, 3D sampling, patterns, prints, AI photography, listings and websites. Fixed quotes, you own the work." />
 
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF0055'/%3E%3Cstop offset='1' stop-color='%236E56F0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='19' font-weight='600' fill='%23fff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<!-- fonts are self-hosted and preloaded, so they usually land before first
+     paint; the metric-matched fallbacks cover the rest without layout shift -->
+<link rel="preload" href="/assets/fonts/pjs-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/instrument-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../assets/styles.css">
 <link rel="stylesheet" href="../assets/night.css">
 <link rel="stylesheet" href="../assets/network.css">
@@ -167,6 +184,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 /* how we work steps */
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .step { padding: 28px 26px; }
+.step .n::before { content: attr(data-n); }
 .step .n { font-family: var(--disp); font-weight: 600; font-size: 30px; letter-spacing: -.025em; color: transparent; -webkit-text-stroke: 1.3px var(--acc-45); }
 .step h3 { font-family: var(--disp); font-size: 18px; font-weight: 700; margin: 12px 0 8px; }
 .step p { font-size: 14px; color: var(--ink-4); line-height: 1.6; margin: 0; }
@@ -202,6 +220,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
 }
 </style>
 <link rel="stylesheet" href="../assets/mobile.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"AboutPage","url":"https://fashionfreelancing.com/pages/about","name":"About Us - Fashion Freelancing","about":{"@id":"https://fashionfreelancing.com/#organization"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://fashionfreelancing.com/"},{"@type":"ListItem","position":2,"name":"About","item":"https://fashionfreelancing.com/pages/about"}]}</script>
 </head>
 <body>
 
@@ -222,7 +242,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         your idea and your factory, your store, your customer — and we speak the language of all three.
       </p>
       <div class="acts rv in">
-        <a href="../index.html#contact" class="btn-acc" data-cms="about-us.button-1">Start a project</a>
+        <a href="/#contact" class="btn-acc" data-cms="about-us.button-1">Start a project</a>
       </div>
     </div>
   </section>
@@ -248,9 +268,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <h2 class="h-display rv rv-display" id="how-h" data-cms="how-we-work.heading-1">Three steps. <span class="acc-t">No surprises.</span></h2>
       </div>
       <div class="steps">
-        <div class="step glass-p rv"><div class="n">01</div><h3 data-cms="how-we-work.heading-2">Send your brief</h3><p data-cms="how-we-work.text-1">A sketch, a tech pack, a link, a voice note — whatever you have. You get a fixed written quote within 24 hours: scope, price, delivery date.</p></div>
-        <div class="step glass-p rv rv-d1"><div class="n">02</div><h3 data-cms="how-we-work.heading-3">We build it</h3><p data-cms="how-we-work.text-2">One in-house team does the work. Two structured revision rounds are part of every package — not an upsell.</p></div>
-        <div class="step glass-p rv rv-d2"><div class="n">03</div><h3 data-cms="how-we-work.heading-4">You own it</h3><p data-cms="how-we-work.text-3">Final files, source files where quoted, and full ownership transfer on final payment. Take everything anywhere, anytime.</p></div>
+        <div class="step glass-p rv"><div class="n" aria-hidden="true" data-n="01"></div><h3 data-cms="how-we-work.heading-2">Send your brief</h3><p data-cms="how-we-work.text-1">A sketch, a tech pack, a link, a voice note — whatever you have. You get a fixed written quote within 24 hours: scope, price, delivery date.</p></div>
+        <div class="step glass-p rv rv-d1"><div class="n" aria-hidden="true" data-n="02"></div><h3 data-cms="how-we-work.heading-3">We build it</h3><p data-cms="how-we-work.text-2">One in-house team does the work. Two structured revision rounds are part of every package — not an upsell.</p></div>
+        <div class="step glass-p rv rv-d2"><div class="n" aria-hidden="true" data-n="03"></div><h3 data-cms="how-we-work.heading-4">You own it</h3><p data-cms="how-we-work.text-3">Final files, source files where quoted, and full ownership transfer on final payment. Take everything anywhere, anytime.</p></div>
       </div>
     </div>
   </section>
@@ -281,16 +301,16 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
         <h2 class="h-display rv rv-display" id="dir-h" data-cms="what-we-do.heading-1">Every service. <span class="acc-t">One team.</span></h2>
       </div>
       <div class="svc-dir">
-        <a class="svc-l rv" href="services/tech-pack.html"><b>Tech packs</b><span>factory-ready specs</span></a>
-        <a class="svc-l rv" href="services/3d-virtual-sampling.html"><b>3D virtual sampling</b><span>see it before you cut</span></a>
-        <a class="svc-l rv" href="services/graphics-prints.html"><b>Graphics &amp; Prints</b><span>surface pattern and placement art</span></a>
-        <a class="svc-l rv" href="services/pattern-cad.html"><b>Pattern making (CAD)</b><span>patterns factories can cut</span></a>
-        <a class="svc-l rv rv-d1" href="services/dobby-jacquard.html"><b>Dobby &amp; jacquard</b><span>designs that actually weave</span></a>
-        <a class="svc-l rv rv-d1" href="services/web-development.html"><b>Web development</b><span>designed, built, live on your domain</span></a>
-        <a class="svc-l rv rv-d1" href="services/ai-agent.html"><b>AI customer agent</b><span>answers at 3PM and 3AM</span></a>
-        <a class="svc-l rv rv-d2" href="services/ai-photography.html"><b>AI video &amp; photography</b><span>flat shot in, on-model out</span></a>
-        <a class="svc-l rv rv-d2" href="services/ecom-listing.html"><b>E-commerce listings</b><span>found and bought</span></a>
-        <a class="svc-l rv rv-d2" href="services/digital-marketing.html"><b>Digital marketing &amp; SEO</b><span>found on Google, seen on Instagram</span></a>
+        <a class="svc-l rv" href="/pages/services/tech-pack"><b>Tech packs</b><span>factory-ready specs</span></a>
+        <a class="svc-l rv" href="/pages/services/3d-virtual-sampling"><b>3D virtual sampling</b><span>see it before you cut</span></a>
+        <a class="svc-l rv" href="/pages/services/graphics-prints"><b>Graphics &amp; Prints</b><span>surface pattern and placement art</span></a>
+        <a class="svc-l rv" href="/pages/services/pattern-cad"><b>Pattern making (CAD)</b><span>patterns factories can cut</span></a>
+        <a class="svc-l rv rv-d1" href="/pages/services/dobby-jacquard"><b>Dobby &amp; jacquard</b><span>designs that actually weave</span></a>
+        <a class="svc-l rv rv-d1" href="/pages/services/web-development"><b>Web development</b><span>designed, built, live on your domain</span></a>
+        <a class="svc-l rv rv-d1" href="/pages/services/ai-agent"><b>AI customer agent</b><span>answers at 3PM and 3AM</span></a>
+        <a class="svc-l rv rv-d2" href="/pages/services/ai-photography"><b>AI video &amp; photography</b><span>flat shot in, on-model out</span></a>
+        <a class="svc-l rv rv-d2" href="/pages/services/ecom-listing"><b>E-commerce listings</b><span>found and bought</span></a>
+        <a class="svc-l rv rv-d2" href="/pages/services/digital-marketing"><b>Digital marketing &amp; SEO</b><span>found on Google, seen on Instagram</span></a>
       </div>
     </div>
   </section>
@@ -301,7 +321,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--acc); outline-o
       <div class="cta-band glass-p rv">
         <h2 class="h-display" data-cms="start-a-project.heading-1">Tell us what you're making.</h2>
         <p data-cms="start-a-project.text-1">A real person replies with a fixed quote within 24 hours.</p>
-        <a href="../index.html#contact" class="btn-acc" data-cms="start-a-project.button-1">Start a project</a>
+        <a href="/#contact" class="btn-acc" data-cms="start-a-project.button-1">Start a project</a>
       </div>
     </div>
   </section>

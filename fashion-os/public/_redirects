@@ -7,11 +7,17 @@
 # marketplace retirement map from the plan, §12.5.
 
 # --- Clean URLs for the kept public pages ---
-/about        /pages/about.html   301
-/help         /pages/help.html    301
-/terms        /pages/terms.html   301
-/privacy      /pages/privacy.html 301
-/cookies      /pages/cookies.html 301
+# Straight to the address each page lives at, so no visitor or crawler follows
+# a chain. The legal pages' .html forms are 301'd here too — left to the asset
+# layer they get a temporary 307.
+/about        /pages/about   301
+/help         /pages/help    301
+/terms        /pages/terms   301
+/privacy      /pages/privacy 301
+/cookies      /pages/cookies 301
+/pages/terms.html    /pages/terms   301
+/pages/privacy.html  /pages/privacy 301
+/pages/cookies.html  /pages/cookies 301
 
 # --- Legacy marketplace, profile, gig and hire URLs -> the new directory ---
 /marketplace          /specialists 301

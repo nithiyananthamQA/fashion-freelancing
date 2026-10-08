@@ -13,59 +13,40 @@ try{var t=localStorage.getItem('ff-theme');if(t==='light'||t==='dark')d.setAttri
 if('IntersectionObserver' in window)d.className+=' rv-on'; })();</script>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title data-cms="head.title">Web Development — Websites, Stores &amp; Web Apps, Designed and Live | Fashion Freelancing</title>
-<meta name="description" data-cms="head.description" content="Websites, online stores and web apps — designed, built and live on your own domain, with hosting, SSL, business email and analytics set up and registered in your name. Fixed quote in 24 hours." />
+<title data-cms="head.title">Web Development for Fashion Brands | Fashion Freelancing</title>
+<link rel="canonical" href="https://fashionfreelancing.com/pages/services/web-development" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Fashion Freelancing" />
+<meta property="og:url" content="https://fashionfreelancing.com/pages/services/web-development" />
+<meta property="og:title" content="Web Development for Fashion Brands | Fashion Freelancing" />
+<meta property="og:description" content="Websites, online stores and web apps — designed, built and live on your own domain, with hosting, SSL, business email and analytics in your name." />
+<meta property="og:image" content="https://fashionfreelancing.com/assets/img/og/web-development.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Web Development for Fashion Brands | Fashion Freelancing" />
+<meta name="twitter:description" content="Websites, online stores and web apps — designed, built and live on your own domain, with hosting, SSL, business email and analytics in your name." />
+<meta name="twitter:image" content="https://fashionfreelancing.com/assets/img/og/web-development.jpg" />
+<meta name="description" data-cms="head.description" content="Websites, online stores and web apps — designed, built and live on your own domain, with hosting, SSL, business email and analytics in your name." />
 
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23FF0055'/%3E%3Cstop offset='1' stop-color='%236E56F0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='19' font-weight='600' fill='%23fff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" />
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- fonts load without blocking first paint; metric-matched fallbacks
-     (Inter-fb / PJS-fb) render immediately so there is no layout shift -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all';this.onload=null" />
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" /></noscript>
+<!-- fonts are self-hosted and preloaded, so they usually land before first
+     paint; the metric-matched fallbacks cover the rest without layout shift -->
+<link rel="preload" href="/assets/fonts/pjs-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/instrument-latin.woff2" as="font" type="font/woff2" crossorigin>
 
 <link rel="stylesheet" href="../../assets/styles.css">
 <link rel="stylesheet" href="../../assets/night.css">
 <link rel="stylesheet" href="../../assets/network.css">
 
-<!-- SEO bootstrap — canonical, OG, JSON-LD (Service + FAQPage) -->
-<script>
-(function () {
-  var T = 'Web Development — Websites, Stores & Web Apps, Designed and Live | Fashion Freelancing';
-  var D = 'Websites, online stores and web apps — designed, built and live on your own domain, with hosting, SSL, business email and analytics set up and registered in your name. Fixed quote in 24 hours.';
-  var baseUrl = location.origin + location.pathname;
-  var can = document.createElement('link');
-  can.rel = 'canonical'; can.href = baseUrl;
-  document.head.appendChild(can);
-  [
-    ['property', 'og:type', 'website'], ['property', 'og:url', baseUrl],
-    ['property', 'og:title', T], ['property', 'og:description', D],
-    ['property', 'og:site_name', 'Fashion Freelancing'],
-    ['name', 'twitter:card', 'summary'], ['name', 'twitter:title', T],
-    ['name', 'twitter:description', D],
-  ].forEach(function (row) {
-    var m = document.createElement('meta');
-    m.setAttribute(row[0], row[1]); m.content = row[2];
-    document.head.appendChild(m); });
-  var svc = document.createElement('script');
-  svc.type = 'application/ld+json';
-  svc.textContent = JSON.stringify({
-    '@context': 'https://schema.org', '@type': 'Service',
-    'name': "Web Development",
-    'serviceType': "Website design, development and setup",
-    'areaServed': 'Worldwide', 'description': D, 'url': baseUrl,
-    'provider': { '@type': 'Organization', 'name': 'Fashion Freelancing', 'url': location.origin }
-  });
-  document.head.appendChild(svc);
-  var faq = document.createElement('script');
-  faq.type = 'application/ld+json';
-  faq.textContent = JSON.stringify({
-    '@context': 'https://schema.org', '@type': 'FAQPage', 'mainEntity': [{"@type": "Question", "name": "How much does a website cost?", "acceptedAnswer": {"@type": "Answer", "text": "It depends on the pages, features and content — an online store or a web app costs more than a one-page site, which is why we don't publish one price. Tell us what you need and you'll have a fixed written quote within 24 hours."}}, {"@type": "Question", "name": "How long does it take?", "acceptedAnswer": {"@type": "Answer", "text": "Most sites launch in 3–5 weeks. A simple brand site can be faster; a store or a web app takes longer. Your quote includes your timeline."}}, {"@type": "Question", "name": "What does ‘fully set up’ actually include?", "acceptedAnswer": {"@type": "Answer", "text": "Everything a working website needs beyond the design: your domain connected, hosting, SSL (the padlock), business email on your domain, contact forms delivering to your inbox, Google Analytics and Search Console, a sitemap, and redirects from any old URLs. We test each one before handover, not after launch."}}, {"@type": "Question", "name": "Which platform or code do you build on?", "acceptedAnswer": {"@type": "Answer", "text": "The one that fits how you'll run the site: Shopify if you sell online, Webflow or Framer for brand and lookbook sites, WordPress when you need a blog or several editors — and custom code (React, Next.js, Astro) when you need a web app, a customer portal or something no platform does well. On any of them you can change your own text and products."}}, {"@type": "Question", "name": "Who owns the website, domain and accounts?", "acceptedAnswer": {"@type": "Answer", "text": "You do — the design, the code, the content and the domain. Hosting, email and analytics are registered in your name, on your accounts, and every login is handed over in one document. If you ever part ways with us, everything goes with you."}}, {"@type": "Question", "name": "I already have a website or a domain. Can you redo it?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. We connect the domain you already own, keep what's worth keeping, and rebuild on a modern setup — with redirects from the old page addresses so your Google rankings and shared links still land somewhere."}}, {"@type": "Question", "name": "What do you need from me?", "acceptedAnswer": {"@type": "Answer", "text": "About 30 minutes to talk, your logo if you have one, and feedback on the design. We can write the words and source the imagery."}}, {"@type": "Question", "name": "What if I don't like the design?", "acceptedAnswer": {"@type": "Answer", "text": "You see the design before we build anything, and it goes through two structured revision rounds — most pages are approved in the first."}}, {"@type": "Question", "name": "Are domain, hosting and email fees included?", "acceptedAnswer": {"@type": "Answer", "text": "The design, the build and every setup step are in the fixed quote. Running costs — domain renewal, hosting plan, email seats — are billed by those providers straight to your account, so there is never a markup hidden in them."}}, {"@type": "Question", "name": "What happens after launch?", "acceptedAnswer": {"@type": "Answer", "text": "30 days of included fixes and tweaks, then an optional care plan for updates, backups and changes. No lock-in."}}]
-  });
-  document.head.appendChild(faq); })();
-</script>
+<!-- structured data: Service, FAQ, breadcrumb -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Service","name":"Web Development","serviceType":"Website design, development and setup","areaServed":"Worldwide","description":"Websites, online stores and web apps — designed, built and live on your own domain, with hosting, SSL, business email and analytics in your name.","url":"https://fashionfreelancing.com/pages/services/web-development","provider":{"@type":"Organization","@id":"https://fashionfreelancing.com/#organization","name":"Fashion Freelancing","url":"https://fashionfreelancing.com/"},"image":"https://fashionfreelancing.com/assets/img/og/web-development.jpg"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How much does a website cost?","acceptedAnswer":{"@type":"Answer","text":"It depends on the pages, features and content — an online store or a web app costs more than a one-page site, which is why we don't publish one price. Tell us what you need and you'll have a fixed written quote within 24 hours."}},{"@type":"Question","name":"How long does it take?","acceptedAnswer":{"@type":"Answer","text":"Most sites launch in 3–5 weeks. A simple brand site can be faster; a store or a web app takes longer. Your quote includes your timeline."}},{"@type":"Question","name":"What does ‘fully set up’ actually include?","acceptedAnswer":{"@type":"Answer","text":"Everything a working website needs beyond the design: your domain connected, hosting, SSL (the padlock), business email on your domain, contact forms delivering to your inbox, Google Analytics and Search Console, a sitemap, and redirects from any old URLs. We test each one before handover, not after launch."}},{"@type":"Question","name":"Which platform or code do you build on?","acceptedAnswer":{"@type":"Answer","text":"The one that fits how you'll run the site: Shopify if you sell online, Webflow or Framer for brand and lookbook sites, WordPress when you need a blog or several editors — and custom code (React, Next.js, Astro) when you need a web app, a customer portal or something no platform does well. On any of them you can change your own text and products."}},{"@type":"Question","name":"Who owns the website, domain and accounts?","acceptedAnswer":{"@type":"Answer","text":"You do — the design, the code, the content and the domain. Hosting, email and analytics are registered in your name, on your accounts, and every login is handed over in one document. If you ever part ways with us, everything goes with you."}},{"@type":"Question","name":"I already have a website or a domain. Can you redo it?","acceptedAnswer":{"@type":"Answer","text":"Yes. We connect the domain you already own, keep what's worth keeping, and rebuild on a modern setup — with redirects from the old page addresses so your Google rankings and shared links still land somewhere."}},{"@type":"Question","name":"What do you need from me?","acceptedAnswer":{"@type":"Answer","text":"About 30 minutes to talk, your logo if you have one, and feedback on the design. We can write the words and source the imagery."}},{"@type":"Question","name":"What if I don't like the design?","acceptedAnswer":{"@type":"Answer","text":"You see the design before we build anything, and it goes through two structured revision rounds — most pages are approved in the first."}},{"@type":"Question","name":"Are domain, hosting and email fees included?","acceptedAnswer":{"@type":"Answer","text":"The design, the build and every setup step are in the fixed quote. Running costs — domain renewal, hosting plan, email seats — are billed by those providers straight to your account, so there is never a markup hidden in them."}},{"@type":"Question","name":"What happens after launch?","acceptedAnswer":{"@type":"Answer","text":"30 days of included fixes and tweaks, then an optional care plan for updates, backups and changes. No lock-in."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://fashionfreelancing.com/"},{"@type":"ListItem","position":2,"name":"Web Development","item":"https://fashionfreelancing.com/pages/services/web-development"}]}</script>
 
 <style>
 /* metric-matched fallbacks — the font swap no longer moves layout (CLS) */
@@ -991,12 +972,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
         <article class="wk rv" data-cat="brands">
           <a class="wk-shot" href="https://marvelhomefashion.pages.dev/" target="_blank" rel="noopener" aria-label="Open Marvel Home Fashion — marvelhomefashion.pages.dev (opens in a new tab)">
             <span class="wk-bar" aria-hidden="true"><i></i><i></i><i></i><span>marvelhomefashion.pages.dev</span></span>
-            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/mhf-page.webp" width="800" loading="lazy" decoding="async" alt="Marvel Home Fashion home page, scrolled top to bottom" data-cms="work.image-1"></span>
+            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/mhf-page.webp" width="800" loading="lazy" decoding="async" alt="Marvel Home Fashion home page, scrolled top to bottom" data-cms="work.image-1" height="1824"></span>
             <span class="wk-phone" aria-hidden="true"><img src="../../assets/img/works/sites/mhf-phone.webp" width="240" height="519" loading="lazy" decoding="async" alt="" data-cms="work.image-2"></span>
             <span class="wk-badge live"><i></i>Live · launched by us</span>
           </a>
           <div class="wk-body">
-            <span class="wk-logo"><img src="../../assets/img/works/logos/mhf.webp" alt="Marvel Home Fashion logo" loading="lazy" decoding="async" data-cms="work.image-3"></span>
+            <span class="wk-logo"><img src="../../assets/img/works/logos/mhf.webp" alt="Marvel Home Fashion logo" loading="lazy" decoding="async" data-cms="work.image-3" width="98" height="96"></span>
             <div class="wk-id"><h3 data-cms="work.heading-2">Marvel Home Fashion</h3><span>Manufacturing &amp; sourcing · Brands & B2B</span></div>
             <a class="wk-go" href="https://marvelhomefashion.pages.dev/" target="_blank" rel="noopener" aria-label="Visit Marvel Home Fashion">Visit <span aria-hidden="true">↗</span></a>
           </div>
@@ -1006,12 +987,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
         <article class="wk rv rv-d1" data-cat="stores">
           <a class="wk-shot" href="https://ivy-crew.pages.dev/" target="_blank" rel="noopener" aria-label="Open Ivy Crew — ivy-crew.pages.dev (opens in a new tab)">
             <span class="wk-bar" aria-hidden="true"><i></i><i></i><i></i><span>ivy-crew.pages.dev</span></span>
-            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/ivy-crew-page.webp" width="800" loading="lazy" decoding="async" alt="Ivy Crew home page, scrolled top to bottom" data-cms="work.image-4"></span>
+            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/ivy-crew-page.webp" width="800" loading="lazy" decoding="async" alt="Ivy Crew home page, scrolled top to bottom" data-cms="work.image-4" height="2400"></span>
             <span class="wk-phone" aria-hidden="true"><img src="../../assets/img/works/sites/ivy-crew-phone.webp" width="240" height="519" loading="lazy" decoding="async" alt="" data-cms="work.image-5"></span>
             <span class="wk-badge">Designed &amp; built</span>
           </a>
           <div class="wk-body">
-            <span class="wk-logo"><img src="../../assets/img/works/logos/ivy-crew.webp" alt="Ivy Crew logo" loading="lazy" decoding="async" data-cms="work.image-6"></span>
+            <span class="wk-logo"><img src="../../assets/img/works/logos/ivy-crew.webp" alt="Ivy Crew logo" loading="lazy" decoding="async" data-cms="work.image-6" width="144" height="96"></span>
             <div class="wk-id"><h3 data-cms="work.heading-3">Ivy Crew</h3><span>Performance apparel store · Stores</span></div>
             <a class="wk-go" href="https://ivy-crew.pages.dev/" target="_blank" rel="noopener" aria-label="Visit Ivy Crew">Visit <span aria-hidden="true">↗</span></a>
           </div>
@@ -1021,12 +1002,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
         <article class="wk rv rv-d2" data-cat="brands">
           <a class="wk-shot" href="https://slade-in-studio.surge.sh/" target="_blank" rel="noopener" aria-label="Open Slade In Studio — slade-in-studio.surge.sh (opens in a new tab)">
             <span class="wk-bar" aria-hidden="true"><i></i><i></i><i></i><span>slade-in-studio.surge.sh</span></span>
-            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/slade-page.webp" width="800" loading="lazy" decoding="async" alt="Slade In Studio home page, scrolled top to bottom" data-cms="work.image-7"></span>
+            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/slade-page.webp" width="800" loading="lazy" decoding="async" alt="Slade In Studio home page, scrolled top to bottom" data-cms="work.image-7" height="2400"></span>
             <span class="wk-phone" aria-hidden="true"><img src="../../assets/img/works/sites/slade-phone.webp" width="240" height="519" loading="lazy" decoding="async" alt="" data-cms="work.image-8"></span>
             <span class="wk-badge">Designed &amp; built</span>
           </a>
           <div class="wk-body">
-            <span class="wk-logo"><img src="../../assets/img/works/logos/slade.webp" alt="Slade In Studio logo" loading="lazy" decoding="async" data-cms="work.image-9"></span>
+            <span class="wk-logo"><img src="../../assets/img/works/logos/slade.webp" alt="Slade In Studio logo" loading="lazy" decoding="async" data-cms="work.image-9" width="195" height="96"></span>
             <div class="wk-id"><h3 data-cms="work.heading-4">Slade In Studio</h3><span>Creative studio · Brands & B2B</span></div>
             <a class="wk-go" href="https://slade-in-studio.surge.sh/" target="_blank" rel="noopener" aria-label="Visit Slade In Studio">Visit <span aria-hidden="true">↗</span></a>
           </div>
@@ -1036,12 +1017,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
         <article class="wk rv" data-cat="apps">
           <a class="wk-shot" href="https://market-spider.marketspiderfirebase.workers.dev/" target="_blank" rel="noopener" aria-label="Open Market Spider — market-spider.marketspiderfirebase.workers.dev (opens in a new tab)">
             <span class="wk-bar" aria-hidden="true"><i></i><i></i><i></i><span>market-spider.marketspiderfirebase.workers.dev</span></span>
-            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/market-spider-page.webp" width="800" loading="lazy" decoding="async" alt="Market Spider home page, scrolled top to bottom" data-cms="work.image-10"></span>
+            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/market-spider-page.webp" width="800" loading="lazy" decoding="async" alt="Market Spider home page, scrolled top to bottom" data-cms="work.image-10" height="1508"></span>
             <span class="wk-phone" aria-hidden="true"><img src="../../assets/img/works/sites/market-spider-phone.webp" width="240" height="519" loading="lazy" decoding="async" alt="" data-cms="work.image-11"></span>
             <span class="wk-badge">Designed &amp; built</span>
           </a>
           <div class="wk-body">
-            <span class="wk-logo dark"><img src="../../assets/img/works/logos/market-spider.webp" alt="Market Spider logo" loading="lazy" decoding="async" data-cms="work.image-12"></span>
+            <span class="wk-logo dark"><img src="../../assets/img/works/logos/market-spider.webp" alt="Market Spider logo" loading="lazy" decoding="async" data-cms="work.image-12" width="196" height="96"></span>
             <div class="wk-id"><h3 data-cms="work.heading-5">Market Spider</h3><span>Trading advisory · Products & apps</span></div>
             <a class="wk-go" href="https://market-spider.marketspiderfirebase.workers.dev/" target="_blank" rel="noopener" aria-label="Visit Market Spider">Visit <span aria-hidden="true">↗</span></a>
           </div>
@@ -1051,12 +1032,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
         <article class="wk rv rv-d1" data-cat="apps">
           <a class="wk-shot" href="https://onewaycalltaxi-website.pages.dev/" target="_blank" rel="noopener" aria-label="Open One Way Call Taxi — onewaycalltaxi-website.pages.dev (opens in a new tab)">
             <span class="wk-bar" aria-hidden="true"><i></i><i></i><i></i><span>onewaycalltaxi-website.pages.dev</span></span>
-            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/taxi-page.webp" width="800" loading="lazy" decoding="async" alt="One Way Call Taxi home page, scrolled top to bottom" data-cms="work.image-13"></span>
+            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/taxi-page.webp" width="800" loading="lazy" decoding="async" alt="One Way Call Taxi home page, scrolled top to bottom" data-cms="work.image-13" height="2216"></span>
             <span class="wk-phone" aria-hidden="true"><img src="../../assets/img/works/sites/taxi-phone.webp" width="240" height="519" loading="lazy" decoding="async" alt="" data-cms="work.image-14"></span>
             <span class="wk-badge">Designed &amp; built</span>
           </a>
           <div class="wk-body">
-            <span class="wk-logo"><img src="../../assets/img/works/logos/taxi.webp" alt="One Way Call Taxi logo" loading="lazy" decoding="async" data-cms="work.image-15"></span>
+            <span class="wk-logo"><img src="../../assets/img/works/logos/taxi.webp" alt="One Way Call Taxi logo" loading="lazy" decoding="async" data-cms="work.image-15" width="162" height="96"></span>
             <div class="wk-id"><h3 data-cms="work.heading-6">One Way Call Taxi</h3><span>Taxi booking · Products & apps</span></div>
             <a class="wk-go" href="https://onewaycalltaxi-website.pages.dev/" target="_blank" rel="noopener" aria-label="Visit One Way Call Taxi">Visit <span aria-hidden="true">↗</span></a>
           </div>
@@ -1066,12 +1047,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
         <article class="wk rv rv-d2" data-cat="stores">
           <a class="wk-shot" href="https://hoodude.pages.dev/" target="_blank" rel="noopener" aria-label="Open Hoodude — hoodude.pages.dev (opens in a new tab)">
             <span class="wk-bar" aria-hidden="true"><i></i><i></i><i></i><span>hoodude.pages.dev</span></span>
-            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/hoodude-page.webp" width="800" loading="lazy" decoding="async" alt="Hoodude home page, scrolled top to bottom" data-cms="work.image-16"></span>
+            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/hoodude-page.webp" width="800" loading="lazy" decoding="async" alt="Hoodude home page, scrolled top to bottom" data-cms="work.image-16" height="2400"></span>
             <span class="wk-phone" aria-hidden="true"><img src="../../assets/img/works/sites/hoodude-phone.webp" width="240" height="519" loading="lazy" decoding="async" alt="" data-cms="work.image-17"></span>
             <span class="wk-badge">Designed &amp; built</span>
           </a>
           <div class="wk-body">
-            <span class="wk-logo"><img src="../../assets/img/works/logos/hoodude.webp" alt="Hoodude logo" loading="lazy" decoding="async" data-cms="work.image-18"></span>
+            <span class="wk-logo"><img src="../../assets/img/works/logos/hoodude.webp" alt="Hoodude logo" loading="lazy" decoding="async" data-cms="work.image-18" width="67" height="96"></span>
             <div class="wk-id"><h3 data-cms="work.heading-7">Hoodude</h3><span>Streetwear store · Stores</span></div>
             <a class="wk-go" href="https://hoodude.pages.dev/" target="_blank" rel="noopener" aria-label="Visit Hoodude">Visit <span aria-hidden="true">↗</span></a>
           </div>
@@ -1081,12 +1062,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
         <article class="wk rv" data-cat="stores">
           <a class="wk-shot" href="https://uzhavan-fresh-site.pages.dev/" target="_blank" rel="noopener" aria-label="Open Uzhavan Fresh — uzhavan-fresh-site.pages.dev (opens in a new tab)">
             <span class="wk-bar" aria-hidden="true"><i></i><i></i><i></i><span>uzhavan-fresh-site.pages.dev</span></span>
-            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/uzhavan-page.webp" width="800" loading="lazy" decoding="async" alt="Uzhavan Fresh home page, scrolled top to bottom" data-cms="work.image-19"></span>
+            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/uzhavan-page.webp" width="800" loading="lazy" decoding="async" alt="Uzhavan Fresh home page, scrolled top to bottom" data-cms="work.image-19" height="2400"></span>
             <span class="wk-phone" aria-hidden="true"><img src="../../assets/img/works/sites/uzhavan-phone.webp" width="240" height="519" loading="lazy" decoding="async" alt="" data-cms="work.image-20"></span>
             <span class="wk-badge">Designed &amp; built</span>
           </a>
           <div class="wk-body">
-            <span class="wk-logo"><img src="../../assets/img/works/logos/uzhavan.svg" alt="Uzhavan Fresh logo" loading="lazy" decoding="async" data-cms="work.image-21"></span>
+            <span class="wk-logo"><img src="../../assets/img/works/logos/uzhavan.svg" alt="Uzhavan Fresh logo" loading="lazy" decoding="async" data-cms="work.image-21" width="1360" height="1432"></span>
             <div class="wk-id"><h3 data-cms="work.heading-8">Uzhavan Fresh</h3><span>Farm milk subscription · Stores</span></div>
             <a class="wk-go" href="https://uzhavan-fresh-site.pages.dev/" target="_blank" rel="noopener" aria-label="Visit Uzhavan Fresh">Visit <span aria-hidden="true">↗</span></a>
           </div>
@@ -1096,12 +1077,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
         <article class="wk rv rv-d1" data-cat="apps">
           <a class="wk-shot" href="https://www.mycyclesafe.ai/" target="_blank" rel="noopener" aria-label="Open My Cycle Safe AI — www.mycyclesafe.ai (opens in a new tab)">
             <span class="wk-bar" aria-hidden="true"><i></i><i></i><i></i><span>www.mycyclesafe.ai</span></span>
-            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/mycyclesafe-page.webp" width="800" loading="lazy" decoding="async" alt="My Cycle Safe AI home page, scrolled top to bottom" data-cms="work.image-22"></span>
+            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/mycyclesafe-page.webp" width="800" loading="lazy" decoding="async" alt="My Cycle Safe AI home page, scrolled top to bottom" data-cms="work.image-22" height="2400"></span>
             <span class="wk-phone" aria-hidden="true"><img src="../../assets/img/works/sites/mycyclesafe-phone.webp" width="240" height="519" loading="lazy" decoding="async" alt="" data-cms="work.image-23"></span>
             <span class="wk-badge">Designed &amp; built</span>
           </a>
           <div class="wk-body">
-            <span class="wk-logo"><img src="../../assets/img/works/logos/mycyclesafe.svg" alt="My Cycle Safe AI logo" loading="lazy" decoding="async" data-cms="work.image-24"></span>
+            <span class="wk-logo"><img src="../../assets/img/works/logos/mycyclesafe.svg" alt="My Cycle Safe AI logo" loading="lazy" decoding="async" data-cms="work.image-24" width="24" height="24"></span>
             <div class="wk-id"><h3 data-cms="work.heading-9">My Cycle Safe AI</h3><span>Health app · Products & apps</span></div>
             <a class="wk-go" href="https://www.mycyclesafe.ai/" target="_blank" rel="noopener" aria-label="Visit My Cycle Safe AI">Visit <span aria-hidden="true">↗</span></a>
           </div>
@@ -1111,12 +1092,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
         <article class="wk rv rv-d2" data-cat="brands">
           <a class="wk-shot" href="https://ecosureglobal1.surge.sh/" target="_blank" rel="noopener" aria-label="Open Eco Sure Global — ecosureglobal1.surge.sh (opens in a new tab)">
             <span class="wk-bar" aria-hidden="true"><i></i><i></i><i></i><span>ecosureglobal1.surge.sh</span></span>
-            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/ecosure-page.webp" width="800" loading="lazy" decoding="async" alt="Eco Sure Global home page, scrolled top to bottom" data-cms="work.image-25"></span>
+            <span class="wk-view"><img class="wk-page" src="../../assets/img/works/sites/ecosure-page.webp" width="800" loading="lazy" decoding="async" alt="Eco Sure Global home page, scrolled top to bottom" data-cms="work.image-25" height="2400"></span>
             <span class="wk-phone" aria-hidden="true"><img src="../../assets/img/works/sites/ecosure-phone.webp" width="240" height="519" loading="lazy" decoding="async" alt="" data-cms="work.image-26"></span>
             <span class="wk-badge">Designed &amp; built</span>
           </a>
           <div class="wk-body">
-            <span class="wk-logo"><img src="../../assets/img/works/logos/ecosure.svg" alt="Eco Sure Global logo" loading="lazy" decoding="async" data-cms="work.image-27"></span>
+            <span class="wk-logo"><img src="../../assets/img/works/logos/ecosure.svg" alt="Eco Sure Global logo" loading="lazy" decoding="async" data-cms="work.image-27" width="34" height="34"></span>
             <div class="wk-id"><h3 data-cms="work.heading-10">Eco Sure Global</h3><span>Ethical sourcing · Brands & B2B</span></div>
             <a class="wk-go" href="https://ecosureglobal1.surge.sh/" target="_blank" rel="noopener" aria-label="Visit Eco Sure Global">Visit <span aria-hidden="true">↗</span></a>
           </div>
@@ -1347,7 +1328,10 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
         <p class="sub rv" data-cms="contact.text-1">Describe the site you need — fixed quote within 24 hours.</p>
       </div>
       <div class="contact-grid">
-        <form id="td-form" class="cform glass-p rv" autocomplete="on" novalidate>
+        <form id="td-form" class="cform glass-p rv" action="/api/leads" method="post" autocomplete="on" novalidate>
+              <input type="hidden" name="source" value="contact-form">
+              <!-- left empty by people; bots that fill every field are dropped by /api/leads -->
+              <input type="text" name="company_fax" tabindex="-1" autocomplete="off" class="visually-hidden" aria-hidden="true">
           <div class="row2">
             <label><span class="fl">Your name<span class="rq" aria-hidden="true">*</span></span><input class="fi" type="text" name="name" required autocomplete="name" placeholder="First &amp; last"></label>
             <label><span class="fl">Email<span class="rq" aria-hidden="true">*</span></span><input class="fi" type="email" name="email" required autocomplete="email" placeholder="you@brand.com"></label>
@@ -1387,7 +1371,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
             <li data-cms="contact.item-4">Two revision rounds baked in, not extra.</li>
             <li data-cms="contact.item-5">Every account and login in your name on final payment.</li>
           </ul>
-          <button type="button" class="mail" id="copy-mail">hello@fashionos.app<span style="font-size: 11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-5);" id="copy-hint" role="status" aria-live="polite">Click to copy</span></button>
+          <button type="button" class="mail" id="copy-mail">hello@fashionfreelancing.com<span style="font-size: 11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-5);" id="copy-hint" role="status" aria-live="polite">Click to copy</span></button>
         </aside>
       </div>
       </div>
@@ -1689,7 +1673,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   var mailHint = document.getElementById('copy-hint');
   if (mailBtn) {
     mailBtn.addEventListener('click', function () {
-      var email = 'hello@fashionos.app';
+      var email = 'hello@fashionfreelancing.com';
       var done = function () {
         mailHint.textContent = 'Copied \u2713';
         setTimeout(function () { mailHint.textContent = 'Click to copy'; }, 1500); };
@@ -1791,7 +1775,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
         .catch(function () {
           /* Never lose the enquiry to a network blip — show the address so the
              person can still reach us, rather than a dead end. */
-          errBox.textContent = 'That did not send. Please email hello@fashionos.app and we will pick it up.';
+          errBox.textContent = 'That did not send. Please email hello@fashionfreelancing.com and we will pick it up.';
           errBox.hidden = false;
           submit.disabled = false;
           submit.textContent = sendLabel;

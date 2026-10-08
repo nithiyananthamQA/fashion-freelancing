@@ -13,13 +13,14 @@ import Tags from '../../components/Tags.astro';
 import { db } from '../../server/db';
 import { loadPublicProfile } from '../../server/repo/specialists';
 import { currentShortlist } from '../../server/shortlist';
+import { notFoundResponse } from '../../server/site-content';
 import { AVAILABILITY, ENGAGEMENT, RATE_MODEL, WORK_LOCATION, getService } from '../../data/taxonomy';
 
 const { handle } = Astro.params;
 const database = db(Astro);
 const profile = handle ? await loadPublicProfile(database, handle, Astro.locals.tenant) : null;
 
-if (!profile) return new Response(null, { status: 404 });
+if (!profile) return notFoundResponse();
 
 const initials = profile.name.split(/\s+/).slice(0, 2).map((p) => p[0] ?? '').join('').toUpperCase();
 const tint = 't' + ((profile.handle.split('').reduce((n, c) => n + c.charCodeAt(0), 0) % 5) + 1);

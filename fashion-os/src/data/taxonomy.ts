@@ -147,7 +147,7 @@ export const SERVICES: Service[] = [
   {
     id: 'tech-pack',
     name: 'Tech Pack',
-    page: '/pages/services/tech-pack.html',
+    page: '/pages/services/tech-pack',
     blurb: 'Factory-ready specification documents — flats, measurements, BOM and construction detail.',
     accent: 'var(--lg-coral)',
     specialties: ['Womenswear', 'Menswear', 'Kidswear', 'Activewear', 'Denim', 'Knitwear', 'Accessories'],
@@ -157,7 +157,7 @@ export const SERVICES: Service[] = [
   {
     id: '3d-virtual-sampling',
     name: '3D Virtual Sampling',
-    page: '/pages/services/3d-virtual-sampling.html',
+    page: '/pages/services/3d-virtual-sampling',
     blurb: 'Photorealistic digital samples — review fit, fabric and colourways before cutting cloth.',
     accent: 'var(--lg-sky)',
     specialties: ['Garment simulation', 'Fit review', 'Colourways', 'Render production', 'Animation', 'Digital avatars'],
@@ -170,7 +170,7 @@ export const SERVICES: Service[] = [
        is the foreign key on every specialist offering and project already in
        the database — renaming it would break both for no gain. */
     name: 'Graphics & Prints',
-    page: '/pages/services/graphics-prints.html',
+    page: '/pages/services/graphics-prints',
     blurb: 'Surface pattern, colourways and apparel graphics, delivered as print-ready production files.',
     accent: 'var(--lg-pink)',
     specialties: ['Apparel prints', 'Repeat patterns', 'Textile prints', 'Home textiles', 'Print-ready files'],
@@ -180,7 +180,7 @@ export const SERVICES: Service[] = [
   {
     id: 'pattern-cad',
     name: 'Pattern CAD',
-    page: '/pages/services/pattern-cad.html',
+    page: '/pages/services/pattern-cad',
     blurb: 'Digital patterns, grading and markers built for the factory that will actually cut them.',
     accent: 'var(--lg-green)',
     specialties: ['Base patterns', 'Grading', 'Marker making', 'Digitising', 'Fit corrections'],
@@ -190,7 +190,7 @@ export const SERVICES: Service[] = [
   {
     id: 'dobby-jacquard',
     name: 'Dobby & Jacquard',
-    page: '/pages/services/dobby-jacquard.html',
+    page: '/pages/services/dobby-jacquard',
     blurb: 'Woven structures and loom-ready artwork, from weave concept to mill-ready files.',
     accent: 'var(--lg-orange)',
     specialties: ['Dobby structures', 'Jacquard artwork', 'Weave simulation', 'Loom-ready files'],
@@ -203,7 +203,7 @@ export const SERVICES: Service[] = [
        item, project and hire request from both ids to this one. */
     id: 'web-development',
     name: 'Web Development',
-    page: '/pages/services/web-development.html',
+    page: '/pages/services/web-development',
     blurb: 'Brand sites, stores and web apps — designed, built and live on your own domain, with everything behind them set up.',
     accent: 'var(--lg-peri)',
     specialties: WEB_ROLES.map((role) => role.name),
@@ -220,7 +220,7 @@ export const SERVICES: Service[] = [
   {
     id: 'ai-agent',
     name: 'AI Agent',
-    page: '/pages/services/ai-agent.html',
+    page: '/pages/services/ai-agent',
     blurb: 'Support, sales and operations agents that answer accurately and hand off to a person.',
     accent: 'var(--lg-teal)',
     specialties: ['Customer support', 'Lead generation', 'Sales assistance', 'Knowledge-base agent', 'Automation'],
@@ -230,7 +230,7 @@ export const SERVICES: Service[] = [
   {
     id: 'ai-photography',
     name: 'AI Video & Photography',
-    page: '/pages/services/ai-photography.html',
+    page: '/pages/services/ai-photography',
     blurb: 'Channel-ready product and campaign imagery that keeps the real garment honest.',
     accent: 'var(--lg-yellow)',
     specialties: ['Product imagery', 'Lifestyle imagery', 'Campaigns', 'Short video', 'Retouching'],
@@ -240,7 +240,7 @@ export const SERVICES: Service[] = [
   {
     id: 'ecom-listing',
     name: 'E-Commerce Listing',
-    page: '/pages/services/ecom-listing.html',
+    page: '/pages/services/ecom-listing',
     blurb: 'Catalogue work that gets products live and findable on every channel you sell through.',
     accent: 'var(--lg-lime)',
     specialties: ['Shopify', 'Amazon', 'Myntra', 'Flipkart', 'Catalog upload', 'SEO content', 'Product attributes'],
@@ -250,7 +250,7 @@ export const SERVICES: Service[] = [
   {
     id: 'digital-marketing',
     name: 'Digital Marketing & SEO',
-    page: '/pages/services/digital-marketing.html',
+    page: '/pages/services/digital-marketing',
     blurb: 'Found on Google, seen on Instagram — SEO, ads and content measured in enquiries and sales, not likes.',
     accent: 'var(--lg-violet)',
     specialties: ['SEO', 'Local SEO', 'Google Ads', 'Meta Ads', 'Social media', 'Content marketing', 'Email & WhatsApp marketing', 'Analytics & reporting'],

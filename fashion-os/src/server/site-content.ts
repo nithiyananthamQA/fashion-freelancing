@@ -290,19 +290,70 @@ export async function loadOverrides(ctx: Ctx, page: SitePage): Promise<Map<strin
 
 /** Only the inline tags a paragraph or heading on these pages actually uses. */
 const ALLOWED = new Set(['b', 'strong', 'i', 'em', 'u', 'span', 'a', 'br', 'small', 'mark']);
+/** One complete tag. A quoted value may hold anything but its own quote, `>` included. */
+const TAG = /<(\/?)([a-z][a-z0-9]*)((?:\s+[^\s"'<>\/=]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'<>=`]+))?)*)\s*\/?>/iy;
+const ATTR = /([^\s"'<>\/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'<>=`]+)))?/g;
+const COMMENT = /<!--[\s\S]*?-->/y;
+/** Text between tags: every `<` and `>` escaped, a bare `&` too, an entity left as it is. */
+const asText = (s: string) => s.replace(/&(?!(?:[a-z][a-z0-9]*|#\d{1,7}|#x[0-9a-f]{1,6});)/gi, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+/** Attribute values by name, decoded; the first of a repeated name wins, as in a browser. */
+function attrsOf(source: string): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const m of source.matchAll(ATTR)) {
+    const name = (m[1] ?? '').toLowerCase();
+    if (!out.has(name)) out.set(name, unescapeHtml(m[2] ?? m[3] ?? m[4] ?? ''));
+  }
+  return out;
+}
+/**
+ * The only way editor HTML reaches a page, on save and again on render.
+ *
+ * A tokenizer, not a find-and-replace. The old version rewrote only COMPLETE
+ * `<tag…>` tokens and let everything else through, so an unterminated
+ * `<img src=x onerror=alert(1) x=` survived — and renderPage then appended
+ * `</h2>`, whose `>` finished the tag for it. Now every `<` and `>` in the
+ * result was written here: an allowed tag is rebuilt from its parsed name and
+ * the few attributes kept, any other complete tag (and any comment) is
+ * dropped, and every remaining `<` or `>` is escaped as text. Allowed tags are
+ * balanced as well, so a missing `</a>` cannot turn the rest of the page into
+ * one link. Running it twice gives the same result as running it once.
+ */
 export function cleanHtml(input: string): string {
-  return input.replace(/<\/?([a-z][a-z0-9]*)\b([^>]*)>/gi, (m, tag: string, attrs: string) => {
-    const t = tag.toLowerCase();
-    if (!ALLOWED.has(t)) return '';
-    if (m.startsWith('</')) return `</${t}>`;
-    const keep: string[] = [];
-    const cls = attr(attrs, 'class'); if (cls) keep.push(`class="${escapeHtml(cls)}"`);
-    if (t === 'a') {
-      const href = attr(attrs, 'href'); if (href && /^(https?:\/\/|\/|#|mailto:)/i.test(href)) keep.push(`href="${escapeHtml(href)}"`);
-      const target = attr(attrs, 'target'); if (target === '_blank') keep.push('target="_blank" rel="noopener"');
+  let out = '';
+  const open: string[] = [];
+  let from = 0; // start of the text not yet written
+  for (let at = input.indexOf('<'); at !== -1; at = input.indexOf('<', at + 1)) {
+    COMMENT.lastIndex = at;
+    TAG.lastIndex = at;
+    const comment = COMMENT.exec(input);
+    const tag = comment ? null : TAG.exec(input);
+    const token = comment ?? tag;
+    if (!token) continue; // a stray `<` stays in the text run and is escaped with it
+    out += asText(input.slice(from, at));
+    from = at + token[0].length;
+    at = from - 1;
+    if (!tag) continue;
+    const t = (tag[2] ?? '').toLowerCase();
+    if (!ALLOWED.has(t)) continue;
+    if (tag[1]) {
+      // close it and anything opened inside it; a close with no open is dropped
+      const depth = open.lastIndexOf(t);
+      if (depth !== -1) while (open.length > depth) out += `</${open.pop()}>`;
+      continue;
     }
-    return `<${t}${keep.length ? ' ' + keep.join(' ') : ''}${t === 'br' ? ' /' : ''}>`;
-  });
+    const attrs = attrsOf(tag[3] ?? '');
+    const keep: string[] = [];
+    const cls = attrs.get('class'); if (cls) keep.push(`class="${escapeHtml(cls)}"`);
+    if (t === 'a') {
+      const href = attrs.get('href'); if (href && /^(https?:\/\/|\/|#|mailto:)/i.test(href)) keep.push(`href="${escapeHtml(href)}"`);
+      if (attrs.get('target') === '_blank') keep.push('target="_blank" rel="noopener"');
+    }
+    out += `<${t}${keep.length ? ' ' + keep.join(' ') : ''}${t === 'br' ? ' /' : ''}>`;
+    if (t !== 'br') open.push(t);
+  }
+  out += asText(input.slice(from));
+  while (open.length) out += `</${open.pop()}>`;
+  return out;
 }
 
 /** Write one field: an empty value or one equal to the original is a reset. */
@@ -396,6 +447,24 @@ export function renderPage(page: SitePage, overrides: Map<string, { kind: Kind; 
     const inner = items.map((i) => `<div class="fr-item fr-pic" role="listitem"><img src="${escapeHtml(i.src)}" alt="${escapeHtml(i.alt)}" decoding="async"></div>`).join('');
     html = html.slice(0, g.openEnd) + inner + html.slice(g.close);
   }
+  return syncShareTags(html);
+}
+
+/**
+ * The share tags (og:/twitter: title and description) repeat the page's own
+ * <title> and meta description, which editors can change. Copy the current
+ * values across so a link preview never shows the words the page used to have.
+ */
+function syncShareTags(html: string): string {
+  const title = (html.match(/<title[^>]*>([^<]*)<\/title>/) ?? [])[1];
+  const description = (html.match(/<meta name="description"[^>]*\scontent="([^"]*)"/) ?? [])[1];
+  const set = (name: string, value: string | undefined) => {
+    if (value === undefined) return;
+    html = html.replace(new RegExp(`(<meta (?:property|name)="${name}" content=")[^"]*(")`), (_m, a: string, b: string) => a + value + b);
+  };
+  // both are already HTML-escaped in the page, so they go across as they are
+  set('og:title', title); set('twitter:title', title);
+  set('og:description', description); set('twitter:description', description);
   return html;
 }
 
@@ -404,6 +473,13 @@ export function notFoundResponse(): Response {
   const html = (template('404.html') ?? '<!doctype html><title>Not found</title><h1>Not found</h1>')
     .replace(/\.\.\/assets\//g, '/assets/').replace(/\.\.\/index\.html/g, '/');
   return new Response(html, { status: 404, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache' } });
+}
+
+/** The site's own error page, with a 500 status — never a stack trace or a blank screen. */
+export function serverErrorResponse(): Response {
+  const html = (template('500.html') ?? '<!doctype html><title>Something went wrong</title><h1>Something went wrong</h1>')
+    .replace(/\.\.\/assets\//g, '/assets/').replace(/\.\.\/index\.html/g, '/');
+  return new Response(html, { status: 500, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });
 }
 
 // --- edge cache ----------------------------------------------------------------

@@ -1,19 +1,26 @@
 /**
- * Per-visitor sandboxes.
+ * Workspaces.
  *
- * Every browser gets a workspace id in a cookie the first time it asks for a
- * page. Everything that browser creates is stamped with it, and every listing
- * shows only that workspace plus the shared demo content.
+ * Production runs as ONE workspace: every row is stamped 'public', and every
+ * listing's `IN (?, 'public')` therefore sees everything. That is what makes an
+ * account usable from a second device, puts a real freelancer in front of real
+ * companies, and shows admins the leads, people and applications they moderate.
  *
- * The effect: a reviewer can walk the whole product alone — sign up as a
- * freelancer, approve it as an admin, hire it as a company — without their test
- * data appearing to anyone else, and without anyone else's appearing to them.
+ * Per-visitor sandboxes are the demo-era mode, kept behind `DEMO_SANDBOX=1`.
+ * There every browser gets a workspace id in a cookie the first time it asks
+ * for a page, everything it creates is stamped with that id, and every listing
+ * shows only that workspace plus the shared demo content — so a reviewer can
+ * walk the whole product alone (sign up as a freelancer, approve it as an
+ * admin, hire it as a company) without their test data reaching anyone else.
+ * It must never be switched on for the live site: an account made in a sandbox
+ * exists only in the browser that made it, so clearing cookies loses it.
  *
- * This is a demo-time isolation boundary, not a security boundary. It keeps
- * strangers' test data apart; it is not designed to withstand someone who
- * deliberately forges another workspace id.
+ * Sandboxes are a demo-time isolation boundary, not a security boundary. They
+ * keep strangers' test data apart; they are not designed to withstand someone
+ * who deliberately forges another workspace id.
  */
 import type { APIContext, AstroGlobal } from 'astro';
+import { env } from 'cloudflare:workers';
 import { one } from './db';
 import { newId } from './ids';
 
@@ -22,14 +29,32 @@ type Ctx = APIContext | AstroGlobal;
 const COOKIE = 'ff_ws';
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
-/** Content everybody sees: the seeded specialists and the ten services. */
+/**
+ * The one workspace production runs in, and in sandbox mode the shared demo
+ * content everybody sees: the seeded specialists and the ten services.
+ */
 export const PUBLIC_TENANT = 'public';
 
 /**
- * The workspace for this request, creating one if the browser has none.
- * Safe to call on every request — it only writes the cookie when it is missing.
+ * True only when `DEMO_SANDBOX` is exactly "1". Anything else — unset, empty,
+ * "0", "true" — is the single production workspace, so a typo in the dashboard
+ * fails towards the mode where nobody's account goes missing.
+ */
+export const sandboxed = (): boolean => (env as unknown as Env).DEMO_SANDBOX === '1';
+
+/**
+ * The workspace for this request. In sandbox mode it creates one if the
+ * browser has none; it only writes the cookie when it is missing, so it is
+ * safe to call on every request.
  */
 export function resolveTenant(ctx: Ctx): string {
+  if (!sandboxed()) {
+    // A browser that visited while sandboxes were on still carries its id.
+    // It no longer means anything; drop it once rather than send it forever.
+    if (ctx.cookies.has(COOKIE)) ctx.cookies.delete(COOKIE, { path: '/' });
+    return PUBLIC_TENANT;
+  }
+
   const existing = ctx.cookies.get(COOKIE)?.value;
   if (existing && /^[0-9A-Z]{20,32}$/.test(existing)) return existing;
 
@@ -61,9 +86,11 @@ export function tenantScope(column: string, tenant: string): { sql: string; para
  *
  * `audit()` and the rate limiter only ever receive a Request, not the Astro
  * context, so this is how they stamp the workspace without every call site
- * having to pass it down.
+ * having to pass it down. Outside sandbox mode a leftover cookie is ignored —
+ * otherwise an old browser would file its audit rows where no admin looks.
  */
 export function tenantFromRequest(request: Request | undefined): string {
+  if (!sandboxed()) return PUBLIC_TENANT;
   const header = request?.headers.get('cookie');
   if (!header) return PUBLIC_TENANT;
   const match = header.match(/(?:^|;\s*)ff_ws=([0-9A-Z]{20,32})(?:;|$)/);

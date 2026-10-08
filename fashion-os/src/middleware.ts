@@ -5,9 +5,10 @@
  * Static routes (the services website) never reach this — they are served
  * straight from the CDN by Cloudflare Pages.
  */
+import type { APIContext, MiddlewareNext } from 'astro';
 import { defineMiddleware } from 'astro:middleware';
 import { env } from 'cloudflare:workers';
-import { loadUser } from './server/session';
+import { loadUser, pruneExpired } from './server/session';
 import { PUBLIC_TENANT, resolveTenant } from './server/tenant';
 
 /* Retired service pages -> where they live now, mirrored from public/_redirects.
@@ -21,7 +22,44 @@ const RETIRED: Record<string, string> = {
   '/pages/services/seamless-pattern': '/pages/services/graphics-prints',
 };
 
-export const onRequest = defineMiddleware(async (context, next) => {
+/* The asset layer adds these to static files from public/_headers; nothing
+   adds them to what the worker renders, so they are set here. */
+const SECURITY_HEADERS: Record<string, string> = {
+  'x-content-type-options': 'nosniff',
+  'x-frame-options': 'SAMEORIGIN',
+  'referrer-policy': 'strict-origin-when-cross-origin',
+  'permissions-policy': 'geolocation=(), microphone=(), camera=()',
+  'strict-transport-security': 'max-age=31536000',
+};
+
+function secure(response: Response): Response {
+  // Response.redirect() and some fetched responses have immutable headers.
+  try {
+    for (const [name, value] of Object.entries(SECURITY_HEADERS)) if (!response.headers.has(name)) response.headers.set(name, value);
+    return response;
+  } catch {
+    const copy = new Response(response.body, response);
+    for (const [name, value] of Object.entries(SECURITY_HEADERS)) if (!copy.headers.has(name)) copy.headers.set(name, value);
+    return copy;
+  }
+}
+
+/* Expired sessions, one-time tokens and rate-limit windows are deleted only by
+   pruneExpired, and there is no cron trigger to run it. About one request in
+   fifty does, after its response has gone — the sweep never sits on anyone's
+   page load, and a failure costs nothing but a log line. */
+const PRUNE_ONE_IN = 50;
+
+function pruneNowAndThen(context: APIContext, database: D1Database): void {
+  if (Math.random() * PRUNE_ONE_IN >= 1) return;
+  const cf = (context.locals as { cfContext?: { waitUntil(p: Promise<unknown>): void } }).cfContext;
+  if (!cf) return;
+  cf.waitUntil(pruneExpired(database).catch((error) => console.error('[middleware] prune failed:', error)));
+}
+
+export const onRequest = defineMiddleware(async (context, next) => secure(await handle(context, next)));
+
+async function handle(context: APIContext, next: MiddlewareNext): Promise<Response> {
   // The marketing pages used to be static files, and the asset layer answered
   // their `.html` and trailing-slash forms with a redirect to the clean URL.
   // Now that the worker renders them, Astro would quietly serve all three
@@ -46,7 +84,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     context.locals.tenant = PUBLIC_TENANT;
     return next();
   }
-  // Every visitor gets a private workspace; shared demo content is 'public'.
+  // One shared workspace, 'public' — or, under DEMO_SANDBOX=1, a private
+  // one per browser (src/server/tenant.ts).
   context.locals.tenant = resolveTenant(context);
 
   const database = (env as unknown as Env).DB;
@@ -57,6 +96,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
       // A broken session must not take the page down — render signed out.
       console.error('[middleware] session lookup failed:', error);
     }
+    pruneNowAndThen(context, database);
   }
 
   const response = await next();
@@ -67,4 +107,4 @@ export const onRequest = defineMiddleware(async (context, next) => {
     response.headers.set('cache-control', 'private, no-store');
   }
   return response;
-});
+}

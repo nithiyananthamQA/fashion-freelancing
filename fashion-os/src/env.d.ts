@@ -25,16 +25,21 @@ declare global {
      */
     MEDIA?: R2Bucket;
     SITE_URL: string;
+    /** Both must be set for mail to leave the building — see src/server/mail.ts. */
     MAIL_FROM?: string;
-    SESSION_SECRET?: string;
     RESEND_API_KEY?: string;
+    /**
+     * "1" turns on the per-visitor demo sandboxes (src/server/tenant.ts).
+     * Unset in production, which is one shared workspace.
+     */
+    DEMO_SANDBOX?: string;
   }
 
   namespace App {
     interface Locals {
       /** Signed-in account, or null. Resolved once per request in middleware. */
       user: SessionUser | null;
-      /** This browser's private workspace id — see src/server/tenant.ts. */
+      /** 'public' in production; a browser's sandbox id only under DEMO_SANDBOX — see src/server/tenant.ts. */
       tenant: string;
     }
   }

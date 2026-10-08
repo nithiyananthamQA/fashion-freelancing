@@ -9,15 +9,15 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { db, one } from '../../server/db';
+import { safeNext } from '../../server/guards';
 import { toggleCookieShortlist, toggleSavedSpecialist } from '../../server/shortlist';
 import { PUBLIC_TENANT, tenantOf } from '../../server/tenant';
 
 export const POST: APIRoute = async (ctx) => {
   const form = await ctx.request.formData();
   const profileId = String(form.get('profileId') ?? '');
-  const rawNext = String(form.get('next') ?? '/specialists');
   // Same-origin paths only, so this cannot become an open redirect.
-  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/specialists';
+  const next = safeNext(form.get('next'), '/specialists');
 
   const database = db(ctx);
 
