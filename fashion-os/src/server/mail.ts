@@ -1,9 +1,11 @@
 /**
  * Outbound email.
  *
- * Every message is recorded in `outbound_email` first, then sent if a provider
- * is configured. With no provider (local development, or before the API key is
- * set) the row IS the delivery: an admin can read the verification link out of
+ * Every message is recorded in `outbound_email` first, then sent through
+ * Cloudflare Email Service — the `EMAIL` send_email binding in wrangler.toml,
+ * on the same account as the site, so there is no outside provider or API key.
+ * Until MAIL_FROM is set (after the domain is onboarded for sending) the row
+ * IS the delivery: an admin can read the verification link out of
  * the operations view instead of the flow dead-ending.
  *
  * Sending never holds a page up for long. A caller that can hand over its
@@ -67,7 +69,14 @@ const BRAND = 'Fashion Freelancing';
 type MailEnv = Env & { MAIL_REPLY_TO?: string };
 
 /** Whether anything will actually leave the building. Without both, every message stops at 'queued'. */
-export const canSendMail = (env: Env): boolean => Boolean(env.RESEND_API_KEY && env.MAIL_FROM);
+export const canSendMail = (env: Env): boolean => Boolean(env.EMAIL && env.MAIL_FROM);
+
+/** "Fashion Freelancing <no-reply@…>" or a bare address, as Email Service wants it. */
+function sender(from: string): string | EmailAddress {
+  const m = from.match(/^\s*(.*?)\s*<([^>]+)>\s*$/);
+  const name = m?.[1]?.replace(/^"|"$/g, '');
+  return m ? (name ? { email: m[2]!.trim(), name } : m[2]!.trim()) : from.trim();
+}
 
 export async function sendMail(
   database: D1Database,
@@ -102,7 +111,7 @@ export async function sendMail(
  * is still waiting on.
  *
  * One at a time, on purpose. The provider rate-limits per second, and a retry
- * run is exactly the burst that trips it — so a 429 ends the run early and
+ * run is exactly the burst that trips it — so a rate-limit error ends the run early and
  * leaves the rest for the next press rather than failing all of them.
  *
  * `tenant` scopes the run the way the operations page is scoped: this
@@ -156,7 +165,7 @@ export async function retryQueuedMail(
     if (error === null) sent++;
     else {
       failed++;
-      if (error.startsWith('429')) break;
+      if (error.startsWith('E_RATE_LIMIT')) break;
     }
   }
   return { configured: true, sent, failed };
@@ -176,25 +185,20 @@ async function attempt(
   let error: string | null = null;
   try {
     const replyTo = mail.replyTo || (env as MailEnv).MAIL_REPLY_TO || undefined;
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${env.RESEND_API_KEY}`,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: env.MAIL_FROM,
-        to: [mail.to],
-        subject: mail.subject,
-        text: mail.body,
-        html: renderHtml(mail.subject, mail.body),
-        ...(replyTo ? { reply_to: replyTo } : {}),
-      }),
-      signal: AbortSignal.timeout(SEND_TIMEOUT_MS),
+    const sending = env.EMAIL!.send({
+      from: sender(env.MAIL_FROM!),
+      to: mail.to,
+      subject: mail.subject,
+      text: mail.body,
+      html: renderHtml(mail.subject, mail.body),
+      ...(replyTo ? { replyTo } : {}),
     });
-    if (!response.ok) error = `${response.status} ${await response.text()}`.slice(0, 500);
+    const timeout = new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timed out')), SEND_TIMEOUT_MS));
+    await Promise.race([sending, timeout]);
   } catch (caught) {
-    error = String(caught).slice(0, 500);
+    // Email Service errors carry a code (E_RATE_LIMIT_EXCEEDED, E_SENDER_NOT_VERIFIED, …)
+    const code = (caught as { code?: string }).code;
+    error = `${code ? `${code} ` : ''}${String((caught as Error)?.message ?? caught)}`.slice(0, 500);
   }
 
   try {

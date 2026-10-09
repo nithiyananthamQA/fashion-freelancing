@@ -1,6 +1,9 @@
 Fashion Freelancing - Work Items
 fashionfreelancing.com
-Updated 2026-10-08
+Updated 2026-10-09
+
+[x] Deployed to live (migrations 0011-0013 applied)
+[ ] Close the 8 leftover demo-era test accounts (later)
 
 
 COMPLETED
@@ -22,7 +25,7 @@ SPEED (done 2026-10-08)
 [x] Shared CSS/JS minified at build
 [x] ~50 MB of unused images removed from the deployed folder
 [x] Cache headers checked; HSTS added
-[ ] Turn on D1 read replication (Cloudflare dashboard) - speeds up signed-in pages
+[x] D1 read replication - not needed: database already runs in APAC, next to the users
 
 
 SEO (done 2026-10-08, except owner steps)
@@ -33,8 +36,7 @@ SEO (done 2026-10-08, except owner steps)
 [x] Meta descriptions on all pages, titles/descriptions trimmed to Google length
 [x] Favicon set (ico, svg, apple touch icon, manifest)
 [x] Clean URLs everywhere (no .html redirects), short URLs 301 in one hop
-[ ] OWNER: turn OFF "Manage robots.txt" (AI Crawl Control) in Cloudflare - it adds
-    a line Google flags as an error and blocks some search crawlers
+[x] Cloudflare Bot Preference Sync turned off - robots.txt clean, live SEO score 100
 [ ] OWNER: Google Search Console - verify domain (DNS TXT in Cloudflare), submit /sitemap.xml
 [ ] OWNER: Bing Webmaster Tools - import from Search Console
 
@@ -42,10 +44,11 @@ SEO (done 2026-10-08, except owner steps)
 EMAIL & NOTIFICATIONS
 [x] Code: verification, reset, every in-product notification, new-lead alerts
 [x] Code: retry button for failed/queued mail (Workspace -> Activity)
-[ ] OWNER: Resend account, verify domain (DKIM + SPF include merged into Hostinger SPF)
-[ ] OWNER: set RESEND_API_KEY (secret), MAIL_FROM, MAIL_REPLY_TO, LEADS_TO (variables)
-[ ] OWNER: confirm mailbox hello@fashionfreelancing.com exists in Hostinger
-[ ] Bounce handling (needs Resend webhook)
+[x] Code: sends through Cloudflare Email Service (no outside provider, no API key)
+[x] Bounces handled by Cloudflare (cf-bounce records) - no webhook needed
+[x] Domain onboarded for Cloudflare Email Sending (2026-10-09)
+[x] MAIL_FROM no-reply@, replies + enquiries to hello@ - test email sent OK
+[ ] OWNER: confirm the test email arrived in hello@fashionfreelancing.com
 
 
 LOGIN
@@ -59,8 +62,6 @@ LOGIN
 ALERTS & MONITORING
 [x] Workers logs enabled (wrangler.toml [observability])
 [x] Analytics - Cloudflare Web Analytics already on (cookieless)
-[ ] OWNER: Cloudflare notifications for Worker errors
-[ ] OWNER: uptime monitor (e.g. UptimeRobot / Better Stack on / and /specialists)
 
 
 DASHBOARD & BACKEND  (see git log for detail)

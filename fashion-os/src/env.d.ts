@@ -27,7 +27,8 @@ declare global {
     SITE_URL: string;
     /** Both must be set for mail to leave the building — see src/server/mail.ts. */
     MAIL_FROM?: string;
-    RESEND_API_KEY?: string;
+    /** Cloudflare Email Service — the send_email binding in wrangler.toml (src/server/mail.ts). */
+    EMAIL?: SendEmail;
     /** Default Reply-To on outbound mail (src/server/mail.ts). */
     MAIL_REPLY_TO?: string;
     /** Comma-separated addresses that receive every new enquiry (src/pages/api/leads.ts). */
@@ -35,8 +36,6 @@ declare global {
     /** Google sign-in (src/pages/sign-in/google*). */
     GOOGLE_CLIENT_ID?: string;
     GOOGLE_CLIENT_SECRET?: string;
-    /** Resend webhook signing secret (whsec_…) for bounce and complaint events. */
-    RESEND_WEBHOOK_SECRET?: string;
     /**
      * "1" turns on the per-visitor demo sandboxes (src/server/tenant.ts).
      * Unset in production, which is one shared workspace.

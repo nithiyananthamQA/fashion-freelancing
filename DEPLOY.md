@@ -64,9 +64,10 @@ The bucket must stay **private**. Files are only ever read back through
 
 ## Secrets
 
-```bash
-npx wrangler secret put RESEND_API_KEY    # optional, enables real email — or set it in the dashboard
-```
+Outbound email needs no secret: it goes through Cloudflare Email Service via
+the `[[send_email]]` binding in wrangler.toml. Onboard the domain once in the
+dashboard (Compute → Email Service → Email Sending → Onboard Domain); its
+records sit on `cf-bounce.` and leave the Hostinger inbox records alone.
 
 And set these as Worker variables in the dashboard (`keep_vars = true` in
 wrangler.toml keeps them across deploys):
@@ -150,7 +151,7 @@ user's existing sessions, so sign in again for the role to take effect.
 
 - [ ] `database_id` in `wrangler.toml` is the real one, not the placeholder
 - [ ] `npm run db:migrate` has run against the remote database
-- [ ] `MAIL_FROM` and `RESEND_API_KEY` are set, and a test sign-up delivers mail
+- [ ] Domain onboarded for Email Sending, `MAIL_FROM` set, and a test sign-up delivers mail
 - [ ] At least one admin exists
 - [ ] Enough approved specialists per visible service, or a manual-match
       fallback is in place (plan §14, Phase 6)

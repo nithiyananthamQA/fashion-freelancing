@@ -45,13 +45,21 @@ bucket_name = "fashion-os-media"
 # No KV. Astro's session store is disabled in astro.config.mjs, and our own
 # sign-in sessions live in D1, so nothing needs a KV namespace.
 
+# --- Outbound email: Cloudflare Email Service, on this account ---
+# No outside provider. Onboard the domain once (Compute → Email Service →
+# Email Sending → Onboard Domain); its records live on cf-bounce., so the
+# Hostinger inbox records are untouched. Mail sends once MAIL_FROM is set below.
+[[send_email]]
+name = "EMAIL"
+remote = true
+
 [vars]
 SITE_URL = "https://fashionfreelancing.com"
-# Outbound mail: leave unset to queue verification / notification mail in the
-# outbound_email table instead of sending it (see src/server/mail.ts).
-# MAIL_FROM = "no-reply@fashionfreelancing.com"
-# MAIL_REPLY_TO = "hello@fashionfreelancing.com"   # where replies to our mail go
-# LEADS_TO = "hello@fashionfreelancing.com"        # every new enquiry, comma-separated
+# Outbound mail (src/server/mail.ts). Remove MAIL_FROM to stop sending and
+# keep every message queued in outbound_email instead.
+MAIL_FROM = "Fashion Freelancing <no-reply@fashionfreelancing.com>"
+MAIL_REPLY_TO = "hello@fashionfreelancing.com"   # where replies to our mail go
+LEADS_TO = "hello@fashionfreelancing.com"        # every new enquiry, comma-separated
 # GOOGLE_CLIENT_ID = "….apps.googleusercontent.com"
 
 # Per-visitor demo sandboxes (src/server/tenant.ts). Leave UNSET for the live
@@ -62,8 +70,6 @@ SITE_URL = "https://fashionfreelancing.com"
 
 # Secrets — set with `wrangler secret put <NAME>` (or in the dashboard), never
 # committed:
-#   RESEND_API_KEY            optional, enables real outbound email
-#   RESEND_WEBHOOK_SECRET     bounce / complaint webhook (whsec_…)
 #   GOOGLE_CLIENT_SECRET      Google sign-in
 #
 # There is no session secret. A session is a random token in an HttpOnly

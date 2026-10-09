@@ -99,7 +99,7 @@ export function requireSpecialist(ctx: Ctx): { user: SessionUser; profileId: str
  */
 export function verificationRequired(account: SessionUser): boolean {
   const runtime = env();
-  return Boolean(runtime.RESEND_API_KEY && runtime.MAIL_FROM) && !account.emailVerified;
+  return Boolean(runtime.EMAIL && runtime.MAIL_FROM) && !account.emailVerified;
 }
 
 /** A content editor or an admin. Like the admin pages, nobody else learns the route exists. */
