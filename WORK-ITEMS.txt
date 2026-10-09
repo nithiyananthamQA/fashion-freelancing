@@ -3,7 +3,29 @@ fashionfreelancing.com
 Updated 2026-10-09
 
 [x] Deployed to live (migrations 0011-0013 applied)
-[ ] Close the 8 leftover demo-era test accounts (later)
+
+
+PENDING - TO DO LATER
+[x] Google sign-in code is live (migration 0014) - hidden until the setup below is done
+[ ] Google sign-in setup (Google Cloud console, project already created,
+    "OAuth configuration created" done):
+    1. Branding: home page https://fashionfreelancing.com,
+       privacy https://fashionfreelancing.com/pages/privacy,
+       terms https://fashionfreelancing.com/pages/terms,
+       authorized domain fashionfreelancing.com, developer contact hello@ - no logo
+    2. Clients -> Create client -> Web application -> redirect URI
+       https://fashionfreelancing.com/sign-in/google/callback
+    3. Client ID -> GOOGLE_CLIENT_ID in fashion-os/wrangler.toml [vars]
+    4. Client secret -> npx wrangler secret put GOOGLE_CLIENT_SECRET (never in git/chat)
+    5. Audience -> Publish app (In production)
+    6. Optional: Branding -> Verify branding (shows "Fashion Freelancing" on Google screen)
+[ ] Close the 8 leftover demo-era test accounts (UPDATE users SET status='closed' WHERE tenant <> 'public')
+[ ] Lawyer review of Terms + Privacy (drafts in docs/legal/); add Google sign-in line to Privacy;
+    then fill placeholders on the site and remove noindex
+[ ] Razorpay online payments (owner adds later)
+[ ] Shiprocket (owner adds later)
+[ ] Speed up the heaviest service pages (web-development, graphics-prints, dobby, ai-photography)
+[ ] Real phone / browser check after deploy
 
 
 COMPLETED
@@ -56,7 +78,7 @@ LOGIN
 [x] Forgot password flow; change password + sign out everywhere at /account
 [x] Accounts work on every device (single workspace, migration 0011)
 [x] Google sign-in built: sign in, sign up, connect/disconnect on /account, security emails
-[ ] OWNER: Google Cloud OAuth client -> GOOGLE_CLIENT_ID (wrangler.toml) + GOOGLE_CLIENT_SECRET (secret)
+[ ] Google Cloud setup - see PENDING at the top
 
 
 ALERTS & MONITORING
@@ -67,11 +89,11 @@ ALERTS & MONITORING
 DASHBOARD & BACKEND  (see git log for detail)
 [x] Notifications page + bell; email copy of each notification
 [x] Admin: suspend/reactivate/close accounts, manual match, lead notes, disputes, payments record
-[ ] Online payments (Razorpay or Stripe keys + webhook)
+[ ] Online payments - see PENDING at the top
 
 
 TESTING
-[ ] Cross-browser / real-device pass after deploy
+[ ] Real phone / browser check - see PENDING at the top
 
 
 REFERENCE
