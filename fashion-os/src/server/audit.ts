@@ -23,7 +23,7 @@ export type AuditAction =
   | 'project.published' | 'project.closed'
   | 'hire_request.sent' | 'hire_request.answered'
   | 'engagement.created' | 'engagement.completed'
-  | 'payment.recorded'
+  | 'payment.recorded' | 'user.signed_in_google' | 'mail.bounced'
   // operations — the admin tools in src/pages/workspace/admin
   | 'user.suspended' | 'user.reactivated' | 'user.closed' | 'user.role_changed'
   | 'lead.created' | 'lead.updated' | 'lead.note_added'

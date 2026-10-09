@@ -245,6 +245,8 @@ export async function setPassword(
   request: Request,
   /** The session hash to leave signed in — the person who made the change. */
   keepSessionId: string | null = null,
+  /** A forgotten-password reset, or a change made while signed in — the audit log tells them apart. */
+  reason: 'reset' | 'change' = 'reset',
 ): Promise<void> {
   const now = nowIso();
   await run(
@@ -258,7 +260,7 @@ export async function setPassword(
   // might already be signed in with the old one. A reset keeps none; a change
   // from the account page keeps the browser it was made in.
   await run(database, 'DELETE FROM sessions WHERE user_id = ? AND id IS NOT ?', userId, keepSessionId);
-  await audit(database, { actorId: userId, action: 'user.password_reset', entityType: 'user', entityId: userId, request });
+  await audit(database, { actorId: userId, action: reason === 'change' ? 'user.password_changed' : 'user.password_reset', entityType: 'user', entityId: userId, request });
 }
 
 export type ChangePasswordResult =
@@ -285,7 +287,7 @@ export async function changePassword(
   if (current === next) {
     return { ok: false, field: 'password', message: 'Choose a password you are not already using.' };
   }
-  await setPassword(database, userId, next, request, keepSessionId);
+  await setPassword(database, userId, next, request, keepSessionId, 'change');
   return { ok: true };
 }
 
