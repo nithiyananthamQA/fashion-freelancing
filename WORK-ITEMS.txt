@@ -6,19 +6,9 @@ Updated 2026-10-09
 
 
 PENDING - TO DO LATER
-[x] Google sign-in code is live (migration 0014) - hidden until the setup below is done
-[ ] Google sign-in setup (Google Cloud console, project already created,
-    "OAuth configuration created" done):
-    1. Branding: home page https://fashionfreelancing.com,
-       privacy https://fashionfreelancing.com/pages/privacy,
-       terms https://fashionfreelancing.com/pages/terms,
-       authorized domain fashionfreelancing.com, developer contact hello@ - no logo
-    2. Clients -> Create client -> Web application -> redirect URI
-       https://fashionfreelancing.com/sign-in/google/callback
-    3. Client ID -> GOOGLE_CLIENT_ID in fashion-os/wrangler.toml [vars]
-    4. Client secret -> npx wrangler secret put GOOGLE_CLIENT_SECRET (never in git/chat)
-    5. Audience -> Publish app (In production)
-    6. Optional: Branding -> Verify branding (shows "Fashion Freelancing" on Google screen)
+[x] Google sign-in live: branding, OAuth client, client id + secret set (2026-10-09)
+[ ] Google sign-in: Audience -> Publish app ("In production"), then a real test sign-in
+[ ] Optional: Google Branding -> Verify branding (shows "Fashion Freelancing" on Google screen)
 [ ] Close the 8 leftover demo-era test accounts (UPDATE users SET status='closed' WHERE tenant <> 'public')
 [ ] Lawyer review of Terms + Privacy (drafts in docs/legal/); add Google sign-in line to Privacy;
     then fill placeholders on the site and remove noindex
