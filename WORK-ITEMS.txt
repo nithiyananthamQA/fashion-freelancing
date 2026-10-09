@@ -26,6 +26,11 @@ PENDING - TO DO LATER
 [ ] Shiprocket (owner adds later)
 [ ] Speed up the heaviest service pages (web-development, graphics-prints, dobby, ai-photography)
 [ ] Real phone / browser check after deploy
+[ ] Role-by-role audit and fixes - visitor, company, freelancer, admin, editor,
+    Google-only user: sign-up path per role, where each lands after sign-in,
+    what each can see/do (menus, pages, buttons), session behaviour (switching
+    roles, sign-out, expired sessions), and dashboard layout/alignment on
+    desktop + mobile. Owner to note concrete problems seen.
 
 
 COMPLETED
