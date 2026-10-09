@@ -61,7 +61,9 @@ SITE_URL = "https://fashionfreelancing.com"
 MAIL_FROM = "Fashion Freelancing <no-reply@fashionfreelancing.com>"
 MAIL_REPLY_TO = "hello@fashionfreelancing.com"   # where replies to our mail go
 LEADS_TO = "hello@fashionfreelancing.com"        # every new enquiry, comma-separated
-# GOOGLE_CLIENT_ID = "….apps.googleusercontent.com"
+# Google sign-in (src/server/google.ts). The client id is public; the secret is
+# GOOGLE_CLIENT_SECRET, set with `wrangler secret put`. The button shows once both exist.
+GOOGLE_CLIENT_ID = "319914784956-uv1hj4crtqggutrpafpkpqef76piqu6c.apps.googleusercontent.com"
 
 # Per-visitor demo sandboxes (src/server/tenant.ts). Leave UNSET for the live
 # site, which is one shared workspace. "1" gives every browser its own private
