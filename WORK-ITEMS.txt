@@ -37,8 +37,7 @@ SEO (done 2026-10-08, except owner steps)
 [x] Favicon set (ico, svg, apple touch icon, manifest)
 [x] Clean URLs everywhere (no .html redirects), short URLs 301 in one hop
 [x] Cloudflare Bot Preference Sync turned off - robots.txt clean, live SEO score 100
-[ ] OWNER: Google Search Console - verify domain (DNS TXT in Cloudflare), submit /sitemap.xml
-[ ] OWNER: Bing Webmaster Tools - import from Search Console
+[x] Google Search Console verified, sitemap submitted (2026-10-09)
 
 
 EMAIL & NOTIFICATIONS
@@ -71,7 +70,6 @@ DASHBOARD & BACKEND  (see git log for detail)
 
 
 TESTING
-[ ] Automated test setup
 [ ] Cross-browser / real-device pass after deploy
 
 

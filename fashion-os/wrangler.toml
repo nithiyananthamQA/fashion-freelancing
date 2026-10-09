@@ -49,9 +49,10 @@ bucket_name = "fashion-os-media"
 # No outside provider. Onboard the domain once (Compute → Email Service →
 # Email Sending → Onboard Domain); its records live on cf-bounce., so the
 # Hostinger inbox records are untouched. Mail sends once MAIL_FROM is set below.
+# Deliberately not `remote = true`: a local `npm run dev` must never send real
+# mail from the live account to whatever test address someone types.
 [[send_email]]
 name = "EMAIL"
-remote = true
 
 [vars]
 SITE_URL = "https://fashionfreelancing.com"
