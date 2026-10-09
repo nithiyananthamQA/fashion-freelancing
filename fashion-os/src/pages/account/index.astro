@@ -18,7 +18,8 @@ import Workspace from '../../layouts/Workspace.astro';
 import type { NavItem } from '../../components/WorkspaceNav.astro';
 import { db, env, one } from '../../server/db';
 import { guard, requireUser } from '../../server/guards';
-import { changePassword, issueEmailVerification } from '../../server/auth';
+import { changePassword, disconnectGoogle, issueEmailVerification, signInMethods } from '../../server/auth';
+import { googleConfigured } from '../../server/google';
 import { passwordProblem } from '../../server/password';
 import { currentSessionId } from '../../server/session';
 import { limited, windowInWords } from '../../server/rate-limit';
@@ -43,7 +44,15 @@ const shell: { role: 'freelancer' | 'company' | 'admin' | 'editor'; items: NavIt
   : { role: 'company', items: companyNav() };
 
 let errors: Record<string, string> = {};
-let flash: string | null = null;
+/* What came back from "Connect Google" (src/pages/sign-in/google/callback.ts). */
+const GOOGLE_RESULT: Record<string, string> = {
+  connected: 'Google is connected. You can now sign in with it — we have emailed you to confirm.',
+  already: 'That Google account is already connected to this account.',
+  'in-use': 'That Google account is connected to a different Fashion Freelancing account, so it was not added here.',
+  'email-in-use': "That Google account's email belongs to a different Fashion Freelancing account, so it was not added here.",
+  failed: 'Google did not confirm the connection — please try again.',
+};
+let flash: string | null = GOOGLE_RESULT[Astro.url.searchParams.get('google') ?? ''] ?? null;
 
 /* Every action here is on the caller's own account: the id comes off the
    session and the forms carry none, so there is nothing to replay with
@@ -78,6 +87,10 @@ if (Astro.request.method === 'POST') {
       }
     }
     if (hasErrors(errors)) flash = 'Your password was not changed — check the highlighted field below.';
+  } else if (intent === 'google-disconnect') {
+    flash = await disconnectGoogle(database, Astro.request, user.id)
+      ? 'Google is disconnected. Sign in with your email and password from now on.'
+      : 'Google was not disconnected — set a password first, so you can still get in.';
   } else if (intent === 'verify' && !user.emailVerified) {
     // Shares its bucket with the button on /sign-in/verify: one account, one
     // allowance, whichever page asks.
@@ -97,6 +110,11 @@ const sessions = await one<{ n: number }>(
   user.id, nowIso(),
 );
 const signedIn = sessions?.n ?? 1;
+/* An account made with "Continue with Google" has no password to type as the
+   current one; it adds one through the reset email, which proves the address. */
+const methods = await signInMethods(database, user.id);
+const passwordSet = methods.password;
+const googleAvailable = googleConfigured(env(Astro));
 ---
 
 <Workspace
@@ -140,10 +158,17 @@ const signedIn = sessions?.n ?? 1;
       <div class="ws-row-head">
         <div>
           <h2 style="margin:0;">Password</h2>
-          <p class="ws-sub">Changing it signs you out everywhere except here.</p>
+          <p class="ws-sub">{passwordSet ? 'Changing it signs you out everywhere except here.' : 'You sign in with Google.'}</p>
         </div>
       </div>
 
+      {!passwordSet ? (
+        <p>
+          This account has no password — you sign in with Google. To be able to sign in with your email and a
+          password as well, <a href="/sign-in/forgot">set one by email</a>: we send a link to {user.email}.
+        </p>
+      ) : (
+      <Fragment>
       <form method="post" class="cform" novalidate>
         <input type="hidden" name="intent" value="password" />
         {/* Lets a password manager file the new password under the right account. */}
@@ -179,7 +204,36 @@ const signedIn = sessions?.n ?? 1;
       <p class="fh" style="margin-top:14px;">
         Forgotten the current one? <a href="/sign-in/forgot">Reset it by email</a> instead.
       </p>
+      </Fragment>
+      )}
     </section>
+
+    {(googleAvailable || methods.google) && (
+      <section class="panel glass-p">
+        <div class="ws-row-head">
+          <div>
+            <h2 style="margin:0;">Google sign-in</h2>
+            <p class="ws-sub">{methods.google ? 'Connected — you can sign in with Google.' : 'Not connected.'}</p>
+          </div>
+          <span class={`pill-tone ${methods.google ? 'ok' : 'warn'}`}>{methods.google ? 'Connected' : 'Off'}</span>
+        </div>
+        {methods.google ? (
+          passwordSet ? (
+            <form method="post">
+              <input type="hidden" name="intent" value="google-disconnect" />
+              <button type="submit" class="btn-glass btn-sm">Disconnect Google</button>
+            </form>
+          ) : (
+            <p>Google is the only way into this account, so it can't be disconnected yet. <a href="/sign-in/forgot">Set a password</a> first.</p>
+          )
+        ) : (
+          <Fragment>
+            <p>Sign in with one click using your Google account. We only receive your name and email address from Google.</p>
+            <a href="/sign-in/google?connect=1" class="btn-glass btn-sm">Connect Google</a>
+          </Fragment>
+        )}
+      </section>
+    )}
 
     <section class="panel glass-p">
       <div class="ws-row-head">

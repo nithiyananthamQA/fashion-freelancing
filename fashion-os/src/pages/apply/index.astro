@@ -593,8 +593,8 @@ const rateModel = readList(profile?.rate_model ?? null);
 
                   <label class="opt" id="f-terms" style="width:100%;">
                     <input type="checkbox" name="terms" value="on" required checked={v('terms') === 'on'} />
-                    <span>I accept the <a href="/pages/terms.html" target="_blank" rel="noopener" style="color:var(--champagne-2);">freelancer terms</a>{' '}
-                      and <a href="/pages/privacy.html" target="_blank" rel="noopener" style="color:var(--champagne-2);">privacy policy</a>.</span>
+                    <span>I accept the <a href="/pages/terms" target="_blank" rel="noopener" style="color:var(--champagne-2);">freelancer terms</a>{' '}
+                      and <a href="/pages/privacy" target="_blank" rel="noopener" style="color:var(--champagne-2);">privacy policy</a>.</span>
                   </label>
                   {errors.terms && <span class="cform-err" role="alert">{errors.terms}</span>}
 

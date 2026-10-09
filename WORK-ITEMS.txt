@@ -47,7 +47,7 @@ EMAIL & NOTIFICATIONS
 [x] Bounces handled by Cloudflare (cf-bounce records) - no webhook needed
 [x] Domain onboarded for Cloudflare Email Sending (2026-10-09)
 [x] MAIL_FROM no-reply@, replies + enquiries to hello@ - test email sent OK
-[ ] OWNER: confirm the test email arrived in hello@fashionfreelancing.com
+[x] Test email confirmed in hello@fashionfreelancing.com (2026-10-09)
 
 
 LOGIN
@@ -55,7 +55,8 @@ LOGIN
 [x] Login rate limit (per IP and per account)
 [x] Forgot password flow; change password + sign out everywhere at /account
 [x] Accounts work on every device (single workspace, migration 0011)
-[ ] Google sign-in (needs Google OAuth client id/secret)
+[x] Google sign-in built: sign in, sign up, connect/disconnect on /account, security emails
+[ ] OWNER: Google Cloud OAuth client -> GOOGLE_CLIENT_ID (wrangler.toml) + GOOGLE_CLIENT_SECRET (secret)
 
 
 ALERTS & MONITORING

@@ -10,11 +10,11 @@ export const prerender = false;
 
 import Night from '../../layouts/Night.astro';
 import { db, env } from '../../server/db';
-import { landingFor, signIn, signUp } from '../../server/auth';
+import { landingFor, rolesOf, signIn, signUp } from '../../server/auth';
+import { googleConfigured } from '../../server/google';
 import { safeNext } from '../../server/guards';
 import { createSession, setSessionCookie } from '../../server/session';
 import { mergeCookieShortlist } from '../../server/shortlist';
-import { one } from '../../server/db';
 import { passwordProblem } from '../../server/password';
 import { HONEYPOT, parse, trapped } from '../../server/validate';
 import { accountKey, clientKey, limited, tooManyRequests, windowInWords } from '../../server/rate-limit';
@@ -90,7 +90,7 @@ if (Astro.request.method === 'POST') {
     } else {
       const token = await createSession(database, result.userId, Astro.request.headers.get('user-agent'));
       setSessionCookie(Astro, token);
-      const roles = await loadRoles(database, result.userId);
+      const roles = await rolesOf(database, result.userId);
       // Anything shortlisted before signing in now belongs to their company.
       if (roles.companyIds[0]) {
         await mergeCookieShortlist(Astro, database, roles.companyIds[0], result.userId);
@@ -100,23 +100,10 @@ if (Astro.request.method === 'POST') {
   }
 }
 
-async function loadRoles(database: D1Database, userId: string) {
-  const company = await one<{ company_id: string }>(
-    database, 'SELECT company_id FROM company_members WHERE user_id = ? LIMIT 1', userId,
-  );
-  const profile = await one<{ id: string }>(
-    database, 'SELECT id FROM specialist_profiles WHERE user_id = ?', userId,
-  );
-  const admin = await one<{ is_admin: number; role: string }>(database, 'SELECT is_admin, role FROM users WHERE id = ?', userId);
-  return {
-    companyIds: company ? [company.company_id] : [],
-    profileId: profile?.id ?? null,
-    isAdmin: admin?.is_admin === 1,
-    role: admin?.role ?? 'member',
-  };
-}
 
 const creating = mode === 'create';
+const google = googleConfigured(runtimeEnv);
+const googleUrl = `/sign-in/google${next ? `?next=${encodeURIComponent(next)}` : ''}`;
 const otherModeUrl = `/sign-in?mode=${creating ? 'signin' : 'create'}${next ? `&next=${encodeURIComponent(next)}` : ''}`;
 ---
 
@@ -142,12 +129,44 @@ const otherModeUrl = `/sign-in?mode=${creating ? 'signin' : 'create'}${next ? `&
         {note === 'everywhere' && (
           <div class="notice" role="status">You are signed out on every device, this one included.</div>
         )}
+        {note === 'google-cancelled' && (
+          <div class="notice" role="status">Google sign-in was cancelled. Try again, or use your email below.</div>
+        )}
+        {note === 'google-failed' && (
+          <div class="notice bad" role="alert">Google sign-in did not go through — the link may have expired. Please try again.</div>
+        )}
+        {note === 'google-other-account' && (
+          <div class="notice bad" role="alert">That email is already linked to a different Google account. Sign in with that one, or with your password.</div>
+        )}
+        {note === 'google-inactive' && (
+          <div class="notice bad" role="alert">That account is not active. Contact us if you think this is wrong.</div>
+        )}
 
         <div class="flow-panel glass-p">
           {Object.keys(errors).length > 0 && (
             <p class="notice bad" role="alert" style="margin-bottom:22px;">
               Nothing was lost — check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
             </p>
+          )}
+
+          {google && (
+            <Fragment>
+              <a href={googleUrl} class="btn-glass google-btn" style="width:100%;justify-content:center;gap:10px;">
+                <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+                  <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/>
+                  <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+                  <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
+                  <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/>
+                </svg>
+                {creating ? 'Sign up with Google' : 'Continue with Google'}
+              </a>
+              {/* Shown in both modes: Google creates the account if there is none yet. */}
+              <p class="fh" style="margin-top:10px;text-align:center;">
+                By continuing with Google you accept the <a href="/pages/terms" target="_blank" rel="noopener" style="color:var(--champagne-2);">terms</a>
+                {' '}and <a href="/pages/privacy" target="_blank" rel="noopener" style="color:var(--champagne-2);">privacy policy</a>.
+              </p>
+              <p class="fh" style="text-align:center;margin:18px 0;">or with your email</p>
+            </Fragment>
           )}
 
           <form method="post" class="cform" novalidate>
@@ -196,8 +215,8 @@ const otherModeUrl = `/sign-in?mode=${creating ? 'signin' : 'create'}${next ? `&
 
                 <label class="opt" id="f-terms" style="width:100%;">
                   <input type="checkbox" name="terms" value="on" required />
-                  <span>I accept the <a href="/pages/terms.html" target="_blank" rel="noopener" style="color:var(--champagne-2);">terms</a>{' '}
-                    and <a href="/pages/privacy.html" target="_blank" rel="noopener" style="color:var(--champagne-2);">privacy policy</a>.</span>
+                  <span>I accept the <a href="/pages/terms" target="_blank" rel="noopener" style="color:var(--champagne-2);">terms</a>{' '}
+                    and <a href="/pages/privacy" target="_blank" rel="noopener" style="color:var(--champagne-2);">privacy policy</a>.</span>
                 </label>
                 {errors.terms && <span class="cform-err" role="alert">{errors.terms}</span>}
               </>

@@ -8,7 +8,7 @@
 import { one, run } from './db';
 import { isoIn, newId, newToken, nowIso, sha256 } from './ids';
 import { hashPassword, needsRehash, verifyPassword } from './password';
-import { audit } from './audit';
+import { audit, notify } from './audit';
 import { safeNext } from './guards';
 import { resetPasswordMessage, sendMail, verifyEmailMessage } from './mail';
 import { PUBLIC_TENANT } from './tenant';
@@ -125,6 +125,170 @@ export async function signIn(
 
   await audit(database, { actorId: row.id, action: 'user.signed_in', entityType: 'user', entityId: row.id, request });
   return { ok: true, userId: row.id };
+}
+
+// --- Google -----------------------------------------------------------------
+
+/**
+ * Stored in place of a password hash for accounts made through Google. It is
+ * not a `pbkdf2$…` hash, so verifyPassword rejects every guess against it; the
+ * owner can still add a real password with "Forgot password", which proves
+ * they hold the address.
+ */
+const NO_PASSWORD = 'google$';
+
+/**
+ * Tell the owner whenever Google is connected to or removed from their account
+ * — in the workspace and, through notify(), by email. If it wasn't them, this
+ * is how they find out.
+ */
+async function googleNotice(database: D1Database, userId: string, connected: boolean, googleEmail: string | null): Promise<void> {
+  try {
+    await notify(database, {
+      userId,
+      kind: 'security',
+      title: connected ? 'Google sign-in was added to your account' : 'Google sign-in was removed from your account',
+      body: connected
+        ? `You can now sign in with the Google account ${googleEmail ?? ''}. If this wasn't you, reset your password straight away and tell us at hello@fashionfreelancing.com.`
+        : "Your account no longer signs in with Google. If this wasn't you, reset your password straight away and tell us at hello@fashionfreelancing.com.",
+      link: '/account',
+    });
+  } catch (error) {
+    // the change itself has happened; a failed notice must not undo it
+    console.error('[auth] google notice failed:', error);
+  }
+}
+
+export type GoogleSignInResult =
+  | { ok: true; userId: string; created: boolean }
+  | { ok: false; message: string };
+
+/**
+ * Sign in with an identity Google has already checked (src/server/google.ts):
+ * the returning Google account first, then an existing account with the same
+ * address — which gets linked — and otherwise a new account.
+ */
+export async function signInWithGoogle(
+  database: D1Database,
+  request: Request,
+  identity: { sub: string; email: string; name: string },
+  tenant: string,
+): Promise<GoogleSignInResult> {
+  type Row = { id: string; status: string; email_verified_at: string | null; google_sub: string | null };
+  const now = nowIso();
+  const inactive = { ok: false as const, message: 'That account is not active. Contact us if you think this is wrong.' };
+
+  let row = await one<Row>(database,
+    `SELECT id, status, email_verified_at, google_sub FROM users
+      WHERE google_sub = ? AND tenant IN (?, 'public') ORDER BY tenant = 'public' LIMIT 1`,
+    identity.sub, tenant);
+
+  if (!row) {
+    row = await one<Row>(database,
+      `SELECT id, status, email_verified_at, google_sub FROM users
+        WHERE email = ? AND tenant IN (?, 'public') ORDER BY tenant = 'public' LIMIT 1`,
+      identity.email, tenant);
+    // The address already belongs to a different Google identity — never
+    // move an account from one Google login to another.
+    if (row?.google_sub && row.google_sub !== identity.sub) {
+      return { ok: false, message: 'That email is linked to a different Google account. Sign in with that one, or with your password.' };
+    }
+    if (row) {
+      if (row.status !== 'active') return inactive;
+      /* Linking proves the person holds the address. If the existing account
+         never confirmed it, its password may have been set by someone who
+         only typed that address in — so it is wiped and its sessions ended,
+         and the account belongs to the person who actually owns the email. */
+      if (!row.email_verified_at) {
+        await run(database, 'UPDATE users SET password_hash = ? WHERE id = ?', NO_PASSWORD, row.id);
+        await run(database, 'DELETE FROM sessions WHERE user_id = ?', row.id);
+      }
+      await run(database,
+        'UPDATE users SET google_sub = ?, email_verified_at = COALESCE(email_verified_at, ?), updated_at = ? WHERE id = ?',
+        identity.sub, now, now, row.id);
+      await audit(database, { actorId: row.id, action: 'user.google_linked', entityType: 'user', entityId: row.id, detail: { via: 'sign-in' }, request });
+      await googleNotice(database, row.id, true, identity.email);
+      return { ok: true, userId: row.id, created: false };
+    }
+
+    // Nobody yet: a new account, already confirmed, since Google checked the address.
+    const id = newId();
+    await run(database,
+      `INSERT INTO users (id, email, password_hash, name, email_verified_at, terms_accepted_at, google_sub, tenant, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      id, identity.email, NO_PASSWORD, identity.name, now, now, identity.sub, tenant, now, now);
+    await audit(database, { actorId: id, action: 'user.signed_up', entityType: 'user', entityId: id, detail: { via: 'google' }, request });
+    return { ok: true, userId: id, created: true };
+  }
+
+  if (row.status !== 'active') return inactive;
+  await audit(database, { actorId: row.id, action: 'user.signed_in_google', entityType: 'user', entityId: row.id, request });
+  return { ok: true, userId: row.id, created: false };
+}
+
+/** How an account can sign in: with a password, with Google, or both. */
+export async function signInMethods(database: D1Database, userId: string): Promise<{ password: boolean; google: boolean }> {
+  const row = await one<{ password_hash: string; google_sub: string | null }>(
+    database, 'SELECT password_hash, google_sub FROM users WHERE id = ?', userId,
+  );
+  return { password: Boolean(row?.password_hash.startsWith('pbkdf2$')), google: Boolean(row?.google_sub) };
+}
+
+export type ConnectGoogleResult = 'connected' | 'already' | 'in-use' | 'email-in-use';
+
+/**
+ * A signed-in person adds Google to their own account (from /account). They
+ * have proved both sides — this session, and the Google account they just
+ * chose — so the Google address may differ from the one they sign in with.
+ * Refused when that Google account, or its address, already belongs to a
+ * different account here: one identity, one account.
+ */
+export async function connectGoogle(
+  database: D1Database,
+  request: Request,
+  userId: string,
+  identity: { sub: string; email: string },
+): Promise<ConnectGoogleResult> {
+  const owner = await one<{ id: string }>(database, 'SELECT id FROM users WHERE google_sub = ?', identity.sub);
+  if (owner) return owner.id === userId ? 'already' : 'in-use';
+  const sameEmail = await one<{ id: string }>(database, 'SELECT id FROM users WHERE email = ? AND id <> ?', identity.email, userId);
+  if (sameEmail) return 'email-in-use';
+  const done = await run(database,
+    'UPDATE users SET google_sub = ?, updated_at = ? WHERE id = ? AND google_sub IS NULL', identity.sub, nowIso(), userId);
+  if (!done.meta.changes) return 'already';
+  await audit(database, { actorId: userId, action: 'user.google_linked', entityType: 'user', entityId: userId, detail: { via: 'account' }, request });
+  await googleNotice(database, userId, true, identity.email);
+  return 'connected';
+}
+
+/**
+ * Remove Google from an account. Only when it also has a password — otherwise
+ * this would lock the owner out of their own account.
+ */
+export async function disconnectGoogle(database: D1Database, request: Request, userId: string): Promise<boolean> {
+  const methods = await signInMethods(database, userId);
+  if (!methods.google || !methods.password) return false;
+  await run(database, 'UPDATE users SET google_sub = NULL, updated_at = ? WHERE id = ?', nowIso(), userId);
+  await audit(database, { actorId: userId, action: 'user.google_unlinked', entityType: 'user', entityId: userId, request });
+  await googleNotice(database, userId, false, null);
+  return true;
+}
+
+/** What a freshly signed-in account is, for `landingFor` and the shortlist merge. */
+export async function rolesOf(database: D1Database, userId: string) {
+  const company = await one<{ company_id: string }>(
+    database, 'SELECT company_id FROM company_members WHERE user_id = ? LIMIT 1', userId,
+  );
+  const profile = await one<{ id: string }>(
+    database, 'SELECT id FROM specialist_profiles WHERE user_id = ?', userId,
+  );
+  const account = await one<{ is_admin: number; role: string }>(database, 'SELECT is_admin, role FROM users WHERE id = ?', userId);
+  return {
+    companyIds: company ? [company.company_id] : [],
+    profileId: profile?.id ?? null,
+    isAdmin: account?.is_admin === 1,
+    role: account?.role ?? 'member',
+  };
 }
 
 // --- one-time tokens --------------------------------------------------------
