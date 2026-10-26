@@ -172,7 +172,7 @@ const money = (row: Row): string | null => {
 };
 ---
 
-<Night title="Projects — Fashion Freelancing" noindex current="" quoteBot={false}>
+<Night title="Projects | Fashion Freelancing" noindex current="" quoteBot={false}>
   <section class="net-hero" style="padding-bottom:calc(var(--u) * 3);">
     <div class="wrap">
       <div class="ws-head">
@@ -195,20 +195,20 @@ const money = (row: Row): string | null => {
     <div class="wrap">
       {mustVerify && (
         <div class="notice bad" role="alert" style="margin-bottom:20px;">
-          Confirm your email first — we sent you a link. Lost it? Send a fresh one
+          Confirm your email first. We sent you a link. Lost it? Send a fresh one
           from <a href="/account">Password &amp; security</a>.
         </div>
       )}
       {/* a rejected reply used to vanish without a word; say what stopped it */}
       {Object.keys(errors).length > 0 && (
         <div class="notice bad" role="alert" style="margin-bottom:20px;">
-          Your reply was not sent — {Object.values(errors)[0]}
+          Your reply was not sent. {Object.values(errors)[0]}
         </div>
       )}
       {applied && <div class="notice ok" style="margin-bottom:20px;">Your reply to “{applied}” is with the company.</div>}
       {kept && (
         <div class="notice" style="margin-bottom:20px;">
-          You have already replied to “{kept.title}”, and it stands as {applicationStatusLabel(kept.status).toLowerCase()} —
+          You have already replied to “{kept.title}”, and it stands as {applicationStatusLabel(kept.status).toLowerCase()},
           so nothing new was sent. <a href="/workspace/freelancer/replies">See your reply</a>.
         </div>
       )}

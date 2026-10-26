@@ -63,7 +63,7 @@ if (Astro.request.method === 'POST') {
         featured, now, profile.id,
       );
       flash = featured
-        ? `${profile.name} is featured — they now sort to the top of the directory.`
+        ? `${profile.name} is featured. They now sort to the top of the directory.`
         : `${profile.name} is no longer featured. They stay in the directory, in the usual order.`;
     } else {
       const next = action === 'hide' ? 'paused' : 'approved';
@@ -89,7 +89,7 @@ if (Astro.request.method === 'POST') {
         entityType: 'specialist_profile', entityId: profile.id, request: Astro.request,
       });
       flash = next === 'paused'
-        ? `${profile.name} is hidden — out of the directory and out of matching until you relist them.`
+        ? `${profile.name} is hidden: out of the directory and out of matching until you relist them.`
         : `${profile.name} is back in the directory and can be matched to projects again.`;
     }
   }
@@ -208,7 +208,7 @@ const nav = adminNav();
 
           {person.public_work === 0 && (
             <p class="ws-sub">
-              Nothing of theirs is on their public page yet — either they have
+              Nothing of theirs is on their public page yet: either they have
               added no work, or it is still sitting in the moderation queue.
               Featuring them would send people to an empty page.
             </p>

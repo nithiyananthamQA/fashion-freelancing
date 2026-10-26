@@ -94,7 +94,7 @@ if (Astro.request.method === 'POST') {
         });
       }
       flash = next && next !== lead.status
-        ? `${lead.name} — ${leadStatusLabel(next)}${note ? ', and your note is saved' : ''}.`
+        ? `${lead.name} · ${leadStatusLabel(next)}${note ? ', and your note is saved' : ''}.`
         : `Note saved on ${lead.name}'s enquiry.`;
     }
   }
@@ -176,13 +176,13 @@ const firstName = (e: Enquiry) => e.name.split(/\s+/)[0] ?? e.name;
 /** The reply, with the greeting and the subject already written — the operator only adds the answer. */
 function mailtoFor(e: Enquiry): string {
   const about = serviceName(e);
-  const subject = `Your ${about && e.service !== 'multiple' ? `${about} ` : ''}enquiry — Fashion Freelancing`;
+  const subject = `Your ${about && e.service !== 'multiple' ? `${about} ` : ''}enquiry - Fashion Freelancing`;
   const body = `Hi ${firstName(e)},\n\nThank you for getting in touch with Fashion Freelancing.\n\n`;
   return `mailto:${e.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 function whatsappFor(e: Enquiry, number: string): string {
-  const text = `Hi ${firstName(e)}, this is Fashion Freelancing — thank you for your enquiry.`;
+  const text = `Hi ${firstName(e)}, this is Fashion Freelancing. Thank you for your enquiry.`;
   return `https://wa.me/${number}?text=${encodeURIComponent(text)}`;
 }
 
@@ -281,7 +281,7 @@ const nav = adminNav({ enquiries: unanswered || undefined });
               <button class="btn-glass btn-sm" name="status" value="">Save the note only</button>
             </div>
             <p class="ws-sub" style="margin:0;">
-              Sending the email does not move the enquiry on its own — mark where
+              Sending the email does not move the enquiry on its own. Mark where
               it got to, so whoever opens this next knows what is left to do. A
               note typed above is saved with whichever button you press.
             </p>

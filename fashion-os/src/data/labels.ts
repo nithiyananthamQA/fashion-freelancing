@@ -21,12 +21,12 @@ export const projectSizeLabel = fromList(PROJECT_SIZE);
 const PROJECT_STATUS_COMPANY: Record<string, string> = {
   draft: 'Not posted yet',
   submitted: 'Being checked',
-  published: 'Open — waiting for replies',
+  published: 'Open · waiting for replies',
   responding: 'Replies coming in',
   shortlisted: 'You have shortlisted someone',
   hired: 'Someone hired',
   in_progress: 'Work in progress',
-  delivered: 'Delivered — needs your review',
+  delivered: 'Delivered · needs your review',
   completed: 'Finished',
   closed: 'Closed',
 };
@@ -40,12 +40,12 @@ const PROJECT_STATUS_COMPANY: Record<string, string> = {
 const PROJECT_STATUS_ADMIN: Record<string, string> = {
   draft: 'Not posted yet',
   submitted: 'Waiting to be checked',
-  published: 'Open — no replies yet',
+  published: 'Open · no replies yet',
   responding: 'Replies coming in',
   shortlisted: 'Someone shortlisted',
   hired: 'Someone hired',
   in_progress: 'Work in progress',
-  delivered: 'Delivered — with the company',
+  delivered: 'Delivered · with the company',
   completed: 'Finished',
   closed: 'Closed',
 };
@@ -168,7 +168,7 @@ const PORTFOLIO_MODERATION: Record<string, string> = {
 const LEAD_STATUS: Record<string, string> = {
   new: 'Nobody has replied yet',
   contacted: 'You have replied',
-  quoted: 'Price sent — waiting on them',
+  quoted: 'Price sent · waiting on them',
   won: 'Turned into work',
   lost: 'Went elsewhere',
 };

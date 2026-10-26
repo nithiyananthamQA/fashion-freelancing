@@ -1394,7 +1394,7 @@ details.faq p { color: var(--ink-4); font-size: 14px; line-height: 1.65; margin:
 .tier li { display: flex; gap: 8px; color: var(--ink-3); }
 .tier li::before { content: "✓"; color: var(--ink-3); }
 .tier li.no { color: var(--ink-6); text-decoration: line-through; }
-.tier li.no::before { content: "—"; color: var(--ink-7); text-decoration: none; }
+.tier li.no::before { content: "-"; color: var(--ink-7); text-decoration: none; }
 
 /* Order pipeline (replaces kanban) */
 .order-steps { display: flex; gap: 0; align-items: center; }

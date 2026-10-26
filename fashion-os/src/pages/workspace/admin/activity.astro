@@ -50,7 +50,7 @@ if (Astro.request.method === 'POST') {
       });
       flash = result.failed === 0
         ? `${result.sent} ${result.sent === 1 ? 'message' : 'messages'} sent.`
-        : `${result.sent} sent, ${result.failed} still failing — the reason is on each one below.`;
+        : `${result.sent} sent, ${result.failed} still failing. The reason is on each one below.`;
     }
   }
 }
@@ -173,7 +173,7 @@ const nav = adminNav();
             <h2 style="margin:0;">What has happened</h2>
             <p class="ws-sub">
               {activity.length > 0
-                ? `The last ${activity.length} ${activity.length === 1 ? 'thing' : 'things'} anyone did in this workspace, newest first. Nothing here can be edited or removed — it is the record.`
+                ? `The last ${activity.length} ${activity.length === 1 ? 'thing' : 'things'} anyone did in this workspace, newest first. Nothing here can be edited or removed: it is the record.`
                 : 'Everything anyone does in this workspace is written down here, and nothing written down can be edited or removed.'}
             </p>
           </div>
@@ -224,7 +224,7 @@ const nav = adminNav();
             <h2 style="margin:0;">Email waiting to go out</h2>
             <p class="ws-sub">
               {canSend
-                ? 'Every message is written down before it is sent. Anything still listed here failed to send or has not been picked up yet — the person on the other end has not received it.'
+                ? 'Every message is written down before it is sent. Anything still listed here failed to send or has not been picked up yet. The person on the other end has not received it.'
                 : 'No mail provider is configured, so nothing sends on its own and every message stops here. Copy the link out and send it by hand, or set RESEND_API_KEY and MAIL_FROM to deliver them for real.'}
             </p>
           </div>
@@ -264,7 +264,7 @@ const nav = adminNav();
                   To {message.to_email} · written {when(message.created_at)} at {clock(message.created_at)}
                   {message.attempts > 0 && (
                     <span> · {message.attempts >= MAX_SEND_ATTEMPTS
-                      ? `gave up after ${message.attempts} tries — send it by hand`
+                      ? `gave up after ${message.attempts} tries · send it by hand`
                       : `tried ${message.attempts} ${message.attempts === 1 ? 'time' : 'times'}`}</span>
                   )}
                 </p>

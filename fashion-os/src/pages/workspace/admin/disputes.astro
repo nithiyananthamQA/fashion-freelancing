@@ -42,17 +42,17 @@ let keptNote = '';
 const OUTCOMES = {
   active: {
     button: 'Back to work',
-    title: 'The issue is settled — work carries on',
+    title: 'The issue is settled, work carries on',
     done: 'is back in progress',
   },
   completed: {
     button: 'Mark it finished',
-    title: 'The issue is settled — the work is finished',
+    title: 'The issue is settled, the work is finished',
     done: 'is marked finished',
   },
   closed: {
     button: 'Close it',
-    title: 'The issue is settled — the work is closed',
+    title: 'The issue is settled, the work is closed',
     done: 'is closed',
   },
 } as const;
@@ -238,7 +238,7 @@ const nav = adminNav({ disputes: disputes.length || undefined });
         When a company or a specialist raises an issue on a piece of work, it
         stops where it is and lands here, with the conversation, its history and
         any money recorded against it. You settle it by putting it back to work,
-        marking it finished or closing it — with a note both sides receive.
+        marking it finished or closing it, with a note both sides receive.
       </p>
       <a class="btn-glass btn-sm" href="/workspace/admin/payments">See work and payments</a>
     </div>
@@ -254,7 +254,7 @@ const nav = adminNav({ disputes: disputes.length || undefined });
               </p>
               {moneyOn(d.id).length > 0 && (
                 <p class="ws-sub">
-                  {moneyOn(d.id).map((m) => `${paymentKindLabel(m.kind)} ${m.currency} ${m.amount.toLocaleString('en-GB')} — ${paymentStatusLabel(m.status)}`).join(' · ')}
+                  {moneyOn(d.id).map((m) => `${paymentKindLabel(m.kind)} ${m.currency} ${m.amount.toLocaleString('en-GB')}: ${paymentStatusLabel(m.status)}`).join(' · ')}
                 </p>
               )}
             </div>

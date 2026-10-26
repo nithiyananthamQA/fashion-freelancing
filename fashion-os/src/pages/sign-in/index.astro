@@ -107,7 +107,7 @@ const googleUrl = `/sign-in/google${next ? `?next=${encodeURIComponent(next)}` :
 const otherModeUrl = `/sign-in?mode=${creating ? 'signin' : 'create'}${next ? `&next=${encodeURIComponent(next)}` : ''}`;
 ---
 
-<Night title={creating ? 'Create your account — Fashion Freelancing' : 'Sign in — Fashion Freelancing'} noindex current="" quoteBot={false}>
+<Night title={creating ? 'Create your account | Fashion Freelancing' : 'Sign in | Fashion Freelancing'} noindex current="" quoteBot={false}>
   <section class="net-hero" style="padding-bottom:calc(var(--u) * 8);">
     <div class="wrap">
       <div class="flow" style="max-width:520px;">
@@ -116,7 +116,7 @@ const otherModeUrl = `/sign-in?mode=${creating ? 'signin' : 'create'}${next ? `&
           <span class="kicker">{creating ? 'New account' : 'Welcome back'}</span>
           <h1 style="margin-top:14px;">{creating ? 'Create your account.' : 'Sign in.'}</h1>
           <p class="sub" style="margin-top:12px;">
-            One account covers both sides — hire a specialist, offer your own work, or do both.
+            One account covers both sides: hire a specialist, offer your own work, or do both.
           </p>
         </div>
 
@@ -133,7 +133,7 @@ const otherModeUrl = `/sign-in?mode=${creating ? 'signin' : 'create'}${next ? `&
           <div class="notice" role="status">Google sign-in was cancelled. Try again, or use your email below.</div>
         )}
         {note === 'google-failed' && (
-          <div class="notice bad" role="alert">Google sign-in did not go through — the link may have expired. Please try again.</div>
+          <div class="notice bad" role="alert">Google sign-in did not go through: the link may have expired. Please try again.</div>
         )}
         {note === 'google-other-account' && (
           <div class="notice bad" role="alert">That email is already linked to a different Google account. Sign in with that one, or with your password.</div>
@@ -145,7 +145,7 @@ const otherModeUrl = `/sign-in?mode=${creating ? 'signin' : 'create'}${next ? `&
         <div class="flow-panel glass-p">
           {Object.keys(errors).length > 0 && (
             <p class="notice bad" role="alert" style="margin-bottom:22px;">
-              Nothing was lost — check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
+              Nothing was lost. Check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
             </p>
           )}
 
@@ -238,7 +238,7 @@ const otherModeUrl = `/sign-in?mode=${creating ? 'signin' : 'create'}${next ? `&
         </div>
 
         <p class="fh" style="text-align:center;margin-top:20px;">
-          Looking to hire our team instead? <a href="/#contact" style="color:var(--champagne-2);">Start a project</a> — no account needed.
+          Looking to hire our team instead? <a href="/#contact" style="color:var(--champagne-2);">Start a project</a>, no account needed.
         </p>
       </div>
     </div>

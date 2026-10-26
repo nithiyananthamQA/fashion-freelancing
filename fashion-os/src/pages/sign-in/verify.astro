@@ -51,7 +51,7 @@ if (Astro.request.method === 'POST') {
 const canResend = state === 'expired' && user !== null && !user.emailVerified;
 const alreadyConfirmed = state === 'expired' && user !== null && user.emailVerified;
 ---
-<Night title={state === 'confirmed' ? 'Email confirmed — Fashion Freelancing' : 'Confirm your email — Fashion Freelancing'} noindex current="" quoteBot={false}>
+<Night title={state === 'confirmed' ? 'Email confirmed | Fashion Freelancing' : 'Confirm your email | Fashion Freelancing'} noindex current="" quoteBot={false}>
   <section class="net-hero">
     <div class="wrap">
       <div class="flow" style="max-width:520px;">

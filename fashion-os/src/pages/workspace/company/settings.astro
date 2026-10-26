@@ -75,7 +75,7 @@ if (Astro.request.method === 'POST' && company) {
   };
 
   if (hasErrors(errors)) {
-    flash = 'Nothing was saved — check the highlighted field below.';
+    flash = 'Nothing was saved. Check the highlighted field below.';
   } else {
     /* The id comes off the session and never off the form, and the membership
        is proved again here, so a replayed post cannot rename someone else's
@@ -118,7 +118,7 @@ if (!values.country) {
 if (!values.timezone) {
   blanks.push({
     label: 'Timezone',
-    why: 'Your browser’s best guess is already filled in above — saving it is what makes a deadline mean the same thing to both sides.',
+    why: 'Your browser’s best guess is already filled in above. Saving it is what makes a deadline mean the same thing to both sides.',
   });
 }
 
@@ -145,7 +145,7 @@ const nav = companyNav();
       <h3>No company on this account yet</h3>
       <p>
         Your company name, website, country and timezone appear here once the
-        account is set up — they are what a specialist reads before answering
+        account is set up. They are what a specialist reads before answering
         your first request.
       </p>
       <a class="btn-hot btn-sm" href="/company/setup">Set up your company</a>
@@ -223,7 +223,7 @@ const nav = companyNav();
           <div>
             <h2 style="margin:0;">Password &amp; security</h2>
             <p class="ws-sub">
-              Your own sign-in, {user.email} — change your password, get a fresh confirmation link,
+              Your own sign-in, {user.email}: change your password, get a fresh confirmation link,
               or sign out of every other device. It belongs to you, not the company, so it lives on
               its own page.
             </p>

@@ -92,7 +92,7 @@ if (Astro.request.method === 'POST') {
         'SELECT status FROM applications WHERE project_id = ? AND profile_id = ?',
         project.id, profileId,
       );
-      flash = `You have already replied to ${project.title}, and it stands as "${applicationStatusLabel(existing?.status).toLowerCase()}" — nothing new was sent. It is under "Replies you sent".`;
+      flash = `You have already replied to ${project.title}, and it stands as "${applicationStatusLabel(existing?.status).toLowerCase()}". Nothing new was sent. It is under "Replies you sent".`;
     } else {
       await run(
         database,
@@ -213,7 +213,7 @@ const nav = freelancerNav({ invites: invitations.length || undefined });
 >
   {mustVerify && (
     <p class="notice bad" role="alert" style="margin-bottom:18px;">
-      Confirm your email first — we sent you a link. Lost it? Send a fresh one
+      Confirm your email first. We sent you a link. Lost it? Send a fresh one
       from <a href="/account">Password &amp; security</a>.
     </p>
   )}

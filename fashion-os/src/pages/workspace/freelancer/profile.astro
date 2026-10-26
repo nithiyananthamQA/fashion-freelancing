@@ -131,7 +131,7 @@ const when = (iso: string) =>
 const statusLine: Record<string, string> = {
   draft: `Nobody can see this page. Your application stops at step ${step} of ${TOTAL_APPLICATION_STEPS}, ${stepTitle}, and nothing is published until it is finished and approved.`,
   submitted: 'Our review team has your application. Nothing below is public while they read it, which usually takes a few working days.',
-  needs_changes: 'We need a few changes before this page can go live. The notes are below — make them in your application and send it back.',
+  needs_changes: 'We need a few changes before this page can go live. The notes are below. Make them in your application and send it back.',
   approved: `Companies can find this page in the directory, and projects matching your services reach you.${profile?.approved_at ? ` Live since ${when(profile.approved_at)}.` : ''}`,
   paused: 'Your page is hidden from the directory and from matching, so nobody can open it at the moment. Our team paused it, and Messages is the place to ask why.',
 };
@@ -268,7 +268,7 @@ const nav = freelancerNav();
       {(profile?.capacity || profile?.preferred_size || regions) && (
         <p class="ws-sub">
           Your capacity, preferred project size and regions are not printed on
-          the page — we ask so we can put the right work in front of you.
+          the page. We ask so we can put the right work in front of you.
         </p>
       )}
 
@@ -300,7 +300,7 @@ const nav = freelancerNav();
           <p>
             Companies decide from the work, not the words, and at least one
             piece is needed before your application can be sent. Add a piece
-            with what you did on it and it appears here — publicly once our
+            with what you did on it and it appears here, publicly once our
             team has checked it.
           </p>
           <a class="btn-hot btn-sm" href="/apply?step=5">Add a piece of work</a>

@@ -96,7 +96,7 @@ if (Astro.request.method === 'POST') {
       });
       flash = `Accepted. ${request.specialist} has been told, and the work is under Work in progress.`;
     } else if (['accepted', 'active', 'completed'].includes(request.status)) {
-      flash = 'This price was already accepted — the work is under Work in progress.';
+      flash = 'This price was already accepted. The work is under Work in progress.';
     } else {
       flash = 'There is no price waiting on you for this request any more.';
     }
@@ -247,8 +247,8 @@ const nav = companyNav({ requests: waiting || undefined });
       <h3>You have not asked anyone yet</h3>
       <p>
         Open a specialist's page and use <b>Request to hire</b>. Your brief,
-        budget and dates go to them privately, and their answer — along with
-        anything they need to ask you first — lands here, where you can reply
+        budget and dates go to them privately, and their answer, along with
+        anything they need to ask you first, lands here, where you can reply
         without leaving the page.
       </p>
       <a class="btn-hot btn-sm" href="/specialists">Find a specialist</a>
@@ -302,8 +302,8 @@ const nav = companyNav({ requests: waiting || undefined });
                   <strong>{r.name} will do it for {money(r.proposal_amount, r.proposal_currency)}</strong>
                   {r.proposal_timeline && <span> · {r.proposal_timeline}</span>}
                   {r.proposed_at && <span> · sent {day(r.proposed_at)}</span>}.
-                  Accepting starts the work straight away. To talk it over first, reply below —
-                  they can send a different price.
+                  Accepting starts the work straight away. To talk it over first, reply below.
+                  They can send a different price.
                 </p>
                 <form method="post">
                   <input type="hidden" name="requestId" value={r.id} />

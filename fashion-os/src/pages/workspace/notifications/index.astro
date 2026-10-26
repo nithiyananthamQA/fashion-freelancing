@@ -119,7 +119,7 @@ const mark = (n: Notification) => (n.read_at ? '' : '●');
     ? unread
       ? `${unread} unread. Opening one marks it read and takes you to it.`
       : 'You are up to date. Everything the site has told you is below, newest first.'
-    : 'Replies, requests, approvals and anything else that needs you — as it happens.'}
+    : 'Replies, requests, approvals and anything else that needs you, as it happens.'}
   flash={flash}
 >
   {notifications.length === 0 ? (
@@ -127,7 +127,7 @@ const mark = (n: Notification) => (n.read_at ? '' : '●');
       <h3>Nothing to tell you yet</h3>
       <p>
         When a company asks to hire you, a specialist replies to your project,
-        a message arrives or an application is decided, it appears here — and,
+        a message arrives or an application is decided, it appears here and,
         once email is set up, in your inbox too. Each one links straight to the
         page where you can act on it.
       </p>

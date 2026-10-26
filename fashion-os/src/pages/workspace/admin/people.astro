@@ -183,10 +183,10 @@ const facts = (person: Person): string[] => [
  */
 function whatTheyCanDo(person: Person): string {
   const parts: string[] = [];
-  if (person.profile_id) parts.push(`Specialist — ${profileStatusLabel(person.profile_status)}`);
+  if (person.profile_id) parts.push(`Specialist: ${profileStatusLabel(person.profile_status)}`);
   const seated = seatsFor(person.id);
   for (const seat of seated) {
-    parts.push(`${seat.company_name} — ${companyRoleLabel(seat.role)}${seat.job_title ? `, ${seat.job_title}` : ''}`);
+    parts.push(`${seat.company_name}: ${companyRoleLabel(seat.role)}${seat.job_title ? `, ${seat.job_title}` : ''}`);
   }
   if (person.is_admin === 1) parts.push('Runs this workspace');
   if (person.role === 'editor') parts.push('Edits the site content');
@@ -213,8 +213,8 @@ const nav = adminNav();
     <div class="ws-empty">
       <h3>No accounts in this workspace yet</h3>
       <p>
-        Everyone who signs up appears here — freelancers who applied, the people
-        who post projects for a company, and anyone with admin rights — with
+        Everyone who signs up appears here (freelancers who applied, the people
+        who post projects for a company, and anyone with admin rights) with
         their email, when they joined, and which of those they are. The first
         person to create an account starts the list.
       </p>
@@ -226,7 +226,7 @@ const nav = adminNav();
         <article class="panel glass-p">
           <div class="ws-row-head" style="margin-bottom:0;">
             <div>
-              <h2 style="margin:0;">{person.name}{person.id === admin.id ? ' — you' : ''}</h2>
+              <h2 style="margin:0;">{person.name}{person.id === admin.id ? ' (you)' : ''}</h2>
               <p class="ws-sub">{facts(person).join(' · ')}</p>
               <p class="ws-sub">{whatTheyCanDo(person)}</p>
             </div>
@@ -267,7 +267,7 @@ const nav = adminNav();
                   <label>
                     <span class="fl">Why</span>
                     <input class="fi" type="text" name="reason" maxlength="500"
-                           placeholder="Kept in the activity log — they are not shown it" />
+                           placeholder="Kept in the activity log. They are not shown it" />
                   </label>
                   <div style="display:flex;flex-wrap:wrap;gap:8px;">
                     <button class="btn-glass btn-sm" name="action" value="suspend">Suspend access</button>
@@ -276,7 +276,7 @@ const nav = adminNav();
                   <p class="ws-sub" style="margin:0;">
                     Both sign them out everywhere at once and take their public
                     page out of the directory. Suspending is for while something
-                    is looked into; closing is for good — though either can be
+                    is looked into; closing is for good, though either can be
                     reversed from here.
                   </p>
                 </form>

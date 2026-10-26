@@ -231,7 +231,7 @@ const nav = adminNav({
                   <span class="m">
                     {q.mailFailed > 0
                       ? `${q.mailFailed} failed to send · ${q.mail - q.mailFailed} still waiting`
-                      : 'From the last three days — written down, but not sent yet'}
+                      : 'From the last three days · written down, but not sent yet'}
                   </span>
                 </span>
                 <span class={q.mailFailed > 0 ? 'pill-tone bad' : 'pill-tone warn'}>Somebody is waiting</span>
@@ -268,7 +268,7 @@ const nav = adminNav({
           <a class="ws-row" href="/workspace/admin/people">
             <span class="body">
               <span class="t">People</span>
-              <span class="m">Everyone with an account — and suspending or closing one</span>
+              <span class="m">Everyone with an account, and suspending or closing one</span>
             </span>
           </a>
         </div>

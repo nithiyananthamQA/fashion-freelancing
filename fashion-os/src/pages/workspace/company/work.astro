@@ -93,7 +93,7 @@ if (Astro.request.method === 'POST') {
        reopens — so it is required, and nothing moves until it is written. */
     const note = f.text('note', 'What still needs doing', { required: true, min: 10, max: 2000 });
     if (!note) {
-      flash = `Nothing was sent back — ${errors.note ?? 'say what still needs doing.'}`;
+      flash = `Nothing was sent back. ${errors.note ?? 'Say what still needs doing.'}`;
     } else if (await moveEngagement(database, thread.id, ['delivered'], 'revision')) {
       await postMessage(database, thread, user.id, `Changes requested:\n\n${note}`);
       await tell(thread, 'engagement_revision', `Changes requested: ${thread.title}`, excerpt(note));
@@ -119,7 +119,7 @@ if (Astro.request.method === 'POST') {
     if (await limited(database, 'message', user.id)) return tooManyRequests();
     const issue = f.text('issue', 'What has gone wrong', { required: true, min: 20, max: 2000 });
     if (!issue) {
-      flash = `Nothing was raised — ${errors.issue ?? 'say what has gone wrong.'}`;
+      flash = `Nothing was raised. ${errors.issue ?? 'Say what has gone wrong.'}`;
     } else if (await moveEngagement(database, thread.id, LIVE_WORK, 'disputed')) {
       await postMessage(database, thread, user.id, `Issue raised:\n\n${issue}`);
       await tell(thread, 'engagement_disputed', `Issue raised: ${thread.title}`, excerpt(issue));
@@ -301,7 +301,7 @@ const nav = companyNav({ work: open || undefined });
     <div class="ws-empty">
       <h3>You have not hired anyone yet</h3>
       <p>
-        Work appears here the moment you hire someone — either by picking a
+        Work appears here the moment you hire someone, either by picking a
         reply to a project you posted, or by a specialist accepting your request
         to work with them. The brief, the conversation, the state of the job and
         every payment recorded against it then stay on this page.
@@ -384,7 +384,7 @@ const nav = companyNav({ work: open || undefined });
 
             {j.status === 'disputed' && (
               <p class="ws-sub">
-                This work is in dispute. Our team will be in touch — anything
+                This work is in dispute. Our team will be in touch. Anything
                 either side writes in the thread below becomes part of it.
               </p>
             )}
@@ -393,7 +393,7 @@ const nav = companyNav({ work: open || undefined });
               {forJob(j.id).length === 0 ? (
                 <p class="ws-sub" style="margin:0;">
                   No money recorded against this work yet. Once an invoice is
-                  recorded it — along with everything paid against it — shows up
+                  recorded it (along with everything paid against it) shows up
                   on this line and under Invoices.
                 </p>
               ) : forJob(j.id).map((y) => (
@@ -434,7 +434,7 @@ const nav = companyNav({ work: open || undefined });
                 <label>
                   <span class="fl">What still needs doing</span>
                   <textarea class="fi" name="note" rows="2"
-                            placeholder="Only needed if you are asking for changes. Be specific — this is what they read when the job reopens."></textarea>
+                            placeholder="Only needed if you are asking for changes. Be specific: this is what they read when the job reopens."></textarea>
                 </label>
                 <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-self:start;">
                   <button class="btn-hot btn-sm" name="action" value="accept" data-busy="Accepting…">
@@ -450,7 +450,7 @@ const nav = companyNav({ work: open || undefined });
               <label>
                 <span class="fl">{thread.length ? 'Your reply' : `Message ${j.specialist_name}`}</span>
                 <textarea class="fi" name="body" rows="2" required minlength="2"
-                          placeholder="Anything about this piece of work — both of you see the whole thread here."></textarea>
+                          placeholder="Anything about this piece of work. Both of you see the whole thread here."></textarea>
               </label>
               <button class="btn-glass btn-sm" name="action" value="message"
                       style="justify-self:start;" data-busy="Sending…">Send</button>
@@ -485,7 +485,7 @@ const nav = companyNav({ work: open || undefined });
                     <label>
                       <span class="fl">Why, in a line</span>
                       <textarea class="fi" name="reason" rows="2"
-                                placeholder="Optional — it goes into the thread, so they know where they stand."></textarea>
+                                placeholder="Optional. It goes into the thread, so they know where they stand."></textarea>
                       <span class="fh">
                         This ends the work without marking it finished, and closes the
                         {j.from_project === 1 ? ' project' : ' request'} it came from. It cannot be reopened.

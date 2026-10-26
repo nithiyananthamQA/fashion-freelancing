@@ -42,7 +42,7 @@ function labeller(sections: Section[]) {
 /** What a strip shows once it has no list of its own. */
 const stripBack = (g: Gallery) => g.defaults.length
   ? `${g.label} is back to the page's own ${g.defaults.length} image${g.defaults.length === 1 ? '' : 's'}.`
-  : `${g.label} is back to the page default — hidden until you add images.`;
+  : `${g.label} is back to the page default, hidden until you add images.`;
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 if (Astro.request.method === 'POST') {
@@ -75,7 +75,7 @@ if (Astro.request.method === 'POST') {
     const good = saved || reset
       ? `Saved ${plural(saved, 'change')}${reset ? `, ${reset} put back to the original` : ''}. It's live now.`
       : '';
-    done = [good, problems.join(' ')].filter(Boolean).join(' ') || 'Nothing to save — no changes were made.';
+    done = [good, problems.join(' ')].filter(Boolean).join(' ') || 'Nothing to save: no changes were made.';
   } else if (action === 'reset') {
     const key = String(form.get('key') ?? '');
     const g = strips.find((x) => GALLERY_KEY + x.name === key);
@@ -155,7 +155,7 @@ const ago = (iso: string) => {
   return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 ---
-<Workspace title={`Edit — ${page.title}`} role={user.isAdmin ? 'admin' : 'editor'} current="/workspace/content"
+<Workspace title={`Edit | ${page.title}`} role={user.isAdmin ? 'admin' : 'editor'} current="/workspace/content"
   items={user.isAdmin ? adminNav() : editorNav()} who={user.name} heading={page.title}
   lede="Change any text or image, then save. Your changes go live the moment you save.">
 
@@ -237,7 +237,7 @@ const ago = (iso: string) => {
                         <div class="ed-image-side">
                           <label class="ed-sublabel" for={`${id}-alt`}>Image description</label>
                           <input class="ed-input" id={`${id}-alt`} type="text" name={`alt:${f.key}`} value={img(f).alt} maxlength="300" />
-                          <p class="ed-hint" data-ed-upload-status>Read aloud to people who can't see the image, and used by Google. Drop a new picture on the preview or click it — JPG, PNG, WebP or AVIF up to 25 MB.</p>
+                          <p class="ed-hint" data-ed-upload-status>Read aloud to people who can't see the image, and used by Google. Drop a new picture on the preview or click it: JPG, PNG, WebP or AVIF up to 25 MB.</p>
                         </div>
                       </div>
                     ) : f.kind === 'html' ? (
@@ -533,7 +533,7 @@ const ago = (iso: string) => {
     let leaving = false;
     form.addEventListener('submit', (e) => {
       if (uploading.size) { e.preventDefault(); toast('Wait for the images to finish uploading, then save.'); return; }
-      if (!dirtyCount) { e.preventDefault(); toast('Nothing to save yet — change something first.'); return; }
+      if (!dirtyCount) { e.preventDefault(); toast('Nothing to save yet. Change something first.'); return; }
       // send only what changed
       fields.forEach((field) => { if (!fieldChanged(field)) controlsOf(field).forEach((c) => { c.disabled = true; }); });
       strips.forEach((strip) => { if (!stripChanged(strip)) strip.querySelectorAll<HTMLInputElement>('input[name]').forEach((c) => { c.disabled = true; }); });
@@ -601,7 +601,7 @@ const ago = (iso: string) => {
     type Upload = { ok: boolean; url?: string; error?: string };
     const upload = (file: File, page: string, key: string): Promise<Upload> => {
       const body = new FormData(); body.append('file', file); body.append('page', page); body.append('key', key);
-      return fetch('/api/site-media', { method: 'POST', body }).then((r) => r.json() as Promise<Upload>).catch(() => ({ ok: false, error: 'Upload failed — check your connection.' }));
+      return fetch('/api/site-media', { method: 'POST', body }).then((r) => r.json() as Promise<Upload>).catch(() => ({ ok: false, error: 'Upload failed. Check your connection.' }));
     };
     const images = (list: FileList | File[] | null | undefined) => [...(list ?? [])].filter((f) => f.type.startsWith('image/'));
     const dropTarget = (zone: HTMLElement, onFiles: (files: File[]) => void) => {
@@ -629,7 +629,7 @@ const ago = (iso: string) => {
         uploading.delete(field); zone.classList.remove('is-busy');
         if (!res.ok || !res.url) { status.textContent = res.error || 'Upload failed.'; refresh(); return; }
         src.value = res.url; preview.src = res.url;
-        status.textContent = 'New image ready — save changes to put it live.';
+        status.textContent = 'New image ready. Save changes to put it live.';
         refresh();
       };
       input.addEventListener('change', () => { take(input.files?.[0]); input.value = ''; });
@@ -676,7 +676,7 @@ const ago = (iso: string) => {
         if (!files.length) return;
         const room = max - tilesOf(strip).length;
         const take = files.slice(0, Math.max(0, room));
-        if (files.length > take.length) status.textContent = `A strip holds up to ${max} images — ${plural(files.length - take.length, 'file')} left out.`;
+        if (files.length > take.length) status.textContent = `A strip holds up to ${max} images, ${plural(files.length - take.length, 'file')} left out.`;
         // a placeholder tile per file, so progress shows where the image will land
         const pending = take.map((file) => {
           const li = document.createElement('li');

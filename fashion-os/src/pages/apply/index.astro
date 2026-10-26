@@ -385,7 +385,7 @@ if (Astro.request.method === 'POST') {
       if (count < MIN_PORTFOLIO_ITEMS) errors.submit = `Add at least ${MIN_PORTFOLIO_ITEMS} portfolio pieces first.`;
       else if (!offerings.length) errors.submit = 'Choose your services before submitting.';
       else if (!profile.headline) errors.submit = 'Finish your professional profile before submitting.';
-      else if (verificationRequired(user)) errors.verify = 'Confirm your email first — we sent you a link.';
+      else if (verificationRequired(user)) errors.verify = 'Confirm your email first. We sent you a link.';
 
       if (!Object.keys(errors).length) {
         const now = nowIso();
@@ -502,7 +502,7 @@ const workPreference = readList(profile?.work_preference ?? null);
 const rateModel = readList(profile?.rate_model ?? null);
 ---
 
-<Night title={`Join as a freelancer — step ${step} of ${TOTAL_APPLICATION_STEPS}`} noindex current="" quoteBot={false}>
+<Night title={`Join as a freelancer: step ${step} of ${TOTAL_APPLICATION_STEPS}`} noindex current="" quoteBot={false}>
   <section class="net-hero">
     <div class="wrap">
       <div class="flow">
@@ -525,7 +525,7 @@ const rateModel = readList(profile?.rate_model ?? null);
         <div class="flow-panel glass-p">
           {Object.keys(errors).length > 0 && (
             <p class="notice bad" role="alert" style="margin-bottom:22px;">
-              Nothing was lost — check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
+              Nothing was lost. Check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
             </p>
           )}
 
@@ -570,7 +570,7 @@ const rateModel = readList(profile?.rate_model ?? null);
                     <input class="fi" id="f-password" type="password" name="password" required minlength="10" autocomplete="new-password"
                            aria-invalid={errors.password ? 'true' : undefined} />
                     {errors.password
-                      ? <span class="cform-err" role="alert">{errors.password} Please type it again — passwords are never sent back to the page.</span>
+                      ? <span class="cform-err" role="alert">{errors.password} Please type it again: passwords are never sent back to the page.</span>
                       : <span class="fh">At least 10 characters.</span>}
                   </label>
 
@@ -640,7 +640,7 @@ const rateModel = readList(profile?.rate_model ?? null);
                 <details class="net-more" open={secondaryIds.length > 0}>
                   <summary>Do you also work in something else?</summary>
                   <p class="hint" style="margin:14px 0 12px;">
-                    Optional. Up to {MAX_SECONDARY_SERVICES} more. Most people leave this alone —
+                    Optional. Up to {MAX_SECONDARY_SERVICES} more. Most people leave this alone:
                     a focused profile gets matched more often than a broad one.
                   </p>
                   <div class="opts" id="f-secondary_service">
@@ -675,7 +675,7 @@ const rateModel = readList(profile?.rate_model ?? null);
               <>
                 <h2>Which parts do you do?</h2>
                 <p class="lead">
-                  Companies filter on these, so tick what you genuinely take on — not everything
+                  Companies filter on these, so tick what you genuinely take on, not everything
                   you have touched once.
                 </p>
 
@@ -722,7 +722,7 @@ const rateModel = readList(profile?.rate_model ?? null);
                             <span class="fl">Add your own</span>
                             <input class="fi" type="text" name={`custom_specialty_${service.id}`}
                                    value={v(`custom_specialty_${service.id}`)}
-                                   placeholder="Separate with commas — e.g. Bridalwear, Corsetry" />
+                                   placeholder="Separate with commas: e.g. Bridalwear, Corsetry" />
                             <span class="fh">The list covers the common ones. We check anything new before it shows on your profile.</span>
                           </label>
                         </details>
@@ -745,7 +745,7 @@ const rateModel = readList(profile?.rate_model ?? null);
             <>
               <h2>Which kind of developer are you?</h2>
               <p class="lead">
-                This is your specialty <em>and</em> it decides what we ask next — a backend developer
+                This is your specialty <em>and</em> it decides what we ask next: a backend developer
                 never gets asked about styling, and a full-stack one is asked once, not twice.
               </p>
 
@@ -755,7 +755,7 @@ const rateModel = readList(profile?.rate_model ?? null);
 
                 {capability.filter((c) => c.service.roles).map(({ service, offering }) => (
                   <fieldset class="fieldset" id={`f-role_${service.id}`}>
-                    <legend>{service.name} — your role<span class="rq" aria-hidden="true">*</span></legend>
+                    <legend>{service.name} · your role<span class="rq" aria-hidden="true">*</span></legend>
                     <div class="picks">
                       {service.roles!.map((role) => (
                         <label class="pick">
@@ -790,8 +790,8 @@ const rateModel = readList(profile?.rate_model ?? null);
               <>
                 <h2>What do you actually work with?</h2>
                 <p class="lead">
-                  This is what companies search on, so be specific. Anything missing can be added —
-                  we check it before it shows on your profile.
+                  This is what companies search on, so be specific. Anything missing can be added.
+                  We check it before it shows on your profile.
                 </p>
 
                 <form method="post" class="cform" novalidate>
@@ -990,7 +990,7 @@ const rateModel = readList(profile?.rate_model ?? null);
               <p class="lead">
                 {MIN_PORTFOLIO_ITEMS === 1
                   ? 'One strong piece is enough to start.'
-                  : `At least ${MIN_PORTFOLIO_ITEMS} pieces.`} What matters is what <em>you</em> contributed —
+                  : `At least ${MIN_PORTFOLIO_ITEMS} pieces.`} What matters is what <em>you</em> contributed,
                 not the brand on the label.
               </p>
 
@@ -1042,7 +1042,7 @@ const rateModel = readList(profile?.rate_model ?? null);
                 <label>
                   <span class="fl">What you contributed<span class="rq" aria-hidden="true">*</span></span>
                   <textarea class="fi" id="f-contribution" name="contribution" required minlength="20" rows="3"
-                            placeholder="Your specific part in it — the decisions and the files you produced."
+                            placeholder="Your specific part in it: the decisions and the files you produced."
                             aria-invalid={errors.contribution ? 'true' : undefined}></textarea>
                   {errors.contribution && <span class="cform-err" role="alert">{errors.contribution}</span>}
                 </label>
@@ -1193,17 +1193,17 @@ const rateModel = readList(profile?.rate_model ?? null);
               </p>
 
               <dl class="facts" style="margin-bottom:24px;">
-                <div><dt>Services</dt><dd>{offerings.map((o) => getService(o.service_id)?.name).join(', ') || '—'}</dd></div>
-                <div><dt>Headline</dt><dd>{profile?.headline ?? '—'}</dd></div>
-                <div><dt>Experience</dt><dd>{profile?.years_experience ?? '—'} years</dd></div>
+                <div><dt>Services</dt><dd>{offerings.map((o) => getService(o.service_id)?.name).join(', ') || '-'}</dd></div>
+                <div><dt>Headline</dt><dd>{profile?.headline ?? '-'}</dd></div>
+                <div><dt>Experience</dt><dd>{profile?.years_experience ?? '-'} years</dd></div>
                 <div><dt>Portfolio</dt><dd>{portfolio.length} pieces</dd></div>
-                <div><dt>Starting rate</dt><dd>{profile?.rate_min ? `${profile.rate_currency ?? 'USD'} ${profile.rate_min}` : '—'}</dd></div>
+                <div><dt>Starting rate</dt><dd>{profile?.rate_min ? `${profile.rate_currency ?? 'USD'} ${profile.rate_min}` : '-'}</dd></div>
               </dl>
 
               <div class="notice">
                 <strong>What happens when we approve you</strong>
                 <p style="margin:8px 0 0;color:inherit;">
-                  Your profile becomes a public page that anyone can find and read — your name,
+                  Your profile becomes a public page that anyone can find and read: your name,
                   photo, headline, skills and the work you added. Your email, phone and address stay
                   private and are never shown. You can pause the profile at any time.
                 </p>
@@ -1232,7 +1232,7 @@ const rateModel = readList(profile?.rate_model ?? null);
 
         {step > 1 && (
           <p class="fh" style="text-align:center;margin-top:20px;">
-            Progress is saved at each step — <a href="/workspace/freelancer" style="color:var(--champagne-2);">leave and come back</a> whenever.
+            Progress is saved at each step: <a href="/workspace/freelancer" style="color:var(--champagne-2);">leave and come back</a> whenever.
           </p>
         )}
       </div>

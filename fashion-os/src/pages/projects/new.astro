@@ -268,7 +268,7 @@ const dm = (key: string): string[] => {
 };
 ---
 
-<Night title="Post a project — Fashion Freelancing" noindex current="specialists">
+<Night title="Post a project | Fashion Freelancing" noindex current="specialists">
   <section class="net-hero">
     <div class="wrap">
       <div class="flow">
@@ -326,7 +326,7 @@ const dm = (key: string): string[] => {
             {restored && <div class="notice ok">Your draft was saved while you signed in. Everything is still here.</div>}
             {!user && (
               <div class="notice">
-                Fill this in first — we ask for an account only when you publish, and nothing you
+                Fill this in first. We ask for an account only when you publish, and nothing you
                 type here is lost along the way.
               </div>
             )}
@@ -334,14 +334,14 @@ const dm = (key: string): string[] => {
             <div class="flow-panel glass-p">
               {mustVerify && (
                 <p class="notice bad" role="alert" style="margin-bottom:22px;">
-                  Confirm your email first — we sent you a link. Lost it? Send a fresh one
+                  Confirm your email first. We sent you a link. Lost it? Send a fresh one
                   from <a href="/account">Password &amp; security</a>. Your brief is still here.
                 </p>
               )}
 
               {Object.keys(errors).length > 0 && (
                 <p class="notice bad" role="alert" style="margin-bottom:22px;">
-                  Nothing was lost — check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
+                  Nothing was lost. Check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
                 </p>
               )}
 
@@ -396,7 +396,7 @@ const dm = (key: string): string[] => {
                 <label>
                   <span class="fl">The brief<span class="rq" aria-hidden="true">*</span></span>
                   <textarea class="fi" id="f-brief" name="brief" required minlength="30" rows="6"
-                            placeholder="Scope, stage, constraints — what does finished look like?"
+                            placeholder="Scope, stage, constraints: what does finished look like?"
                             aria-invalid={errors.brief ? 'true' : undefined}>{d('brief')}</textarea>
                   {errors.brief && <span class="cform-err" role="alert">{errors.brief}</span>}
                 </label>
@@ -544,15 +544,15 @@ const dm = (key: string): string[] => {
                   <div class="opts col" id="f-visibility">
                     <label class="opt">
                       <input type="radio" name="visibility" value="matched" checked={d('visibility', 'matched') === 'matched'} required />
-                      <span><b>Anyone in this service</b> — every approved specialist who does this kind of work can see it and reply.</span>
+                      <span><b>Anyone in this service</b>: every approved specialist who does this kind of work can see it and reply.</span>
                     </label>
                     <label class="opt">
                       <input type="radio" name="visibility" value="invited" checked={d('visibility') === 'invited'} />
-                      <span><b>Invited only</b> — only the specialists we recommend are shown it.</span>
+                      <span><b>Invited only</b>: only the specialists we recommend are shown it.</span>
                     </label>
                     <label class="opt">
                       <input type="radio" name="visibility" value="private" checked={d('visibility') === 'private'} />
-                      <span><b>Confidential</b> — nobody is told and nobody can see it until you invite them yourself.</span>
+                      <span><b>Confidential</b>: nobody is told and nobody can see it until you invite them yourself.</span>
                     </label>
                   </div>
                 </fieldset>
@@ -568,19 +568,19 @@ const dm = (key: string): string[] => {
                     <input class="fi" id="f-files" type="file" name="files" multiple accept={ACCEPT}
                            aria-invalid={errors.files ? 'true' : undefined} />
                     <span class="fh">
-                      Tech packs, references, moodboards — JPG, PNG, WebP, AVIF, PDF or MP4, up to {MAX_FILES} files
+                      Tech packs, references, moodboards: JPG, PNG, WebP, AVIF, PDF or MP4, up to {MAX_FILES} files
                       of 25 MB each. Only the specialists who can see this project can open them, so if it needs an
                       NDA first, keep the confidential ones back until it is signed.
                     </span>
                     {errors.files && <span class="cform-err" role="alert">{errors.files}</span>}
                     {Object.keys(errors).length > 0 && !errors.files && (
-                      <span class="fh">Files are not kept when a form comes back — choose them again before publishing.</span>
+                      <span class="fh">Files are not kept when a form comes back. Choose them again before publishing.</span>
                     )}
                   </label>
                 )}
 
                 <button type="submit" class="btn-hot" style="width:100%;margin-top:6px;">
-                  {user ? 'Publish project' : 'Continue — you will sign in next'}
+                  {user ? 'Publish project' : 'Continue · you will sign in next'}
                 </button>
               </form>
             </div>

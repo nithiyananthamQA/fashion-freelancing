@@ -40,7 +40,7 @@ const editedCount = pages.filter((p) => summary(p.path)).length;
 ---
 <Workspace title="Site content" role={user.isAdmin ? 'admin' : 'editor'} current="/workspace/content"
   items={user.isAdmin ? adminNav() : editorNav()} who={user.name}
-  heading="Site content" lede="Pick a page to change its words and images. Everything you save goes live straight away — and any change can be undone.">
+  heading="Site content" lede="Pick a page to change its words and images. Everything you save goes live straight away, and any change can be undone.">
 
   <div class="pl">
     <div class="pl-bar">
@@ -65,7 +65,7 @@ const editedCount = pages.filter((p) => summary(p.path)).length;
               <a class="pl-open" href={`/workspace/content/${p.slug}`}>
                 <span class="pl-title">{p.title}</span>
               </a>
-              <span class="pl-meta">{e ? `${e.n} change${e.n === 1 ? '' : 's'} · last on ${when(e.last)}` : 'No changes yet — showing the original'}</span>
+              <span class="pl-meta">{e ? `${e.n} change${e.n === 1 ? '' : 's'} · last on ${when(e.last)}` : 'No changes yet · showing the original'}</span>
               <span class="pl-go" aria-hidden="true">Edit page <svg viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5" /></svg></span>
             </li>
           ); })}

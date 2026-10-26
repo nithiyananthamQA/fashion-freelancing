@@ -80,7 +80,7 @@ if (Astro.request.method === 'POST' && isOwner) {
     if (errors.email) {
       inviteError = errors.email;
     } else if (email === user.email) {
-      inviteError = 'That is your own address — you are already on the account.';
+      inviteError = 'That is your own address. You are already on the account.';
     } else if (existing && existing.here > 0) {
       flash = `${existing.name} is already on ${companyName}.`;
     } else if (existing && existing.companies > 0) {
@@ -132,14 +132,14 @@ if (Astro.request.method === 'POST' && isOwner) {
       await sendMail(database, runtime, {
         to: email,
         tenant: tenantOf(Astro),
-        subject: `${user.name} invited you to ${companyName} — Fashion Freelancing`,
+        subject: `${user.name} invited you to ${companyName} - Fashion Freelancing`,
         body:
           `Hi,\n\n` +
           `${user.name} has invited you to join ${companyName} on Fashion Freelancing, so you can post ` +
           `projects, read replies from specialists and follow the work with the rest of the team.\n\n` +
           `Create your account with this email address (${email}), using this link:\n\n` +
           `${runtime.SITE_URL}/sign-in?next=${encodeURIComponent(next)}\n\n` +
-          `You join ${companyName} the moment you arrive. If you were not expecting this, ignore it — ` +
+          `You join ${companyName} the moment you arrive. If you were not expecting this, ignore it: ` +
           `nothing happens unless you sign up.\n`,
       });
       await audit(database, {
@@ -209,8 +209,8 @@ const nav = companyNav();
       <div class="ws-empty">
         <h3>Nobody on this account yet</h3>
         <p>
-          Everyone who can sign in to this company — post projects, read replies,
-          hire people and answer messages — is listed here with what they are
+          Everyone who can sign in to this company (post projects, read replies,
+          hire people and answer messages) is listed here with what they are
           allowed to do. Your own account should already be one of them.
         </p>
         <a class="btn-glass btn-sm" href="/workspace/company">Back to your overview</a>
@@ -220,7 +220,7 @@ const nav = companyNav();
         <article class="panel glass-p">
           <div class="ws-row-head" style="margin-bottom:0;">
             <div>
-              <h2 style="margin:0;">{m.name}{m.user_id === user.id ? ' — you' : ''}</h2>
+              <h2 style="margin:0;">{m.name}{m.user_id === user.id ? ' (you)' : ''}</h2>
               <p class="ws-sub">
                 {m.job_title ? `${m.job_title} · ` : ''}{m.email} · Joined {when(m.joined_at)}
               </p>
@@ -298,7 +298,7 @@ const nav = companyNav();
         <div>
           <h2 style="margin:0;">Password &amp; security</h2>
           <p class="ws-sub">
-            Your own sign-in — change your password, confirm your email, or sign out of every device.
+            Your own sign-in: change your password, confirm your email, or sign out of every device.
           </p>
         </div>
         <a class="btn-glass btn-sm" href="/account">Password &amp; security</a>

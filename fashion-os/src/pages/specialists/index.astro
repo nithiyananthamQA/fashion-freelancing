@@ -43,8 +43,8 @@ const savedIds = await currentShortlist(Astro, database, user?.companyIds[0] ?? 
 
 const lastPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
 const title = service
-  ? `Find a ${service.name} specialist — Fashion Freelancing`
-  : 'Find a specialist — Fashion Freelancing';
+  ? `Find a ${service.name} specialist | Fashion Freelancing`
+  : 'Find a specialist | Fashion Freelancing';
 const heading = service ? `Find a ${service.name} specialist.` : 'Find a specialist.';
 /* Searches, filters and later pages all fold into the directory itself, or
    into its one-service view, so search engines index one copy of each. */
@@ -73,7 +73,7 @@ const shareImage = service ? `${SITE}/assets/img/og/${service.page.split('/').po
           : 'Approved professionals across our ten services. Filter by what the work actually needs, then request to hire the person who fits.'}
       </p>
       <p class="fh" style="margin-top:16px;">
-        Free to browse, save and contact. No payment is taken through this site — you agree the fee
+        Free to browse, save and contact. No payment is taken through this site: you agree the fee
         directly with the specialist.
       </p>
       <div class="acts">
@@ -96,7 +96,7 @@ const shareImage = service ? `${SITE}/assets/img/og/${service.page.split('/').po
               <span class="fl">Search</span>
               <input class="fi" type="search" name="q" value={filters.q}
                      placeholder="e.g. Pattern CAD Gerber" />
-              <span class="fh">Matches services, specialties, skills, tools and stack — not just the biography.</span>
+              <span class="fh">Matches services, specialties, skills, tools and stack, not just the biography.</span>
             </label>
 
             <label>
@@ -228,7 +228,7 @@ const shareImage = service ? `${SITE}/assets/img/og/${service.page.split('/').po
               </label>
 
               <p class="fh" style="margin:0;">
-                Everyone listed here has been checked and approved by our team — there is nothing
+                Everyone listed here has been checked and approved by our team. There is nothing
                 unreviewed to filter out.
               </p>
             </div>
@@ -246,8 +246,8 @@ const shareImage = service ? `${SITE}/assets/img/og/${service.page.split('/').po
             <p class="notice" style="margin-bottom:18px;">
               <b>{savedIds.size} saved.</b>{' '}
               {user?.companyIds[0]
-                ? <>Saved to your company — see them in your <a href="/workspace/company" style="color:inherit;text-decoration:underline;">workspace</a>.</>
-                : <>Kept on this device for now. They move to your account the moment you sign in — nothing is lost.</>}
+                ? <>Saved to your company. See them in your <a href="/workspace/company" style="color:inherit;text-decoration:underline;">workspace</a>.</>
+                : <>Kept on this device for now. They move to your account the moment you sign in. Nothing is lost.</>}
             </p>
           )}
 

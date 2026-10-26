@@ -77,7 +77,7 @@ if (Astro.request.method === 'POST') {
     if (uploads.files.length && await limited(database, 'upload', user.id)) return tooManyRequests();
 
     if (errors.note || uploads.problem) {
-      flash = `Nothing was handed over — ${errors.note ?? uploads.problem}`;
+      flash = `Nothing was handed over. ${errors.note ?? uploads.problem}`;
     } else if (await moveEngagement(database, thread.id, ['active', 'revision'], 'delivered')) {
       /* The note and the files go into the thread together, so the company
          reads what was handed over next to what it was handed over with. */
@@ -108,7 +108,7 @@ if (Astro.request.method === 'POST') {
     if (await limited(database, 'message', user.id)) return tooManyRequests();
     const issue = f.text('issue', 'What has gone wrong', { required: true, min: 20, max: 2000 });
     if (!issue) {
-      flash = `Nothing was raised — ${errors.issue ?? 'say what has gone wrong.'}`;
+      flash = `Nothing was raised. ${errors.issue ?? 'Say what has gone wrong.'}`;
     } else if (await moveEngagement(database, thread.id, LIVE_WORK, 'disputed')) {
       await postMessage(database, thread, user.id, `Issue raised:\n\n${issue}`);
       if (thread.recipientId) {
@@ -277,7 +277,7 @@ const nav = freelancerNav({ work: open || undefined });
     <div class="ws-empty">
       <h3>Nobody has hired you yet</h3>
       <p>
-        Work appears here the moment a company hires you — either by you
+        Work appears here the moment a company hires you, either by you
         accepting a request to work with them, or by them picking your reply to
         a posted project. The brief, the conversation, the state of the job and
         every payment recorded against it then stay on this page.
@@ -330,7 +330,7 @@ const nav = freelancerNav({ work: open || undefined });
 
             {j.status === 'revision' && (
               <p class="ws-sub">
-                {j.company_name} asked for changes on {when(j.updated_at)} — their notes are in the
+                {j.company_name} asked for changes on {when(j.updated_at)}. Their notes are in the
                 thread below.
               </p>
             )}
@@ -341,7 +341,7 @@ const nav = freelancerNav({ work: open || undefined });
 
             {j.status === 'disputed' && (
               <p class="ws-sub">
-                This work is in dispute. Our team will be in touch — anything
+                This work is in dispute. Our team will be in touch. Anything
                 either side writes in the thread below becomes part of it.
               </p>
             )}
@@ -391,7 +391,7 @@ const nav = freelancerNav({ work: open || undefined });
                 <label>
                   <span class="fl">{j.status === 'revision' ? 'What you changed' : 'A note with the hand-over'}</span>
                   <textarea class="fi" name="note" rows="2"
-                            placeholder="Optional — what is included, where to find it, anything they should check first."></textarea>
+                            placeholder="Optional: what is included, where to find it, anything they should check first."></textarea>
                 </label>
                 {bucket && (
                   <label>
@@ -414,7 +414,7 @@ const nav = freelancerNav({ work: open || undefined });
               <label>
                 <span class="fl">{thread.length ? 'Your reply' : `Message ${j.company_name}`}</span>
                 <textarea class="fi" name="body" rows="2" required minlength="2"
-                          placeholder="Anything about this piece of work — both of you see the whole thread here."></textarea>
+                          placeholder="Anything about this piece of work. Both of you see the whole thread here."></textarea>
               </label>
               <button class="btn-glass btn-sm" name="action" value="message"
                       style="justify-self:start;" data-busy="Sending…">Send</button>

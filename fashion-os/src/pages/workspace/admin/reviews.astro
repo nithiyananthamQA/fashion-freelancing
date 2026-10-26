@@ -175,8 +175,8 @@ const nav = adminNav({ reviews: waiting || undefined });
       <h3>Nothing to review</h3>
       <p>
         When a specialist finishes the application form and submits it, their
-        whole submission lands here — what they wrote, what they can do, what
-        they charge and every piece of work they attached — with the approve,
+        whole submission lands here (what they wrote, what they can do, what
+        they charge and every piece of work they attached) with the approve,
         request-changes, pause and reject buttons on the same card. Send someone
         the application form and the first one appears here.
       </p>
@@ -193,7 +193,7 @@ const nav = adminNav({ reviews: waiting || undefined });
               {app.headline && <p class="ws-sub">{app.headline}</p>}
             </div>
             {app.status === 'needs_changes' ? (
-              <span class={tone(app.status)}>Sent back — waiting on them</span>
+              <span class={tone(app.status)}>Sent back · waiting on them</span>
             ) : (
               <span class="pill-tone warn">Waiting on you</span>
             )}
@@ -231,7 +231,7 @@ const nav = adminNav({ reviews: waiting || undefined });
           {app.portfolio.length === 0 ? (
             <p class="ws-sub">
               Nothing attached. A profile with no work on it cannot go public as
-              it stands — ask for pieces before approving.
+              it stands. Ask for pieces before approving.
             </p>
           ) : (
             <div class="thread" style="margin-top:8px;">

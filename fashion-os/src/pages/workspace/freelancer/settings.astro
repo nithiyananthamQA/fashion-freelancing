@@ -74,7 +74,7 @@ if (Astro.request.method === 'POST') {
   values = { name, country, timezone, phone };
 
   if (hasErrors(errors)) {
-    flash = 'Nothing was saved — check the highlighted field below.';
+    flash = 'Nothing was saved. Check the highlighted field below.';
   } else {
     /* A number that has changed has not been confirmed, whatever the old one
        had been through. */
@@ -104,7 +104,7 @@ if (!values.country) {
   blanks.push({ label: 'Country', why: 'We have nothing to tell a company that asks where you are based.' });
 }
 if (!values.timezone) {
-  blanks.push({ label: 'Timezone', why: 'Your browser’s best guess is already filled in above — saving it is what makes it stick.' });
+  blanks.push({ label: 'Timezone', why: 'Your browser’s best guess is already filled in above. Saving it is what makes it stick.' });
 }
 if (!values.phone) {
   blanks.push({ label: 'Phone number', why: 'Email is the only way to reach you when something needs an answer today.' });

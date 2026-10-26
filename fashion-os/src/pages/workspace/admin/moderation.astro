@@ -280,7 +280,7 @@ const nav = adminNav({ moderation: waiting || undefined });
               <p class="ws-sub" style="margin-top:12px;">
                 {piece.has_permission === 1
                   ? `Names ${piece.client_name} as the client, and says they have permission to.`
-                  : `Names ${piece.client_name} as the client without confirming permission — check that before approving.`}
+                  : `Names ${piece.client_name} as the client without confirming permission. Check that before approving.`}
               </p>
             )}
 
@@ -372,7 +372,7 @@ const nav = adminNav({ moderation: waiting || undefined });
                 ) : (
                   <p class="ws-sub" style="margin:0;">
                     There is no public tag alongside this one yet, so there is
-                    nothing to merge it into — approve it or reject it.
+                    nothing to merge it into. Approve it or reject it.
                   </p>
                 )}
 

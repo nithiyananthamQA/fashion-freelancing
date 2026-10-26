@@ -334,7 +334,7 @@ const nav = adminNav();
     <div class="ws-empty">
       <h3>No projects posted yet</h3>
       <p>
-        A brief appears here the moment a company posts it — who posted it,
+        A brief appears here the moment a company posts it: who posted it,
         which service it needs, what it pays, how many specialists have replied,
         and the button to close it if it should not be live. Post one from a
         company account and it shows up here straight away.
@@ -367,7 +367,7 @@ const nav = adminNav();
           {MATCHABLE.includes(project.status) && (
             project.visibility === 'private' ? (
               <p class="ws-sub" style="margin-top:14px;">
-                Confidential — the company chose to invite people itself, so it
+                Confidential: the company chose to invite people itself, so it
                 cannot be matched from here.
               </p>
             ) : matching?.id !== project.id ? (
@@ -405,7 +405,7 @@ const nav = adminNav();
                     <h3>Nobody approved matches that</h3>
                     <p>
                       {query
-                        ? 'Try a shorter search — part of a name, or a single skill.'
+                        ? 'Try a shorter search: part of a name, or a single skill.'
                         : 'No approved specialist offers this service yet. Search by a related skill, or approve someone from the applications queue.'}
                     </p>
                     <a class="btn-glass btn-sm" href="/workspace/admin/reviews">Open the applications queue</a>
@@ -423,7 +423,7 @@ const nav = adminNav();
                                    disabled={c.invited === 1 || c.replied === 1} />
                             <span>
                               <b>{c.name}</b>
-                              {' — '}{[
+                              {' · '}{[
                                 getService(c.service_id)?.name ?? 'No main service',
                                 availabilityLabel(c.availability) || null,
                                 c.replied === 1 ? 'already replied' : c.invited === 1 ? 'already invited' : null,
@@ -461,7 +461,7 @@ const nav = adminNav();
               <label>
                 <span class="fl">Close this project</span>
                 <input class="fi" type="text" name="reason" maxlength="500"
-                       placeholder="Why — kept in the activity log" />
+                       placeholder="Why (kept in the activity log)" />
               </label>
               <button class="btn-glass btn-sm" name="action" value="close_project"
                       formnovalidate style="justify-self:start;">

@@ -88,7 +88,7 @@ export const POST: APIRoute = async (ctx) => {
 
     await notifyAdmins(database, {
       kind: 'lead',
-      title: `New enquiry from ${name}${company ? ` (${company})` : ''} — ${serviceName}`,
+      title: `New enquiry from ${name}${company ? ` (${company})` : ''} - ${serviceName}`,
       body: `${contact}${timeline ? ` · ${timeline}` : ''}\n\n${summary}`,
       link: '/workspace/admin/enquiries',
     });
@@ -101,7 +101,7 @@ export const POST: APIRoute = async (ctx) => {
         to,
         tenant,
         replyTo: email,
-        subject: `New enquiry: ${name} — ${serviceName}`,
+        subject: `New enquiry: ${name} - ${serviceName}`,
         body:
           `${name}${company ? ` from ${company}` : ''} wrote in through the ${source === 'quote-bot' ? 'quote bot' : 'contact form'}` +
           `${page ? ` on ${page}` : ''}.\n\n` +

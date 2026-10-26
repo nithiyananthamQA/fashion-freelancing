@@ -89,7 +89,7 @@
   var launch = document.createElement('button');
   launch.className = 'qb-launch';
   launch.id = 'qb-launch';
-  launch.setAttribute('aria-label', 'Chat with us — get a fixed quote');
+  launch.setAttribute('aria-label', 'Chat with us: get a fixed quote');
   launch.setAttribute('aria-expanded', 'false');
   launch.innerHTML =
     '<svg class="qb-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12c0 4.4-4 8-9 8-1.2 0-2.4-.2-3.4-.6L3 21l1.7-4.1C3.6 15.5 3 13.8 3 12c0-4.4 4-8 9-8s9 3.6 9 8z"/></svg>' +
@@ -196,7 +196,7 @@
   function start() {
     if (started) return;
     started = true;
-    botSay('Hi! I’ll get you a fixed quote within 24 hours — no pricing games.', function () {
+    botSay('Hi! I’ll get you a fixed quote within 24 hours. No pricing games.', function () {
       botSay('What do you need done?', function () {
         chips(SERVICES, function (val, label) {
           lead.service = val;
@@ -207,7 +207,7 @@
   }
 
   function stepDetails(serviceLabel) {
-    botSay('Nice — ' + serviceLabel + '. Tell me about the project in a line or two. What are you making?', function () {
+    botSay('Nice! ' + serviceLabel + '. Tell me about the project in a line or two. What are you making?', function () {
       askText('e.g. An AW25 bomber, tech pack ready, need 3 colorways…', function (v) {
         return v.length < 5 ? 'A few words about the project, please' : null;
       }, function (v) {
@@ -240,7 +240,7 @@
   function stepEmail() {
     botSay('And the email where the quote should land?', function () {
       askText('you@brand.com', function (v) {
-        return EMAIL_RE.test(v) ? null : 'That email doesn’t look right — try again';
+        return EMAIL_RE.test(v) ? null : 'That email doesn’t look right. Try again';
       }, function (v) {
         lead.email = v;
         lead.ts = new Date().toISOString();
@@ -249,11 +249,11 @@
            the address so the brief still has a way through. */
         saveLead(lead).then(function (ok) {
           if (ok) {
-            botSay('Done — brief received. A real person will reply to ' + v + ' within 24 hours with a fixed quote.', function () {
+            botSay('Done! Brief received. A real person will reply to ' + v + ' within 24 hours with a fixed quote.', function () {
               botSay('Have files to share (sketches, tech packs, photos)? Send them to hello@fashionfreelancing.com and mention your name.');
             });
           } else {
-            botSay('Hmm — that didn’t reach us. Please email your brief to hello@fashionfreelancing.com and we’ll quote within 24 hours.');
+            botSay('Hmm, that didn’t reach us. Please email your brief to hello@fashionfreelancing.com and we’ll quote within 24 hours.');
           }
         });
       });

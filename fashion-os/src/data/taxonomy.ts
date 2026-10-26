@@ -148,7 +148,7 @@ export const SERVICES: Service[] = [
     id: 'tech-pack',
     name: 'Tech Pack',
     page: '/pages/services/tech-pack',
-    blurb: 'Factory-ready specification documents — flats, measurements, BOM and construction detail.',
+    blurb: 'Factory-ready specification documents: flats, measurements, BOM and construction detail.',
     accent: 'var(--lg-coral)',
     specialties: ['Womenswear', 'Menswear', 'Kidswear', 'Activewear', 'Denim', 'Knitwear', 'Accessories'],
     skills: ['Flats', 'BOM', 'Measurements', 'Construction', 'Grading notes', 'Fit commentary', 'Trim specification'],
@@ -158,7 +158,7 @@ export const SERVICES: Service[] = [
     id: '3d-virtual-sampling',
     name: '3D Virtual Sampling',
     page: '/pages/services/3d-virtual-sampling',
-    blurb: 'Photorealistic digital samples — review fit, fabric and colourways before cutting cloth.',
+    blurb: 'Photorealistic digital samples: review fit, fabric and colourways before cutting cloth.',
     accent: 'var(--lg-sky)',
     specialties: ['Garment simulation', 'Fit review', 'Colourways', 'Render production', 'Animation', 'Digital avatars'],
     skills: ['Fabric simulation', 'Rendering', 'Fit analysis', 'Colourway production', 'Avatar setup'],
@@ -204,7 +204,7 @@ export const SERVICES: Service[] = [
     id: 'web-development',
     name: 'Web Development',
     page: '/pages/services/web-development',
-    blurb: 'Brand sites, stores and web apps — designed, built and live on your own domain, with everything behind them set up.',
+    blurb: 'Brand sites, stores and web apps: designed, built and live on your own domain, with everything behind them set up.',
     accent: 'var(--lg-peri)',
     specialties: WEB_ROLES.map((role) => role.name),
     /* Empty on purpose. For this service the stack IS the skill set (§5.1), and
@@ -251,7 +251,7 @@ export const SERVICES: Service[] = [
     id: 'digital-marketing',
     name: 'Digital Marketing & SEO',
     page: '/pages/services/digital-marketing',
-    blurb: 'Found on Google, seen on Instagram — SEO, ads and content measured in enquiries and sales, not likes.',
+    blurb: 'Found on Google, seen on Instagram: SEO, ads and content measured in enquiries and sales, not likes.',
     accent: 'var(--lg-violet)',
     specialties: ['SEO', 'Local SEO', 'Google Ads', 'Meta Ads', 'Social media', 'Content marketing', 'Email & WhatsApp marketing', 'Analytics & reporting'],
     skills: ['Keyword research', 'Technical SEO', 'Campaign setup', 'Audience targeting', 'Copywriting', 'Conversion tracking', 'Reporting'],
@@ -348,9 +348,9 @@ export const RATE_MODEL = [
  * box with no guidance, so nobody knew what to type.
  */
 export const PROJECT_SIZE = [
-  { id: 'small', name: 'Small — one-off pieces, a few days' },
-  { id: 'medium', name: 'Medium — a capsule or a phase, a few weeks' },
-  { id: 'large', name: 'Large — a full collection or build, a month or more' },
+  { id: 'small', name: 'Small · one-off pieces, a few days' },
+  { id: 'medium', name: 'Medium · a capsule or a phase, a few weeks' },
+  { id: 'large', name: 'Large · a full collection or build, a month or more' },
   { id: 'any', name: 'Any size' },
 ] as const;
 

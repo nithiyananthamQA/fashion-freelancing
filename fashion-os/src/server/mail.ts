@@ -265,7 +265,7 @@ function renderHtml(subject: string, text: string): string {
     'font-size:15px;line-height:1.6;color:#1d1b22;">' +
     `<p style="margin:0 0 20px;font-size:16px;font-weight:700;letter-spacing:-0.01em;">${BRAND}</p>` +
     `<div style="background:#ffffff;border:1px solid #e4e0ea;border-radius:12px;padding:24px 24px 8px;">${paragraphs}</div>` +
-    `<p style="margin:20px 0 0;font-size:12.5px;color:#6b6676;">${BRAND} — fashion services, and a curated network of independent specialists.</p>` +
+    `<p style="margin:20px 0 0;font-size:12.5px;color:#6b6676;">${BRAND}: fashion services, and a curated network of independent specialists.</p>` +
     '</div></body></html>'
   );
 }
@@ -273,7 +273,7 @@ function renderHtml(subject: string, text: string): string {
 // --- messages -----------------------------------------------------------------
 
 export const verifyEmailMessage = (siteUrl: string, name: string, token: string): Omit<Mail, 'to' | 'tenant'> => ({
-  subject: 'Confirm your email — Fashion Freelancing',
+  subject: 'Confirm your email - Fashion Freelancing',
   body:
     `Hi ${name},\n\n` +
     `Confirm your email address to finish setting up your Fashion Freelancing account:\n\n` +
@@ -282,7 +282,7 @@ export const verifyEmailMessage = (siteUrl: string, name: string, token: string)
 });
 
 export const resetPasswordMessage = (siteUrl: string, name: string, token: string): Omit<Mail, 'to' | 'tenant'> => ({
-  subject: 'Reset your password — Fashion Freelancing',
+  subject: 'Reset your password - Fashion Freelancing',
   body:
     `Hi ${name},\n\n` +
     `Use this link to choose a new password:\n\n` +

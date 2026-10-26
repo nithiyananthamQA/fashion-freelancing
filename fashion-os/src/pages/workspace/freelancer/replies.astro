@@ -77,9 +77,9 @@ if (Astro.request.method === 'POST') {
         title: `${user.name} withdrew their reply to ${owned.title}`,
         link: '/workspace/company/replies',
       });
-      flash = 'Reply withdrawn. The company has been told — you can reply again while the project is open.';
+      flash = 'Reply withdrawn. The company has been told. You can reply again while the project is open.';
     } else {
-      flash = 'That reply can no longer be withdrawn — it has already been decided.';
+      flash = 'That reply can no longer be withdrawn: it has already been decided.';
     }
   }
 }

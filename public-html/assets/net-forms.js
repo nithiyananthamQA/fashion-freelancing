@@ -32,7 +32,7 @@
     tooShort: function (el) {
       var n = el.minLength;
       var have = el.value.trim().length;
-      return 'A bit more detail, please — ' + have + ' of ' + n + ' characters.';
+      return 'A bit more detail, please. ' + have + ' of ' + n + ' characters.';
     },
     tooLong: function (el) { return 'Please keep this under ' + el.maxLength + ' characters.'; },
     typeMismatch: function (el) {

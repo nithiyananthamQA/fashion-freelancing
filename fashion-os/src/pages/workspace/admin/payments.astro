@@ -53,7 +53,7 @@ const KIND_LABEL: Record<(typeof KINDS)[number], string> = {
 /** Buttons say what the operator is doing, not which state they store. */
 const STATUS_ACTION: Record<(typeof STATUSES)[number], string> = {
   draft: 'Back to draft',
-  due: 'Raise it — now due',
+  due: 'Raise it · now due',
   paid: 'Mark paid',
   failed: 'Mark failed',
   refunded: 'Mark refunded',
@@ -150,7 +150,7 @@ if (Astro.request.method === 'POST') {
       } catch (error) {
         console.error('[payments] notify failed:', error);
       }
-      flash = `${KIND_LABEL[kind]} of ${money(currency, amount)} recorded on "${work.title}" — ${paymentStatusLabel(status).toLowerCase()}.`;
+      flash = `${KIND_LABEL[kind]} of ${money(currency, amount)} recorded on "${work.title}" · ${paymentStatusLabel(status).toLowerCase()}.`;
     }
   }
 
@@ -186,7 +186,7 @@ if (Astro.request.method === 'POST') {
         detail: { from: payment.status, to: next }, request: Astro.request,
       });
       await tellAbout(work, payment.kind, next, money(payment.currency, payment.amount), payment.reference);
-      flash = `${KIND_LABEL[payment.kind as (typeof KINDS)[number]]} of ${money(payment.currency, payment.amount)} on "${work.title}" — now ${paymentStatusLabel(next).toLowerCase()}.`;
+      flash = `${KIND_LABEL[payment.kind as (typeof KINDS)[number]]} of ${money(payment.currency, payment.amount)} on "${work.title}", now ${paymentStatusLabel(next).toLowerCase()}.`;
     }
   }
 }
@@ -271,7 +271,7 @@ const tone = (value: string) => {
       <h3>No work has started yet</h3>
       <p>
         Money is recorded against a piece of work, so this page fills up once a
-        company hires somebody — through a request to hire or a reply to a
+        company hires somebody, through a request to hire or a reply to a
         project. Then you can record the invoice to the company and the payout
         to the specialist, and both sides see it in their own workspace.
       </p>
@@ -354,12 +354,12 @@ const tone = (value: string) => {
                 <span class="fl">Reference</span>
                 <input class="fi" type="text" name="reference" maxlength="120"
                        value={failedFor === w.id ? kept.reference : undefined}
-                       placeholder="Invoice number, transfer id — whatever both sides will recognise" />
+                       placeholder="Invoice number, transfer id: whatever both sides will recognise" />
               </label>
               <button class="btn-hot btn-sm" style="justify-self:start;">Record it</button>
               <p class="ws-sub" style="margin:0;">
                 An invoice is shown to the company, a payout to the specialist,
-                and whoever it concerns is told — unless it is a draft, which
+                and whoever it concerns is told, unless it is a draft, which
                 stays here until you move it on.
               </p>
             </form>

@@ -182,7 +182,7 @@ const restored = !sent && Object.keys(draft).length > 0;
 const uploadsEnabled = Boolean(bucket) && Boolean(user);
 ---
 
-<Night title={`Request to hire ${target.name} — Fashion Freelancing`} noindex current="specialists" quoteBot={false}>
+<Night title={`Request to hire ${target.name} | Fashion Freelancing`} noindex current="specialists" quoteBot={false}>
   <section class="net-hero">
     <div class="wrap">
       <div class="flow">
@@ -197,7 +197,7 @@ const uploadsEnabled = Boolean(bucket) && Boolean(user);
             <div class="ok" aria-hidden="true">✓</div>
             <h3>Request sent to {target.name}.</h3>
             <p>
-              {target.name} has been told. They can accept, decline, or ask you a question — and you
+              {target.name} has been told. They can accept, decline, or ask you a question, and you
               can talk it through on this request in your workspace. Most people reply within two
               working days. Nothing about this request is public.
             </p>
@@ -221,14 +221,14 @@ const uploadsEnabled = Boolean(bucket) && Boolean(user);
             <div class="flow-panel glass-p">
               {mustVerify && (
                 <p class="notice bad" role="alert" style="margin-bottom:22px;">
-                  Confirm your email first — we sent you a link. Lost it? Send a fresh one
+                  Confirm your email first. We sent you a link. Lost it? Send a fresh one
                   from <a href="/account">Password &amp; security</a>. Your brief is still here.
                 </p>
               )}
 
               {Object.keys(errors).length > 0 && (
                 <p class="notice bad" role="alert" style="margin-bottom:22px;">
-                  Nothing was lost — check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
+                  Nothing was lost. Check the highlighted {Object.keys(errors).length === 1 ? 'field' : 'fields'} below.
                 </p>
               )}
 
@@ -293,7 +293,7 @@ const uploadsEnabled = Boolean(bucket) && Boolean(user);
                             placeholder="What are you making, what stage are you at, and what does done look like?"
                             aria-invalid={errors.brief ? 'true' : undefined}>{d('brief')}</textarea>
                   {errors.brief ? <span class="cform-err" role="alert">{errors.brief}</span>
-                                : <span class="fh">At least a couple of sentences — enough to quote against.</span>}
+                                : <span class="fh">At least a couple of sentences, enough to quote against.</span>}
                 </label>
 
                 <label>
@@ -375,24 +375,24 @@ const uploadsEnabled = Boolean(bucket) && Boolean(user);
                     <input class="fi" id="f-files" type="file" name="files" multiple accept={ACCEPT}
                            aria-invalid={errors.files ? 'true' : undefined} />
                     <span class="fh">
-                      Tech packs, references, moodboards — JPG, PNG, WebP, AVIF, PDF or MP4, up to {MAX_FILES} files
+                      Tech packs, references, moodboards: JPG, PNG, WebP, AVIF, PDF or MP4, up to {MAX_FILES} files
                       of 25 MB each. Only {target.name} can open them. If the work needs an NDA first, keep the
                       confidential ones back until it is signed.
                     </span>
                     {errors.files && <span class="cform-err" role="alert">{errors.files}</span>}
                     {Object.keys(errors).length > 0 && !errors.files && (
-                      <span class="fh">Files are not kept when a form comes back — choose them again before sending.</span>
+                      <span class="fh">Files are not kept when a form comes back. Choose them again before sending.</span>
                     )}
                   </label>
                 )}
 
                 <p class="fh" style="margin:0;">
-                  Free to send. No payment is taken through this site — you agree the fee directly with
+                  Free to send. No payment is taken through this site: you agree the fee directly with
                   {target.name}.{!user && bucket && ' You can attach files once you have signed in.'}
                 </p>
 
                 <button type="submit" class="btn-hot" style="width:100%;margin-top:6px;" data-busy="Sending…">
-                  {user ? 'Send request' : 'Continue — you will sign in next'}
+                  {user ? 'Send request' : 'Continue · you will sign in next'}
                 </button>
               </form>
             </div>

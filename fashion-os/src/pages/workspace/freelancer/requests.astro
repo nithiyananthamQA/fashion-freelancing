@@ -86,7 +86,7 @@ if (Astro.request.method === 'POST') {
       });
       flash = 'Accepted. The work is now in progress, and the company has been told.';
     } else if (['accepted', 'active', 'completed'].includes(request.status)) {
-      flash = 'You have already accepted this one — it is under Work in progress.';
+      flash = 'You have already accepted this one. It is under Work in progress.';
     } else if (request.status === 'proposal') {
       flash = 'You sent this company a price, so the next answer is theirs. Send a different price if it has changed.';
     } else {
@@ -142,7 +142,7 @@ if (Astro.request.method === 'POST') {
       const firstError = Object.values(errors)[0];
 
       if (firstError || amount === null) {
-        flash = `Nothing was sent — ${firstError ?? 'Your price is required.'}`;
+        flash = `Nothing was sent. ${firstError ?? 'Your price is required.'}`;
       } else {
         const now = nowIso();
         const currency = request.currency ?? 'USD';
@@ -299,7 +299,7 @@ const nav = freelancerNav({ requests: waiting || undefined });
       <h3>No requests yet</h3>
       <p>
         When a company finds you and asks you to take on a piece of work, their
-        brief, budget and dates land here — and you can accept, decline, ask
+        brief, budget and dates land here, and you can accept, decline, ask
         them a question or send your own price without leaving the page.
         Listing the services you take on is what puts you in front of them.
       </p>
@@ -360,7 +360,7 @@ const nav = freelancerNav({ requests: waiting || undefined });
                 You offered {money(request.proposal_amount, request.proposal_currency)}
                 {request.proposal_timeline && <span> · {request.proposal_timeline}</span>}
                 {request.proposed_at && <span> · sent {day(request.proposed_at)}</span>}.
-                It is with {request.company_name} to accept — the work starts the moment they do.
+                It is with {request.company_name} to accept. The work starts the moment they do.
               </p>
             )}
 
@@ -401,7 +401,7 @@ const nav = freelancerNav({ requests: waiting || undefined });
                                 placeholder="What is included, what is not, and anything you need from them to start."></textarea>
                     </label>
                     <span class="fh">
-                      If they accept, the work starts straight away — so only send a price you are ready to work to.
+                      If they accept, the work starts straight away, so only send a price you are ready to work to.
                     </span>
                     <button class="btn-hot btn-sm" name="action" value="proposal" style="justify-self:start;" data-busy="Sending…">
                       Send price

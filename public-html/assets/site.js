@@ -192,7 +192,7 @@
             <img class="logo-img" src="${r("assets/logo.png")}" alt="Fashion Freelancing" style="height:36px;" />
           </a>
           <p style="color:var(--ink-5);font-size:14px;max-width:340px;margin-top:14px;line-height:1.55;">
-            Fashion Freelancing is a fashion design and production-services studio — factory-ready
+            Fashion Freelancing is a fashion design and production-services studio: factory-ready
             tech packs, 3D virtual samples, digital patterns, graphics and prints, woven designs,
             AI product photography, marketplace listings, web development and digital marketing.
           </p>
