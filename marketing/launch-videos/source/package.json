@@ -1,0 +1,12 @@
+{
+  "name": "launch-videos",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "services": "node render.mjs services.html ../fashion-freelancing-services-reel.mp4",
+    "network": "node render.mjs network.html ../fashion-freelancing-network-reel.mp4"
+  },
+  "devDependencies": {
+    "puppeteer-core": "23.11.1"
+  }
+}

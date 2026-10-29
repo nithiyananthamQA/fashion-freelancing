@@ -1,0 +1,3 @@
+# Render outputs and preview frames: rebuild with source/render.mjs
+*.mp4
+preview/

@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Specialist network reel</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  .abs { position: absolute; left: 80px; width: 920px; }
+  .ctr { text-align: center; }
+  #logoWrap { position: absolute; left: 110px; top: 865px; width: 860px; height: 191px; z-index: 30; will-change: transform; }
+
+  /* S1 — hook */
+  .s1-pill { top: 470px; }
+  .s1-h { top: 565px; font-size: 112px; }
+  .s1-sub { top: 835px; font-size: 42px; line-height: 1.3; color: var(--ink-3); }
+  .crowd { position: absolute; left: 0; top: 1000px; width: 1080px; height: 520px; }
+  .person { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .person .av { width: 150px; height: 150px; border-radius: 44px; display: grid; place-items: center; font-family: var(--disp); font-weight: 800; font-size: 54px; color: #0C0A1C;
+    box-shadow: 0 24px 50px -16px rgba(0,0,0,.7), inset 0 2px 0 rgba(255,255,255,.4); }
+  .person .chip { font-size: 26px; padding: 10px 20px; }
+  .person .ok { position: absolute; right: -10px; top: -10px; width: 52px; height: 52px; border-radius: 50%; background: #34C165; border: 5px solid #0C0A1C; display: grid; place-items: center; }
+  .person .ok svg { width: 26px; height: 26px; }
+
+  /* S2 — two doors */
+  .s2-h { top: 430px; font-size: 92px; }
+  .door { position: absolute; left: 80px; width: 920px; height: 390px; padding: 48px 48px; }
+  .door.d1 { top: 680px; } .door.d2 { top: 1110px; }
+  .door .kicker { font-size: 26px; }
+  .door h3 { margin-top: 20px; font-family: var(--disp); font-weight: 800; font-size: 76px; letter-spacing: -.03em; }
+  .door p { margin-top: 16px; width: 640px; font-size: 36px; line-height: 1.3; color: var(--ink-3); }
+  .door .go { position: absolute; right: 48px; bottom: 48px; width: 120px; height: 120px; border-radius: 50%; display: grid; place-items: center; background: var(--grad-hot); box-shadow: 0 20px 50px -12px rgba(255,79,160,.6); }
+  .door .go svg { width: 54px; height: 54px; }
+  .door .ic { position: absolute; right: 48px; top: 44px; width: 96px; height: 96px; border-radius: 30px; display: grid; place-items: center; background: rgba(255,255,255,.08); border: 2px solid var(--rim); }
+  .door .ic svg { width: 52px; height: 52px; }
+  .d2 .go { background: rgba(255,255,255,.1); border: 2px solid var(--rim); box-shadow: none; }
+
+  /* captions above the app */
+  .cap-k { top: 268px; font-size: 28px; }
+  .caps { top: 322px; height: 90px; }
+  .caps h2 { position: absolute; left: 0; right: 0; text-align: center; font-size: 66px; white-space: nowrap; }
+
+  /* the app window */
+  .app { position: absolute; left: 60px; top: 440px; width: 960px; height: 1130px; border-radius: 52px; overflow: hidden;
+    background: linear-gradient(180deg, #1D1838, #141029); border: 2px solid rgba(255,255,255,.16);
+    box-shadow: 0 60px 120px -40px rgba(0,0,0,.85), 0 0 0 10px rgba(255,255,255,.03), inset 0 2px 0 rgba(255,255,255,.08); }
+  .scr { position: absolute; inset: 0; padding: 44px; opacity: 0; visibility: hidden; }
+  .scr h4, .ap-titles h4 { font-family: var(--disp); font-weight: 800; font-size: 62px; letter-spacing: -.03em; }
+  .lbl { font-family: var(--mono); font-weight: 500; font-size: 24px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); }
+  .field { margin-top: 14px; height: 96px; border-radius: 24px; background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.16); display: flex; align-items: center; gap: 18px; padding: 0 30px; font-size: 36px; color: var(--ink); }
+  .field svg { width: 38px; height: 38px; flex: none; }
+  .field.focus { border-color: rgba(167,139,250,.9); box-shadow: 0 0 0 6px rgba(139,92,246,.2); }
+  .btn-s { display: inline-flex; align-items: center; justify-content: center; height: 76px; padding: 0 34px; border-radius: 999px; background: var(--grad-hot); color: #fff; font-family: var(--disp); font-weight: 700; font-size: 30px; }
+
+  /* directory */
+  .search { margin-top: 26px; }
+  .filters { margin-top: 24px; display: flex; gap: 12px; flex-wrap: nowrap; }
+  .filters .chip { font-size: 28px; }
+  .count { margin-top: 24px; }
+  .spc { position: relative; margin-top: 16px; height: 222px; border-radius: 34px; background: rgba(255,255,255,.05); border: 2px solid rgba(255,255,255,.12); padding: 28px 28px 28px 158px; }
+  .spc .av { position: absolute; left: 28px; top: 28px; width: 106px; height: 106px; border-radius: 30px; display: grid; place-items: center; font-family: var(--disp); font-weight: 800; font-size: 40px; color: #0C0A1C; }
+  .spc .k { font-family: var(--mono); font-size: 22px; letter-spacing: .14em; color: var(--ink-3); text-transform: uppercase; }
+  .spc b { display: block; margin-top: 6px; font-family: var(--disp); font-weight: 800; font-size: 44px; letter-spacing: -.02em; }
+  .spc em { display: block; font-style: normal; font-size: 29px; color: var(--ink-2); }
+  .spc .tags { margin-top: 14px; display: flex; gap: 10px; }
+  .spc .tags span { padding: 6px 16px; border-radius: 999px; background: rgba(255,255,255,.08); border: 2px solid rgba(255,255,255,.12); font-size: 23px; color: var(--ink-2); }
+  .spc .btn-s { position: absolute; right: 28px; top: 28px; height: 70px; font-size: 27px; padding: 0 28px; }
+  .spc .avail { position: absolute; right: 30px; bottom: 30px; font-size: 24px; color: #7BE2A0; }
+
+  /* profile */
+  .back { font-size: 28px; color: var(--ink-3); }
+  .pf-top { position: relative; margin-top: 30px; height: 160px; padding-left: 186px; }
+  .pf-top .av { position: absolute; left: 0; top: 0; width: 160px; height: 160px; border-radius: 46px; display: grid; place-items: center; font-family: var(--disp); font-weight: 800; font-size: 60px; color: #0C0A1C; }
+  .pf-top b { display: block; padding-top: 4px; font-family: var(--disp); font-weight: 800; font-size: 60px; letter-spacing: -.03em; }
+  .pf-top em { display: block; font-style: normal; font-size: 30px; color: var(--ink-2); }
+  .badges { margin-top: 26px; display: flex; gap: 12px; }
+  .badge { display: inline-flex; align-items: center; gap: 10px; padding: 10px 22px; border-radius: 999px; font-size: 27px; font-weight: 600; }
+  .badge svg { width: 26px; height: 26px; }
+  .badge.g { background: rgba(52,193,101,.16); color: #8BEAAE; border: 2px solid rgba(52,193,101,.5); }
+  .badge.v { background: rgba(255,255,255,.07); color: var(--ink-2); border: 2px solid var(--rim); }
+  .pf-sec { margin-top: 36px; }
+  .thumbs { margin-top: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .thumbs i { display: block; height: 220px; border-radius: 22px; background: #fff center / cover no-repeat; border: 2px solid rgba(255,255,255,.2); }
+  .skills { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .skills .chip { font-size: 27px; padding: 10px 22px; }
+  .pf-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 150px; padding: 0 44px; display: flex; align-items: center; gap: 18px; background: rgba(12,10,28,.85); border-top: 2px solid rgba(255,255,255,.1); }
+  .pf-bar .btn-ghost, .pf-bar .btn-hot { height: 96px; font-size: 34px; }
+  .pf-bar .btn-hot { flex: 1; }
+
+  /* request sheet */
+  .dim { position: absolute; inset: 0; background: rgba(5,4,14,.62); opacity: 0; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; height: 800px; border-radius: 48px 48px 0 0; background: #221D3F; border-top: 2px solid rgba(255,255,255,.18); padding: 30px 44px 44px; }
+  .sheet .grab { width: 110px; height: 10px; border-radius: 5px; background: rgba(255,255,255,.25); margin: 0 auto 30px; }
+  .sheet h5 { font-family: var(--disp); font-weight: 800; font-size: 52px; letter-spacing: -.02em; }
+  .sheet .area { height: 210px; align-items: flex-start; padding-top: 26px; line-height: 1.3; }
+  .sheet .two { margin-top: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .sheet .send { margin-top: 34px; width: 100%; height: 108px; }
+  .done { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: #221D3F; border-radius: 48px 48px 0 0; opacity: 0; }
+  .done svg { width: 200px; height: 200px; }
+  .done b { margin-top: 26px; font-family: var(--disp); font-weight: 800; font-size: 64px; letter-spacing: -.03em; }
+  .done span { margin-top: 12px; font-size: 34px; color: var(--ink-3); }
+
+  /* post a project */
+  .pp-sub { margin-top: 12px; font-size: 32px; color: var(--ink-3); line-height: 1.3; }
+  .pp-card { margin-top: 36px; padding: 34px; border-radius: 34px; background: rgba(255,255,255,.05); border: 2px solid rgba(255,255,255,.12); }
+  .pp-card .chips { margin-top: 18px; display: flex; gap: 12px; }
+  .meter { margin-top: 40px; }
+  .meter .tr { margin-top: 16px; height: 16px; border-radius: 8px; background: rgba(255,255,255,.1); overflow: hidden; }
+  .meter .tr u { display: block; height: 100%; background: var(--grad-hot); transform: scaleX(0); transform-origin: left; }
+  .matched { margin-top: 44px; display: flex; align-items: center; gap: 30px; }
+  .stack { display: flex; }
+  .stack i { width: 112px; height: 112px; margin-left: -26px; border-radius: 50%; border: 6px solid #181431; display: grid; place-items: center; font-family: var(--disp); font-weight: 800; font-style: normal; font-size: 38px; color: #0C0A1C; }
+  .stack i:first-child { margin-left: 0; }
+  .matched b { display: block; font-family: var(--disp); font-weight: 800; font-size: 48px; letter-spacing: -.02em; }
+  .matched span { font-size: 30px; color: #8BEAAE; }
+  .free { position: absolute; left: 44px; right: 44px; bottom: 44px; text-align: center; }
+  .free .chip { font-size: 30px; }
+
+  /* freelancer application */
+  .ap-head { position: absolute; left: 44px; right: 44px; top: 44px; }
+  .ap-titles { position: relative; height: 76px; margin-top: 14px; }
+  .ap-titles h4 { position: absolute; left: 0; top: 0; white-space: nowrap; }
+  .ap-bar { margin-top: 26px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+  .ap-bar i { display: block; height: 12px; border-radius: 6px; background: rgba(255,255,255,.12); overflow: hidden; }
+  .ap-bar u { display: block; height: 100%; background: var(--grad-hot); transform: scaleX(0); transform-origin: left; }
+  .ap-step { margin-top: 18px; }
+  .ap-body { position: absolute; left: 44px; right: 44px; top: 300px; bottom: 44px; opacity: 0; visibility: hidden; }
+  .ap-body .lbl + .field, .ap-body .lbl + .chips { margin-top: 14px; }
+  .ap-body .gap { margin-top: 34px; }
+  .ap-body .chips { display: flex; flex-wrap: wrap; gap: 12px; }
+  .ap-body .chips .chip { font-size: 28px; }
+  .ap-body .cta { margin-top: 40px; width: 100%; height: 104px; }
+  .slider { margin-top: 30px; height: 14px; border-radius: 7px; background: rgba(255,255,255,.12); position: relative; }
+  .slider u { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; border-radius: 7px; background: var(--grad-hot); transform: scaleX(0); transform-origin: left; }
+  .slider b { position: absolute; top: 50%; left: 0; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: #fff; box-shadow: 0 6px 16px rgba(0,0,0,.5); }
+  .yrs { margin-top: 26px; font-family: var(--disp); font-weight: 800; font-size: 48px; }
+  .ups { margin-top: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .up { position: relative; height: 330px; border-radius: 26px; overflow: hidden; background: #fff center / cover no-repeat; border: 2px solid rgba(255,255,255,.2); }
+  .up .pb { position: absolute; left: 16px; right: 16px; bottom: 16px; height: 14px; border-radius: 7px; background: rgba(12,10,28,.4); overflow: hidden; }
+  .up .pb u { display: block; height: 100%; background: #34C165; transform: scaleX(0); transform-origin: left; }
+  .up .ck { position: absolute; right: 14px; top: 14px; width: 56px; height: 56px; border-radius: 50%; background: #34C165; display: grid; place-items: center; }
+  .up .ck svg { width: 30px; height: 30px; }
+  .tg { margin-top: 22px; height: 104px; border-radius: 26px; background: rgba(255,255,255,.05); border: 2px solid rgba(255,255,255,.12); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; font-size: 34px; }
+  .tg .sw { position: relative; width: 104px; height: 58px; border-radius: 29px; background: rgba(255,255,255,.16); }
+  .tg .sw b { position: absolute; left: 6px; top: 6px; width: 46px; height: 46px; border-radius: 50%; background: #fff; }
+  .tg .sw u { position: absolute; inset: 0; border-radius: 29px; background: #34C165; opacity: 0; }
+  .ck-row { display: flex; align-items: center; gap: 20px; margin-top: 20px; font-size: 34px; }
+  .ck-row b { width: 52px; height: 52px; border-radius: 50%; background: #34C165; display: grid; place-items: center; flex: none; }
+  .ck-row svg { width: 30px; height: 30px; }
+
+  .status { position: absolute; left: 44px; right: 44px; top: 300px; bottom: 44px; display: flex; flex-direction: column; align-items: center; padding-top: 70px; opacity: 0; visibility: hidden; }
+  .status .av { width: 200px; height: 200px; border-radius: 58px; display: grid; place-items: center; font-family: var(--disp); font-weight: 800; font-size: 76px; color: #0C0A1C; background: linear-gradient(135deg, #FF6FB3, #A78BFA); }
+  .status b { margin-top: 30px; font-family: var(--disp); font-weight: 800; font-size: 62px; letter-spacing: -.03em; }
+  .status em { font-style: normal; font-size: 32px; color: var(--ink-3); }
+  .st-pill { position: relative; margin-top: 40px; height: 100px; width: 440px; }
+  .st-pill span { position: absolute; inset: 0; border-radius: 50px; display: flex; align-items: center; justify-content: center; gap: 14px; font-family: var(--disp); font-weight: 800; font-size: 38px; }
+  .st-pill .rv { background: rgba(245,166,35,.16); border: 3px solid rgba(245,166,35,.7); color: #FFC867; }
+  .st-pill .ap { background: rgba(52,193,101,.2); border: 3px solid #34C165; color: #9BF0BA; opacity: 0; }
+  .st-pill svg { width: 40px; height: 40px; }
+  .confetti i { position: absolute; width: 34px; height: 34px; border-radius: 6px; left: 50%; top: 50%; margin: -17px 0 0 -17px; opacity: 0; }
+
+  .toast { position: absolute; left: 30px; right: 30px; top: 30px; z-index: 5; padding: 30px 34px; border-radius: 36px; background: #2A2450; border: 2px solid rgba(255,255,255,.2);
+    box-shadow: 0 30px 70px -20px rgba(0,0,0,.8); display: flex; gap: 26px; align-items: center; }
+  .toast .bell { width: 96px; height: 96px; border-radius: 30px; flex: none; display: grid; place-items: center; background: var(--grad-hot); }
+  .toast .bell svg { width: 50px; height: 50px; }
+  .toast b { display: block; font-family: var(--disp); font-weight: 800; font-size: 40px; letter-spacing: -.02em; }
+  .toast span { display: block; margin-top: 4px; font-size: 29px; color: var(--ink-2); line-height: 1.3; }
+
+  /* S5 — end card */
+  .s5-h { top: 735px; font-size: 108px; }
+  .s5-btns { top: 1040px; display: flex; flex-direction: column; align-items: center; gap: 26px; }
+  .s5-btns svg { width: 40px; height: 40px; }
+  .s5-btns .btn-hot, .s5-btns .btn-ghost { width: 660px; }
+  .s5-url { top: 1340px; }
+  .s5-url .pill { font-family: var(--mono); font-weight: 500; font-size: 40px; letter-spacing: .02em; color: var(--ink); padding: 22px 44px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="logoWrap" class="logo-glow"><div id="logo" class="logo"></div></div>
+
+  <section class="scene" id="s1">
+    <div class="abs ctr s1-pill"><span class="pill"><i class="dot"></i>The specialist network · now live</span></div>
+    <h1 class="abs ctr disp s1-h">Need a specialist <span class="hot">for your project?</span></h1>
+    <p class="abs ctr s1-sub">Approved professionals across every service we run.</p>
+    <div class="crowd">
+      <div class="person" style="left:70px;top:40px"><span class="av" style="background:#F5A623">AK</span><span class="chip">Tech Pack</span><i class="ok"></i></div>
+      <div class="person" style="left:300px;top:200px"><span class="av" style="background:#4AA8F0">RS</span><span class="chip">Pattern CAD</span><i class="ok"></i></div>
+      <div class="person" style="left:520px;top:20px"><span class="av" style="background:#F1543F">LM</span><span class="chip">3D Sampling</span><i class="ok"></i></div>
+      <div class="person" style="left:770px;top:170px"><span class="av" style="background:#34C165">JT</span><span class="chip">Prints</span><i class="ok"></i></div>
+      <div class="person" style="left:110px;top:330px"><span class="av" style="background:#A78BFA">NV</span><span class="chip">Web Dev</span><i class="ok"></i></div>
+      <div class="person" style="left:600px;top:330px"><span class="av" style="background:#FF6FB3">SD</span><span class="chip">AI Photo</span><i class="ok"></i></div>
+    </div>
+  </section>
+
+  <section class="scene" id="s2">
+    <h2 class="abs ctr disp s2-h">One network. <span class="hot">Two ways in.</span></h2>
+    <div class="glass door d1">
+      <div class="kicker">For brands &amp; companies</div>
+      <h3>Find a specialist</h3>
+      <p>Browse approved professionals. No account needed to look.</p>
+      <span class="ic"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="#fff" stroke-width="2.2"/><path d="M15.5 15.5L21 21" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+      <span class="go"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </div>
+    <div class="glass door d2">
+      <div class="kicker">For independent professionals</div>
+      <h3>Join as a freelancer</h3>
+      <p>Show your work, get approved, receive matched projects.</p>
+      <span class="ic"><svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="4" fill="none" stroke="#fff" stroke-width="2.2"/><path d="M3 20c.8-3.6 3.6-5.5 7-5.5 1.3 0 2.5.3 3.5.8M18 14v6M15 17h6" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+      <span class="go"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </div>
+  </section>
+
+  <section class="scene" id="s3">
+    <div class="abs ctr kicker cap-k"><span class="k1">For brands &amp; companies</span></div>
+    <div class="abs caps">
+      <h2 class="disp c">Search by what you need.</h2>
+      <h2 class="disp c">See their real work.</h2>
+      <h2 class="disp c">Request to hire.</h2>
+      <h2 class="disp c">Or post it. <span class="hot">Get matched.</span></h2>
+    </div>
+    <div class="app">
+      <div class="scr dir">
+        <h4>Find a specialist.</h4>
+        <div class="field search"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="#A78BFA" stroke-width="2.4"/><path d="M15.5 15.5L21 21" stroke="#A78BFA" stroke-width="2.4" stroke-linecap="round"/></svg><span class="q"></span></div>
+        <div class="filters"><span class="chip">All services</span><span class="chip">Tech Pack</span><span class="chip f-pc">Pattern CAD</span><span class="chip">3D Sampling</span><span class="chip">Prints</span></div>
+        <div class="lbl count">3 specialists · approved</div>
+        <div class="spc"><span class="av" style="background:#4AA8F0">MI</span><div class="k">Pattern CAD · Grading</div><b>Meera Iyer</b><em>Grading &amp; marker planning, menswear</em><div class="tags"><span>Gerber</span><span>Grading</span><span>Markers</span></div><span class="btn-s view">View profile</span><span class="avail">● Available now</span></div>
+        <div class="spc"><span class="av" style="background:#F5A623">DO</span><div class="k">Pattern CAD · Outerwear</div><b>Daniel Okafor</b><em>Pattern maker for tailoring &amp; jackets</em><div class="tags"><span>Lectra</span><span>Fit correction</span></div><span class="btn-s">View profile</span><span class="avail">● Available now</span></div>
+        <div class="spc"><span class="av" style="background:#FF6FB3">SM</span><div class="k">Pattern CAD · Womenswear</div><b>Sofia Marino</b><em>Technical patterns for womenswear</em><div class="tags"><span>Optitex</span><span>Drafting</span></div><span class="btn-s">View profile</span><span class="avail">● Next week</span></div>
+      </div>
+
+      <div class="scr prof">
+        <div class="back">← All specialists</div>
+        <div class="pf-top"><span class="av" style="background:#4AA8F0">MI</span><b>Meera Iyer</b><em>Pattern CAD &amp; grading specialist</em></div>
+        <div class="badges">
+          <span class="badge g"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#8BEAAE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Approved specialist</span>
+          <span class="badge v">9 years · Gerber</span>
+        </div>
+        <div class="pf-sec"><div class="lbl">Portfolio</div>
+          <div class="thumbs">
+            <i style="background-image:url(../../../public-html/assets/img/techpack/measurement-chart-800.webp)"></i>
+            <i style="background-image:url(../../../public-html/assets/img/techpack/flats-800.webp)"></i>
+            <i style="background-image:url(../../../public-html/assets/img/techpack/construction-callout-800.webp)"></i>
+          </div>
+        </div>
+        <div class="pf-sec"><div class="lbl">Skills &amp; tools</div>
+          <div class="skills"><span class="chip">Grading</span><span class="chip">Marker planning</span><span class="chip">Pattern drafting</span><span class="chip">Fit correction</span><span class="chip">Gerber</span></div>
+        </div>
+        <div class="pf-bar"><span class="btn-ghost">Save</span><span class="btn-hot hire">Request to hire</span></div>
+        <div class="dim"></div>
+        <div class="sheet">
+          <div class="grab"></div>
+          <h5>Request to hire Meera</h5>
+          <div class="lbl" style="margin-top:28px">What do you need?</div>
+          <div class="field area"><span class="brief"></span></div>
+          <div class="two">
+            <div><div class="lbl">Timeline</div><div class="field">Within 2 weeks</div></div>
+            <div><div class="lbl">Files</div><div class="field">Gerber + PDF</div></div>
+          </div>
+          <span class="btn-hot send">Send request</span>
+          <div class="done">
+            <svg viewBox="0 0 120 120"><circle class="dc" cx="60" cy="60" r="52" fill="none" stroke="#34C165" stroke-width="7"/><path class="dk" d="M37 62l15 15 32-34" fill="none" stroke="#34C165" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <b>Request sent</b>
+            <span>Meera replies in your workspace.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="scr post">
+        <h4>Post a project.</h4>
+        <p class="pp-sub">Describe it once. We match approved specialists.</p>
+        <div class="pp-card">
+          <div class="lbl">Project</div>
+          <div class="field"><span class="pq"></span></div>
+          <div class="chips"><span class="chip on">Tech Pack</span><span class="chip">Womenswear</span><span class="chip">Resortwear</span></div>
+        </div>
+        <div class="meter"><div class="lbl">Matching specialists…</div><div class="tr"><u></u></div></div>
+        <div class="matched">
+          <div class="stack"><i style="background:#F5A623">AK</i><i style="background:#FF6FB3">SM</i><i style="background:#A78BFA">PN</i></div>
+          <div><b>3 matched specialists</b><span>● Invitations sent</span></div>
+        </div>
+        <div class="free"><span class="chip">Free to browse, save and contact</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="s4">
+    <div class="abs ctr kicker cap-k">For independent professionals</div>
+    <div class="abs caps">
+      <h2 class="disp c">Join as a freelancer.</h2>
+      <h2 class="disp c">Get approved.</h2>
+      <h2 class="disp c">Receive <span class="hot">matched work.</span></h2>
+    </div>
+    <div class="app">
+      <div class="ap-head">
+        <div class="lbl">Join as a freelancer</div>
+        <div class="ap-titles">
+          <h4>Account.</h4><h4>Services &amp; specialties.</h4><h4>Skills &amp; tools.</h4><h4>Professional profile.</h4><h4>Portfolio.</h4><h4>Rates &amp; preferences.</h4><h4>Submit for review.</h4><h4>Application status.</h4>
+        </div>
+        <div class="ap-bar"><i><u></u></i><i><u></u></i><i><u></u></i><i><u></u></i><i><u></u></i><i><u></u></i><i><u></u></i></div>
+        <div class="lbl ap-step">Step <span class="sn">1</span> of 7</div>
+      </div>
+
+      <div class="ap-body b1">
+        <div class="lbl">Your name</div><div class="field"><span class="t-name"></span></div>
+        <div class="lbl gap">Email</div><div class="field"><span class="t-mail"></span></div>
+        <div class="lbl gap">Password</div><div class="field"><span class="t-pw"></span></div>
+        <span class="btn-hot cta">Create account and continue</span>
+      </div>
+      <div class="ap-body b2">
+        <div class="lbl">Your main service</div>
+        <div class="chips"><span class="chip c-tp">Tech Pack</span><span class="chip">3D Virtual Sampling</span><span class="chip">Graphics &amp; Prints</span><span class="chip">Pattern CAD</span><span class="chip">Dobby &amp; Jacquard</span><span class="chip">Web Development</span><span class="chip">AI Agent</span><span class="chip">AI Video &amp; Photography</span><span class="chip">E-Com Listing</span><span class="chip">Digital Marketing &amp; SEO</span></div>
+        <div class="lbl gap">Specialties</div>
+        <div class="chips sp"><span class="chip">Womenswear</span><span class="chip">Activewear</span><span class="chip">Resortwear</span><span class="chip">Kidswear</span></div>
+      </div>
+      <div class="ap-body b3">
+        <div class="lbl">Skills</div>
+        <div class="chips pop"><span class="chip on">Flats</span><span class="chip on">BOM</span><span class="chip on">Measurements</span><span class="chip on">Grading notes</span><span class="chip on">Construction</span></div>
+        <div class="lbl gap">Tools</div>
+        <div class="chips pop"><span class="chip on">Illustrator</span><span class="chip on">CLO 3D</span><span class="chip on">Excel</span><span class="chip on">PLM</span></div>
+      </div>
+      <div class="ap-body b4">
+        <div class="lbl">Professional headline</div><div class="field"><span class="t-head"></span></div>
+        <div class="lbl gap">Years of experience</div>
+        <div class="slider"><u></u><b></b></div>
+        <div class="yrs"><span class="t-yrs">0</span> years</div>
+        <div class="lbl gap">Based in</div><div class="field">Bengaluru, India</div>
+      </div>
+      <div class="ap-body b5">
+        <div class="lbl">Upload your best work</div>
+        <div class="ups">
+          <div class="up" style="background-image:url(../../../public-html/assets/img/techpack/tech-pack-main-900.webp)"><span class="pb"><u></u></span><span class="ck"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+          <div class="up" style="background-image:url(../../../public-html/assets/img/prints/kit-colourways-640.webp)"><span class="pb"><u></u></span><span class="ck"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+          <div class="up" style="background-image:url(../../../public-html/assets/img/techpack/measurement-chart-800.webp)"><span class="pb"><u></u></span><span class="ck"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        </div>
+        <div class="lbl gap">3 pieces · reviewed by our team</div>
+      </div>
+      <div class="ap-body b6">
+        <div class="lbl">Starting rate</div><div class="field"><span class="t-rate"></span></div>
+        <div class="tg">Remote projects<span class="sw"><u></u><b></b></span></div>
+        <div class="tg">Available now<span class="sw"><u></u><b></b></span></div>
+        <div class="tg">Rush deliveries<span class="sw"><u></u><b></b></span></div>
+      </div>
+      <div class="ap-body b7">
+        <div class="ck-row"><b><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></b>Account</div>
+        <div class="ck-row"><b><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></b>Tech Pack · Womenswear</div>
+        <div class="ck-row"><b><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></b>9 skills &amp; tools</div>
+        <div class="ck-row"><b><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></b>Portfolio · 3 pieces</div>
+        <div class="ck-row"><b><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></b>Rates &amp; preferences</div>
+        <span class="btn-hot cta submit">Submit for review</span>
+      </div>
+
+      <div class="status">
+        <span class="av">PN</span>
+        <b>Priya Nair</b>
+        <em>Technical designer · Tech Pack</em>
+        <div class="st-pill">
+          <span class="rv">Under review</span>
+          <span class="ap"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#9BF0BA" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Approved</span>
+          <div class="confetti"></div>
+        </div>
+      </div>
+
+      <div class="toast">
+        <span class="bell"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5a2.2 2.2 0 0 0 4 0" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></svg></span>
+        <div><b>New project invitation</b><span>Tech packs for a resort capsule, matched to your profile.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" id="s5">
+    <h2 class="abs ctr disp s5-h">Hire a specialist.<br><span class="hot">Or become one.</span></h2>
+    <div class="abs s5-btns">
+      <span class="btn-hot b-find">Find a specialist <svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="btn-ghost b-join">Join as a freelancer</span>
+    </div>
+    <div class="abs ctr s5-url"><span class="pill">fashionfreelancing.com</span></div>
+  </section>
+</div>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="common.js"></script>
+<script>
+const stage = $('#stage');
+stage.insertAdjacentHTML('afterbegin', STAGE_BG);
+stage.insertAdjacentHTML('beforeend', CURSOR);
+atmosphere();
+
+const TICK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+$$('.person .ok').forEach((o) => { o.innerHTML = TICK; });
+
+const logo = buildLogo($('#logo'), 860);
+const LOGO_CY = 865 + 191 / 2;
+const fitLine = (h, max = 920, fs = parseFloat(getComputedStyle(h).fontSize)) => { while (h.scrollWidth > max && fs > 40) h.style.fontSize = `${(fs -= 2)}px`; };
+
+// Measure every cursor target while the layout is still at rest.
+const P = {
+  door: centre($('.d1 .go')),
+  chipPC: centre($('.f-pc')),
+  view: centre($('.spc .view')),
+  hire: centre($('.hire')),
+  send: centre($('.send')),
+  chipTP: centre($('.c-tp')),
+  submit: centre($('.submit')),
+  find: centre($('.b-find')),
+};
+
+/* ---------- S1 · hook (0 – 3.3s) ---------- */
+tl.set('#logoWrap', { y: 330 - LOGO_CY, scale: 0.4 }, 0);
+show('#s1', 0);
+tl.from(logo.tiles, { y: -90, scale: 0.2, rotation: (i) => [-20, 14, -10, 18][i % 4], autoAlpha: 0, duration: 0.6, ease: 'back.out(1.8)',
+  stagger: (i, el) => (parseFloat(el.style.left) / 860) * 0.45 + (i >= 7 ? 0.08 : 0) }, 0);
+tl.from(logo.sub, { autoAlpha: 0, duration: 0.4 }, 0.6);
+tl.from('.s1-pill .pill', { y: 30, autoAlpha: 0, duration: 0.5 }, 0.15);
+rise(split($('.s1-h')), 0.3, { stagger: 0.08, duration: 0.85 });
+rise(split($('.s1-sub')), 0.9, { stagger: 0.03, duration: 0.6 });
+tl.from('.person', { scale: 0.3, y: 80, autoAlpha: 0, duration: 0.6, ease: 'back.out(1.7)', stagger: 0.09 }, 1.05);
+tl.from('.person .ok', { scale: 0, duration: 0.35, ease: 'back.out(3)', stagger: 0.09 }, 1.45);
+$$('.person').forEach((p, i) => tl.to(p, { y: i % 2 ? -18 : 18, duration: 1.4, ease: 'sine.inOut', yoyo: true, repeat: 1 }, 1.4 + i * 0.05));
+tl.to(['.s1-pill', '.s1-h', '.s1-sub', '.crowd'], { y: -90, autoAlpha: 0, duration: 0.45, ease: 'power2.in', stagger: 0.05 }, 2.95);
+hide('#s1', 3.5);
+
+/* ---------- S2 · two doors (3.3 – 5.6s) ---------- */
+show('#s2', 3.3);
+rise(split($('.s2-h')), 3.3, { stagger: 0.07 });
+tl.from('.d1', { x: -260, autoAlpha: 0, duration: 0.65 }, 3.5).from('.d2', { x: 260, autoAlpha: 0, duration: 0.65 }, 3.62);
+tl.set('.cursor', { x: 900, y: 1720 }, 0);
+tl.to('.cursor', { autoAlpha: 1, duration: 0.2 }, 4.2);
+cursorTo(P.door, 4.2, 0.6);
+tap(P.door, 4.9, '.d1 .go');
+tl.to('.d1', { scale: 1.06, borderColor: 'rgba(167,139,250,.9)', duration: 0.3 }, 4.95);
+tl.to('.cursor', { autoAlpha: 0, duration: 0.2 }, 5.2);
+tl.to(['.s2-h', '.d2'], { y: 80, autoAlpha: 0, duration: 0.4, ease: 'power2.in' }, 5.15)
+  .to('.d1', { scale: 1.25, autoAlpha: 0, duration: 0.4, ease: 'power2.in' }, 5.25)
+  .to('#logoWrap', { autoAlpha: 0, y: '-=30', duration: 0.35 }, 5.2);
+hide('#s2', 5.7);
+
+/* ---------- S3 · hiring a specialist (5.5 – 15.3s) ---------- */
+const s3caps = $$('#s3 .caps h2').map((h) => { fitLine(h); return split(h); });
+function caption(words, at, until) {
+  rise(words, at, { stagger: 0.05, duration: 0.6 });
+  if (until) tl.to(words, { yPercent: -115, duration: 0.3, ease: 'power2.in', stagger: 0.02 }, until);
+}
+show('#s3', 5.5);
+tl.from('#s3 .cap-k', { autoAlpha: 0, y: 20, duration: 0.4 }, 5.55);
+tl.fromTo('#s3 .app', { scale: 0.86, y: 120, autoAlpha: 0 }, { scale: 1, y: 0, autoAlpha: 1, duration: 0.7, ease: 'power3.out', immediateRender: false }, 5.45);
+caption(s3caps[0], 5.6, 8.55);
+
+// directory
+tl.set('.dir', { autoAlpha: 1 }, 5.45);
+tl.to('.search', { borderColor: 'rgba(167,139,250,.9)', boxShadow: '0 0 0 6px rgba(139,92,246,.2)', duration: 0.2 }, 5.9);
+type($('.q'), 'Pattern CAD Gerber', 6.0, 0.8);
+tl.to('.cursor', { autoAlpha: 1, duration: 0.2 }, 6.5);
+tl.set('.cursor', { x: 860, y: 1500 }, 6.4);
+cursorTo(P.chipPC, 6.5, 0.5);
+tap(P.chipPC, 7.0, '.f-pc');
+tl.to('.f-pc', { backgroundColor: 'rgba(139,92,246,.32)', borderColor: '#A78BFA', color: '#fff', duration: 0.2 }, 7.05);
+tl.from('.dir .count', { autoAlpha: 0, duration: 0.3 }, 7.1);
+tl.from('.dir .spc', { y: 80, autoAlpha: 0, duration: 0.5, stagger: 0.12 }, 7.15);
+cursorTo(P.view, 7.8, 0.55);
+tap(P.view, 8.4, '.spc .view');
+
+// profile
+tl.to('.dir', { xPercent: -30, autoAlpha: 0, duration: 0.45, ease: 'power2.in' }, 8.55);
+tl.fromTo('.prof', { xPercent: 40, autoAlpha: 0 }, { xPercent: 0, autoAlpha: 1, duration: 0.55, ease: 'power3.out', immediateRender: false }, 8.7);
+caption(s3caps[1], 8.75, 10.45);
+tl.from('.pf-top .av', { scale: 0.4, rotation: -12, duration: 0.6, ease: 'back.out(1.8)' }, 8.85);
+tl.from('.badges .badge', { scale: 0.6, autoAlpha: 0, duration: 0.35, ease: 'back.out(2)', stagger: 0.1 }, 9.1);
+tl.from('.thumbs i', { y: 60, scale: 0.85, autoAlpha: 0, duration: 0.5, stagger: 0.1 }, 9.2);
+tl.from('.skills .chip', { scale: 0.6, autoAlpha: 0, duration: 0.3, ease: 'back.out(2)', stagger: 0.05 }, 9.45);
+tl.from('.pf-bar', { yPercent: 100, duration: 0.45 }, 9.3);
+cursorTo(P.hire, 9.85, 0.5);
+tap(P.hire, 10.4, '.hire');
+
+// request to hire
+tl.to('.prof .dim', { opacity: 1, duration: 0.3 }, 10.5);
+tl.fromTo('.sheet', { yPercent: 100 }, { yPercent: 0, duration: 0.5, ease: 'power3.out' }, 10.5);
+caption(s3caps[2], 10.6, 13.25);
+tl.to('.cursor', { autoAlpha: 0, duration: 0.15 }, 10.55);
+type($('.brief'), 'Grade our shirt block into 6 sizes, with Gerber files.', 10.95, 1.05);
+tl.set('.cursor', { x: 900, y: 1650 }, 11.9);
+tl.to('.cursor', { autoAlpha: 1, duration: 0.15 }, 11.95);
+cursorTo(P.send, 11.95, 0.45);
+tap(P.send, 12.45, '.send');
+tl.to('.done', { opacity: 1, duration: 0.3 }, 12.6);
+const dc = $('.dc'), dk = $('.dk');
+[dc, dk].forEach((p) => { const L = p.getTotalLength(); p.style.strokeDasharray = L; p.style.strokeDashoffset = L; });
+tl.to(dc, { strokeDashoffset: 0, duration: 0.5, ease: 'power2.inOut' }, 12.65).to(dk, { strokeDashoffset: 0, duration: 0.35, ease: 'power2.out' }, 12.95);
+tl.from('.done b, .done span', { y: 30, autoAlpha: 0, duration: 0.4, stagger: 0.08 }, 12.8);
+tl.to('.cursor', { autoAlpha: 0, duration: 0.2 }, 12.9);
+
+// post a project and get matched
+tl.to('.prof', { xPercent: -30, autoAlpha: 0, duration: 0.45, ease: 'power2.in' }, 13.35);
+tl.fromTo('.post', { xPercent: 40, autoAlpha: 0 }, { xPercent: 0, autoAlpha: 1, duration: 0.55, ease: 'power3.out', immediateRender: false }, 13.5);
+caption(s3caps[3], 13.5);
+type($('.pq'), '12 tech packs for a resort capsule', 13.75, 0.6);
+tl.from('.pp-card .chip', { scale: 0.6, autoAlpha: 0, duration: 0.3, ease: 'back.out(2)', stagger: 0.06 }, 13.9);
+tl.to('.meter u', { scaleX: 1, duration: 0.6, ease: 'power2.inOut' }, 14.25);
+tl.from('.stack i', { scale: 0, duration: 0.4, ease: 'back.out(2.2)', stagger: 0.08 }, 14.6);
+tl.from('.matched > div:last-child', { x: -30, autoAlpha: 0, duration: 0.4 }, 14.75);
+tl.from('.free .chip', { y: 30, autoAlpha: 0, duration: 0.4 }, 14.85);
+tl.to(['#s3 .cap-k', '#s3 .caps', '#s3 .app'], { y: -90, autoAlpha: 0, duration: 0.45, ease: 'power2.in', stagger: 0.05 }, 15.4);
+hide('#s3', 16.0);
+
+/* ---------- S4 · joining as a freelancer (15.9 – 25.3s) ---------- */
+const s4caps = $$('#s4 .caps h2').map((h) => { fitLine(h); return split(h); });
+const titles = $$('.ap-titles h4').map((h) => { fitLine(h, 872); return split(h); });
+const bodies = $$('.ap-body'), segsA = $$('.ap-bar u');
+const S4 = 15.8, STEP = 0.86;
+
+show('#s4', S4);
+tl.from('#s4 .cap-k', { autoAlpha: 0, y: 20, duration: 0.4 }, S4);
+tl.fromTo('#s4 .app', { scale: 0.86, y: 120, autoAlpha: 0 }, { scale: 1, y: 0, autoAlpha: 1, duration: 0.7, ease: 'power3.out', immediateRender: false }, S4);
+caption(s4caps[0], S4 + 0.05, S4 + 0.6 + 7 * STEP);
+
+bodies.forEach((b, i) => {
+  const t = S4 + 0.45 + i * STEP;
+  tl.fromTo(b, { x: 120, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.4, ease: 'power3.out', immediateRender: false }, t);
+  if (i < 6) tl.to(b, { x: -120, autoAlpha: 0, duration: 0.3, ease: 'power2.in' }, t + STEP - 0.22);
+  rise(titles[i], t, { stagger: 0.04, duration: 0.45 });
+  tl.to(titles[i], { yPercent: -115, duration: 0.25, ease: 'power2.in', stagger: 0.02 }, t + STEP - 0.2);
+  tl.to(segsA[i], { scaleX: 1, duration: STEP - 0.1, ease: 'power1.inOut' }, t);
+  tl.call(() => { $('.sn').textContent = String(i + 1); }, null, t);
+});
+const at = (i, d) => S4 + 0.45 + i * STEP + d;
+// 1 account
+type($('.t-name'), 'Priya Nair', at(0, 0.05), 0.2);
+type($('.t-mail'), 'priya@studio.co', at(0, 0.2), 0.25);
+type($('.t-pw'), '••••••••••••', at(0, 0.4), 0.15);
+tl.to('.b1 .cta', { scale: 0.96, duration: 0.08, yoyo: true, repeat: 1 }, at(0, 0.55));
+// 2 services — the cursor picks Tech Pack
+tl.set('.cursor', { x: 880, y: 1640 }, at(1, -0.3));
+tl.to('.cursor', { autoAlpha: 1, duration: 0.15 }, at(1, -0.2));
+cursorTo(P.chipTP, at(1, -0.2), 0.45);
+tap(P.chipTP, at(1, 0.3), '.c-tp');
+tl.to('.c-tp', { backgroundColor: 'rgba(139,92,246,.32)', borderColor: '#A78BFA', color: '#fff', duration: 0.15 }, at(1, 0.33));
+tl.to('.b2 .sp .chip:first-child', { backgroundColor: 'rgba(139,92,246,.32)', borderColor: '#A78BFA', color: '#fff', duration: 0.15 }, at(1, 0.45));
+tl.to('.cursor', { autoAlpha: 0, duration: 0.2 }, at(1, 0.55));
+// 3 skills & tools
+tl.from('.b3 .pop .chip', { scale: 0.4, autoAlpha: 0, duration: 0.3, ease: 'back.out(2.2)', stagger: 0.045 }, at(2, 0.12));
+// 4 profile
+type($('.t-head'), 'Technical designer for womenswear', at(3, 0.08), 0.4);
+tl.to('.slider u', { scaleX: 0.42, duration: 0.4, ease: 'power2.out' }, at(3, 0.2)).to('.slider b', { left: '42%', duration: 0.4, ease: 'power2.out' }, at(3, 0.2));
+count($('.t-yrs'), 8, at(3, 0.2), 0.4);
+// 5 portfolio
+tl.from('.up', { y: 140, rotation: (k) => [-8, 6, -4][k], autoAlpha: 0, duration: 0.45, ease: 'back.out(1.5)', stagger: 0.09 }, at(4, 0.05));
+tl.to('.up .pb u', { scaleX: 1, duration: 0.3, ease: 'power1.inOut', stagger: 0.08 }, at(4, 0.22));
+tl.from('.up .ck', { scale: 0, duration: 0.25, ease: 'back.out(3)', stagger: 0.08 }, at(4, 0.48));
+// 6 rates & preferences
+type($('.t-rate'), 'From USD 400 per project', at(5, 0.06), 0.35);
+$$('.tg').slice(0, 2).forEach((g, k) => {
+  tl.to($('.sw b', g), { x: 46, duration: 0.2, ease: 'power2.out' }, at(5, 0.3 + k * 0.12)).to($('.sw u', g), { opacity: 1, duration: 0.2 }, at(5, 0.3 + k * 0.12));
+});
+// 7 submit
+tl.from('.b7 .ck-row', { x: -40, autoAlpha: 0, duration: 0.25, stagger: 0.05 }, at(6, 0.08));
+tl.set('.cursor', { x: 900, y: 1660 }, at(6, 0.05));
+tl.to('.cursor', { autoAlpha: 1, duration: 0.15 }, at(6, 0.1));
+cursorTo(P.submit, at(6, 0.1), 0.45);
+tap(P.submit, at(6, 0.6), '.submit');
+tl.to('.cursor', { autoAlpha: 0, duration: 0.2 }, at(6, 0.85));
+
+// status: under review → approved, then matched work arrives
+const ST = at(7, 0);
+tl.to(bodies[6], { x: -120, autoAlpha: 0, duration: 0.3, ease: 'power2.in' }, ST - 0.1);
+tl.to('.ap-bar, .ap-step', { autoAlpha: 0.4, duration: 0.3 }, ST);
+rise(titles[7], ST, { stagger: 0.04, duration: 0.45 });
+tl.fromTo('.status', { y: 80, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.5, ease: 'power3.out', immediateRender: false }, ST);
+tl.from('.status .av', { scale: 0.4, rotation: -14, duration: 0.6, ease: 'back.out(1.8)' }, ST + 0.05);
+caption(s4caps[1], ST + 0.2, ST + 1.35);
+tl.to('.st-pill .rv', { autoAlpha: 0, scale: 0.9, duration: 0.2 }, ST + 0.75)
+  .fromTo('.st-pill .ap', { scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(2.4)', immediateRender: false }, ST + 0.78);
+const conf = $('.confetti'), CC = ['#F5A623', '#F1543F', '#34C165', '#4AA8F0', '#EFD84A', '#A78BFA', '#3EC8C0', '#FF6FB3', '#A8D84A', '#7E9BEA'];
+for (let k = 0; k < 20; k++) conf.insertAdjacentHTML('beforeend', `<i style="background:${CC[k % 10]}"></i>`);
+const confs = $$('.confetti i');
+tl.fromTo(confs, { x: 0, y: 0, rotation: 0, scale: 0.4, opacity: 1 }, {
+  x: (k) => Math.cos((k / 20) * Math.PI * 2) * (260 + (k % 3) * 70), y: (k) => Math.sin((k / 20) * Math.PI * 2) * (190 + (k % 4) * 45),
+  rotation: (k) => (k % 2 ? 1 : -1) * (120 + k * 9), scale: 1, duration: 0.8, ease: 'power3.out', immediateRender: false }, ST + 0.8);
+tl.to(confs, { opacity: 0, duration: 0.4, stagger: 0.01 }, ST + 1.35);
+caption(s4caps[2], ST + 1.55);
+tl.fromTo('.toast', { yPercent: -160, autoAlpha: 0 }, { yPercent: 0, autoAlpha: 1, duration: 0.6, ease: 'back.out(1.4)' }, ST + 1.6);
+tl.to('.toast .bell svg', { rotation: 16, duration: 0.09, yoyo: true, repeat: 5, ease: 'sine.inOut', transformOrigin: '50% 10%' }, ST + 2.05);
+tl.to(['#s4 .cap-k', '#s4 .caps', '#s4 .app'], { y: -90, autoAlpha: 0, duration: 0.4, ease: 'power2.in', stagger: 0.04 }, 24.95);
+hide('#s4', 25.5);
+
+/* ---------- S5 · end card (25.4 – 30s, holds from ~27.6) ---------- */
+show('#s5', 25.4);
+tl.set([...logo.tiles, logo.sub], { autoAlpha: 0 }, 25.3);
+tl.to(logo.sub, { autoAlpha: 1, duration: 0.4 }, 25.95);
+tl.set('#logoWrap', { y: 560 - LOGO_CY, scale: 0.88, autoAlpha: 1 }, 25.35);
+tl.fromTo(logo.tiles, { y: -120, scale: 0.2, autoAlpha: 0 }, { y: 0, scale: 1, autoAlpha: 1, duration: 0.6, ease: 'back.out(1.7)', immediateRender: false,
+  stagger: (i, el) => (parseFloat(el.style.left) / 860) * 0.4 + (i >= 7 ? 0.08 : 0) }, 25.4);
+rise(split($('.s5-h')), 25.75, { stagger: 0.08, duration: 0.85 });
+tl.from('.s5-btns > *', { y: 50, scale: 0.85, autoAlpha: 0, duration: 0.55, ease: 'back.out(1.6)', stagger: 0.12 }, 26.3);
+tl.from('.s5-url .pill', { y: 40, autoAlpha: 0, duration: 0.5 }, 26.6);
+tl.set('.cursor', { x: 930, y: 1720 }, 26.7);
+tl.to('.cursor', { autoAlpha: 1, duration: 0.2 }, 26.8);
+cursorTo(P.find, 26.8, 0.6);
+tap(P.find, 27.45, '.b-find');
+tl.to('.b-find', { boxShadow: '0 30px 90px -10px rgba(139,92,246,.95), 0 10px 60px -6px rgba(255,79,160,.8)', duration: 0.35, yoyo: true, repeat: 1 }, 27.5);
+tl.to('.cursor', { autoAlpha: 0, x: '+=60', y: '+=80', duration: 0.4 }, 28.3);
+tl.to(logo.tiles, { y: -18, duration: 0.25, yoyo: true, repeat: 1, ease: 'sine.inOut', stagger: 0.03 }, 28.6);
+
+finish();
+</script>
+</body>
+</html>
