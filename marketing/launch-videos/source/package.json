@@ -7,6 +7,6 @@
     "network": "node render.mjs network.html ../fashion-freelancing-network-reel.mp4"
   },
   "devDependencies": {
-    "puppeteer-core": "23.11.1"
+    "puppeteer-core": "25.16.0"
   }
 }
